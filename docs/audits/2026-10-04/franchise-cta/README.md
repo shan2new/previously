@@ -54,3 +54,20 @@ The compiler still emits existing concurrency warnings outside the changed behav
 
 Local ignored evidence: `ios/build/cta-simulator-final.log`, `cta-runtime.log`,
 `cta-runtime-final.log`, `cta-fixture.log`, and `cta-state.json`.
+
+## Release — 1.0 (11)
+
+- Implementation commit `d1951411a0cc4236cb71e22fac9aa5946b53a065` pushed to `origin/main`.
+- Signed Release archive succeeded at `ios/build/Previously-11.xcarchive`.
+- App `com.cognipin.previously` and widget `com.cognipin.previously.widgets` both report 1.0 (11),
+  minimum iOS 18. Strict deep code-signature verification passed.
+- Archived API is `https://anime.cognipin.com`; the configured Clerk key is present and fixture
+  overrides are absent. No backend deployment was needed.
+- Existing `ExportOptions-upload.plist` and Xcode account uploaded the archive. At **21:25:47 IST
+  on 4 October 2026**, Apple reported `Upload succeeded.` and `EXPORT SUCCEEDED`, with the package
+  processing. Logs: `ios/build/archive-11.log` and `ios/build/upload-11.log`.
+- The native TestFlight app showed 1.0 (10) before upload. The post-upload availability check was
+  blocked when the Mac locked and automatic unlock failed; build 11's tester availability is
+  not yet verified. The user was asked to unlock the Mac for this final check.
+- The isolated fixture server was stopped. The QA simulator was restored to the final build 11
+  Debug app with production API/auth configuration, verified from its installed build source.
