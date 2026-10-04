@@ -1666,3 +1666,102 @@ Every request is bounded by one wall-clock budget (~16.6 s: a 15 s attempt plus 
 backoff), shared across retries, so a black-holed upstream can never hold a skeleton on screen.
 `429` and `5xx` are retried twice while that budget lasts (`Retry-After` honoured, capped at 8 s);
 an exhausted `5xx` whose body is HTML lands as infrastructure.
+
+
+## History import
+
+All routes require the signed-in account. Imports never change the source service. Export files
+stay on the device; only parsed watch-history fields are submitted (no account email, IP log,
+comments, ratings or private notes). The request limit is 4 MiB; at most 8 previews per account
+per 10 minutes (`429`, `Retry-After: 600`).
+
+### `POST /me/import/preview?async=1`
+
+Body is one of:
+
+```ts
+{ source: 'anilist', username: string } // public anime list, 1–60 characters
+{ source: 'mal', rows: { malId: number, status: string, watched?: number, title?: string | null }[] }
+{ source: 'tvtime', shows: {
+  tvdbId?: number | null, title?: string,
+  seasons: { number: number, watched: number[] }[],
+  followed?: boolean, forLater?: boolean, archived?: boolean,
+  lastWatchedAt?: number | null // milliseconds since epoch
+}[] }
+```
+
+MAL accepts 1–6,000 rows; TV Time accepts 1–4,000 shows. Missing booleans are false; missing
+nullable fields become null. Invalid bodies/IDs return `400 { error: 'invalid request' }`.
+
+The app uses `async=1`: `202 { id, state: 'reading' }` starts an account-owned read job.
+`409 { error: 'import_busy' }` means an earlier preview for this account is still reading or the
+preview queue is full. This read phase writes no library data. Without the query flag, small
+API callers can receive the completed `ImportPreview` synchronously.
+
+### `GET /me/import/:id/preview`
+
+Poll the read-job id (the app polls every 2 seconds). The response is one of:
+
+```ts
+{ id, state: 'reading' }
+{ id, state: 'ready', preview: ImportPreview }
+{ id, state: 'failed', error: 'import_not_found' | 'import_private' | 'import_unavailable' }
+```
+
+For synchronous previews these errors instead use HTTP 422 (missing/private list) or 503
+(upstream unavailable). A provider outage is not counted as an unmatched title.
+
+```ts
+interface ImportPreview {
+  id: string // apply this id; it differs from the read-job id
+  source: 'anilist' | 'mal' | 'tvtime'
+  listed: number // matched anime list entries, or resolved TV shows
+  ready: number // grouped franchises already in the catalogue
+  toFetch: number // missing anime entries / TV shows, not necessarily distinct franchises
+  episodes: number // planned/source watched counts; final writes obey aired ceilings
+  byStatus: Record<'watching' | 'completed' | 'planned' | 'paused' | 'dropped', number>
+  unmatched: { count: number, titles: string[] } // up to 12 titles
+  sample: FranchiseSummary[] // up to 9 catalogue shows
+}
+```
+
+### `POST /me/import/:id/apply` and `GET /me/import/:id`
+
+Apply the completed preview id; GET follows its progress. Re-applying that id is idempotent.
+
+```ts
+{ id: string, state: 'preview' | 'running' | 'done', shows: number, remaining: number, failed: number }
+```
+
+`shows` counts distinct franchises processed successfully (including existing memberships),
+`remaining` counts pending source entries/shows, and `failed` counts failed ready franchises
+or pending entries/shows. Counts use different units for anime, whose seasons are grouped.
+Already catalogued shows are written first; missing shows follow in the background. Progress
+increases are atomic and capped to aired episodes. Existing memberships retain their status.
+An import can correct the status of a membership it just created as more seasons are resolved,
+but only while that same membership and status are unchanged. Removing a show during the tail
+prevents that import from re-adding it. Background import requests share a paced AniList budget.
+
+Unknown, expired or another account's job/preview returns `410 { error: 'import_expired' }`.
+Sessions live in server memory: unused previews and completed results expire after 30 minutes;
+running jobs are not evicted. A server restart loses remaining work, but completed library writes
+remain. Re-importing safely fills gaps. The app remembers progress across relaunches, and Profile's
+import row reopens the current result. Closing a reading sheet cancels client polling, not the
+server read; no library writes happen until Apply.
+
+### Mapping limits
+
+- AniList/MAL statuses are combined per franchise; finishing a single season does not finish an
+  unwatched later season. Repeating means the original part was finished; no rewatch-session
+  events are manufactured.
+- MAL IDs map through AniList's `idMal`; absent mappings are reported as unmatched.
+- TV Time resolves TheTVDB series IDs through TMDB's TV results. Title fallback requires a unique
+  exact normalized title and honors a trailing year. Ambiguous remakes are left unmatched.
+- TV progress uses the highest watched episode per numbered season. TV Time anime is matched to
+  AniList and its total watched count is allocated across the story in order. Numbering differences
+  and non-contiguous histories are therefore approximate; the preview explains this.
+- TV Time movies, ratings, comments, original watch timestamps and distinct rewatch sessions are
+  not imported. The latest watch date only helps choose Watching versus Paused.
+- Native file readers accept MAL XML/gzip and TV Time's GDPR/newer CSV or ZIP shapes. They verify
+  gzip/ZIP checksums, reject truncated XML/archives and cap input/inflated data at 64 MiB. Encrypted,
+  ZIP64 and multi-volume archives are unsupported.

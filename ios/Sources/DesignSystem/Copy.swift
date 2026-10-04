@@ -829,6 +829,7 @@ extension Copy {
         out += Feed.sampleStrings + Stories.sampleStrings + Social.sampleStrings + Discover.sampleStrings
         out += Video.sampleStrings
         out += FirstRun.sampleStrings
+        out += Import.sampleStrings
         out += ShowPage.sampleStrings
         out += [ForYou.becauseWatching("Re:ZERO"), ForYou.becauseWatched("Frieren"), ForYou.moreLike("One Piece"),
                 ForYou.moreForYou, ForYou.topPick, ForYou.details,

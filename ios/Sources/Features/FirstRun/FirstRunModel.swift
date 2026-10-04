@@ -103,6 +103,8 @@ final class FirstRunModel {
     private(set) var committed = false
     /// Go to Home was tapped before the writes had all returned.
     private(set) var leaving = false
+    /// A history was imported (`ImportView`): the lineup is the library's, not only the picks'.
+    private(set) var imported = false
 
     init(appModel: AppModel, entry: Entry) {
         self.appModel = appModel
@@ -372,6 +374,13 @@ final class FirstRunModel {
         }
     }
 
+    /// A history was brought in from the picker: straight to the lineup, with whatever was also
+    /// picked by hand added as it would have been.
+    func importFinished() {
+        imported = true
+        startLineup()
+    }
+
     /// Skip: the questions not yet answered are left unasked (those shows are simply added).
     func skipRest() {
         startLineup()
@@ -391,7 +400,10 @@ final class FirstRunModel {
         // The one haptic of the run: the shows are added (the board comes alive on it).
         FeedbackCoordinator.fire(.success)
         let now = appModel.now
-        let work = picks.map { pick in (pick, details[pick.id]) }
+        // Import has already placed these shows. A default placement from an earlier tap must
+        // not turn Completed back into Planned when the viewer proceeds to the lineup.
+        let owned = Set(appModel.library.map(\.id))
+        let work = picks.filter { !owned.contains($0.id) }.map { pick in (pick, details[pick.id]) }
         // Drawn first, all of them, so the lineup (and Home beneath it) is whole before any
         // call returns.
         var writes: [(Franchise, FirstRunWrite)] = []
@@ -447,7 +459,7 @@ final class FirstRunModel {
     /// side-story OVA as something to watch now.
     func lineup(now: Int64) -> [LineupRow] {
         let ids = Set(picks.map(\.id))
-        let shows = appModel.library.filter { ids.contains($0.id) }
+        let shows = imported ? appModel.library : appModel.library.filter { ids.contains($0.id) }
         let feed = HomeCompose.feed(appModel)
         var ready: [String: (part: FranchisePart, episode: Int)] = [:]
         for airing in feed.recent {
@@ -498,7 +510,7 @@ final class FirstRunModel {
     func alertShow(now: Int64) -> Franchise? {
         let ids = Set(picks.map(\.id))
         return appModel.library
-            .filter { ids.contains($0.id) && $0.source == .anilist && $0.effectiveStatus == .watching }
+            .filter { (imported || ids.contains($0.id)) && $0.source == .anilist && $0.effectiveStatus == .watching }
             .compactMap { f in f.nextAiring(now: now).map { (f, $0) } }
             .min { $0.1 < $1.1 }?.0
     }

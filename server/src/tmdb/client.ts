@@ -98,6 +98,23 @@ export async function searchTv(
   return (json.results ?? []).slice(0, Math.max(1, Math.min(options.limit ?? 20, 20)))
 }
 
+/**
+ * The TMDB show for a TheTVDB SERIES id (`/find`), or null — how a TV Time export's shows are
+ * found (its ids are TheTVDB's). Only `tv_results` count: TheTVDB's series and episode id spaces
+ * overlap, so for a series id TMDB does not know `/find` can answer with an unrelated EPISODE.
+ */
+export async function findTvByTvdbId(
+  tvdbId: number,
+  options: TmdbRequestOptions = {},
+): Promise<TmdbSearchResult | null> {
+  const json = await tmdbGet<{ tv_results?: TmdbSearchResult[] }>(
+    `/find/${tvdbId}`,
+    { external_source: 'tvdb_id' },
+    options,
+  )
+  return json.tv_results?.[0] ?? null
+}
+
 /** Search movies by name (used to resolve anime franchises whose primary work is a film). */
 export async function searchMovies(
   query: string,

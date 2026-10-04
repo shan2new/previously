@@ -97,10 +97,11 @@ Trustpilot and ResetEra stand in.
 
 ## Open, and why
 
-- **Import (TV Time zip, AniList by username, MAL XML, Trakt).** The single biggest first-run
-  feature of 2026, and not built here: it is a server pipeline of its own (id mapping, franchise
-  materialisation under AniList/TMDB rate limits) whose bar is fidelity. The flow leaves the
-  place for it: a third way to fill the picker.
+- **Import (implemented 4 Oct):** AniList public username, MAL XML/gzip and TV Time ZIP/CSV now
+  share an on-device file reader, async preview, explicit apply and background catalogue fetch.
+  First-run and Profile entry points are present. Trakt remains out of scope. TV Time episode
+  numbering is approximate and disclosed; rewatch events and TV Time movies are not imported.
+  See [the import verification](IMPORT-VERIFICATION.md) and the API contract for the limits.
 - **Account wall last (Duolingo, Sequel).** The catalogue routes are authenticated, and search can
   spend an LLM call (the spell-corrector), so a picker before sign-in would need a public,
   rate-limited, search-less catalogue route — a weaker picker for the promise of trying first.

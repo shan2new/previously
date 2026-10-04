@@ -336,6 +336,38 @@ final class APIClient: @unchecked Sendable {
         return res.franchises
     }
 
+    // MARK: History import (`Features/Import`)
+
+    /// What an import WOULD add — nothing is written (`POST /me/import/preview`). Not retried by
+    /// the transport: each call reads an upstream list, and the server rations them.
+    func importPreview(_ request: ImportRequest) async throws -> ImportPreview {
+        struct Job: Decodable {
+            let id: String
+            let state: String
+            let preview: ImportPreview?
+            let error: String?
+        }
+        var job: Job = try await self.request("/me/import/preview?async=1", method: "POST", body: request, idempotent: false)
+        // Each request retains the normal transport budget. Reading a large export can take
+        // minutes without a held connection, and cancelling the sheet cancels this loop.
+        while job.state == "reading" {
+            try await Task.sleep(for: .seconds(2))
+            job = try await self.request("/me/import/\(Self.segment(job.id))/preview", idempotent: true)
+        }
+        if let preview = job.preview { return preview }
+        throw APIError.http(422, job.error ?? "import_unavailable")
+    }
+
+    /// Write a previewed import. Applying twice is a no-op the second time, so a replay is safe.
+    func importApply(id: String) async throws -> ImportProgress {
+        try await request("/me/import/\(Self.segment(id))/apply", method: "POST", idempotent: true)
+    }
+
+    /// How far an applied import's background part has got. 410 once the server has forgotten it.
+    func importProgress(id: String) async throws -> ImportProgress {
+        try await request("/me/import/\(Self.segment(id))", idempotent: true)
+    }
+
     /// The full search response, including what the server corrected and which catalogue failed.
     /// `exact` opts out of the server's spell-correction.
     func search(query: String, exact: Bool = false) async throws -> SearchResponse {

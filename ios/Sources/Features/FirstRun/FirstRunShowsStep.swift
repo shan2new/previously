@@ -19,6 +19,8 @@ struct FirstRunShowsStep: View {
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @Environment(\.dynamicTypeSize) private var typeSize
     @FocusState private var fieldFocused: Bool
+    /// "Bring your history": the import sheet (`ImportView`).
+    @State private var importing = false
 
     private static let columnGap: CGFloat = ThemeSpace.x3
     private var columns: [GridItem] {
@@ -34,7 +36,20 @@ struct FirstRunShowsStep: View {
                 FirstRunHeading(title: Copy.FirstRun.showsTitle, lede: Copy.FirstRun.showsLede)
                     .padding(.horizontal, ThemeMetrics.gutter)
                     .padding(.top, ThemeSpace.x5)
-                    .padding(.bottom, ThemeSpace.x2)
+                // Someone arriving from another tracker has a list already: the wall is for
+                // everyone else. One line, where they will read it before they start tapping.
+                Button { importing = true } label: {
+                    HStack(spacing: ThemeSpace.x1) {
+                        Text(Copy.Import.invite)
+                        AppGlyph(systemName: "chevron.forward", decorative: true)
+                            .font(.system(size: 11, weight: .bold))
+                    }
+                }
+                .buttonStyle(InlineLinkButtonStyle())
+                // The style pads its label 12 pt for the target: pulled back so the WORDS start
+                // on the gutter, under the heading.
+                .padding(.leading, ThemeMetrics.gutter - 12)
+                .padding(.bottom, ThemeSpace.x1)
                 Section {
                     content
                         .padding(.horizontal, ThemeMetrics.gutter)
@@ -46,6 +61,18 @@ struct FirstRunShowsStep: View {
             }
         }
         .scrollDismissesKeyboard(.immediately)
+        .sheet(isPresented: $importing) {
+            ImportView(appModel: appModel) { imported in
+                importing = false
+                if imported { model.importFinished() }
+            }
+        }
+        .onAppear {
+            #if DEBUG
+            // `-openImport 1` (a capture): the picker with the import sheet up.
+            if UserDefaults.standard.bool(forKey: "openImport") { importing = true }
+            #endif
+        }
         .safeAreaInset(edge: .bottom, spacing: 0) {
             // With nothing picked the foot is only the way out — not offered over the keyboard
             // (it sat on the results), nor on the picker-only run (its × is the way out).

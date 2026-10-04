@@ -61,6 +61,7 @@ struct ProfileView: View {
     @State private var showRules = false
     /// "What do you watch?" (`AudienceChooser`).
     @State private var showAudience = false
+    @State private var showImport = false
     #if DEBUG
     @State private var demoBusy = UserDefaults.standard.bool(forKey: "demoBusy")
     #endif
@@ -177,6 +178,9 @@ struct ProfileView: View {
         }
         .sheet(isPresented: $showRules) {
             CommunityRulesSheet(mode: .read, onAccepted: { _ in })
+        }
+        .sheet(isPresented: $showImport) {
+            ImportView(appModel: appModel) { _ in showImport = false }
         }
         .sheet(isPresented: $showAudience) {
             AudienceChooser(mode: .settings, onDone: { showAudience = false })
@@ -876,6 +880,13 @@ struct ProfileView: View {
                 }
             }
             .accessibilityValue(Copy.Watching.name(appModel.audience))
+            // A list kept elsewhere (AniList, MyAnimeList, TV Time), brought in — any time, not
+            // only at first run.
+            ProfileRow(symbol: "clock.arrow.circlepath",
+                       title: Copy.Import.row,
+                       action: { showImport = true }) {
+                trailingGlyph("chevron.forward", tint: ThemeColor.textTertiary)
+            }
             ProfileRow(symbol: "bell",
                        title: "Notifications",
                        action: { notificationsTapped() }) {

@@ -6,6 +6,7 @@ import { accountRoutes } from './routes/account.js'
 import { discoverRoutes } from './routes/discover.js'
 import { feedRoutes } from './routes/feed.js'
 import { franchiseRoutes } from './routes/franchises.js'
+import { importRoutes } from './routes/import.js'
 import { meRoutes } from './routes/me.js'
 import { socialRoutes } from './routes/social.js'
 
@@ -27,6 +28,7 @@ export async function buildServer(): Promise<FastifyInstance> {
   await app.register(socialRoutes)
   await app.register(accountRoutes)
   await app.register(discoverRoutes)
+  await app.register(importRoutes)
 
   return app
 }

@@ -243,6 +243,18 @@ final class AppModel {
     var audienceChosen: Bool = Audience.storedChosen
     /// The one-time question is due (`askAudienceIfNeeded`).
     var audiencePromptDue = false
+    /// An applied history import whose background part is still arriving (`AppModel+Import.swift`):
+    /// how far it has got, for whichever surface is saying so. nil when none is in flight.
+    var importProgress: ImportProgress? {
+        didSet {
+            if let importProgress, let data = try? JSONEncoder().encode(importProgress) {
+                UserDefaults.standard.set(data, forKey: Self.importProgressKey)
+            } else {
+                UserDefaults.standard.removeObject(forKey: Self.importProgressKey)
+            }
+        }
+    }
+    @ObservationIgnored var importFollow: Task<Void, Never>?
     /// First run (`AppModel+FirstRun.swift`): the flow a new account goes through before its
     /// Home exists. Known at launch for a device that has been through it; asked of the server
     /// otherwise (`resolveFirstRun`).
@@ -381,6 +393,7 @@ final class AppModel {
         loadCachedRecommendations()
         loadCachedFeed()                                   // AppModel+Feed
         loadPendingSocial()                                // AppModel+Social
+        resumeImport()
         // The feed waits for the visit stamp (iD3): `fresh` is ordered against `prev_opened_at`,
         // and a feed fetched before the stamp lands orders against the visit before last.
         Task {
@@ -650,6 +663,9 @@ final class AppModel {
         // The next account answers for itself.
         clearAudience()
         resetFirstRun()
+        importFollow?.cancel()
+        importFollow = nil
+        importProgress = nil
 
         justCaught = []
         undo = nil

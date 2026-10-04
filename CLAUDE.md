@@ -280,9 +280,19 @@ to `news:` with every social row, in one transaction, when research adopts the p
     new id is a new account. Flags (DEBUG): `-firstRun 1` forces the flow, `-firstRunStep
     audience|shows`, `-firstRunPick N`, `-firstRunAdvance place|lineup` (lineup WRITES; local
     backend only). The pure rules are checked by `-verifyAnnouncements 1`.
-  - Not built, and why (SPIKE.md): importing a history (TV Time's export, AniList, MAL, Trakt) —
-    2026's biggest first-run feature and a server pipeline of its own; sign-in AFTER the picker
-    (the catalogue is authenticated and search can spend an LLM call).
+  - **History import** (`Features/Import`, `AppModel+Import`, `server/src/import`): the picker's
+    "Bring it in" and Profile's "Import your history" share a preview → apply → result sheet.
+    AniList by public username, MAL XML/gzip, TV Time ZIP/CSV; files are parsed on-device.
+    Preview jobs are polled (`POST /me/import/preview?async=1`, then `GET /me/import/:id/preview`)
+    so large lists survive the normal 15-second HTTP timeout. Apply only raises progress, keeps
+    existing statuses, and fetches uncatalogued shows in the background with shared AniList pacing.
+    Manual first-run picks skip already imported memberships. The app remembers the result across
+    relaunches; reopening Profile's import shows it. Server jobs are in memory, so a restart needs
+    a safe re-import for unfinished work. See `docs/api-contract.md` for shapes and mapping limits.
+    No new schema or production write is needed. `-verifyImport 1` runs file-reader regressions;
+    `design/onboarding-2026-10-04/verify-import.mts` verifies real SQL on the scratch DB only.
+  - Not built: Trakt import; sign-in AFTER the picker (the catalogue is authenticated and search
+    can spend an LLM call).
 - **ONE LIGHT, ONE INK (4 Oct: "improve the design system and colours everywhere… utterly polished,
   satisfying and premium", owner).** Every filled or raised CONTROL is lit from above, from one set
   of materials in `ThemeGradient` (ThemeTokens): `accent` (the primary capsule — which also stands

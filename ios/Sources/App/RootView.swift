@@ -516,6 +516,10 @@ struct MainTabView: View {
                 if UserDefaults.standard.bool(forKey: "verifyDetailProgress") {
                     await DetailProgressRegression.run()
                 }
+                // `-verifyImport 1`: the export-file readers (zip, gzip, CSV, the three shapes).
+                if UserDefaults.standard.bool(forKey: "verifyImport") {
+                    ImportRegression.run()
+                }
                 // `-verifyFeed 1`: the feed's pure rules (composer, counting, routes) against fixtures.
                 if UserDefaults.standard.bool(forKey: "verifyFeed") {
                     FeedRegression.run()

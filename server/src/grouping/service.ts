@@ -27,6 +27,12 @@ export interface GroupOptions {
   grouper?: LlmGrouper
   fetcher?: MediaFetcher
   model?: string
+  /**
+   * false: do not queue the new franchise's catalogue enrichment. For a bulk caller that paces
+   * its own AniList reads (history import builds hundreds in a row; the queue's unpaced requests
+   * ran AniList's budget out under it). The show page and Search still enrich it on first sight.
+   */
+  enrich?: boolean
 }
 
 export interface GroupOutcome {
@@ -127,7 +133,7 @@ export async function groupKnownComponent(
     onRaced: (raced, tx) => attachToExisting(raced, component, seedId, tx),
   })
   await ensureAniListOwnerLink(outcome.franchiseId)
-  enqueueFranchiseEnrichment(outcome.franchiseId)
+  if (opts.enrich !== false) enqueueFranchiseEnrichment(outcome.franchiseId)
   return outcome
 }
 
