@@ -117,7 +117,10 @@ export function airDateToMs(date: string | null | undefined): number | null {
   if (!date) return null
   const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(date)
   if (!m) return null
-  return Date.UTC(Number(m[1]), Number(m[2]) - 1, Number(m[3]), TMDB_AIR_HOUR_UTC)
+  const [y, mo, d] = [Number(m[1]), Number(m[2]), Number(m[3])]
+  const at = Date.UTC(y, mo - 1, d, TMDB_AIR_HOUR_UTC)
+  const back = new Date(at)
+  return back.getUTCFullYear() === y && back.getUTCMonth() === mo - 1 && back.getUTCDate() === d ? at : null
 }
 
 const ANIMATION_GENRE_ID = 16
@@ -188,11 +191,22 @@ export function includedSeasons(show: TmdbShow): TmdbSeason[] {
  */
 export function deriveSeasonStatus(show: TmdbShow, season: TmdbSeason, nowMs: number): MediaStatus {
   const premiere = airDateToMs(season.air_date)
-  if (premiere == null || premiere > nowMs) return 'NOT_YET_RELEASED'
+  if (premiere != null && premiere > nowMs) return 'NOT_YET_RELEASED'
   if (show.next_episode_to_air?.season_number === season.season_number) return 'RELEASING'
   if (show.status === 'Canceled' && show.last_episode_to_air?.season_number === season.season_number) {
     return 'CANCELLED'
   }
+  // A missing next date does not prove a finale. Preserve an explicitly incomplete current run
+  // while the provider still calls the series active.
+  const lastAirDate = airDateToMs(show.last_episode_to_air?.air_date)
+  if (lastAirDate != null && lastAirDate <= nowMs && nowMs - lastAirDate < 30 * 86_400_000 &&
+    show.status !== 'Ended' && show.status !== 'Canceled' &&
+    show.last_episode_to_air?.season_number === season.season_number &&
+    show.last_episode_to_air.episode_number < season.episode_count) return 'RELEASING'
+  // Missing dates on old seasons are common. The provider's last aired season is evidence these
+  // numbered seasons have already arrived; absence of a premiere is not an announcement.
+  if (premiere == null && !(season.season_number > 0 &&
+    season.season_number <= (show.last_episode_to_air?.season_number ?? 0))) return 'NOT_YET_RELEASED'
   return 'FINISHED'
 }
 
@@ -507,21 +521,9 @@ export function tmdbShowUpcoming(show: TmdbShow, nowMs = Date.now()): FranchiseU
     }
   }
 
-  // Do not infer another season while the latest one is actively releasing. Search already carries
-  // that state via isReleasing/nextAiringAt, and "Returning Series" may describe that same run.
-  const releasing = show.next_episode_to_air != null
-  if (releasing || !['Returning Series', 'In Production', 'Planned'].includes(show.status)) return null
-
-  const nextNumber = Math.max(...numbered.map((season) => season.season_number)) + 1
-  return {
-    status: 'announced_no_date',
-    next: `Season ${nextNumber}`,
-    release: 'TBA',
-    note: 'TMDB currently lists the series as returning; no premiere date is available in its catalogue.',
-    source,
-    checked,
-    evidence,
-  }
+  // "Returning Series" describes the show, not an order for max(season)+1. Only an actual future
+  // season row supports a catalogue announcement; web research can establish a renewal separately.
+  return null
 }
 
 export function tmdbSeasonToMediaRow(
@@ -545,9 +547,9 @@ export function tmdbSeasonToMediaRow(
   const lastAiredAt =
     lastEp?.season_number === season.season_number
       ? airDateToMs(lastEp.air_date)
-      : status === 'FINISHED' || status === 'CANCELLED'
-        ? airDateToMs(season.air_date)
-        : null
+      : episodes.reduce<number | null>((latest, episode) =>
+          episode.airDate != null && episode.airDate <= nowMs
+            ? Math.max(latest ?? 0, episode.airDate) : latest, null)
   return {
     id: tmdbSeasonMediaId(season.id),
     source: 'tmdb',

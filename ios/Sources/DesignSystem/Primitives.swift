@@ -90,7 +90,7 @@ private struct SurfaceModifier: ViewModifier {
             EmptyView()
         case .raised, .art:
             shape.strokeBorder(
-                LinearGradient(colors: [ThemeColor.hairline, .clear],
+                LinearGradient(colors: [.white.opacity(0.11), .clear],
                                startPoint: .top, endPoint: .center),
                 lineWidth: 1
             )
@@ -232,26 +232,42 @@ private extension View {
     }
 }
 
-/// 48-pt capsule, accent on onAccent, press 0.985, disabled 0.38. Label comes from the copy table.
+/// 48-pt capsule, the accent as a lit material, `onAccent` ink, disabled 0.38. Label comes from
+/// the copy table.
+///
+/// It was a flat #F0A24E fill with one hairline of sheen — "an orange swatch" on a screen whose
+/// one job is to be pressed (4 Oct, owner: "doesn't feel as premium"). Now it is an OBJECT: lit
+/// from above (`ThemeGradient.accent`), a bright edge along its crown and a shaded one along its
+/// foot, standing in a pool of its own light. Under the finger it darkens and sinks a hair. The
+/// light is drawn by the capsule's own fill (`fill.shadow`), rasterised with the shape — never
+/// `.shadow` on the composited label.
 struct PrimaryButtonStyle2: ButtonStyle {
     @Environment(\.isEnabled) private var isEnabled
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     func makeBody(configuration: Configuration) -> some View {
+        let pressed = configuration.isPressed
         configuration.label
             .type(ThemeType.button)
             .foregroundStyle(ThemeColor.onAccent)
             .frame(maxWidth: .infinity, minHeight: 48)
             .padding(.horizontal, 18)
-            .background(configuration.isPressed ? ThemeColor.accentPressed : ThemeColor.accent, in: Capsule())
-            // A lit top edge. Flat #F0A24E across 48×376 pt is a swatch of orange; one 22 %-white
-            // hairline along the top, dead by the vertical centre, is what makes it read as a
-            // physical, pressable object — the same trick every native filled control uses.
+            .background {
+                Capsule().fill((pressed ? ThemeGradient.accentPressed : ThemeGradient.accent)
+                    .shadow(.drop(color: ThemeColor.accent.opacity(isEnabled && !pressed ? 0.30 : 0),
+                                  radius: 14, x: 0, y: 6)))
+            }
+            // The crown catches the light…
             .overlay(Capsule().strokeBorder(
-                LinearGradient(colors: [ThemeColor.controlSheen, .clear],
+                LinearGradient(colors: [.white.opacity(pressed ? 0.18 : 0.46), .clear],
                                startPoint: .top, endPoint: .center),
                 lineWidth: 1))
+            // …and the foot turns away from it.
+            .overlay(Capsule().strokeBorder(
+                LinearGradient(colors: [.clear, .black.opacity(0.16)],
+                               startPoint: .center, endPoint: .bottom),
+                lineWidth: 1))
             .opacity(isEnabled ? 1 : 0.38)
-            .pressFeedback(configuration.isPressed, reduceMotion: reduceMotion)
+            .pressFeedback(pressed, reduceMotion: reduceMotion, scale: 0.975)
     }
 }
 
@@ -272,7 +288,7 @@ struct SecondaryButtonStyle2: ButtonStyle {
             // `strokeBorder`, not `stroke`: a centred 1-pt line straddles the capsule's edge and
             // renders as a soft 2-px smear on the outside of the shape. A CONTROL is allowed a
             // full-perimeter edge (a container is not) — but it has to be a crisp one.
-            .overlay(Capsule().strokeBorder(ThemeColor.textPrimary.opacity(0.16), lineWidth: 1))
+            .overlay(Capsule().strokeBorder(ThemeGradient.litEdge, lineWidth: 1))
             .pressFeedback(configuration.isPressed, reduceMotion: reduceMotion)
     }
 }
@@ -769,7 +785,8 @@ struct ProgressBar: View {
             let ratio = min(1, max(0, value))
             ZStack(alignment: .leading) {
                 Capsule().fill(onArt ? ThemeColor.textPrimary.opacity(0.22) : ThemeColor.strokeStrong)
-                Capsule().fill(onArt ? ThemeColor.textPrimary.opacity(0.92) : ThemeColor.accent)
+                Capsule().fill(onArt ? AnyShapeStyle(ThemeColor.textPrimary.opacity(0.92))
+                                     : AnyShapeStyle(ThemeGradient.accentBar))
                     .frame(width: max(3, proxy.size.width * ratio))
             }
         }
@@ -1455,6 +1472,11 @@ struct ArtHeader<Overlay: View>: View {
     /// banner the cover is composited instead: a blurred, opaque copy of itself as the ground, the
     /// whole cover fitted over it. Nothing is upscaled and nothing is lost.
     var portraitSource: Bool = false
+    /// The portrait FILLS the frame from its top — its sides give — where the frame is much taller
+    /// than a poster (Home's billboard, 0.53 w/h against a poster's 0.67): fitted to the width, the
+    /// poster ended four fifths of the way down, on a straight edge behind the lockup, with the
+    /// copy in a void under it (4 Oct).
+    var portraitFill: Bool = false
     /// A slow breath on the sharp layer — Today's billboard. ~7 % over 24 s, eased, reversing:
     /// under the threshold where it reads as motion, over the one where the frame reads as a
     /// still pinned to a wall. Off under Reduce Motion. It is one transform animation on one
@@ -1500,7 +1522,7 @@ struct ArtHeader<Overlay: View>: View {
                     // One transform on one layer, and NO mask unless the picture is inset: a mask is an
                     // offscreen pass, and under the drift `.mask { Color.black }` cost one per frame on a
                     // 2048-px layer — Today lagged to a standstill (5 Sep).
-                    let sharp = RemoteImageView(url: url, contentMode: topInset > 0 ? .fill : .fit, maxPixel: 2048,
+                    let sharp = RemoteImageView(url: url, contentMode: topInset > 0 || portraitFill ? .fill : .fit, maxPixel: 2048,
                                                 alignment: focus, placeholderHidden: true, onLoaded: onArtLoaded)
                         .padding(.top, topInset)
                     if topInset > 0 {
@@ -1631,10 +1653,9 @@ struct HeroBadge: View {
             // the tag reads as a struck object at rest. This is where the prominence lives —
             // motion cannot be the carrier, because motion has to stop (see `AttentionBeat`).
             .background {
-                shape.fill(
-                    LinearGradient(colors: [fill, fillDeep],
-                                   startPoint: .top, endPoint: .bottom)
-                )
+                shape.fill(isNews ? AnyShapeStyle(LinearGradient(colors: [fill, fillDeep],
+                                                                 startPoint: .top, endPoint: .bottom))
+                                  : AnyShapeStyle(ThemeGradient.accent))
                 .overlay(shape.strokeBorder(.white.opacity(0.28), lineWidth: 0.5))
             }
             // The sheen rides ON the tag, clipped to it: one light band crossing a metallic
@@ -1985,19 +2006,17 @@ struct ChipButtonStyle: ButtonStyle {
             .padding(.horizontal, 14)
             .frame(minHeight: 34)
             .background {
-                Capsule().fill(
-                    selected
-                        ? (configuration.isPressed ? ThemeColor.accentPressed : ThemeColor.accent)
-                        : (configuration.isPressed ? ThemeColor.surfacePressed : ThemeColor.surfaceRaised)
-                )
+                if selected {
+                    Capsule().fill(configuration.isPressed ? ThemeGradient.accentPressed : ThemeGradient.accent)
+                } else {
+                    Capsule().fill(configuration.isPressed ? ThemeColor.surfacePressed : ThemeColor.surfaceRaised)
+                }
             }
             .overlay {
-                if selected {
-                    Capsule().strokeBorder(
-                        LinearGradient(colors: [ThemeColor.controlSheen, .clear],
-                                       startPoint: .top, endPoint: .center),
-                        lineWidth: 1)
-                }
+                Capsule().strokeBorder(selected ? ThemeGradient.litEdgeStrong
+                                                : LinearGradient(colors: [.white.opacity(0.12), .clear],
+                                                                 startPoint: .top, endPoint: .center),
+                                       lineWidth: 1)
             }
             .contentShape(Capsule())
             .frame(minHeight: 44)
@@ -2174,7 +2193,10 @@ struct MarkRing: View {
     var body: some View {
         Button(action: action) {
             ZStack {
-                Circle().fill(disc).frame(width: diameter, height: diameter)
+                // The amber disc is the accent as a MATERIAL (lit from above, as the primary
+                // capsule is); a settled disc keeps its show's flat colour.
+                Circle().fill(disc == ThemeColor.accent ? AnyShapeStyle(ThemeGradient.accent) : AnyShapeStyle(disc))
+                    .frame(width: diameter, height: diameter)
                 Circle().strokeBorder(ring, lineWidth: 1.5).frame(width: diameter, height: diameter)
                 if let episode, !marked, !committing, episode < 100 {
                     Text("\(episode)")

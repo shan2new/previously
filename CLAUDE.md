@@ -83,6 +83,25 @@ grouping. The LLM is only worth spending on when a `SIDE_STORY` might actually b
   OpenAI-compatible Cerebras request lives in `util/cerebras.ts` (`cerebrasChat`) — reused by both
   franchise grouping and zero-result search correction (`services/queryCorrect.ts`).
 - `GROUPING_LLM_DISABLED=1` forces deterministic grouping (no key / offline dev).
+- **A part's `relationship` is derived in ONE place, `grouping/relationship.ts`** (4 Oct), for all
+  three writers (the deterministic grouper, `decoratePartOrder` after the LLM, and `planAttach` in
+  `grouping/attach.ts`). An AniList edge `from → to` of type T means "`to` is the T of `from`"; the
+  writers used to invert only PREQUEL/SEQUEL, so a side story whose one tie was "my PARENT is the
+  series" was stored as PARENT (Re:ZERO's Break Time shorts, taken for the story's spine) and a
+  season that HAS a side story as SIDE_STORY + optional (One-Punch Man S2, Noragami Aragoto, JoJo
+  Part 4). Now: child first (SIDE_STORY, SPIN_OFF), then SEQUEL, then PREQUEL, never PARENT;
+  `optional` = a child, a special or a music video; an attached real season is "Season <next
+  number>", an attached side series of season kind wears its title, extras are "OVA N" / "ONA N".
+  **Stored rows are NOT rewritten by this**: `npm run relations:backfill` is a dry run that prints
+  the plan (4 Oct: 188 of 600 anime franchises, 628 members — incl. 17 series that become SPIN_OFF,
+  e.g. the Gundam alternate universes and MHA Vigilantes, which the app then files under extras);
+  `-- --apply` writes it and is the owner's call. Until it has run, readers must not trust
+  `optional` or a season's SIDE_STORY (the feed's `isMainStory` and the iOS rules do not).
+- **The production API runs from this working tree** (`com.shan.previously` launchd job: `npx tsx
+  src/index.ts`, KeepAlive, cloudflared → `localhost:8787`, the local Postgres IS production). It
+  does not watch files, but any restart serves whatever is on disk — uncommitted edits included.
+  Keep `server/` compiling and its tests green while working, and never run a writing script
+  against the database without the owner's go-ahead.
 
 ## Scheduled sync
 
@@ -131,7 +150,31 @@ to `news:` with every social row, in one transaction, when research adopts the p
   Comment length is Unicode code points on both sides (≤ 280). Keyset pagination for threads and
   notifications. No push: Activity (`GET /me/notifications`, now with `reply` / `like_comment`) is
   polled by the app.
-- For you composes the top trending franchises once per 10 minutes per process, filtered per user;
+- **For you is ranked per viewer (4 Oct: "for you is not really recommendation based on user's watch
+  history. It's just too random", owner).** It was news about the 150 trending franchises in time
+  order, minus owned and muted shows. Now (`feed/forYou.ts`, pure and unit-tested; IO in
+  `feed/service.ts`): the candidates are the shared trending snapshot (still one composition per 10
+  minutes per process) PLUS posts about the shows the library recommender picks for this viewer
+  (`loadRankInput` + `rankRecommendations`, rotation off — never `getRecommendations`, which queues
+  show pages), scored `0.5 × affinity + 0.5 × recency` (a pick 0.7–1.0 by its place; any other show
+  0.6 × its genres' match with the library's taste profile; news halves every 45 days), with a taste
+  floor, an eight-month staleness cut and a PICTURE rule — a post needs a video or art measured
+  ≥ 1000 px (AniList-only covers blew up into title cards) — all refilled only to reach the list.
+  **For you is 20 posts** ("let's limit total for you to 20", owner), one per show where it can.
+  A pick with no post of its own gets a DISCOVERY TRAILER: its best dated official trailer whatever
+  its age (a trailer is new to someone who has not seen the show), `evergreen` — exempt from
+  staleness, recency held at 0.6 so fresh news still outranks it. Each post says why in `context`
+  (`recommended` with the recommender's reason, `taste` with one or two genres from a 0.6 match,
+  else null; null on Following, the post page, Saved and Reminders). The viewer's part is cached
+  per user for the snapshot's 10 minutes; a failure there serves the trending feed. An empty
+  library gets the old time order.
+- **"Episode N is out" posts (4 Oct), Following only and OPT-IN: `GET /me/feed?tab=following&
+  episodes=1`.** One per main-story part for a week after its newest episode aired (statuses
+  watching / completed / paused), kind `episode`, `episode: n`, id = the episode's room
+  `ep:<mediaId>:<n>`, `time.basis: 'aired'`, no title and no still (spoilers). Opt-in because a
+  build that predates the kind decodes it as `.unknown` and prints the ANNOUNCED sentence — never
+  send a new post kind to a client that did not ask for it. A like on an `ep:` post needs the
+  episode aired, not watched (comments keep the full gate); reminders refuse `ep:`.
   `/me/feed` never enqueues research (the agent runs on a personal subscription). Discover's
   genres: `GET /discover/genres`, `/discover/genres/:key` (cursor-paginated, owned titles marked).
 
@@ -157,6 +200,99 @@ to `news:` with every social row, in one transaction, when research adopts the p
   `releaseSortKey`, `isFutureInstallment`, sort keys like `nextAiringSortKey`/`lastAiredSortKey`)
   from the raw API status/release fields. Keep this logic in the model layer, not the views, and
   reuse the existing sort-key accessors instead of re-inlining `?? .max` / `?? 0` sentinels.
+- **THE AUDIENCE: anime, TV, or both (4 Oct: "TV-first folks don't have any interest in anime. Anime
+  folks could echo the same… We need a user flag … that does a clean segregation so that this
+  contract is not violated across our application", owner).** `Audience` + `AppModel+Audience.swift`.
+  **The contract: everything the app SUGGESTS is of the viewer's kind and nothing else** — For you,
+  Suggested, Trending, Discover's shelves and genres, Search and its launchpad. **What they OWN is
+  never hidden**: Library, Home, Schedule and Following are their shows whatever kind they are. A
+  title is one kind or the other (`source`: `anilist` = anime, `tmdb` = TV), which is what makes the
+  wall clean. Any NEW surface that shows titles the viewer does not own must pass through
+  `audience.allows(_:)` (or the scope below) — that is the rule this bullet exists for.
+  - It is the ACCOUNT's (`GET` / `PUT /me/preferences`, `audience`; null = never answered = both):
+    the server composes For you and the recommendations for it and defaults every catalogue route
+    without an explicit `source` to it. The app keeps the same wall itself — `visibleRecommendations`,
+    `FeedComposer.rows(allows:)` (For you only), the Trending lists — against a response cached
+    before the choice, an older server, or an answer that has not caught up. The device keeps the
+    choice (`previously.audience`) so the FIRST frame is already the viewer's; a choice the server
+    has not confirmed is owed (`previously.audience.pending`) and sent at launch, reconnect and
+    foreground (`syncAudience`), which also adopts a change made on another device. Sign-out
+    clears it (`clearAudience`).
+  - **A single audience FIXES the app's one scope** (`mediaFilter`, Discover and Search's All / Anime
+    / TV): it is set from the audience and every control that changes it is gone — Discover's scope
+    menu, Search's scope bar, a genre page's chips (`ScopeChips`). A search that finds nothing says
+    why and where the door is ("You're seeing anime only. Change it in Profile › What you watch.");
+    there is no way to widen from Search.
+  - **Asked once** (`AudienceChooser(mode: .firstRun)`, a sheet from `MainTabView` when the account
+    has no answer, after the launch, never over a suspension; it cannot be waved away, and the
+    library suggests the first answer — all anime, all TV, else both) and kept in Profile ›
+    Settings › "What you watch" (`mode: .settings`: a tap IS the change, with the receipt "Showing
+    anime only"). Three picture cards, each a picture MADE for its answer (4 Oct, Codex:
+    `audience-anime-v1` / `-tv-v1` / `-both-v1`, sources in design/onboarding-2026-10-04 — the
+    Discover genre duotones they first borrowed were "shit", owner); the chosen one is held by
+    the selection ring (`SelectionRing`, standing off the card in the lit accent) with its badge
+    (`SelectedBadge`), and the screen takes that picture's light (`AudienceAmbient`) (STATE).
+  - **It is felt, not announced**: Discover's genre art leans the viewer's way (`GenreArt.leaningKey`
+    is written by the choice), the field says "Search anime" / "Search TV", the chart is "Trending
+    anime" / "Trending TV", and the kind word is DROPPED where the app suggests (`MediaSource.
+    kindLead`: "2019", not "Anime · 2019", on a wall that is all anime) — their own shows keep
+    `kindWord`, since a library may hold both.
+- **FIRST RUN is four questions, then a Home that is already theirs (4 Oct: "a robust onboarding
+  experience for new users… Apple-class bar", owner; the research is
+  `design/onboarding-2026-10-04/SPIKE.md`).** It was one sheet ("What do you watch?") over an empty
+  Home. Now a NEW account — no audience answer AND an empty library — gets `FirstRunFlow`
+  (Features/FirstRun) IN PLACE OF the tabs (`SignedInRoot` in RootView; `AppModel+FirstRun.swift`
+  has who, why and the writes): **what you watch** (Profile's `AudienceCard`s, saved at once) →
+  **pick your shows** (a wall of posters: `GET /franchises/starter`, the catalogue's best-known
+  shows, falling back to the chart on a 404; "Airing now"; the genres; a search field) → **where
+  are you?** (one screen per picked show on its own colour: Caught up / Part-way — an episode dial,
+  `EpisodeDial` — / Just starting / Save for later; the show page's own batches, `FirstRunWrite`)
+  → **here's what's next** (their shows on the board: each row's WHEN on a `SplitFlap` that turns
+  to its value; the alerts offer) → Home.
+  - **Nothing is required and nothing explains the app**: no tutorial, no minimum of picks ("Skip
+    for now" with none picked; Skip on the questions leaves the rest unasked), no profile screens.
+    The spike's complaints were exactly those (Hobi's forced three, Trakt's re-marking by hand).
+  - **Nothing is written until the picks are placed** (Back changes an answer, never undoes a
+    write) — except the audience. Then each show is ONE call (`saveProgressBatch`: membership,
+    status, progress), drawn into the library first (`insertPending`), four at a time; a failure
+    goes to Sync status and its show leaves. No receipt, no Undo; one `.success` as the board
+    comes alive.
+  - **The system's notification alert follows a tap on "Turn on" and nothing else.** The line
+    exists only when permission is unanswered and a Watching anime has a timed airing ahead, and
+    it names that show. Go to Home is beside it and works whatever was tapped.
+  - **The states never show an empty Home that turns into a questionnaire**: signed in and not yet
+    known to be new, the brand HOLDS (`FirstRunHold` — the gate's own picture when they just
+    signed in, the launch lockup at a launch; six seconds at most, then the app); when the flow
+    reaches its last screen the tabs are built BENEATH it, so Go to Home lifts the flow off a
+    composed page. A quit mid-way resumes at the picker (`FirstRun.pending`); an account that
+    skipped, or arrives on another device, gets the same picker from the empty Home's button
+    ("Pick your shows", `FirstRunFlow(entry: .shows)`, a cover with an ×). An older account with
+    shows but no audience answer keeps the one sheet.
+  - Art: the empty Home's board and the alerts bell are Codex's (`design/onboarding-2026-10-04`:
+    `codex-brief.md`, `source/`, `package-art.py`), in the empty states' graphite split-flap family.
+  - **How it is exercised:** the real server against a SCRATCH copy of the database, never
+    production — `createdb previously_onboarding_scratch`, `pg_dump previously -Fc | pg_restore -d
+    previously_onboarding_scratch`, then from `server/`: `APP_ENV=development PORT=8799
+    DEV_AUTH_BYPASS=1 DATABASE_URL=postgres://localhost:5432/previously_onboarding_scratch
+    NEWS_AGENT_DISABLED=1 … npx tsx ../design/onboarding-2026-10-04/scratch-entry.mts` (no cron;
+    it refuses any other database). Build with `API_BASE_URL=http://localhost:8799` and
+    `CLERK_PUBLISHABLE_KEY=` (blank) and launch with `-devSignInId <a new id> -devSignInAuto 1`: a
+    new id is a new account. Flags (DEBUG): `-firstRun 1` forces the flow, `-firstRunStep
+    audience|shows`, `-firstRunPick N`, `-firstRunAdvance place|lineup` (lineup WRITES; local
+    backend only). The pure rules are checked by `-verifyAnnouncements 1`.
+  - Not built, and why (SPIKE.md): importing a history (TV Time's export, AniList, MAL, Trakt) —
+    2026's biggest first-run feature and a server pipeline of its own; sign-in AFTER the picker
+    (the catalogue is authenticated and search can spend an LLM call).
+- **ONE LIGHT, ONE INK (4 Oct: "improve the design system and colours everywhere… utterly polished,
+  satisfying and premium", owner).** Every filled or raised CONTROL is lit from above, from one set
+  of materials in `ThemeGradient` (ThemeTokens): `accent` (the primary capsule — which also stands
+  in a pool of its own light — a selected chip, a committed `MarkRing`, the amber badges and tags),
+  `ivory` (the white pills: Mark as watched, Add, Follow), `litEdge` / `litEdgeStrong` (the crown
+  of a quiet capsule, a chip, a tile). ARTWORK is exempt: a picture's edge stays `posterEdge`.
+  A chosen picture wears `SelectionRing` + `SelectedBadge` (DesignSystem/Selection.swift), never a
+  stroke on its own edge. And the feed's INK is the app's own now: `feedText` = `textPrimary`,
+  `feedSecondary` #8C8781, `feedSeparator`, `feedCard`, `feedField` in the warm graphite ramp (the
+  grid and metrics stay X's); `surfaceFloating` / `surfacePressed` left their cool blue-grey.
 - **Home is the landing, the feed is a tab (26 Sep: "the today screen should become Feed… feed should
   not be the home screen for sure", owner).** Tabs: **Home · Schedule · Feed · Library · Discover**
   (`AppTab`: `home`, `schedule`, `today` = the FEED — the case kept its name so every route and flag
@@ -169,9 +305,11 @@ to `news:` with every social row, in one transaction, when research adopts the p
   feed's. `HomeView` + `HomeParts` (Features/Home) — what you can watch now, each show in the FIRST
   place that carries it (`HomeCompose`, memoised on `scheduleFeedKey`):
   - **The billboard, full bleed** ("let's make it like the full bleed art it was earlier", then "make
-    the art take more height"): the retired Today billboard's grammar at 0.84 × the window —
-    `ArtHeader` on `billboardArt` (portrait-first, textless, drifting; a name set in TYPE starts its
-    poster under the bar), `HeroTopVeil`, the restored `HeroCopyScrim` (Features/Home), then centred:
+    the art take more height"): the retired Today billboard's grammar, its height MEASURED FROM THE TAB
+    BAR (the next section's title peeks under its foot, none of its cards — see "Home's 4 Oct
+    repair") — `ArtHeader` on `billboardArt` (portrait-first, textless, drifting, FILLING the frame;
+    a name set in TYPE starts its poster under the bar), `HeroTopVeil` (pinned in the bar), the
+    restored `HeroCopyScrim` (Features/Home), then centred:
     `HeroBadge` ("New episode", "2 episodes behind" while airing, "3 episodes LEFT" in a finished
     season), the logo else the name, "Season 4 · Episode 22", the season bar, "Episode 24 aired
     yesterday" under a backlog, and X's white "Mark as watched" pill. **The pick is something you can
@@ -227,8 +365,9 @@ to `news:` with every social row, in one transaction, when research adopts the p
     is black type, Mushoku Tensei's bronze; One Punch Man's red and Slime's blue keep their colour.
   - **The page sits in the show's hue** ("maybe add subtle gradient too", owner): `HomeGround` — the
     scrim lands on `DetailTint.ground(tint, groundTopLightness)` and the page eases to canvas over
-    520 pt, one faint pool of the tint; the bar's solid ground is that colour, and it turns solid the
-    moment the billboard's COPY reaches it (`HomeChrome.trackCopy`), never with words under its glyphs.
+    520 pt, one faint pool of the tint; both bars' grounds are WINDOWS onto that ground
+    (`HomeGroundWindow`), and the top one turns solid the moment the billboard's COPY reaches it
+    (`HomeChrome.trackCopy`), never with words under its glyphs.
   - **Recently aired** ("what about previous week / unmarked episodes?", owner): the last seven days'
     aired, unmarked episodes, newest first, ONE PER SHOW — its newest episode ("Only the most recent
     episode of that series NOT multiple unseen episodes", owner), naming the run still to watch
@@ -253,6 +392,51 @@ to `news:` with every social row, in one transaction, when research adopts the p
     write lands inside `uiSettle` and what changed ROLLS (`.contentTransition(.numericText())` on the
     badge, the episode, the caption), a finished row or tile leaves, and a caught-up billboard hands
     over (`.handoff`). The launch hands off on the billboard's picture (`HomeView.markArtReady`).
+  - **Home's 4 Oct repair** ("the design direction for Home was good but the implementation has gone
+    sideways", then, of the sim: "why is Ona being emphasized so damn much? The seam looks ugly. The
+    bottom nav looks weird when there is a recently aired item", owner). What it settled:
+    **The pick is asked of the RESUME part.** `HomeCompose.freshCount` used `Franchise.freshPart` —
+    the first part in catalogue order with a recent drop — which for Re:ZERO was the "Break Time"
+    shorts that air beside Season 4, so the finale one episode behind was not fresh and the
+    billboard read "19 EPISODES LEFT · Ona 4 · Episode 1". Now: freshness is the resume part's own;
+    Recently aired lists the STORY's episodes only (`isMainStory` — the shorts air half an hour
+    later, so newest-first they were the one row the show kept); `dropItem` counts by the airing
+    that struck, not the catalogue's count (a premiere is out while its season still reads "not yet
+    released"); `FranchisePart.isNews` counts `unwatchedOut` (`behind` is 0 on a finished part, so
+    every finished run was "news"); an ONA/OVA whose one tie is `PARENT` is an extra and a
+    `TV_SHORT` under a `PARENT` is a spin-off (`isSpinOff` — they arrived as "Season 6/7");
+    `canonicalLabel` prints "ONA 4", not "Ona 4". The server's relation inversion is the root (see
+    the follow-up task); the client rules hold whatever it sends. Checks: `-verifyAnnouncements 1`.
+    **No straight line may end a light.** Three seams, one cause each: the lockup's pool was a
+    radial wider than its own frame, cut again by the billboard's clip — now an `EllipticalGradient`
+    spent at its rim, an OVERLAY free to pass the billboard's foot (only the picture is clipped,
+    `BelowClip` on the art); `HomeGround`'s pool began at full strength on the billboard's bottom
+    edge — now an ellipse inside the fade; and the poster, fitted to the width of a frame far taller
+    than a poster, ended four fifths down on a straight edge behind the logo — `ArtHeader(
+    portraitFill:)` fills the frame from its top (its sides give; `PosterPick`'s 14–64 % visible
+    band already assumed it). A drop card's glow is its shape's shadow, cast from its lower half
+    (a blurred `drawingGroup` ends on its bounds; a card waiting under the bar lit the bar's edge).
+    **The bars are windows, not colours.** The page's ground is a gradient with a pool in it, so no
+    flat colour is flush with it: the tab bar (painted the hue's top colour since 28 Sep, snapping
+    to canvas when the header went solid) sat a shade off the page. `HomeGroundWindow` draws the
+    SAME `HomeGround` where the page draws it, cut to the bar, for both bars; it and
+    `HomeHeaderGround` are the only readers of `HomeChrome.contentTop`. Home reports
+    `TabBarGroundKey` as `.clear` — the root's bar draws no ground there — and never reads
+    `chrome.solid` in its body. The top veil is PINNED in `HomeHeader` (on the billboard it scrolled
+    away and the slower picture slid bare under the clock).
+    **The billboard's height is measured from the bar**, constant: `barTop − x4 − a title's line −
+    labelGap + 3`, so the first section's title peeks and its card starts under the bar's edge (at
+    0.84 × the window fifteen points of card and half a NEW tag stood on the bar). The same height
+    with nothing under it, so a hand-off never resizes the frame and the receipt lane clears the
+    mark. **A single drop is not a shelf** (its card runs gutter to gutter) and names its season
+    ("Season 2 · Episode 1"). **The next billboard is fetched ahead** (`warmBillboard`: the first
+    Recently aired and Up next shows' pictures and colours; picks include Recently aired's shows) —
+    a hand-off was an empty frame in the last show's colour for the length of a poster download;
+    `heroTint` is kept beside the picture it was read from.
+    **How it is photographed:** `design/artwork-2026-10-02/preview-server.py` serves a read-only
+    snapshot of the owner's library (`scout/library-snapshot.local.json`, gitignored; `preview-
+    mode.txt` = `populated`); build with `API_BASE_URL=http://localhost:<port>` and
+    `CLERK_PUBLISHABLE_KEY=` (blank), launch with `-previously.devClerkId <any id>`.
   - The four "directions" (tray / card / both / deck) were photographed on the owner's library on a
     second simulator before this; the full-bleed billboard won. `-homeAnchor recent|upnext` (DEBUG)
     scrolls a capture to a section.
@@ -466,6 +650,17 @@ to `news:` with every social row, in one transaction, when research adopts the p
     with X's "Show more" (the post page always whole). Every post shows its whole body (the sentence
     + the research note) — the timeline showed only the sentence until 26 Sep ("why are we
     unnecessarily clipping text", owner). A glyph sized to the text reads `feedMeta.font`.
+  - **For you, drawn (4 Oct: "For you visuals look poorly built", owner).** The reason sits over the
+    post as X's social-context line (`FeedPostRow.contextLine`, `Copy.Feed.context` → Discover's own
+    `Copy.ForYou.reason`, the shows named as the library names them, a name that fits leading: "Like
+    Mushoku Tensei and 4 more of yours", "Trending in Fantasy and Action"). A post's picture is a
+    CLEAN scene, else the poster, and a lettered backdrop only when there is nothing else
+    (`FeedComposer.wideArt` — a language-tagged backdrop is the show's banner, an advertisement
+    beside the name line). **Trending is a shelf of posters** (`TrendingModule`, the Library card),
+    not X's eight rows of type. A first season announced is "A new series", a film the catalogue
+    only numbers "A new film"; an uploader's shorthand ("PV", "CM 2") is never a headline; a
+    trailer whose stills are gone falls back to the show's picture. An `.episode` post reads
+    "Episode 19 is out." / "Season 2 has started.", carries no reminder bell, and opens the SHOW.
   - **Android has not mirrored the feed yet** (brief §15): no feed, no social layer, no Discover
     genres there. Where the bullets below say "Android mirrors this", they predate the feed.
   The bullets below that describe Today's billboard, its Up next shelf or its recap are the history
@@ -509,8 +704,17 @@ to `news:` with every social row, in one transaction, when research adopts the p
   `FeedChromeState` and Discover's `DiscoverChromeState` (each screen takes its own as `chrome:`)
   and hands the bar whichever is in front as `scrollAway` (`ScrollAwayChrome.awayFraction`), so the
   bar slides down by the fraction the header has slid up — point for point with the finger,
-  settling with it. Every other tab and every
-  page pushed from the feed keep the bar; arriving on the feed from another tab, or popping back to
+  settling with it. **Since 4 Oct EVERY ROOT does it** ("In the Schedule, Library the top and bottom
+  header and nav are there even when scrolling… not very polished", owner): Schedule and Library
+  wore the SYSTEM navigation bar, which cannot move a point at a time, so they have the app's own
+  row now (`App/RootChrome.swift`: `RootChromeState`, `RootHeader` / `RootHeaderRow` in the scroll
+  view's top safe-area inset, the system bar hidden, `.navigationTitle` kept for VoiceOver and back
+  buttons), and Home's `HomeChrome` slides its row and its foot ground (`HomeFootGround`) the same
+  way; `MainTabView.rootChrome(_:)` hands the bar the root in front's state. Only a READER's scroll
+  moves the bars (`phase(_:)`: interacting or decelerating) — Schedule's landing on today and every
+  other programmatic scroll leave them alone — and VoiceOver keeps them. Schedule's month grid
+  hangs under the band and opening it reveals the bar. Every page PUSHED from a root keeps
+  the bar; arriving on a root from another tab, or popping back to
   it, reveals the header (and so the bar); the hand-off slides (an implicit animation keyed on the
   SOURCE, never on the offset, so a scroll is never animated behind the finger); VoiceOver keeps
   the bar. The page reserves stay put while it is away — the feed draws under them to the edge.
@@ -892,7 +1096,13 @@ to `news:` with every social row, in one transaction, when research adopts the p
   where it scrolls away with the header like X's (the 8 Sep "I don't want the floating nav to
   collapse while scrolling" was about the system pill's minimise); the pill's minimise behaviour,
   its 180-pt underfill and the bottom band that landed below the screen on iOS 26 went with it. Docked bar titles (Detail,
-  Season, History) use `displayTitle`. Watch sessions live in `RewatchStore` (device-local JSON).
+  Season, History) use `displayTitle`. Watch sessions live in `RewatchStore` (JSON on the device) and, since 2 Oct, on the server
+  (`/me/watch-sessions`): every change queues one word per session (newest wins, versioned) in
+  `sessions-sync.json`, and `AppModel+Rewatch` sends the queue on each change, reload and
+  reconnect, then folds `GET` in (`merge`: the server wins for sessions with no unsent word; one it
+  once acknowledged and no longer lists was deleted elsewhere; one it never saw is uploaded). A
+  delete is a server tombstone, so a replay cannot resurrect it (`410`). Android still keeps them
+  device-local.
 - **Auth hand-off:** `AuthManager.bootstrap()` waits (≤3 s) for `Clerk.shared.isLoaded`, then
   follows `Clerk.shared.auth.events` for session changes; the splash leaves only when both its
   timeline and `auth.bootstrapped` are done (`RootView.handOffIfReady`) — never sign-in for a

@@ -365,7 +365,7 @@ struct NewPostsPill: View {
             .padding(.leading, ThemeSpace.x3)
             .padding(.trailing, ThemeSpace.x4)
             .frame(height: FeedMetrics.pillHeight)
-            .background(ThemeColor.accent, in: shape)
+            .background(ThemeGradient.accent, in: shape)
             // The shadow is drawn by the capsule's own shape (rasterised with it), never `.shadow`
             // on the composited pill.
             .cardShadow(.floating, shape: shape, fill: ThemeColor.accent)

@@ -1,0 +1,58 @@
+[
+  {
+    "franchiseId": "982d297c-e674-473d-902c-a0f379bc6a5a",
+    "showId": 243360,
+    "season": 0,
+    "refreshed": true,
+    "attached": 1
+  },
+  {
+    "franchiseId": "b954a614-5af3-46c4-817b-6c90a82684eb",
+    "showId": 316804,
+    "season": 2,
+    "refreshed": true,
+    "attached": 1
+  },
+  {
+    "franchiseId": "44ce01fa-5e84-44a6-908b-954be23b1b80",
+    "showId": 387,
+    "season": 19,
+    "refreshed": true,
+    "attached": 1
+  },
+  {
+    "franchiseId": "e821e600-a7e1-4870-9052-1d20a7544a16",
+    "showId": 236235,
+    "season": 3,
+    "refreshed": true,
+    "attached": 1
+  },
+  {
+    "franchiseId": "6512fa61-8e67-4643-b9af-91f71a262eb2",
+    "showId": 154521,
+    "season": 8,
+    "refreshed": true,
+    "attached": 1
+  },
+  {
+    "franchiseId": "720ac47b-7a96-42f9-ba06-bfb29ab31fe8",
+    "showId": 325755,
+    "season": 2,
+    "refreshed": true,
+    "attached": 1
+  },
+  {
+    "franchiseId": "73dfa0b0-c621-4b5a-a66b-e050c8a24087",
+    "showId": 215943,
+    "season": 6,
+    "refreshed": true,
+    "attached": 2
+  },
+  {
+    "franchiseId": "9b75d75c-148f-431d-b4c8-e18743d00a4c",
+    "showId": 126167,
+    "season": 5,
+    "refreshed": true,
+    "attached": 2
+  }
+]

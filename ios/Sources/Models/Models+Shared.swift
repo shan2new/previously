@@ -149,12 +149,32 @@ extension FranchisePart {
     /// **Never derived from `sequence`.** Empty string when the source gave no label — unknown
     /// says unknown; a fabricated "Season 1" is worse than nothing.
     var canonicalLabel: String {
-        label.trimmingCharacters(in: .whitespacesAndNewlines)
+        let trimmed = label.trimmingCharacters(in: .whitespacesAndNewlines)
+        // An extra the server named from its kind arrives as "Ona 4" / "Ova 2": initialisms.
+        for (written, initialism) in [("Ona", "ONA"), ("Ova", "OVA")]
+        where trimmed == written || trimmed.hasPrefix(written + " ") {
+            return initialism + trimmed.dropFirst(written.count)
+        }
+        return trimmed
     }
 
     /// The catalogue relates this part to the work as a spin-off. A spin-off is an extra, never a
     /// season of the show, whatever its `kind` says.
-    var isSpinOff: Bool { relationship?.uppercased() == "SPIN_OFF" }
+    ///
+    /// A SHORT-FORM series attached after the work's own first season, whose one tie to it is
+    /// "my PARENT is in it", is one too: Re:ZERO's Break Time and Re:PETIT shorts arrived as "Season
+    /// 6" and "Season 7" (4 Oct). Not the FIRST of its kind: the old rows also store PARENT for a
+    /// first season its side stories point at (Double Wish, Ninja Hattori — short-form works in
+    /// their own right). The server derives the relation correctly now (`grouping/relationship.ts`:
+    /// SIDE_STORY / SPIN_OFF for the child, nothing for the parent); this reads the rows written
+    /// before it, until `npm run relations:backfill -- --apply` has run.
+    var isSpinOff: Bool {
+        switch relationship?.uppercased() {
+        case "SPIN_OFF": return true
+        case "PARENT": return format?.uppercased() == "TV_SHORT" && sequence > 1
+        default: return false
+        }
+    }
 
     /// Part of the story's SPINE: a season, an ONA/OVA or a film that is a sequel or prequel of
     /// its neighbours (or the first entry, with no relation). Side stories, spin-offs, recaps
@@ -182,8 +202,12 @@ extension FranchisePart {
         if name.contains("film") || name.contains("movie") || name.contains("episode 0") || name.contains("episode:0") {
             return false
         }
+        // PARENT is not the story: the part names a member of the work as its parent and has no
+        // sequel or prequel of its own — the shorts that air beside a season. Re:ZERO's "Break
+        // Time" run took Home's billboard as "19 EPISODES LEFT · Ona 4 · Episode 1" while Season 4
+        // sat one episode behind (owner, 4 Oct: "why is Ona being emphasized so damn much?").
         switch relationship?.uppercased() {
-        case nil, "SEQUEL", "PREQUEL", "PARENT": return true
+        case nil, "SEQUEL", "PREQUEL": return true
         default: return false
         }
     }
@@ -456,4 +480,10 @@ extension MediaSource {
     /// "AniList" or "TMDB" to a viewer. Lives on the source so `FranchiseSummary` (Search) and
     /// `Franchise` (Library, Detail) cannot spell it differently.
     var kindWord: String { self == .tmdb ? "TV" : "Anime" }
+
+    /// The kind word where the app SUGGESTS titles (Discover, For you, a genre's page): said only
+    /// to a viewer who sees both kinds. To someone who watches anime alone, "Anime ·" before every
+    /// title on a wall of anime is the app reminding them of a choice they made once (`Audience`).
+    /// Their own shows keep `kindWord` — a library may hold both.
+    var kindLead: String? { Audience.stored.isSingle ? nil : kindWord }
 }

@@ -132,8 +132,8 @@ authenticated user's progress.
   "kind": "season",          // season | movie | ova | ona | special | music
   "sequence": 1,              // order within its kind
   "watchOrder": 1,            // one global chronology across seasons, movies and specials
-  "relationship": "SEQUEL", // source relation when known; otherwise null
-  "optional": false,          // true only for source-identified side/optional material
+  "relationship": "SEQUEL", // what THIS part is to the work (see below); null for a root / unknown
+  "optional": false,          // a side story, a spin-off, a special or a music video
   "label": "Season 1",       // human label the LLM/grouping assigned
   "title": "Attack on Titan",
   "cover": "https://…",
@@ -170,6 +170,21 @@ authenticated user's progress.
   "videos": [ FranchiseVideo, … ] // trailers/teasers scoped to this exact part
 }
 ```
+
+**`relationship` is the part's own role** (`server/src/grouping/relationship.ts`), derived from the
+catalogue's relation edges, where an edge `from → to` of type T means "`to` is the T of `from`": the
+edge states `to`'s role as written and `from`'s only through T's inverse. In priority order:
+`SIDE_STORY`, `SPIN_OFF` (a child of the story — it stays one even when it has a sequel of its
+own), `SEQUEL` (any part that follows another), `PREQUEL` (only the part that opens the chain), then
+any other catalogue relation, else `null`. **`PARENT` is never sent for a correctly derived part**:
+"this part has children" is not a role. Rows written before 4 Oct 2026 may still carry it — there it
+marks either a first season its side stories point at or a child whose own "my parent is…" edge was
+passed through uninverted — and may carry `SIDE_STORY` / `optional: true` on a season that merely
+*has* a side story. `npm run relations:backfill` (dry run; `-- --apply` to write) re-derives them
+from `media_relations`; clients must read both shapes until it has run. Mechanical labels are
+`Season N` (the next season NUMBER, not the kind's sequence), `OVA N`, `ONA N`, `Movie N`,
+`Special N`; a side series of season kind attached later is labelled with its own title.
+
 
 ### Airing
 One dated episode of a part, for the Schedule calendar. `airings` covers the window **8 days back
@@ -306,7 +321,10 @@ Personal, second-degree recommendations: the titles the catalogues' own "if you 
 ranked on the server. Every show in the library casts one vote spread over its list, weighted by how
 engaged the user is with it (status, episodes watched, recency); several of the user's shows agreeing
 counts for more, then a Bayesian quality score, genre fit, a popularity damper and freshness apply.
-Ownership, progress and feedback are read live on every request.
+Ownership, progress and feedback are read live on every request. Only titles of the viewer's
+**Audience** are served (`both` / not chosen = every catalogue, as below): the other catalogue's
+titles are dropped before the list is cut to `limit`, so an anime or a TV viewer still gets a full
+list, with no TV quota.
 
 ```jsonc
 // GET /me/recommendations?limit=12   (1–30, default 12; anything else is a 400)
@@ -440,6 +458,16 @@ Catalogue-derived facts carry a `catalogue` evidence row immediately; agent rese
 official primary announcement and independent trade/reputable reporting. The immutable history is
 available at `GET /franchises/:id/announcements`.
 
+Current facts are reconciled on every read: elapsed release windows and news about an installment
+already airing/finished yield to current catalogue data or `null`. Expiry means unverified, not
+concluded. A generic provider “Returning Series” flag does not establish another season: a real
+future part or supported announcement is required. Spin-offs and national adaptations must match
+the canonical series identity before research may publish. Research with missing evidence, invalid
+calendar dates, inconsistent date precision, or provider failures cannot replace a stored fact.
+Corrections update the franchise, announcement and evidence observation atomically, including
+date withdrawals. Retracted announcements remain in the audit history but are suppressed from
+live/saved posts and notification counts.
+
 **`release` is the only field a client prints; `sortKey` is the only field it sorts by.** Clients
 must not parse `release` themselves — an ISO-only reading of a corpus full of `October 2026` and
 `Summer 2027` silently files every one of them under January of its year, which is how a "returning
@@ -496,19 +524,23 @@ Detail do a current bounded lookup. Use the batch endpoint to warm a visible she
 | Method | Path | Body | Returns |
 |--------|------|------|---------|
 | GET | `/health` | — | `{ ok: true }` |
-| GET | `/franchises/trending?limit=30&country=IN` | — | `FranchiseListResponse`; supports the same `source`, `year`, `status`, `theme`, `providerId` filters as Search |
-| GET | `/search?q=&exact=1&source=anilist&year=2026&status=RELEASING&theme=Drama&providerId=8&country=IN` | — | `FranchiseListResponse` — empty `q` = trending. Indexed aliases include English, Romaji, native titles and synonyms. One- or two-character typeahead is local-only. A genuine miss gets one short AniList + TMDB fan-out and bounded materialization. Exact-title hits synchronously refresh immediate `upcoming`, trailer and regional facts, then queue richer research. `exact=1` disables spell correction. All filters are optional; `providerId` requires a query/saved country |
+| GET | `/franchises/trending?limit=30&country=IN` | — | `FranchiseListResponse`; supports the same `source`, `year`, `status`, `theme`, `providerId` filters as Search. No `source` = the viewer's **Audience** |
+| GET | `/franchises/starter?limit=60&source=anilist` | — | `{ franchises: FranchiseSummary[] }` — first run's picker (4 Oct): the catalogue's BEST-KNOWN shows, most popular first (`media.popularity`: AniList's member count, TMDB's popularity), non-adult, with a cover. `limit` 1–120 (default 60). No `source` = the viewer's **Audience**; for `both` the two catalogues are ranked separately and alternate, anime first (their popularity scales cannot be compared). Not trending: a chart of this season's titles is the wrong list for someone who has not picked anything yet. A client must fall back to `/franchises/trending` on a 404 (a server that predates the route) |
+| GET | `/search?q=&exact=1&source=anilist&year=2026&status=RELEASING&theme=Drama&providerId=8&country=IN` | — | `FranchiseListResponse` — empty `q` = trending. Indexed aliases include English, Romaji, native titles and synonyms. One- or two-character typeahead is local-only. A genuine miss gets one short AniList + TMDB fan-out and bounded materialization. Exact-title hits synchronously refresh immediate `upcoming`, trailer and regional facts, then queue richer research. `exact=1` disables spell correction. All filters are optional; `providerId` requires a query/saved country. With no `source`, the viewer's **Audience** is the catalogue searched (trending and typed queries alike) |
 | POST | `/franchises/resolve` | `{ source: "anilist" \| "tmdb", externalId }` | Returns the `FranchiseSummary` of a `RelatedTitle` / `RecommendationItem` the user selected: the existing show page at once when the title is already materialised (no provider call), else it materialises it; `422` when identity/source policy rejects it |
 | GET | `/franchises/:id?country=IN` | — | `Franchise`; `country` is optional/case-insensitive, falls back to saved preference, selects `audience.contentRating`, and attaches current `availability` |
 | GET | `/franchises/:id/announcements?limit=20` | — | `{ observations: AnnouncementObservation[] }` newest-first, with immutable evidence snapshots |
 | GET | `/franchises/:id/watch-providers?country=IN` | — | `WatchAvailability`; `country` is case-insensitive and may be omitted after saving a preference |
 | POST | `/franchises/watch-providers/batch` | `{ franchiseIds: [uuid], country? }` | `{ country, availability: [{ franchiseId, ...WatchAvailability }] }`; max 100, four bounded workers |
-| GET | `/me/preferences` | — | `{ country, language, providerIds, updatedAt }` |
-| PUT | `/me/preferences` | `{ country?: "IN" \| null, language?, providerIds? }` | Saved preference object; omitted fields are preserved |
+| GET | `/me/preferences` | — | `{ country, language, providerIds, updatedAt, audience }` — `audience` is `"anime" \| "tv" \| "both" \| null` (see **Audience**) |
+| PUT | `/me/preferences` | `{ country?: "IN" \| null, language?, providerIds?, audience?: "anime" \| "tv" \| "both" }` | Saved preference object; omitted fields are preserved. `503 {"error":"audience_unavailable"}` when `audience` was sent and could not be stored — the other fields in the body ARE saved (see **Audience**) |
 | GET | `/me/library?country=IN` | — | `{ franchises: LibraryFranchise[], prevOpenedAt: Int }`; country falls back to preferences and adds cached availability. `prevOpenedAt` is the **previous visit** (the value `POST /me/opened` shifted away; the last stamp for an account not yet shifted since migration 0010), never the stamp this session just wrote; `newParts` counts against it |
 | GET | `/me/recommendations?limit=12` | — | `{ items: RecommendationItem[], generatedAt }` — see **Recommended for you**; `limit` 1–30 |
 | POST | `/me/recommendations/feedback` | `{ key, kind: "dismissed" \| "seen" }` | `204` |
 | DELETE | `/me/recommendations/feedback` | `{ key }` | `204` (undo) |
+| GET | `/me/watch-sessions` | — | `{ sessions: WatchSession[] }` — live sessions only, by franchise then ordinal — see **Watch sessions** |
+| PUT | `/me/watch-sessions/:id` | `WatchSessionBody` (`:id` a client-generated uuid) | `204`; `410 {"error":"session deleted"}`, `404 {"error":"franchise not found"}`, `404 {"error":"session not found"}` (the id is someone else's), `400` on a bad id or body. All final |
+| DELETE | `/me/watch-sessions/:id` | — | `204`, always (idempotent; a repeat, an unknown id or someone else's id changes nothing) |
 | POST | `/me/subscriptions` | `{ franchiseId, status? }` | `{ ok: true }` (status defaults: `watching` if releasing else `planned`) |
 | PATCH | `/me/subscriptions/:franchiseId` | `{ status }` | `{ ok: true }` |
 | DELETE | `/me/subscriptions/:franchiseId` | — | `{ ok: true }` |
@@ -518,13 +550,13 @@ Detail do a current bounded lookup. Use the batch endpoint to warm a visible she
 | GET | `/me/notifications?limit=50&cursor=` | — | `NotificationsPage` `{ items: NotificationItem[], unread: Int, nextCursor }` newest-first — see **NotificationItem**; `limit` 1–200, `400` outside it or on a bad cursor |
 | POST | `/me/notifications/read` | `{ ids?: [uuid] }` (≤ 500) | `{ marked: Int }` — omit `ids` to mark all unread as read; `400` on a bad body |
 | DELETE | `/me` | — (an unknown field is a `400`) | `{ deleted: true }` — see **Account deletion**. Answers a suspended account too |
-| GET | `/me/feed?tab=following` | — | `FeedResponse` — see **Today feed**; `tab` is `following` (default) or `foryou`, `400` otherwise; `429` (the read budget — see **Rate limits**) |
-| GET | `/feed/posts/:id` | — | `FeedPostDetailResponse` — see **Post detail, Saved, Reminders**; `:id` a PostId; `400` bad id, `404 {"error":"post not found"}`, `429` (the read budget) |
+| GET | `/me/feed?tab=following` | — | `FeedResponse` — see **Today feed**; `tab` is `following` (default) or `foryou`, `400` otherwise; `episodes=1` opts in to Following's "Episode N is out" posts; `429` (the read budget — see **Rate limits**) |
+| GET | `/feed/posts/:id` | — | `FeedPostDetailResponse` — see **Post detail, Saved, Reminders**; `:id` a PostId or an episode post's `ep:<mediaId>:<n>`; `400` bad id, `404 {"error":"post not found"}`, `429` (the read budget) |
 | GET | `/me/saved` | — | `SavedResponse`, newest first |
 | GET | `/me/reminders` | — | `RemindersResponse`, newest first |
-| PUT / DELETE | `/me/likes` | `{ subject }` (a ThreadSubject) | `204`; PUT: `404 subject not found`, `409 episode_locked` (ep only), `429` — see **Social** |
-| PUT / DELETE | `/me/saves` | `{ postId }` | `204`; PUT: `404`, `429` |
-| PUT / DELETE | `/me/reminders` | `{ postId }` | `204`; PUT: `404`, `429` |
+| PUT / DELETE | `/me/likes` | `{ subject }` (a ThreadSubject) | `204`; PUT: `404 subject not found`, `409 episode_locked` (an `ep:` episode that has NOT AIRED; one that is out can be liked, watched or not), `429` — see **Social** |
+| PUT / DELETE | `/me/saves` | `{ postId }` (a PostId, or an episode post's `ep:` id) | `204`; PUT: `404` (an `ep:` episode that has not aired included), `429` |
+| PUT / DELETE | `/me/reminders` | `{ postId }` (a PostId — an `ep:` id is `400`) | `204`; PUT: `404`, `429` |
 | PUT / DELETE | `/me/hides` | `{ kind: "post", target: postId }` \| `{ kind: "show", target: franchiseId }` | `204`; PUT: `404` unknown post or franchise, `429` |
 | GET | `/me/hides` | — | `HidesResponse` `{ items: [{ kind, target, createdAt, franchise: { id, title } \| null }] }`, newest first |
 | PUT | `/me/ratings` | `{ mediaId, episode: 1…99999, score: 0…100 }` | `204`; `404 episode not found`, `409 episode_locked`, `429` |
@@ -542,8 +574,99 @@ Detail do a current bounded lookup. Use the batch endpoint to warm a visible she
 | GET | `/me/profile/handle?handle=` | — | `HandleAvailability`; `400`, `429` |
 | POST | `/me/terms` | `{ version }` | `200 ProfileResponse`; `409 terms_version_mismatch` (+`currentVersion`), `429` |
 | GET | `/me/export` | — | `AccountExport` as a JSON attachment — see **Account export**; `429`. Answers a suspended account too |
-| GET | `/discover/genres?source=` | — | `DiscoverGenresResponse` — see **Discover: genres**; `400` on a bad source |
-| GET | `/discover/genres/:key?source=&limit=24&cursor=` | — | `DiscoverGenrePage`; `limit` 1–50; `400`, `404 genre not found` |
+| GET | `/discover/genres?source=` | — | `DiscoverGenresResponse` — see **Discover: genres**; no `source` = the viewer's **Audience**; `400` on a bad source |
+| GET | `/discover/genres/:key?source=&limit=24&cursor=` | — | `DiscoverGenrePage`; `limit` 1–50; no `source` = the viewer's **Audience**; `400`, `404 genre not found` |
+
+### Audience
+
+One preference per account decides which catalogue the server SUGGESTS titles from: `anime`
+(AniList), `tv` (TMDB) or `both`. A franchise is one or the other, never mixed (`source`), so the
+rule is a clean cut: an anime viewer is never suggested a TV show, a TV viewer never an anime.
+
+```ts
+type Audience = 'anime' | 'tv' | 'both'
+interface UserPreferences {
+  country: string | null
+  language: string
+  providerIds: number[]
+  updatedAt: string | null      // the later of the last preferences write and the last audience write
+  audience: Audience | null     // null = the viewer has not chosen yet; the server treats null as 'both'
+}
+```
+
+- **Reading and writing it.** `GET /me/preferences` returns it. `PUT /me/preferences` takes an
+  optional `audience` (`"anime" | "tv" | "both"`; omitted = unchanged, like every other field; it
+  cannot be set back to `null`). A change applies to the **next request** on every route below —
+  nothing is cached across it, For you included.
+- **`503 {"error":"audience_unavailable"}`** on a `PUT` that carried `audience` means the choice
+  could not be stored (the server's audience table is not there yet, or the write failed). Any
+  OTHER field in the same body has been saved. Keep the previous value on screen and retry later;
+  reads never fail for this reason — until the choice can be stored every viewer reads
+  `audience: null` and is treated as `both`.
+- **`both` and `null` are exactly the behaviour before this preference existed**, on every route.
+
+**The default-source rule.** The routes that take a `source` (`anilist` | `tmdb`) and suggest titles
+use the viewer's audience as the DEFAULT: with no `source` in the request, an `anime` viewer is
+answered as if they had sent `source=anilist`, a `tv` viewer `source=tmdb`, a `both` viewer both
+catalogues (as before). **An explicit `source` always wins** — that is how a client lets someone
+deliberately look at the other catalogue. There is no value for "both catalogues regardless of my
+audience": a viewer who wants both sets their audience to `both`.
+
+**What it governs** — everything the viewer did not ask for by name:
+
+| Route | Effect for an `anime` or `tv` viewer |
+|---|---|
+| `GET /me/feed?tab=foryou` | Only shows of the audience: the trending pool (that catalogue's OWN top 150), the recommended shows and their posts and discovery trailers, and the `trending` module. No `source` parameter exists here: the audience is always applied |
+| `GET /me/recommendations` | Only titles of the audience, filtered BEFORE the limit, so the list is as full as the library allows (an anime viewer's 12 are 12 anime, not the mixed 12 with the TV removed). No TV quota applies to a one-catalogue list |
+| `GET /franchises/trending` | Default `source` = the audience |
+| `GET /franchises/starter` | Default `source` = the audience (`both`: the catalogues alternate) |
+| `GET /search` | Default `source` = the audience, for an empty `q` (trending) AND a typed query: an anime viewer typing a TV show's name finds nothing unless the request sends `source=tmdb` |
+| `GET /discover/genres`, `GET /discover/genres/:key` | Default `source` = the audience; the response's `source` says which catalogue was used |
+
+**What it never touches** — anything that is the viewer's own, or that names a title:
+`GET /me/feed?tab=following`, `/me/library`, `/me/notifications`, `/me/saved`, `/me/reminders` and
+the watch sessions (the viewer's library, whatever it holds); `GET /franchises/:id` (a show page
+opens for anyone, and its `related` titles are part of that show), `POST /franchises/resolve`,
+`GET /feed/posts/:id`, the watch-provider routes and every social route.
+
+**One catalogue's trending is ranked within that catalogue.** Only AniList carries a trend score
+(TMDB shows rank by popularity), so in the mixed ranking every anime sorts above every TV show.
+`source=tmdb` — explicit or by audience — therefore ranks TV on its own rather than filtering the
+mixed list (which used to answer an empty list for TV).
+
+### Watch sessions: `/me/watch-sessions`
+
+One watch of a franchise: the implicit first watch, or a rewatch. The app owns the history (it starts,
+completes, stops, re-dates and deletes sessions) and the server keeps a copy, so a new phone, a
+reinstall or a new app id gets it back. Device-local until 2 Oct 2026.
+
+```ts
+interface WatchSessionBody {
+  franchiseId: string
+  scopeMediaId: number | null      // null = the whole franchise; else the one part rewatched
+  ordinal: number                  // 1 = first watch, 2 = second, … (1–999)
+  startedAt: number | null         // ms epochs; completedAt 0 = "finished, date unknown"
+  completedAt: number | null       //   (the implicit first watch)
+  cancelledAt: number | null
+  cancelledAtEpisode: number | null
+  episodes: number                 // episodes the session covers; 0 when unknown
+  restoreProgress: Record<string, number> | null  // media id → episodes before the rewatch, so
+  restoreStatus: WatchStatus | null                //   stopping it can put the show back
+}
+interface WatchSession extends WatchSessionBody { id: string; updatedAt: number }
+```
+
+- **The client generates `id` and sends the whole session.** `PUT` creates or replaces it, so a
+  replay is harmless. Optional fields may be omitted and read as `null`; an unknown field is a `400`.
+- **Newest word wins, per session.** The app queues one word per session (save or delete) and sends
+  the newest; an acknowledgement for an older word does not clear a newer one.
+- **A delete is a tombstone.** `DELETE` marks the row deleted and `GET` stops listing it; a later
+  `PUT` of that id answers `410` and changes nothing, so a replay from another device cannot bring
+  it back. `GET /me/export` lists tombstones with their `deletedAt`.
+- **The app folds `GET` in** after each library reload: the server's copy wins for every session
+  with no unsent word; a session the server once acknowledged and no longer lists was deleted on
+  another device; one it never saw (made before sync existed, or offline) is uploaded.
+- `410`, `404` and `400` are final: the app drops the word (on `410` it drops the session too).
 
 ### Account deletion
 
@@ -561,7 +684,8 @@ route in this API that cannot be undone, so its semantics are exact:
     comments** of the same thread (the parent link is cleared, never cascaded);
   - the user's likes, saves, reminders, hides, episode ratings, blocks in both directions (whom they
     blocked and who blocked them), and public profile (which **frees the handle**);
-  - the user's `subscriptions`, `progress`, `user_preferences` and `recommendation_feedback`.
+  - the user's `subscriptions`, `progress`, `watch_sessions` (tombstones too), `user_preferences`,
+    `user_audience` (the audience choice) and `recommendation_feedback`.
 
   Every user-owned table is deleted explicitly rather than left to the `ON DELETE CASCADE` each
   foreign key declares — the cascade is real and `me.account.test.ts` asserts it (for every foreign
@@ -617,8 +741,10 @@ interface AccountExport {
   library: {
     subscriptions: { franchiseId: string; title: string; status: WatchStatus; addedAt: number }[]
     progress: { mediaId: number; episodes: number; updatedAt: number }[]
-    preferences: UserPreferences | null
+    preferences: UserPreferences | null  // incl. `audience` (see Audience); null = neither a
+                                         // preferences row nor an audience choice is stored
     recommendationFeedback: { key: string; kind: string; createdAt: number }[]
+    watchSessions: (WatchSession & { deletedAt: number | null })[]  // tombstones included
   }
   social: {
     comments: { id: string; subject: string; parentId: string | null; body: string; createdAt: number; deletedAt: number | null; hiddenAt: number | null; hiddenReason: string | null }[]  // hiddenReason: 'reports' | 'operator'
@@ -749,7 +875,10 @@ hidden, is not listed and does not count as unread. While `SOCIAL_COMMENTS_ENABL
 social kinds are not listed at all.
 
 **News rows** are produced by the daily research job (Claude Agent SDK web research over each
-subscribed franchise). A notification is created only when news is genuinely new: first sighting of
+subscribed franchise, with Codex live web research when Claude is unavailable). Both providers use
+the same identity, evidence and release-date validation. A completed but unsupported result does
+not trigger fallback; if neither provider returns verified information, existing facts remain.
+A notification is created only when news is genuinely new: first sighting of
 an upcoming installment (including credible rumors), a status upgrade (rumored → announced → dated),
 or a TBA release gaining a concrete date. It goes to the franchise's subscribers **and to the
 reminder holders it answers** (`PUT /me/reminders`), once each: everyone with a reminder on that
@@ -767,14 +896,16 @@ There is no push in this build: the Activity sheet polls. Opening it marks read
 
 Every social row (likes, comments, saves, reminders, "not interested") keys on one text id. There
 are four kinds; the first three are **PostIds** (a post in the feed), and all four are
-**ThreadSubjects** (something with a discussion):
+**ThreadSubjects** (something with a discussion). The fourth is ALSO the id of one kind of feed
+post — Following's "Episode N is out" (`kind: 'episode'`) — so that post and the episode's room are
+one subject:
 
 | Subject | Grammar (whole string) | What it is |
 |---|---|---|
 | `news:<uuid>` | `news:` + lowercase uuid | A research-backed news post. The uuid is the announcement's id. |
 | `catalog:<mediaId>` | `catalog:` + 1…2147483647, no leading zero | A catalogue-only upcoming post: an announced (NOT_YET_RELEASED) part that research has no row for |
 | `trailer:<franchiseId>:<site>:<videoId>` | lowercase uuid, `[a-z0-9]{1,20}` (lowercased), `[A-Za-z0-9_-]{1,64}` | A trailer post |
-| `ep:<mediaId>:<n>` | 1…2147483647, episode 1…99999 | An episode discussion room (spoiler-gated — see **Episode discussions**) |
+| `ep:<mediaId>:<n>` | 1…2147483647, episode 1…99999 | An episode discussion room (spoiler-gated — see **Episode discussions**), and the id of that episode's "Episode N is out" post |
 
 - **A news post is its announcement**, not its wording: `news:<announcement id>`. Research that
   rewords the same installment ("Season 2" / "2nd Season") lands on the same announcement row, so
@@ -799,6 +930,13 @@ are four kinds; the first three are **PostIds** (a post in the feed), and all fo
   toggle queued, a comment replayed or a hide sent against the old id is never stranded. A client
   that sent `catalog:<mediaId>` and reads back a different `subject` re-files its state under the
   answered id. A `catalog:` id no announcement names is its own canonical subject.
+- **An episode post has no id of its own: it is `ep:<mediaId>:<n>`.** `GET /feed/posts/:id`,
+  `/me/saves` and `/me/hides` (`kind: "post"`) take it beside the three PostIds; `/me/reminders`
+  does not (`400` — an episode that is out has nothing to be reminded of). As a POST it exists once
+  the episode has aired, watched or not: it can be liked, saved and hidden then (`404 post not
+  found` / `409 episode_locked` + `reason: "unaired"` before). As a ROOM it is unchanged: reading
+  and writing its comments, liking them and rating the episode still need the episode aired AND
+  watched. The post's `counts` are the room's (its likes, its visible comments).
 - **A trailer id carries its franchise**, so one YouTube id attached to two shows cannot collide.
 - Clients treat every id as **opaque**. Use `post.id` from `GET /feed/posts/:id` as the canonical
   thread subject (it can differ from the id you asked for — see the alias rule there). An old
@@ -809,7 +947,8 @@ are four kinds; the first three are **PostIds** (a post in the feed), and all fo
 
 ## Today feed: `GET /me/feed`
 
-`GET /me/feed?tab=following|foryou&since=<ms>` (`tab` defaults to `following`; `since` is optional).
+`GET /me/feed?tab=following|foryou&since=<ms>&episodes=1` (`tab` defaults to `following`; `since`
+and `episodes` are optional).
 Posts are assembled ON THE SERVER by one composer with stable ids; the client renders every WORD
 (headline, stamp, premiere line, window) from the structured facts below, in the viewer's locale and
 time zone.
@@ -817,11 +956,13 @@ time zone.
 | Query | Meaning |
 |---|---|
 | `tab` | `following` \| `foryou` |
+| `episodes` | **Opt-in** to Following's "Episode N is out" posts (`kind: "episode"` — see **Episode posts**): `1` or `true` includes them. Absent, or any other value, they are left out and the response is exactly what it was before the kind existed (never a `400`). A client sends it only once it renders `kind: "episode"`: an older build decodes an unknown kind as an announcement and would print false news. No effect on For you. |
 | `since` | The client's visit anchor, ms epoch, digits only (anything else is `400`): the `prevOpenedAt` its own `POST /me/opened` answered this session. When `0 < since ≤ now` it is THE anchor — `fresh`, the order and the echoed `prevOpenedAt` all use it. Otherwise (absent, `0`, in the future) the server reads its stored anchor. Pass it once this session's stamp has landed: the stored anchor is the visit before last while that stamp is missing (it failed; it is never retried), and another device's stamp moves it mid-session. |
 
 ```ts
 type FeedTab = 'following' | 'foryou'
 type FeedPostKind = 'dated' | 'window' | 'announced' | 'rumour' | 'trailer'
+                  | 'episode'   // "Episode N is out": Following only
 type FeedPostOrigin = 'research' | 'catalogue' | 'video'
 
 interface FeedTime {            // when the news happened
@@ -832,6 +973,7 @@ interface FeedTime {            // when the news happened
        | 'observed'             // when research first saw this state (no dated report)
        | 'catalogue'            // when the catalogue attached the part
        | 'published'            // the video's publish instant
+       | 'aired'                // kind 'episode': the episode's air instant (TMDB: date-only)
 }
 interface FeedPremiere { at: number; precision: 'exact' | 'date_only' }
 interface FeedWindow { release: string; releaseWindow: ReleaseWindow }   // see FranchiseUpcoming
@@ -855,7 +997,7 @@ interface FeedFranchise {       // the post's author row ("the show"), shipped o
   upcoming: FranchiseUpcoming | null
 }
 interface FeedPost {
-  id: string                    // PostId
+  id: string                    // PostId; for kind 'episode' the episode's subject `ep:<mediaId>:<n>`
   kind: FeedPostKind
   origin: FeedPostOrigin
   franchiseId: string
@@ -863,6 +1005,7 @@ interface FeedPost {
                                 // trailer (and for a delisted trailer composed by id — see Post detail)
   isMovie: boolean
   part: FeedPartRef | null
+  episode: number | null        // kind 'episode': the episode number; null for every other kind
   time: FeedTime                // never after the response's generatedAt
   discoveredAt: number          // when the app first knew this post in its current state; 0 = never "new"
   fresh: boolean                // discoveredAt > the response's prevOpenedAt
@@ -872,9 +1015,13 @@ interface FeedPost {
   video: FranchiseVideo | null  // a trailer's own video; null only on a delisted trailer composed by id
   sources: FeedSource[]         // ranked; sources[0] is the lead
   isOfficial: boolean           // sources[0].tier === 'official'
+  context: FeedPostContext | null // For you only: why the post is in THIS viewer's feed (see For you)
   viewer: { liked: boolean; saved: boolean; reminded: boolean }
   counts: { likes: number; comments: number }
 }
+type FeedPostContext =
+  | { kind: 'recommended'; reason: RecommendationReason }  // the reason of GET /me/recommendations
+  | { kind: 'taste'; genres: string[] }                    // 1–2 taxonomy genres, the viewer's strongest first
 interface FeedResponse {
   tab: FeedTab
   generatedAt: number
@@ -894,7 +1041,7 @@ interface FeedResponse {
   "franchises": [{ "id": "…", "source": "anilist", "title": "Sakamoto Days", "status": "watching", "…": "…" }],
   "posts": [{
     "id": "news:0b6c…", "kind": "window", "origin": "research", "franchiseId": "…",
-    "installment": "Season 2", "isMovie": false, "part": null,
+    "installment": "Season 2", "isMovie": false, "part": null, "episode": null,
     "time": { "at": 1789819200000, "dateOnly": true, "basis": "primary" },
     "discoveredAt": 1790300000000, "fresh": true,
     "premiere": null,
@@ -902,6 +1049,7 @@ interface FeedResponse {
     "note": "Announced at …", "video": null,
     "sources": [{ "publisher": "Netflix Tudum", "tier": "official", "url": "https://…", "publishedAt": 1789819200000, "dateOnly": true, "primary": true }],
     "isOfficial": true,
+    "context": null,
     "viewer": { "liked": false, "saved": false, "reminded": true },
     "counts": { "likes": 0, "comments": 0 }
   }],
@@ -912,7 +1060,8 @@ interface FeedResponse {
 Rules a client builds on:
 
 - **Kinds.** `dated` has a `premiere`; `window` has a `window`; `announced` is confirmed with no
-  date; `rumour` is unconfirmed (it keeps its Community Note); `trailer` has a `video`. The post's
+  date; `rumour` is unconfirmed (it keeps its Community Note); `trailer` has a `video`; `episode`
+  has an `episode` number (see **Episode posts**, below). The post's
   state is the newest research observation resolved against the catalogue exactly as Detail's
   `upcoming` is, so the feed can never say "rumoured" while the show page says "dated". A research
   result whose release is DAY-precise is `dated` (a `date_only` premiere) whatever its status called
@@ -951,7 +1100,8 @@ Rules a client builds on:
   installment falls back to the matched part's catalogue label, else there is no post; a refused
   publisher reads as the page's host; a refused release makes the post `announced`; a refused note
   is `null`. A storyline `headline` whose words carry a blocked term is `null`.
-- **`fresh` and the order.** `fresh = prevOpenedAt > 0 && discoveredAt > prevOpenedAt`. Fresh posts
+- **`fresh` and the order (Following; For you has its own order, below).**
+  `fresh = prevOpenedAt > 0 && discoveredAt > prevOpenedAt`. Fresh posts
   come first, then everything else; each block is ordered by `time.at` desc, then `id` asc (so equal
   times never flicker). The "new posts" pill counts the fresh posts, and "You're all caught up" sits
   above the first post with `fresh: false` when at least one fresh post precedes it.
@@ -959,17 +1109,107 @@ Rules a client builds on:
   or the client's own `since` when it sent one. Its "since …" label reads the RESPONSE's
   `prevOpenedAt`, so the words and the fresh block always name the same boundary.
 - **Following** is every show in the viewer's library (every status), minus muted shows and posts
-  marked "Not interested", capped at 200 posts.
-- **For you** is news about trending shows the viewer does not track: the top 150 trending
-  franchises are composed once per 10 minutes per process (independent of the viewer). Per request:
-  the viewer's anchors and hides are read; the composed posts lose the viewer's library shows, muted
-  shows and posts marked "Not interested"; the rest are ordered by `time.at` desc, then `id` asc —
-  **no fresh block, every post `fresh: false`** (nothing in For you is "new since your visit"; the
-  response still echoes `prevOpenedAt`); capped at 50 posts; then the viewer's likes/saves/reminders
-  and the global counts are attached, and every author row has `status: null`. `trending` is the
-  Trending module — the first 8 untracked, unmuted trending shows as `FranchiseSummary`, ranked.
-- **The feed never triggers research.** A trending show nobody follows may have only catalogue and
-  trailer posts, or none. A show researched before research kept observations (before 3 Sep) posts
+  marked "Not interested", capped at 200 posts. Every post has `context: null`.
+- **Episode posts ("Episode N is out") — Following only, and only for a request that sends
+  `episodes=1`** (see the query table: every other request gets no `episode` post at all). For each
+  library show whose status is
+  `watching`, `completed` or `paused` (never `planned` or `dropped`), each MAIN-STORY episodic part
+  posts its newest episode that has **aired by now**, for **7 days** after it aired — one post per
+  part, whether or not the viewer has watched it. Main-story parts are the `season` parts that are
+  not a short (`format: TV_SHORT`), not `optional`, and not a `SPIN_OFF` or `SIDE_STORY`; a show
+  with no such season posts for its main-story `ona` parts instead. "Aired by now" is the rule of
+  **Episode discussions** (a timed slot at its instant, even before the hourly sync moves the
+  catalogue on; a date-only TMDB episode from 10:00 UTC of its date), read from the part's dated
+  `airings`; a part still `NOT_YET_RELEASED` posts nothing; a same-day drop posts its highest
+  episode number. The post:
+  `id: "ep:<mediaId>:<n>"`, `kind: "episode"`, `origin: "catalogue"`, `episode: n`,
+  `installment` = the part's label, `part` = its `FeedPartRef`, `time` = the air instant with
+  `basis: "aired"` (a TMDB episode is `dateOnly: true`, carried at 12:00 UTC of its date and never
+  after `generatedAt`), `discoveredAt` = the instant it counted as aired (so it is `fresh` for a
+  viewer whose previous visit was before it), and `premiere`, `window`, `note`, `video` null,
+  `sources: []`, `isOfficial: false`. **No episode title, still or synopsis is sent** (spoilers):
+  the client writes "Episode 7 is out" from `episode` and `installment`. It is ordered like every
+  Following post (fresh block first, then `time.at`), and muted shows and hidden posts drop it like
+  any other. Its id is the episode's room, so its `counts` are that room's; see **Post ids and
+  thread subjects** for what a viewer who has not watched the episode may do with it.
+- **For you** is news about shows the viewer does not track, RANKED FOR THE VIEWER from their
+  library, and **only about shows of the viewer's Audience** (see **Audience**): for an `anime` or a
+  `tv` viewer the trending pool is that catalogue's own top 150, the recommended shows are of that
+  catalogue, and so is the `trending` module; `both` (or not chosen) is everything below unchanged.
+  The audience is read on every request, so a change shows in the next response.
+  The candidates are two sets of posts: the top 150 trending franchises, composed once per
+  10 minutes per process (independent of the viewer, one composition per catalogue scope), and the viewer's recommended shows — the
+  ranker behind `GET /me/recommendations`, asked for 40 in its reference order (no daily rotation),
+  keeping the titles that have a show page (`franchiseId != null`) and composing the ones the
+  trending set does not already carry. The viewer's part (their library and those posts) is kept
+  per user for the same 10 minutes, so a library change can take that long to move the order;
+  ownership, mutes and hides are still read on every request. Per request the candidates lose the
+  viewer's library shows, muted shows and posts marked "Not interested", then:
+  - **Discovery trailers.** Most recommended shows have no news, and a trailer is new to someone
+    who has not seen the show: each recommended show (wherever its posts come from) gets ONE
+    trailer post whatever the video's age, unless its feed already carries a trailer post (a cut
+    from the last 200 days keeps its place and its real recency). The video is the catalogue's own
+    — the franchise's featured video when it is a postable trailer, else an official cut before an
+    unmarked one, a trailer before a teaser before an announcement, the newest first; never a
+    disowned cut or a re-cut, never the live news post's own video (or one published within ten
+    days of it), and only a DATED one (an AniList-only trailer carries no publish date, so such a
+    show gets none). It is an ordinary trailer post — `kind: "trailer"`, the usual
+    `trailer:<franchiseId>:<site>:<videoId>` id (so its page, likes and saves work), `time` = the
+    video's real publish instant (`basis: "published"`), `context: { kind: "recommended", … }` —
+    and nothing on the wire marks it. In the ranking it is **evergreen**: never stale, and its
+    recency is held at 0.6 (never less than its real age would give).
+  - **Score** = `0.5 × affinity + 0.5 × recency`, highest first; ties by `time.at` desc, then
+    `id` asc. `recency` is `0.5 ^ (age in days / 45)` from `time.at`. `affinity` of a recommended
+    show is `0.7 + 0.3 × (1 − place / max(1, n − 1))`, its 0-based place among the `n` recommended
+    shows that have a post in the candidates (the ranker's first is 1, its last 0.7); of any other
+    show it is `0.6 × tasteMatch`. The weights are even on purpose: this week's news about a show in
+    the viewer's genres outranks a recommended show's year-old post. An evergreen trailer's recency
+    is `max(0.6, recency)`: news about the same show from the last ~33 days outranks its trailer.
+  - **`tasteMatch`** (0–1) reads the library's genres in the shared taxonomy (TMDB's compound
+    genres split, as the recommender does). Each library show adds a weight to its genres —
+    Watching or Watched: how much of it was watched (one cour = 1), never under 0.3; Paused 0.5;
+    Planned 0.4; Dropped 0 — and the strongest genre is scaled to 1. A show's match is the mean of
+    its (up to three) best-matching genres; a show with no genres matches 0.
+  - **Floor.** Three things leave a post out. **Stale:** `time.at` is more than 240 days before
+    `generatedAt` — a recommended show's post included (exactly 240 days is still in); an evergreen
+    trailer is exempt. **Nothing to look at:** the post has no `video`, and neither its part nor
+    its show has a sharp picture — a portrait or landscape in `artwork` that the catalogue measured
+    at 1000 px wide or more. An image with no measured width counts only when its `source` is
+    `tmdb` (the poster and backdrop a TV show is stored with before its gallery is measured); an
+    AniList cover or banner is never measured, so a show with only those needs a video. A
+    recommended show's post is held to this too. **Not to the viewer's taste:** the show is not
+    recommended and its `tasteMatch` is under 0.15 (skipped when the library's shows carry no
+    genres at all — every match is 0 then and measures nothing; the other two still apply). When
+    fewer than 20 posts fit, the best-scoring of everything left out — stale, pictureless and taste
+    misses alike — fill the feed back up to 20, so a small candidate set can still carry any of them.
+  - **Diversity.** Never two consecutive posts about the same show while a post about another
+    remains; ONE post per show within the first 20 — the whole feed, so it is 20 different shows
+    where it can be, and a recommended show appears as its news or its trailer, whichever scores
+    higher (when fewer shows than slots remain, the cap gives way before the no-repeat rule).
+  - **`context`** says why: `{ kind: 'recommended', reason }` on a recommended show's posts — the
+    same `RecommendationReason` as `GET /me/recommendations`, worded by the same table;
+    `{ kind: 'taste', genres }` on any other post whose `tasteMatch` ≥ 0.6 — the one or two of the
+    show's genres the viewer has, their strongest first (taxonomy names: "Sci-Fi", "Action");
+    `null` otherwise. The bar is high so the line means something: a show needs to sit squarely in
+    the viewer's genres (one matching genre out of two is 0.5 at best, and carries no context). A
+    post the refill brought back keeps whatever context it earned (a stale recommended post still
+    says `recommended`). A client that predates the field ignores it.
+  - **A library that says nothing** (empty, only dropped shows, or the viewer's part failed to
+    load — the route never fails for it) gets the feed as it was before it was personal: every
+    remaining post by `time.at` desc, then `id` asc, `context: null`, no floor (no age limit and
+    no picture test either), no diversity pass, no discovery trailers.
+
+  In every case there is **no fresh block and every post is `fresh: false`** (nothing in For you is
+  "new since your visit"; the response still echoes `prevOpenedAt`); the list is capped at **20
+  posts**; there are no episode posts (a For you show is not in the library); then the viewer's
+  likes/saves/reminders and the global counts are attached, and every
+  author row has `status: null`. `trending` is the Trending module — the first 8 untracked, unmuted
+  trending shows as `FranchiseSummary`, ranked (unchanged, and not personal).
+- **The feed never triggers research — nor a show page.** For you reads the recommender through
+  its loader and ranker only: a recommended title with no show page yet is not queued for one (that
+  is `GET /me/recommendations`' job) and simply has no posts. A trending or recommended show nobody
+  follows may have only catalogue and trailer posts, or none (most recommended shows have no news at
+  all). A show researched before research kept observations (before 3 Sep) posts
   from its stored `upcoming` when an announcement row names the same installment — the same
   `news:<announcement id>` post, dated at that announcement's first sighting until research sees it
   again.
@@ -978,8 +1218,8 @@ Rules a client builds on:
 
 ## Post detail, Saved, Reminders
 
-`GET /feed/posts/:id` (`:id` a PostId; colons are fine in a path segment, and percent-encoding is
-accepted):
+`GET /feed/posts/:id` (`:id` a PostId or an episode post's `ep:<mediaId>:<n>`; colons are fine in a
+path segment, and percent-encoding is accepted):
 
 ```ts
 interface FeedPostDetailResponse {
@@ -1012,12 +1252,25 @@ interface StoryBeat {
   comment, a save or a reminder on it: a bare post — `video: null`, `installment: ''`,
   `part: null`, `sources: []`, `isOfficial: false`, `discoveredAt: 0`, `time` = the thread's first
   activity (`basis: 'observed'`), `live: false`. Nobody holding a row on it → `404`.
+- An `ep:<mediaId>:<n>` post composes for ANY part of a franchise and any episode that has aired
+  (`404` before it airs, or when no franchise holds the part) — with no opt-in: only a client that
+  knows the kind asks for one. While the part's dated `airings`
+  still carry the episode (about 8 days back) it is the feed's post, dated `basis: "aired"`; `live`
+  is true exactly while the caller's Following (asked with `episodes=1`) carries it (their status
+  posts episodes, the part is main-story, the episode is its newest and aired within 7 days). An
+  older episode's air instant is
+  no longer in the payload: like a delisted trailer it composes only while someone holds a like, a
+  live comment or a save on it, dated at the thread's first activity (`basis: "observed"`),
+  `discoveredAt: 0`, `live: false`; nobody holding a row → `404`. `storyline` and `threadSources`
+  are `[]`. The thread under it is the episode's room, gated as ever.
 - **Alias:** asking for `catalog:<mediaId>` when an announcement already matches that part answers
   the `news:<id>` post. Always adopt `post.id` from the response.
+- `post.context` is always `null` here, and in Saved and Reminders: the reason a post was in For
+  you belongs to that feed's response.
 - A post the viewer hid is still served (they followed a link to it). `404 {"error":"post not found"}`
   when the post cannot be composed (an unknown id, a part or show the catalogue no longer has, a
-  delisted trailer nobody holds a row on); `400` for an id that is not a PostId (an `ep:` subject
-  included).
+  delisted trailer nobody holds a row on, an episode that has not aired); `400` for an id that is
+  none of the four grammars.
 
 `GET /me/saved` and `GET /me/reminders` list the viewer's saves and reminders newest first:
 
@@ -1028,8 +1281,8 @@ interface RemindersResponse { items: { postId: string; remindedAt: number; post:
 
 `post: null` means the post can no longer be composed (for example a catalogue post whose part the
 catalogue no longer lists). Show a quiet "no longer available" row, or drop it. A saved or reminded
-post whose installment has since premiered, or a saved trailer since delisted, is still composed
-(`FeedPost` as above) — the viewer's own row keeps a delisted trailer reachable.
+post whose installment has since premiered, a saved trailer since delisted, or a saved episode post
+from weeks ago, is still composed (`FeedPost` as above) — the viewer's own row keeps it reachable.
 
 **Reminders.** A post with a `premiere` is scheduled LOCALLY by the client (anime at the air
 minute, a TMDB date-only premiere at 9 AM local on its date). An undated post (`window`,
@@ -1048,10 +1301,10 @@ once an announcement names the part they are stored under `news:<id>`, and a `DE
 
 | Toggle | Body | Notes |
 |---|---|---|
-| `/me/likes` | `{ subject: ThreadSubject }` | A post or an episode room. An `ep:` like needs the room open (`409 episode_locked`). |
-| `/me/saves` | `{ postId: PostId }` | Listed by `GET /me/saved`. |
+| `/me/likes` | `{ subject: ThreadSubject }` | A post or an episode. An `ep:` like needs the episode to have AIRED (`409 episode_locked`, `reason: "unaired"`) — not watched: the subject is also the "Episode N is out" post, and a like shows nothing of the room. |
+| `/me/saves` | `{ postId: PostId \| "ep:<mediaId>:<n>" }` | Listed by `GET /me/saved`. An episode post can be saved once the episode has aired (`404 post not found` before). |
 | `/me/reminders` | `{ postId: PostId }` | Listed by `GET /me/reminders`. A dated post's reminder is also a LOCAL notification the app schedules. The server notifies on research news: a reminder on `news:<A>` hears that announcement, and a reminder on any `trailer:`/`catalog:` post hears every announcement for its show (see **News rows**). |
-| `/me/hides` | `{ kind: "post", target: PostId }` or `{ kind: "show", target: franchiseId }` | "Not interested" / "Mute <show>". `GET /me/hides` lists them newest first (`franchise` set for `show`). |
+| `/me/hides` | `{ kind: "post", target: PostId \| "ep:<mediaId>:<n>" }` or `{ kind: "show", target: franchiseId }` | "Not interested" / "Mute <show>". `GET /me/hides` lists them newest first (`franchise` set for `show`). An episode post can be hidden once the episode has aired. |
 | `/me/ratings` | `PUT { mediaId, episode, score: 0…100 }`, `DELETE { mediaId, episode }` | The emoji slider; one rating per (user, episode), re-rating replaces it. Needs the room open. |
 | `/me/blocks` | `{ userId }` | `400 {"error":"self_block"}` for yourself; `404 user not found` for an account with no handle. `GET /me/blocks` lists them newest first. While comments are off, `PUT` answers `404 comments disabled` (nobody is shown to block); `GET` and `DELETE` always work. |
 
@@ -1209,9 +1462,12 @@ An episode room `ep:<mediaId>:<n>` is **open** to a viewer only when BOTH hold:
 
 Otherwise it is `unaired` (checked first) or `unwatched`. A locked room still answers
 `GET /social/comments` — `locked: true`, `items: []` and the room's global `total`, which drives
-"Mark it watched to join N comments" — and refuses posts, likes and ratings with
+"Mark it watched to join N comments" — and refuses posts, comment likes and ratings with
 `409 episode_locked` + `reason`. On `unwatched`, a client first replays the part's pending progress
-write, then retries once.
+write, then retries once. **The one thing an `unwatched` room allows is a like on the episode
+itself** (`PUT /me/likes { subject: "ep:…" }`): the subject is also Following's "Episode N is out"
+post, which the viewer sees before watching, and a like reveals nothing. An `unaired` episode
+cannot be liked.
 
 **Aired by now** is computed from the part's airing slots, the same rule that clamps progress:
 
@@ -1297,10 +1553,11 @@ A canonical genre vocabulary over both catalogues (an AniList genre and its TMDB
 key; TMDB's combined genres such as "Action & Adventure" and "Sci-Fi & Fantasy" feed both halves).
 Adult titles are never listed, and Ecchi, Hentai, News, Soap and Talk are not genres here.
 
-- `GET /discover/genres?source=anilist|tmdb` (absent = both) → `DiscoverGenresResponse`: every genre
+- `GET /discover/genres?source=anilist|tmdb` (absent = the viewer's **Audience**: one catalogue for
+  an `anime` or `tv` viewer, both otherwise; the response's `source` says which) → `DiscoverGenresResponse`: every genre
   with at least 3 qualifying franchises, most titles first (then by key). `posters` are up to four
   portrait URLs of the genre's top trending titles, for the tile's collage. Cached ~30 minutes.
-- `GET /discover/genres/:key?source=&limit=24&cursor=` (limit 1…50) → `DiscoverGenrePage`: the
+- `GET /discover/genres/:key?source=&limit=24&cursor=` (limit 1…50; `source` defaults the same way) → `DiscoverGenrePage`: the
   genre's franchises ranked by trending, then popularity. **Owned titles are marked, not excluded**:
   `FranchiseSummary.status` is set for a show in the viewer's library. The cursor is opaque; the
   ranking moves hourly, so dedupe by id across pages. Unknown key → `404 genre not found`.
@@ -1322,7 +1579,9 @@ Genre names are catalogue data (English), as the franchise's own `genres` carry 
 The client computes views exactly like the old app, but per **releasing part**:
 
 - **episodesBehind(part)** = `isReleasing ? max(0, airedEpisodes - progress) : 0`.
-- **availableEpisodes(part)** = `0` when `status == "NOT_YET_RELEASED"`, else `airedEpisodes || totalEpisodes`.
+- **availableEpisodes(part)** = `0` when `status == "NOT_YET_RELEASED"`, `airedEpisodes` while
+  releasing, otherwise `airedEpisodes || totalEpisodes`. A releasing part with no dated episodes
+  or next slot reports zero verified aired episodes; the planned total is not evidence of availability.
   Announced parts must never contribute to a "keep watching" backlog.
 - **premiereAt(part)** = `nextAiringAt` while `status == "NOT_YET_RELEASED"` — both sources put a
   dated announced part's premiere in that slot. `null` there means the date is genuinely unknown

@@ -285,13 +285,13 @@ describe('tmdbSeasonToMediaRow', () => {
     expect(row.lastAiredAt).toBeNull()
   })
 
-  it('takes lastAiredAt from last_episode_to_air for its season, else the season premiere', () => {
+  it('uses an actual last episode date, never the season premiere as its finale', () => {
     const s = show({
       next_episode_to_air: { air_date: '2026-07-10', episode_number: 5, season_number: 2 },
       last_episode_to_air: { air_date: '2026-07-03', episode_number: 4, season_number: 2 },
     })
     expect(tmdbSeasonToMediaRow(s, season(2), NOW).lastAiredAt).toBe(Date.UTC(2026, 6, 3, 17))
-    expect(tmdbSeasonToMediaRow(s, season(1), NOW).lastAiredAt).toBe(airDateToMs(season(1).air_date))
+    expect(tmdbSeasonToMediaRow(s, season(1), NOW).lastAiredAt).toBeNull()
   })
 
   it('falls back to the show poster when a season has none', () => {
@@ -482,19 +482,14 @@ describe('tmdbShowUpcoming', () => {
     })
   })
 
-  it('uses the provider returning status when the next season has no catalogue row yet', () => {
+  it('does not invent a numbered season from the generic returning status', () => {
     const s = show({
       id: 87_826,
       status: 'Returning Series',
       seasons: [season(8), season(9)],
       last_episode_to_air: { air_date: '2025-10-29', episode_number: 11, season_number: 9 },
     })
-    expect(tmdbShowUpcoming(s, NOW)).toMatchObject({
-      status: 'announced_no_date',
-      next: 'Season 10',
-      release: 'TBA',
-      source: 'https://www.themoviedb.org/tv/87826',
-    })
+    expect(tmdbShowUpcoming(s, NOW)).toBeNull()
   })
 
   it('does not invent another season for an ended or currently releasing show', () => {

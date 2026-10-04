@@ -1,0 +1,45 @@
+{
+  "changes": [
+    {
+      "id": 1000521025,
+      "before": "FINISHED",
+      "after": "RELEASING",
+      "title": "Totally Spies!",
+      "fetchedAt": "2026-09-12 23:00:12.945+05:30"
+    }
+  ],
+  "beforeLabels": [
+    {
+      "media_id": 216346,
+      "franchise_id": "1644f87d-94f9-4282-908c-86505eff3e8e",
+      "part_kind": "season",
+      "sequence": 1,
+      "label": "Season 1",
+      "added_at": "2026-09-04 03:30:09.434727+05:30",
+      "watch_order": 2,
+      "relationship": "SEQUEL",
+      "optional": false
+    },
+    {
+      "media_id": 213702,
+      "franchise_id": "ade7b360-aafd-4f8c-89b0-e3d7418c0537",
+      "part_kind": "season",
+      "sequence": 1,
+      "label": "Season 1",
+      "added_at": "2026-06-30 03:30:03.225862+05:30",
+      "watch_order": 2,
+      "relationship": "SEQUEL",
+      "optional": false
+    }
+  ],
+  "labels": [
+    {
+      "id": 213702,
+      "label": "Season 2"
+    },
+    {
+      "id": 216346,
+      "label": "Nippon Sangoku (Zoku-hen)"
+    }
+  ]
+}

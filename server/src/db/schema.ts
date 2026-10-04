@@ -192,6 +192,42 @@ export const progress = pgTable(
   (t) => [primaryKey({ columns: [t.userId, t.mediaId] })],
 )
 
+// One watch of a franchise — the implicit first one, or a rewatch — so "Watched twice" and where a
+// stopped rewatch puts the show back survive a new phone (device-local until 2 Oct 2026). `id` is
+// CLIENT-generated: the upsert key that makes a replayed PUT safe. A deleted session is a TOMBSTONE
+// (`deleted_at`), so a late replay from another device cannot bring it back. Times are the client's
+// ms epochs; `completed_at = 0` is its "finished, date unknown" (the implicit first watch). User
+// data — erased with the account (DELETE /me) and returned by GET /me/export.
+export const watchSessions = pgTable(
+  'watch_sessions',
+  {
+    id: uuid('id').primaryKey(),
+    userId: uuid('user_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    franchiseId: uuid('franchise_id')
+      .notNull()
+      .references(() => franchise.id, { onDelete: 'cascade' }),
+    /** null = the whole franchise; else the one part (media id) the session covers. */
+    scopeMediaId: integer('scope_media_id'),
+    /** 1 = first watch, 2 = second, … */
+    ordinal: integer('ordinal').notNull(),
+    startedAt: bigint('started_at', { mode: 'number' }),
+    completedAt: bigint('completed_at', { mode: 'number' }),
+    cancelledAt: bigint('cancelled_at', { mode: 'number' }),
+    cancelledAtEpisode: integer('cancelled_at_episode'),
+    /** Episodes the session covers; 0 when unknown. */
+    episodes: integer('episodes').notNull().default(0),
+    /** Where the show stood before the rewatch zeroed it (media id → episodes), for "Stop rewatch". */
+    restoreProgress: jsonb('restore_progress').$type<Record<string, number>>(),
+    restoreStatus: text('restore_status'),
+    createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
+    deletedAt: timestamp('deleted_at', { withTimezone: true }),
+  },
+  (t) => [index('watch_sessions_user_idx').on(t.userId, t.franchiseId)],
+)
+
 /** Durable, inspectable identity bridges between one canonical franchise and external catalogues. */
 export const catalogLinks = pgTable(
   'catalog_links',
@@ -226,6 +262,21 @@ export const userPreferences = pgTable('user_preferences', {
   country: text('country'),
   language: text('language').notNull().default('en'),
   providerIds: jsonb('provider_ids').$type<number[]>().notNull().default([]),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
+})
+
+// The viewer's audience (Anime / TV / Both — `Audience`, services/audience.ts): which catalogue the
+// server suggests titles from. Its OWN table, not a column on user_preferences: the API is served
+// from the working tree, so code can run before its migration has, and a missing column would fail
+// every read and upsert of user_preferences on every existing route — a missing table fails only
+// the audience's own tolerant read. No row = not chosen yet. User data: erased with the account
+// (DELETE /me) and returned by GET /me/export.
+export const userAudience = pgTable('user_audience', {
+  userId: uuid('user_id')
+    .primaryKey()
+    .references(() => users.id, { onDelete: 'cascade' }),
+  /** 'anime' | 'tv' | 'both' */
+  audience: text('audience').notNull(),
   updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
 })
 

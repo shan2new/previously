@@ -11,6 +11,8 @@ struct RootView: View {
     @State private var launchDone = false
     /// The app has started emerging beneath the splash.
     @State private var emerged = false
+    /// The sign-in gate has been on screen this run: whoever is signed in now arrived through it.
+    @State private var sawGate = false
 
     var body: some View {
         ZStack {
@@ -22,12 +24,15 @@ struct RootView: View {
             // for the price of two layers. Under Reduce Motion nothing scales.
             Group {
                 if auth.isSignedIn {
-                    MainTabView()
+                    SignedInRoot(fromGate: sawGate)
                         .task(id: auth.isSignedIn) { appModel.start() }
                         .transition(.opacity.animation(ThemeMotion.uiGentle))
                 } else {
                     SignInView()
                         .transition(.opacity.animation(ThemeMotion.uiGentle))
+                        // Seen for real — after auth has answered that nobody is signed in — not
+                        // the frame it holds under the launch while a session is being restored.
+                        .task(id: auth.bootstrapped) { if auth.bootstrapped { sawGate = true } }
                 }
             }
             // No scale on the whole tree (review i5): 0.96 → 1 on `uiSettle` was a full-screen
@@ -86,6 +91,52 @@ struct RootView: View {
         }
     }
 
+}
+
+/// Signed in: the app — or, for a NEW account, first run in its place (`AppModel+FirstRun.swift`).
+///
+/// Three states, never an empty Home that turns into a questionnaire a moment later: while it is
+/// not yet known whether the account is new, the brand holds (`FirstRunHold`, where the launch
+/// left the mark); a new account gets the flow; everyone else the tabs. When the flow reaches its
+/// last screen the tabs are built BENEATH it — Home composed from the shows just placed, its
+/// billboard's picture on its way — so "Go to Home" lifts the flow off a page that is already
+/// there, as the launch lifts off the app.
+private struct SignedInRoot: View {
+    /// The viewer signed in a moment ago (the gate was up): the hold is the gate's own picture.
+    var fromGate = false
+
+    @Environment(AppModel.self) private var appModel
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    /// The flow is on its last screen: Home may be built under it.
+    @State private var homeUnderneath = false
+
+    /// A suspended account is never asked questions: the tabs carry its suspension screen.
+    private var phase: FirstRunPhase { appModel.accountSuspended ? .done : appModel.firstRun }
+
+    var body: some View {
+        ZStack {
+            if phase == .done || (phase == .due && homeUnderneath) {
+                MainTabView()
+                    .accessibilityHidden(phase != .done)
+            }
+            if phase == .checking {
+                FirstRunHold(fromGate: fromGate)
+                    .transition(.opacity)
+                    .zIndex(1)
+            }
+            if phase == .due {
+                FirstRunFlow(appModel: appModel, entry: .account,
+                             onLineup: { homeUnderneath = true },
+                             onFinished: { appModel.finishFirstRun() })
+                    .transition(.opacity)
+                    .zIndex(2)
+            }
+        }
+        .animation(ThemeMotion.pick(.easeInOut(duration: 0.38), reduceMotion: reduceMotion), value: phase)
+        .onChange(of: phase) { _, phase in
+            if phase != .due { homeUnderneath = false }
+        }
+    }
 }
 
 // The five tabs: Home (what to watch now), Schedule, the Feed, Library, Discover.
@@ -166,6 +217,14 @@ struct MainTabView: View {
     /// Discover's Explore header, the same (25 Sep: "Discover also needs the scroll treatment like
     /// in Today", owner).
     @State private var discoverChrome = DiscoverChromeState()
+    /// Schedule's and Library's bars (`RootChromeState`, 4 Oct): their own rows now, leaving with
+    /// the scroll as the feed's does, the tab bar riding them.
+    @State private var scheduleChrome = RootChromeState()
+    @State private var libraryChrome = RootChromeState()
+    /// Home's bar over its billboard (`HomeChrome`): it leaves with the scroll too.
+    @State private var homeChrome = HomeChrome()
+    /// "Pick your shows" — the empty Home's button: first run's picker, on its own.
+    @State private var pickingShows = false
     /// The transition namespace every card registers its artwork in (`zoomSource(_:)`).
     ///
     /// Nothing consumes it today: Detail is a push again (see `detailDestinations` for the
@@ -229,11 +288,30 @@ struct MainTabView: View {
         selectedTab == .discover && (paths[.discover] ?? NavigationPath()).isEmpty
     }
 
-    /// The header the bar rides: the feed's or Discover's, whichever is in front; else none.
+    /// The header the bar rides: the root in front's own (every tab has one since 4 Oct); none
+    /// on a pushed page, which keeps the bar.
     private var scrollingHeader: (any ScrollAwayChrome)? {
-        if feedInFront { return feedChrome }
-        if discoverInFront { return discoverChrome }
-        return nil
+        guard (paths[selectedTab] ?? NavigationPath()).isEmpty else { return nil }
+        return rootChrome(selectedTab)
+    }
+
+    /// The first-run question is due and there is a place to ask it.
+    private var audienceQuestion: Binding<Bool> {
+        Binding(get: { appModel.audiencePromptDue && !appModel.accountSuspended && (launch?.finished ?? true) },
+                set: { if !$0 { appModel.audiencePromptDue = false } })
+    }
+
+    /// How deep the tab in front has pushed.
+    private var frontDepth: Int { paths[selectedTab]?.count ?? 0 }
+
+    private func rootChrome(_ tab: AppTab) -> any ScrollAwayChrome {
+        switch tab {
+        case .home: return homeChrome
+        case .schedule: return scheduleChrome
+        case .today: return feedChrome
+        case .library: return libraryChrome
+        case .discover: return discoverChrome
+        }
     }
 
     /// Re-selecting the active tab pops it to its root (system behaviour, made explicit).
@@ -244,12 +322,11 @@ struct MainTabView: View {
                 if tab == .library { libraryPops += 1 }
                 if tab == .today { todayPops += 1 }
                 if tab == .home { homePops += 1 }
-                if tab == .discover { discoverChrome.reveal() }
+                rootChrome(tab).reveal()
             } else {
-                // Arriving on the feed, the bar that was just tapped does not slide away under the
+                // Arriving on a tab, the bar that was just tapped does not slide away under the
                 // finger: the header (which the bar rides) comes back first.
-                if tab == .today { feedChrome.reveal() }
-                if tab == .discover { discoverChrome.reveal() }
+                rootChrome(tab).reveal()
                 selectedTab = tab
             }
         })
@@ -274,8 +351,10 @@ struct MainTabView: View {
                                      appModel.searchFieldRequested = true
                                      selectedTab = .discover
                                  },
+                                 onPickShows: { pickingShows = true },
                                  topSignal: homePops,
-                                 dismissSignal: feedDismissals)
+                                 dismissSignal: feedDismissals,
+                                 chrome: homeChrome)
                             .detailDestinations(push: { push(.home, $0) })
                             .perfScreen("Home")
                             .tabBarReserve()
@@ -289,7 +368,8 @@ struct MainTabView: View {
                     NavigationStack(path: path(.schedule)) {
                         ScheduleView(onOpenDetail: openEpisode,
                                      onAddShow: { appModel.searchFieldRequested = true; selectedTab = .discover },
-                                     active: selectedTab == .schedule && appModel.surfaceReady)
+                                     active: selectedTab == .schedule && appModel.surfaceReady,
+                                     rootChrome: scheduleChrome)
                             .detailDestinations(push: { push(.schedule, $0) })
                             .perfScreen("Schedule")
                             .tabBarReserve()
@@ -334,7 +414,8 @@ struct MainTabView: View {
                         LibraryView(onOpenDetail: openDetail,
                                     onAddShow: { appModel.searchFieldRequested = true; selectedTab = .discover },
                                     requestedAll: $libraryRequest,
-                                    popSignal: libraryPops)
+                                    popSignal: libraryPops,
+                                    chrome: libraryChrome)
                             .detailDestinations(push: { push(.library, $0) })
                             .perfScreen("Library")
                             .tabBarReserve()
@@ -366,8 +447,9 @@ struct MainTabView: View {
             .environment(\.zoomNamespace, zoom)
             // Back on the feed from a page pushed on it: the header — and the bar with it — are
             // there to meet the reader, not left wherever the feed's scroll had put them.
-            .onChange(of: paths[.today]?.count ?? 0) { _, _ in feedChrome.reveal() }
-            .onChange(of: paths[.discover]?.count ?? 0) { _, _ in discoverChrome.reveal() }
+            // A push or a pop on the tab in front brings its root's bars back: a pushed page keeps
+            // the tab bar, and a root is returned to with its header in place.
+            .onChange(of: frontDepth) { _, _ in rootChrome(selectedTab).reveal() }
             // No haptic on a tab switch (review, 5 Sep): Music, TV and the App Store are silent
             // on the most frequent gesture in the app; a haptic is a signature for a WRITE.
             // A tapped episode alert opens its show — on Today, above whatever was there.
@@ -403,10 +485,10 @@ struct MainTabView: View {
                     }
                 }
             }
-            // Back online: the social words queued while offline (likes, saves, reminders, hides)
-            // and the replies waiting to send go now.
+            // Back online: the social words queued while offline (likes, saves, reminders, hides),
+            // the replies waiting to send and the rewatch history's changes go now.
             .onChange(of: SyncCenter.shared.isOnline) { _, online in
-                if online { appModel.flushSocial() }
+                if online { appModel.flushSocial(); appModel.flushWatchSessions() }
             }
             .task {
                 KeyboardMotion.install()
@@ -471,6 +553,15 @@ struct MainTabView: View {
             }
         }
         .animation(ThemeMotion.uiGentle, value: appModel.accountSuspended)
+        // "What do you watch?" — asked once per account, when the app has emerged and the account
+        // has no answer (`AppModel.syncAudience`). Not over a suspension, and not under the launch.
+        .sheet(isPresented: audienceQuestion) {
+            AudienceChooser(mode: .firstRun, onDone: { appModel.audiencePromptDue = false })
+        }
+        .fullScreenCover(isPresented: $pickingShows) {
+            FirstRunFlow(appModel: appModel, entry: .shows, onFinished: { pickingShows = false })
+                .environment(appModel)
+        }
         // The text-input stack, loaded while the person is still reading Today (`KeyboardWarmup`):
         // only if they have not moved on — a tab switched or a page pushed means the moment has
         // passed, and the first field will pay for itself.

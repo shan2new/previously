@@ -193,6 +193,12 @@ export interface RankOptions {
    * printed). The API always rotates.
    */
   rotation?: boolean
+  /**
+   * The viewer's audience as a catalogue (services/audience.ts): only titles of this source are
+   * candidates. Applied BEFORE selection, so a filtered list is still as full as the library
+   * allows. null / absent = both catalogues, with the TV quota — today's list.
+   */
+  source?: MediaSource | null
 }
 
 // ---------------------------------------------------------------- output
@@ -237,8 +243,11 @@ export interface RankResult {
     candidates: number
     /** Edges dropped by the hard filters, by class (owned, twin, format, unreleased, …). */
     excludedEdges: Record<string, number>
-    /** Whole candidates dropped: no show the user values votes for them (e.g. only a dropped one), or feedback. */
-    excludedCandidates: { unsupported: number; feedback: number }
+    /**
+     * Whole candidates dropped: no show the user values votes for them (e.g. only a dropped one),
+     * feedback, or — when the ranking is scoped to one catalogue — a title of the other one.
+     */
+    excludedCandidates: { unsupported: number; feedback: number; audience: number }
     tvShare: number
     tvQuota: number
     penalisedSeeds: string[]
@@ -793,7 +802,7 @@ export function rankRecommendations(input: RankInput, options: RankOptions): Ran
     stats: {
       candidates: 0,
       excludedEdges: {},
-      excludedCandidates: { unsupported: 0, feedback: 0 },
+      excludedCandidates: { unsupported: 0, feedback: 0, audience: 0 },
       tvShare: 0,
       tvQuota: 0,
       penalisedSeeds: [],
@@ -825,12 +834,19 @@ export function rankRecommendations(input: RankInput, options: RankOptions): Ran
     }
     if (penalised.length > 0) built = buildCandidates(input, affinity, ctx)
   }
-  const candidates = built.candidates.filter((c) => {
+  const unblocked = built.candidates.filter((c) => {
     for (const id of identities(c)) if (blocked.has(id)) return false
     return true
   })
+  // The audience: one catalogue's titles only. Here, before the quota and the selection, so the
+  // list fills up from what is left instead of being cut short after the fact.
+  const candidates = options.source ? unblocked.filter((c) => c.source === options.source) : unblocked
   const excludedEdges = built.excluded
-  const excludedCandidates = { unsupported: built.unsupported, feedback: built.candidates.length - candidates.length }
+  const excludedCandidates = {
+    unsupported: built.unsupported,
+    feedback: built.candidates.length - unblocked.length,
+    audience: unblocked.length - candidates.length,
+  }
 
   let affAll = 0
   let affTv = 0

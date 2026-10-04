@@ -38,3 +38,6 @@ icon/genres/sheet-*.png
 design/app-icon-splitflap/renders/
 design/app-icon-splitflap/handover.png
 design/app-icon-splitflap/src/*.png
+
+# First-run scratch server log (design/onboarding-2026-10-04/run-first-run.sh)
+design/onboarding-2026-10-04/*.local.log

@@ -402,11 +402,20 @@ export interface FranchiseListResponse {
   sources?: { anilist: SourceOutcome; tmdb: SourceOutcome }
 }
 
+/**
+ * Which catalogue the server SUGGESTS titles from for a viewer: anime (AniList), TV (TMDB) or both.
+ * It governs everything the viewer did not ask for by name — For you, recommendations, trending,
+ * genre browsing, and search with no explicit `source` — and never their own library.
+ */
+export type Audience = 'anime' | 'tv' | 'both'
+
 export interface UserPreferences {
   country: string | null
   language: string
   providerIds: number[]
   updatedAt: string | null
+  /** null = the viewer has not chosen yet; the server treats null as 'both'. */
+  audience: Audience | null
 }
 
 /**
@@ -462,6 +471,39 @@ export interface RecommendationsResponse {
 }
 
 export type RecommendationFeedbackKind = 'dismissed' | 'seen'
+
+/**
+ * One watch of a franchise (`/me/watch-sessions`): the implicit first watch or a rewatch. The
+ * client generates `id` and owns every field; the server stores what it is sent. Times are ms
+ * epochs; `completedAt: 0` means "finished, date unknown" (the implicit first watch).
+ */
+export interface WatchSessionBody {
+  franchiseId: string
+  /** null = the whole franchise; else the one part (media id) the session covers. */
+  scopeMediaId: number | null
+  /** 1 = first watch, 2 = second, … */
+  ordinal: number
+  startedAt: number | null
+  completedAt: number | null
+  cancelledAt: number | null
+  cancelledAtEpisode: number | null
+  /** Episodes the session covers; 0 when unknown. */
+  episodes: number
+  /** Where the show stood before the rewatch (media id → episodes), so stopping it can restore. */
+  restoreProgress: Record<string, number> | null
+  restoreStatus: WatchStatus | null
+}
+
+export interface WatchSession extends WatchSessionBody {
+  id: string
+  /** ms epoch of the last write the server accepted. */
+  updatedAt: number
+}
+
+/** `GET /me/watch-sessions`. Live sessions only (no tombstones), ordered by franchise then ordinal. */
+export interface WatchSessionsResponse {
+  sessions: WatchSession[]
+}
 
 export interface AnnouncementObservationView {
   id: string
@@ -571,7 +613,8 @@ export interface NotificationsPage {
 // ---------- Today feed (GET /me/feed, /feed/posts/:id, /me/saved, /me/reminders) ----------
 
 export type FeedTab = 'following' | 'foryou'
-export type FeedPostKind = 'dated' | 'window' | 'announced' | 'rumour' | 'trailer'
+/** `episode` = "Episode N is out": Following only, one per main-story part, for a week after it airs. */
+export type FeedPostKind = 'dated' | 'window' | 'announced' | 'rumour' | 'trailer' | 'episode'
 export type FeedPostOrigin = 'research' | 'catalogue' | 'video'
 
 /** When the news happened. A date-only fact is carried at 12:00 UTC of its day (dateOnly: true). */
@@ -580,8 +623,9 @@ export interface FeedTime {
   dateOnly: boolean
   /** primary = the original announcement's date; first_report = earliest report in the 120-day
    *  cluster; observed = when research first saw this state; catalogue = when the catalogue
-   *  attached the part; published = the video's publish instant. */
-  basis: 'primary' | 'first_report' | 'observed' | 'catalogue' | 'published'
+   *  attached the part; published = the video's publish instant; aired = the episode's air instant
+   *  (kind 'episode'; a TMDB episode is date-only). */
+  basis: 'primary' | 'first_report' | 'observed' | 'catalogue' | 'published' | 'aired'
 }
 
 export interface FeedPremiere {
@@ -648,8 +692,16 @@ export interface FeedCapabilities {
   comments: boolean
 }
 
+/** Why a For you post is in THIS viewer's feed; null on Following and where no reason is known. */
+export type FeedPostContext =
+  | { kind: 'recommended'; reason: RecommendationReason }
+  | { kind: 'taste'; genres: string[] } // 1–2 taxonomy genres, the viewer's strongest first
+
 export interface FeedPost {
-  /** PostId: `news:<announcement uuid>` | `catalog:<media id>` | `trailer:<franchise uuid>:<site>:<video id>`. */
+  /**
+   * PostId: `news:<announcement uuid>` | `catalog:<media id>` | `trailer:<franchise uuid>:<site>:<video id>`,
+   * or — kind 'episode' only — the episode's own thread subject `ep:<media id>:<episode>`.
+   */
   id: string
   kind: FeedPostKind
   origin: FeedPostOrigin
@@ -658,6 +710,8 @@ export interface FeedPost {
   installment: string
   isMovie: boolean
   part: FeedPartRef | null
+  /** The episode number, for kind 'episode' only; null for every other kind. */
+  episode: number | null
   time: FeedTime
   /** When the app first knew this post in its current state (ms). "New" compares this, never `time`. */
   discoveredAt: number
@@ -674,6 +728,8 @@ export interface FeedPost {
   sources: FeedSource[]
   /** True only when sources[0].tier === 'official': the ONLY condition for the gold check. */
   isOfficial: boolean
+  /** For you only (feed/forYou.ts); null on Following, the post page, Saved and Reminders. */
+  context: FeedPostContext | null
   viewer: FeedViewerState
   counts: FeedCounts
 }
@@ -900,6 +956,8 @@ export interface AccountExport {
     progress: { mediaId: number; episodes: number; updatedAt: number }[]
     preferences: UserPreferences | null
     recommendationFeedback: { key: string; kind: string; createdAt: number }[]
+    /** Every session the server holds, deleted ones included as the tombstones they are. */
+    watchSessions: (WatchSession & { deletedAt: number | null })[]
   }
   social: {
     comments: {

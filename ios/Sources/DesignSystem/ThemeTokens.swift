@@ -26,8 +26,10 @@ enum ThemeColor {
     // which is why every container still needed an outline to exist.
     static let surfaceFlat = Color(hex: 0x171719)
     static let surfaceRaised = Color(hex: 0x242428)
-    static let surfaceFloating = Color(hex: 0x2A2D36)
-    static let surfacePressed = Color(hex: 0x353842)
+    /// Graphite, the board's own (`FlapGeometry`): these two were a cool blue-grey (#2A2D36,
+    /// #353842) beside neutral plates and warm ink — a second temperature in one ramp (4 Oct).
+    static let surfaceFloating = Color(hex: 0x2C2B32)
+    static let surfacePressed = Color(hex: 0x38373F)
     // Text
     static let textPrimary = Color(hex: 0xF4F1EC)
     static let textSecondary = Color(hex: 0xAAA6A0)
@@ -44,6 +46,13 @@ enum ThemeColor {
     /// not amber (amber is a fact or a state) and it is not an action colour: it is the name's.
     static let brandPeriod = Color(hex: 0xF0563F)
     static let accentPressed = Color(hex: 0xD88D3B)
+    /// The accent as a LIT MATERIAL (4 Oct: "the selection ring doesn't feel as premium… improve
+    /// the design system and colours everywhere", owner). Flat #F0A24E across a capsule or round a
+    /// card is a swatch of orange; the same hue lit from above — a bright crown, a shaded foot — is
+    /// an object. These two are the ends of that light (`ThemeGradient`); `accent` stays the hue
+    /// every flat use reads (a word, a 2-pt bar, a tag).
+    static let accentHigh = Color(hex: 0xFFC27A)
+    static let accentDeep = Color(hex: 0xE2852E)
     /// NEWS red — "NEW EPISODE", "NEW SEASON", "NEW SERIES", the episode list's NEW tag and the
     /// Activity bell's unread dot (`ThemeColor.unreadDot`, FeedTokens.swift — the same "something
     /// new"), and nothing else (24 Sep, owner: "New Episode is not standing out properly despite the shimmer
@@ -146,6 +155,48 @@ enum ThemeColor {
     /// The light along the top edge of a filled control (the accent capsule, a chip). An orange
     /// rectangle is a swatch; an orange rectangle with a lit top edge is an object.
     static let controlSheen = Color.white.opacity(0.22)
+}
+
+// MARK: - Materials
+
+/// Fills that are a material, not a swatch: the accent lit from above. Every filled accent control
+/// (the primary capsule, a selected chip, a committed check) and the selection ring draw from here,
+/// so the app's one colour has one light.
+enum ThemeGradient {
+    /// The accent, lit from above.
+    static let accent = LinearGradient(
+        stops: [.init(color: ThemeColor.accentHigh, location: 0),
+                .init(color: ThemeColor.accent, location: 0.46),
+                .init(color: ThemeColor.accentDeep, location: 1)],
+        startPoint: .top, endPoint: .bottom)
+    /// The same, under a finger.
+    static let accentPressed = LinearGradient(
+        colors: [ThemeColor.accent, ThemeColor.accentPressed], startPoint: .top, endPoint: .bottom)
+    /// The selection ring's metal: the light catches its top-left and runs out toward the foot.
+    static let ring = LinearGradient(
+        stops: [.init(color: Color(hex: 0xFFDCA8), location: 0),
+                .init(color: ThemeColor.accent, location: 0.42),
+                .init(color: ThemeColor.accentDeep, location: 1)],
+        startPoint: .topLeading, endPoint: .bottomTrailing)
+    /// Ivory, lit from above: the white pill ("Mark as watched", "Add") as an object. Flat white
+    /// is the brightest rectangle on a dark screen; with a crown and a foot it is a key to press.
+    static let ivory = LinearGradient(
+        stops: [.init(color: .white, location: 0),
+                .init(color: ThemeColor.textPrimary, location: 0.5),
+                .init(color: Color(hex: 0xE2DED6), location: 1)],
+        startPoint: .top, endPoint: .bottom)
+    /// The edge of a raised CONTROL (a quiet capsule, a chip, a tile): light along its crown,
+    /// gone by its foot. Never for artwork — a picture's edge stays `posterEdge`, quiet all round
+    /// (a bright line across the top of someone's illustration is a frame).
+    static let litEdge = LinearGradient(
+        colors: [.white.opacity(0.26), .white.opacity(0.05)], startPoint: .top, endPoint: .bottom)
+    /// The same edge on a filled accent or ivory control, where the crown catches more.
+    static let litEdgeStrong = LinearGradient(
+        colors: [.white.opacity(0.48), .clear], startPoint: .top, endPoint: .center)
+    /// A bar's fill: brightest at its head, where the progress is.
+    static let accentBar = LinearGradient(
+        colors: [ThemeColor.accentDeep, ThemeColor.accent, ThemeColor.accentHigh],
+        startPoint: .leading, endPoint: .trailing)
 }
 
 // MARK: - Elevation

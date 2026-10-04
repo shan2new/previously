@@ -1,0 +1,16 @@
+{
+  "distinctMediaChanges": {
+    "tmdb": 1715,
+    "anilist": 506
+  },
+  "fieldChanges": {
+    "tmdb:last_aired_at": 1665,
+    "tmdb:status": 64,
+    "tmdb:episodes": 34,
+    "tmdb:next_airing_episode": 24,
+    "anilist:episodes_list": 503,
+    "anilist:next_airing_episode": 3,
+    "anilist:status": 2,
+    "anilist:episodes": 2
+  }
+}

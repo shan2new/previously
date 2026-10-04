@@ -59,6 +59,8 @@ struct ProfileView: View {
     @State private var path: [ProfileRoute] = []
     /// Community rules, to read (the accept form is the composer's first step, never this row's).
     @State private var showRules = false
+    /// "What do you watch?" (`AudienceChooser`).
+    @State private var showAudience = false
     #if DEBUG
     @State private var demoBusy = UserDefaults.standard.bool(forKey: "demoBusy")
     #endif
@@ -175,6 +177,9 @@ struct ProfileView: View {
         }
         .sheet(isPresented: $showRules) {
             CommunityRulesSheet(mode: .read, onAccepted: { _ in })
+        }
+        .sheet(isPresented: $showAudience) {
+            AudienceChooser(mode: .settings, onDone: { showAudience = false })
         }
         .onAppear { sync.profileIsOpen = true }
         .onDisappear { sync.profileIsOpen = false }
@@ -859,6 +864,18 @@ struct ProfileView: View {
 
     private var settings: some View {
         GroupedList(header: "Settings") {
+            // First: it decides what every suggestion in the app is.
+            ProfileRow(symbol: "tv",
+                       title: Copy.Watching.row,
+                       action: { showAudience = true }) {
+                HStack(spacing: ThemeSpace.x2) {
+                    Text(Copy.Watching.name(appModel.audience))
+                        .type(ThemeType.metadata)
+                        .foregroundStyle(ThemeColor.textTertiary)
+                    trailingGlyph("chevron.forward", tint: ThemeColor.textTertiary)
+                }
+            }
+            .accessibilityValue(Copy.Watching.name(appModel.audience))
             ProfileRow(symbol: "bell",
                        title: "Notifications",
                        action: { notificationsTapped() }) {

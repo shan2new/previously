@@ -36,8 +36,9 @@ import {
   putSave,
 } from '../services/socialToggles.js'
 import { checkCommentBody, codePointLength, normalizeUserText } from '../social/contentFilter.js'
-import { canonicalSubject, resolveFranchise, resolveSubject } from '../social/resolve.js'
+import { canonicalSubject, resolveFranchise, resolveSubject, type ResolvedSubject } from '../social/resolve.js'
 import {
+  feedPostIdSchema,
   formatSubject,
   MAX_MEDIA_ID,
   parseSubject,
@@ -98,9 +99,12 @@ const intParam = (max: number) =>
     .pipe(z.number().int().min(1).max(max))
 
 const subjectBody = z.object({ subject: threadSubjectSchema }).strict()
+/** A reminder: PostIds only — an "Episode N is out" post has nothing left to be reminded of. */
 const postBody = z.object({ postId: postIdSchema }).strict()
+/** A save or a hide: any post the feed carries, the `ep:` episode post included. */
+const feedPostBody = z.object({ postId: feedPostIdSchema }).strict()
 const hideBody = z.discriminatedUnion('kind', [
-  z.object({ kind: z.literal('post'), target: postIdSchema }).strict(),
+  z.object({ kind: z.literal('post'), target: feedPostIdSchema }).strict(),
   z.object({ kind: z.literal('show'), target: uuidSchema }).strict(),
 ])
 const ratingBody = z
@@ -213,6 +217,18 @@ async function resolveThread(userId: string, p: ParsedSubject): Promise<Thread |
 }
 
 /**
+ * The franchise a post belongs to, for a save or a hide; null when there is no such post. A PostId
+ * resolves as ever (`resolveSubject`). An `ep:` id is Following's "Episode N is out" post, which
+ * exists once that episode has aired — watched or not: saving or hiding the post shows nothing of
+ * the room, whose comments stay behind the gate.
+ */
+async function resolvePost(userId: string, p: ParsedSubject): Promise<ResolvedSubject | null> {
+  if (p.kind !== 'episode') return resolveSubject(p)
+  const gate = await getEpisodeAccess(userId, p.mediaId, p.episode)
+  return gate && gate.access !== 'unaired' ? { franchiseId: gate.franchiseId, franchiseTitle: gate.franchiseTitle } : null
+}
+
+/**
  * The subject a write or a thread read keys on (social/resolve.ts `canonicalSubject`): once an
  * announcement names a catalogue part, `catalog:<mediaId>` is that announcement's `news:<id>`
  * thread, so a toggle queued, a comment replayed or a hide sent against the old id lands where the
@@ -248,7 +264,10 @@ export const socialRoutes: FastifyPluginAsync = async (app) => {
     const target = await canonical(parsed)
     const thread = await resolveThread(me, target.parsed)
     if (!thread) return notFound(reply, 'subject')
-    if (thread.access != null && thread.access !== 'open') return episodeLocked(reply, thread.access)
+    // An episode can be liked once it is OUT, watched or not: its `ep:` subject is also Following's
+    // "Episode N is out" post, and a like shows nothing of the room. Reading and writing its
+    // comments, their likes and the rating stay behind the full gate (aired AND watched).
+    if (thread.access === 'unaired') return episodeLocked(reply, thread.access)
     const limited = spend(req, reply, 'toggle')
     if (limited) return limited
     await putLike(me, target.subject)
@@ -262,19 +281,19 @@ export const socialRoutes: FastifyPluginAsync = async (app) => {
     return noContent(reply)
   })
 
-  // ---------- Saves and reminders (posts only) ----------
+  // ---------- Saves (any feed post) and reminders (PostIds only) ----------
 
-  for (const [path, put, del] of [
-    ['/me/saves', putSave, deleteSave],
-    ['/me/reminders', putReminder, deleteReminder],
+  for (const [path, schema, put, del] of [
+    ['/me/saves', feedPostBody, putSave, deleteSave],
+    ['/me/reminders', postBody, putReminder, deleteReminder],
   ] as const) {
     app.put(path, async (req, reply) => {
-      const body = postBody.safeParse(req.body)
+      const body = schema.safeParse(req.body)
       const parsed = body.success ? parseSubject(body.data.postId) : null
       if (!body.success || !parsed) return invalid(reply)
       const me = req.user!.id
       const target = await canonical(parsed)
-      const post = await resolveSubject(target.parsed)
+      const post = await resolvePost(me, target.parsed)
       if (!post) return notFound(reply, 'post')
       const limited = spend(req, reply, 'toggle')
       if (limited) return limited
@@ -283,7 +302,7 @@ export const socialRoutes: FastifyPluginAsync = async (app) => {
     })
 
     app.delete(path, async (req, reply) => {
-      const body = postBody.safeParse(req.body)
+      const body = schema.safeParse(req.body)
       if (!body.success) return invalid(reply)
       for (const key of await deletionKeys(body.data.postId)) await del(req.user!.id, key)
       return noContent(reply)
@@ -306,7 +325,7 @@ export const socialRoutes: FastifyPluginAsync = async (app) => {
       const parsed = parseSubject(body.data.target)
       if (!parsed) return invalid(reply)
       const post = await canonical(parsed)
-      if (!(await resolveSubject(post.parsed))) return notFound(reply, 'post')
+      if (!(await resolvePost(me, post.parsed))) return notFound(reply, 'post')
       target = post.subject
     } else if (!(await resolveFranchise(body.data.target))) {
       return notFound(reply, 'franchise')

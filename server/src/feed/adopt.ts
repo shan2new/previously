@@ -116,7 +116,7 @@ export async function adoptCatalogueThread(announcementId: string): Promise<numb
   const index = await loadInstallmentIndex(row.franchiseId)
   const own = index.announcements.find((a) => a.id === announcementId)
   const part = own ? announcedPart(own.next, index.parts) : null
-  if (!own || !part) return 0
+  if (!own || own.status === 'retracted' || !part) return 0
   const canonical = announcementForPart(part, index.announcements, index.parts) ?? own
   return rekeyPostSubject(
     formatSubject({ kind: 'catalog', mediaId: part.mediaId }),

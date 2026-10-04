@@ -55,6 +55,13 @@ real Clerk session, leave `DEV_AUTH_BYPASS=1` and send `Authorization: Bearer de
 Grouping: with no `OPENROUTER_API_KEY` (or `GROUPING_LLM_DISABLED=1`) the server uses the
 deterministic relation-graph grouping. Add the key to enable LLM-refined grouping.
 
+News research uses the Claude Agent SDK, falling back to the installed `codex` CLI when Claude
+hits a quota, fails or times out. Run `codex login` with the server's OS account to enable its
+ChatGPT subscription authentication. Codex runs ephemeral, read-only live web research with app
+credentials and mutation tools excluded. Both providers share the same fact validation; failed
+research preserves existing facts. See `NEWS_CODEX_*` in `server/.env.example` for the executable,
+optional model, timeout and disable switch. Leave the model empty to use the CLI's default.
+
 ## Run the iOS app
 
 ```bash

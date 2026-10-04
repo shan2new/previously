@@ -1,0 +1,38 @@
+{
+  "elapsedMs": 50296,
+  "result": {
+    "status": "concluded",
+    "next": "",
+    "release": "TBA",
+    "note": "The fifth and final season completed on May 20, 2026; no further installment of The Boys is announced as of October 4, 2026.",
+    "source": "https://www.aboutamazon.com/news/entertainment/the-boys-eric-kripke-season-5-prime-video",
+    "evidence": [
+      {
+        "url": "https://www.aboutamazon.com/news/entertainment/the-boys-eric-kripke-season-5-prime-video",
+        "publisher": "Amazon",
+        "publishedAt": null,
+        "tier": "official",
+        "primary": true
+      },
+      {
+        "url": "https://apnews.com/article/boys-series-finale-41841d15aec14c8c571e293577a37320",
+        "publisher": "Associated Press",
+        "publishedAt": "2026-05-20",
+        "tier": "reputable",
+        "primary": false
+      },
+      {
+        "url": "https://au.variety.com/2026/tv/news/the-boys-finale-homelander-dead-butcher-gen-v-season-3-36811/",
+        "publisher": "Variety",
+        "publishedAt": "2026-05-21",
+        "tier": "trade",
+        "primary": false
+      }
+    ]
+  },
+  "verifiedAt": "2026-10-04T09:14:06.068767+00:00",
+  "primaryFailure": "Claude weekly limit (429)",
+  "fallback": "Codex CLI 0.157.1 with ChatGPT subscription login and default model",
+  "mode": "research-only; no database writes or notifications",
+  "validation": "Shared parseNewsResult accepted; completed CLI web_search and turn.completed required; Amazon primary source independently opened"
+}

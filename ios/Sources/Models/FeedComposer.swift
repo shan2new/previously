@@ -133,6 +133,9 @@ struct FeedPostModel: Identifiable, Equatable, Sendable {
     /// then "…", and the row ends on "Show more" (`FeedComposer.timelineCut`); nil when the body is
     /// short enough to draw whole. The post page always draws `body`.
     let clippedBody: String?
+    /// For you: why the post is here, over its name — "Because you’re watching Re:ZERO",
+    /// "Trending in Fantasy" (`FeedPostContext`). Nil on Following and on an unexplained post.
+    let contextLine: String?
     /// "2h", "3d", "12 Sep".
     let stamp: String
     /// "Premieres tomorrow" when the post carries a premiere still to come (nil once its day has
@@ -251,7 +254,8 @@ enum FeedComposer {
     static func rows(tab: FeedTab, state: FeedTabState, library: [Franchise], libraryIndex: (String) -> Franchise?,
                      now: Int64, folds: [String: FeedFold], hidden: Set<String>,
                      muted: Set<String>, recommendationKeys: [String], untrackedTrending: [FranchiseSummary],
-                     libraryEmpty: Bool, online: Bool) -> [FeedRow] {
+                     libraryEmpty: Bool, online: Bool,
+                     allows: (MediaSource) -> Bool = { _ in true }) -> [FeedRow] {
         let suggestedRow: FeedRow? = recommendationKeys.isEmpty
             ? nil : .suggested(keys: Array(recommendationKeys.prefix(maxSuggested)))
         let trendingList = Array(untrackedTrending.prefix(maxTrending))
@@ -283,8 +287,13 @@ enum FeedComposer {
             }
             guard !hidden.contains(post.id), !muted.contains(post.franchiseId),
                   let show = shows[post.franchiseId] else { continue }
+            // For you is the viewer's kind only (`Audience`). The server composes it so; this holds
+            // a response cached before the choice, or from an older server, to the same wall.
+            // Following is the viewer's own shows and is never filtered.
+            guard tab == .following || allows(show.source) else { continue }
             let copy = libraryIndex(post.franchiseId)
-            body.append(.post(model(post, show: show, library: copy, owned: copy != nil, now: now, fresh: isFresh)))
+            body.append(.post(model(post, show: show, library: copy, owned: copy != nil, now: now, fresh: isFresh,
+                                    seedName: { libraryIndex($0.franchiseId)?.displayTitle ?? $0.title })))
             freshFlags.append(isFresh)
         }
         let postRows = body.count
@@ -351,11 +360,27 @@ enum FeedComposer {
     }
 
     /// One post, composed. Every word goes through `Copy.Feed` / `TemporalCopy`.
+    /// `seedName`: how the viewer's library names a show a For you reason cites (its display title).
     static func model(_ post: FeedPost, show: FeedFranchise, library copy: Franchise?, owned: Bool,
-                      now: Int64, fresh: Bool) -> FeedPostModel {
+                      now: Int64, fresh: Bool,
+                      seedName: (RecommendationItem.Seed) -> String = { $0.title }) -> FeedPostModel {
         let franchise = copy ?? show.stub
         let showName = franchise.displayTitle
-        let name = post.installment.isEmpty ? showName : post.installment
+        // What the news is about, as a person would say it: the installment — but "Season 1 is
+        // confirmed" is a NEW SERIES, and a film the catalogue only numbers ("Movie 1") has no name
+        // to print ("A new film, Movie 1, is in production", 4 Oct).
+        let numberedFilm = post.isMovie
+            && post.installment.range(of: #"^(Movie|Film)( \d+)?$"#, options: [.regularExpression, .caseInsensitive]) != nil
+        let firstSeason = !post.isMovie && post.installment.caseInsensitiveCompare("Season 1") == .orderedSame
+        let announcement = post.kind == .announced || post.kind == .window || post.kind == .unknown
+        let name: String
+        if numberedFilm {
+            name = Copy.Feed.newFilm
+        } else if firstSeason && announcement {
+            name = Copy.Feed.newSeries
+        } else {
+            name = post.installment.isEmpty ? showName : post.installment
+        }
 
         let premiereWhen = post.premiere.map { TemporalCopy.premiereWhen($0.at, anchor: $0.anchor, now: now) }
         // A premiere whose day has passed (the server's hourly sync, or a post opened by id) is told
@@ -388,6 +413,8 @@ enum FeedComposer {
             headline = Copy.Feed.headlineRumour(name: name)
         case .trailer:
             headline = trailerHeadline(post.video, show: show)
+        case .episode:
+            headline = Copy.Feed.headlineEpisode(installment: post.installment, episode: post.episode ?? 1)
         }
 
         let sentence = Copy.Feed.sentence(kind: post.kind, headline: headline, name: name,
@@ -401,7 +428,11 @@ enum FeedComposer {
             // X's news accounts post the trailer WITH the headline: news that carries its own cut
             // (the server attaches the official one published within ten days of it) shows the
             // video, which plays in the post (`FeedAutoplay`), not a still of the key art.
-            media = .trailer(stills: FeedVideoStill.candidates(video), video: video)
+            // The show's own picture closes the list: a trailer whose stills are gone (a video
+            // taken down since the catalogue listed it) was a black box with a play button.
+            media = .trailer(stills: FeedVideoStill.candidates(video)
+                                + [wideArt(part: post.part, show: show).url].compactMap { $0 },
+                             video: video)
         } else {
             media = .art(wideArt(part: post.part, show: show))
         }
@@ -427,6 +458,7 @@ enum FeedComposer {
             post: post, show: show, franchise: franchise, isOwned: owned, showName: showName,
             shortName: franchise.title.shelfShortened(fitting: nameLineBudget),
             headline: headline, sentence: sentence, body: body, clippedBody: clippedBody,
+            contextLine: post.context.map { Copy.Feed.context($0, name: seedName) },
             stamp: stamp, premiereLine: premiereLine,
             media: media, fresh: fresh,
             showsOfficialMark: post.isOfficial && post.kind != .rumour,
@@ -465,20 +497,38 @@ enum FeedComposer {
             .replacingOccurrences(of: " - ", with: " \u{00B7} ")
             .replacingOccurrences(of: "  ", with: " ")
             .trimmingCharacters(in: .whitespaces)
-        return tidy.isEmpty ? Copy.Video.kind(video.kind) : tidy
+        // The uploader's shorthand is not a headline: "PV", "CM 2", "Promotional Video" say what
+        // the kind already says, in a trade's words ("Overlord · PV.", For you, 4 Oct).
+        let shorthand = tidy.range(of: #"^(PV|CM|PROMO|Promotional Video|Promotion Video)( ?\d+)?$"#,
+                                   options: [.regularExpression, .caseInsensitive]) != nil
+        return tidy.isEmpty || shorthand ? Copy.Video.kind(video.kind) : tidy
     }
 
     /// A TRUE 16:9 for the post's frame — the season's, the show's, then the galleries' — never an
     /// AniList ultra-wide banner (its middle third in a 16:9 frame is a pair of eyes); else the
     /// poster, composited whole (spike `wide(part:f:)`).
+    ///
+    /// A CLEAN scene: a backdrop the catalogue tags with a language is the show's banner — its
+    /// logo lettered across the picture — and in a post it read as an advertisement beside the
+    /// name line that already says the show (Seirei Gensouki, LIAR GAME; "For you visuals look
+    /// poorly built", owner, 4 Oct). The order is a clean scene, then the POSTER (the designed key
+    /// art, cropped to its faces), and a lettered backdrop only when there is nothing else. An
+    /// untagged gallery (the older shape) says nothing, so its first landscape stands as before.
     static func wideArt(part: FeedPartRef?, show: FeedFranchise) -> WideArt {
-        var candidates: [String?] = [part?.landscapeArt, show.landscapeArt]
-        candidates += (part?.artwork?.landscapes ?? []).map(\.url)
-        candidates += (show.artwork?.landscapes ?? []).map(\.url)
-        if let url = candidates.compactMap({ $0 }).first(where: { !$0.isEmpty && !$0.contains("/anime/banner/") }) {
-            return WideArt(landscape: url, portrait: nil)
+        let gallery = (part?.artwork?.landscapes ?? []) + (show.artwork?.landscapes ?? [])
+        // The same picture at another size is the same picture: its file, not its URL.
+        func file(_ url: String) -> Substring { url.split(separator: "/").last ?? Substring(url) }
+        let lettered = Set(gallery.filter { ArtworkSet.nonEmpty($0.language) != nil }.map { file($0.url) })
+        let scenes = ([part?.landscapeArt, show.landscapeArt] + gallery.map(\.url))
+            .compactMap { $0 }
+            .filter { !$0.isEmpty && !$0.contains("/anime/banner/") }
+        if let clean = scenes.first(where: { !lettered.contains(file($0)) }) {
+            return WideArt(landscape: clean, portrait: nil)
         }
-        return WideArt(landscape: nil, portrait: part?.portraitArt ?? show.stub.portraitArt)
+        if let poster = part?.portraitArt ?? show.stub.portraitArt, !poster.isEmpty {
+            return WideArt(landscape: nil, portrait: poster)
+        }
+        return WideArt(landscape: scenes.first, portrait: nil)
     }
 
     private static func isHTTPS(_ url: URL?) -> Bool {

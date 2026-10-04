@@ -78,6 +78,20 @@
       "when": 1790307139519,
       "tag": "0010_thankful_spyke",
       "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1790930456772,
+      "tag": "0011_sticky_mentor",
+      "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "7",
+      "when": 1791102718899,
+      "tag": "0012_special_mimic",
+      "breakpoints": true
     }
   ]
 }

@@ -16,8 +16,19 @@ const fake = vi.hoisted(() => {
       Promise.resolve(answers.shift() ?? []).then(resolve, reject)
     return c
   }
-  const tx = { select: () => chain() }
-  return { answers, tx }
+  /**
+   * The audience is read inside a SAVEPOINT (a nested transaction). `savepointError`, while set, is
+   * what that savepoint fails with — "no such table" before migration 0012 has run.
+   */
+  const state = { savepointError: null as unknown }
+  const tx = {
+    select: () => chain(),
+    transaction: async (fn: (savepoint: unknown) => unknown) => {
+      if (state.savepointError) throw state.savepointError
+      return fn(tx)
+    },
+  }
+  return { answers, tx, state }
 })
 
 vi.mock('../db/index.js', () => ({
@@ -30,10 +41,12 @@ const { buildAccountExport, moderationRecord, openedAtOrNull } = await import('.
 const USER = '11111111-1111-4111-8111-111111111111'
 const FRANCHISE = '33333333-3333-4333-8333-333333333333'
 const COMMENT = '55555555-5555-4555-8555-555555555555'
+const SESSION = '66666666-6666-4666-8666-666666666666'
 const T = (iso: string) => new Date(iso)
 
 beforeEach(() => {
   fake.answers.length = 0
+  fake.state.savepointError = null
 })
 
 describe('openedAtOrNull / moderationRecord', () => {
@@ -88,7 +101,28 @@ describe('buildAccountExport', () => {
       [], // subscriptions
       [], // progress
       [], // preferences
+      [], // audience (its own table, read in a savepoint)
       [], // recommendation feedback
+      // watch sessions — a stopped rewatch, deleted later (a tombstone is still the caller's data)
+      [
+        {
+          id: SESSION,
+          userId: USER,
+          franchiseId: FRANCHISE,
+          scopeMediaId: null,
+          ordinal: 2,
+          startedAt: 1790000000000,
+          completedAt: null,
+          cancelledAt: 1790100000000,
+          cancelledAtEpisode: 7,
+          episodes: 24,
+          restoreProgress: null,
+          restoreStatus: 'completed',
+          createdAt: T('2026-09-21T00:00:00Z'),
+          updatedAt: T('2026-09-22T00:00:00Z'),
+          deletedAt: T('2026-09-23T00:00:00Z'),
+        },
+      ],
       // comments
       [
         {
@@ -148,6 +182,23 @@ describe('buildAccountExport', () => {
       since: Date.parse('2026-09-20T00:00:00Z'),
       liftedAt: null,
     })
+    expect(doc?.library.watchSessions).toEqual([
+      {
+        id: SESSION,
+        franchiseId: FRANCHISE,
+        scopeMediaId: null,
+        ordinal: 2,
+        startedAt: 1790000000000,
+        completedAt: null,
+        cancelledAt: 1790100000000,
+        cancelledAtEpisode: 7,
+        episodes: 24,
+        restoreProgress: null,
+        restoreStatus: 'completed',
+        updatedAt: Date.parse('2026-09-22T00:00:00Z'),
+        deletedAt: Date.parse('2026-09-23T00:00:00Z'),
+      },
+    ])
     expect(doc?.social.comments[0]).toMatchObject({ hiddenReason: 'reports', hiddenAt: Date.parse('2026-09-11T00:00:00Z') })
     expect(doc?.social.notifications[0]).toMatchObject({ kind: 'comment_hidden', title: 'Frieren', body: 'reports' })
   })
@@ -162,5 +213,60 @@ describe('buildAccountExport', () => {
 
   it('no account row → null', async () => {
     expect(await buildAccountExport(USER, 1)).toBeNull()
+  })
+
+  describe('the audience preference', () => {
+    const account = [{ id: USER, clerkId: 'user_x', createdAt: T('2026-09-01T00:00:00Z'), email: null, lastOpenedAt: 0, prevOpenedAt: 0 }]
+    const preferences = { userId: USER, country: 'IN', language: 'en', providerIds: [8], updatedAt: T('2026-09-05T00:00:00Z') }
+    const audience = { audience: 'tv', updatedAt: T('2026-10-01T00:00:00Z') }
+    /** account, profile, ban, subscriptions, progress — then the two rows under test. */
+    const upTo = (prefs: unknown[], chosen: unknown[]) => [account, [], [], [], [], prefs, chosen]
+
+    it('exports the choice with the preferences, stamped with the later of the two writes', async () => {
+      fake.answers.push(...upTo([preferences], [audience]))
+      const doc = await buildAccountExport(USER, 1)
+      expect(doc?.library.preferences).toEqual({
+        country: 'IN',
+        language: 'en',
+        providerIds: [8],
+        updatedAt: '2026-10-01T00:00:00.000Z',
+        audience: 'tv',
+      })
+    })
+
+    it('exports a choice made by a viewer who never saved any other preference', async () => {
+      fake.answers.push(...upTo([], [audience]))
+      const doc = await buildAccountExport(USER, 1)
+      expect(doc?.library.preferences).toEqual({
+        country: null,
+        language: 'en',
+        providerIds: [],
+        updatedAt: '2026-10-01T00:00:00.000Z',
+        audience: 'tv',
+      })
+    })
+
+    it('says "not chosen" for a viewer with preferences and no audience row, and null with neither', async () => {
+      fake.answers.push(...upTo([preferences], []))
+      expect((await buildAccountExport(USER, 1))?.library.preferences).toMatchObject({ country: 'IN', audience: null })
+      fake.answers.length = 0
+      fake.answers.push(...upTo([], []))
+      expect((await buildAccountExport(USER, 1))?.library.preferences).toBeNull()
+    })
+
+    it('still exports everything else while the audience table does not exist yet', async () => {
+      fake.state.savepointError = Object.assign(new Error('relation "user_audience" does not exist'), { code: '42P01' })
+      // The savepoint fails before its query, so the answers run on: preferences, then feedback…
+      fake.answers.push(account, [], [], [], [], [preferences])
+      const doc = await buildAccountExport(USER, 1)
+      expect(doc?.library.preferences).toMatchObject({ country: 'IN', audience: null })
+      expect(doc?.account.id).toBe(USER)
+    })
+
+    it('does not swallow any other failure of that read', async () => {
+      fake.state.savepointError = new Error('connection terminated')
+      fake.answers.push(account, [], [], [], [], [preferences])
+      await expect(buildAccountExport(USER, 1)).rejects.toThrow('connection terminated')
+    })
   })
 })

@@ -164,6 +164,10 @@ struct ReceiptLane: View {
                     .type(ThemeType.metadataEmphasis)
                     .foregroundStyle(.primary)
                     .lineLimit(1)
+                    // The longest fact ("Series finished · Moved to Watched") is a few points wider
+                    // than the lane beside a poster and Undo on a 393-pt phone: it closes up before
+                    // it loses its last word ("Moved to Watc…", 4 Oct).
+                    .minimumScaleFactor(0.88)
                 if let title {
                     // ONE line (review i5: two lines orphaned "a Slime" under a poster that already
                     // says which show); the head of a long name is enough beside its poster.

@@ -1,0 +1,13 @@
+{
+  "health": {
+    "local": {
+      "ok": true
+    },
+    "public": {
+      "ok": true
+    }
+  },
+  "anonymousDetailStatus": 401,
+  "authenticatedDeviceUI": "not checked",
+  "databaseToResponseVerification": "verification.json"
+}

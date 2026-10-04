@@ -167,7 +167,7 @@ struct ShowFollowPillLabel: View {
         .foregroundStyle(filled ? ThemeColor.canvas : ThemeColor.feedText)
         .padding(.horizontal, filled ? ThemeSpace.x5 : ThemeSpace.x4)
         .frame(height: 34)
-        .background(filled ? ThemeColor.feedText : Color.clear, in: Capsule())
+        .background(filled ? AnyShapeStyle(ThemeGradient.ivory) : AnyShapeStyle(Color.clear), in: Capsule())
         .overlay(Capsule().strokeBorder(filled ? .clear : ThemeColor.feedText.opacity(0.35), lineWidth: FeedMetrics.hairline))
         .frame(minHeight: 44)
         .contentShape(Capsule())

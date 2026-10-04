@@ -17,11 +17,16 @@ import {
   reports,
   saves,
   subscriptions,
+  userAudience,
   userPreferences,
   userProfiles,
   users,
+  watchSessions,
 } from '../db/schema.js'
 import type { AccountExport, WatchStatus } from '../types/api.js'
+import { isAudience, isMissingTable, type StoredAudience } from './audience.js'
+import { withAudience } from './preferences.js'
+import { toWatchSession } from './watchSessions.js'
 
 // GET /me/export (docs/api-contract.md, "Account export"): everything the server holds FOR the
 // caller, as one JSON document. Only the caller's own rows — never who blocked them, never reports
@@ -125,11 +130,35 @@ export async function buildAccountExport(userId: string, nowMs: number = Date.no
         .where(eq(userPreferences.userId, userId))
         .limit(1)
 
+      // The audience has its own table, which a not-yet-applied migration creates. Read inside a
+      // SAVEPOINT: "no such table" then undoes only this read (it would otherwise abort the whole
+      // snapshot transaction) and the export says what the server holds — no audience.
+      let audience: StoredAudience | null = null
+      try {
+        audience = await tx.transaction(async (savepoint) => {
+          const [row] = await savepoint
+            .select({ audience: userAudience.audience, updatedAt: userAudience.updatedAt })
+            .from(userAudience)
+            .where(eq(userAudience.userId, userId))
+            .limit(1)
+          return row && isAudience(row.audience) ? { audience: row.audience, updatedAt: row.updatedAt } : null
+        })
+      } catch (error) {
+        if (!isMissingTable(error)) throw error
+      }
+
       const feedbackRows = await tx
         .select({ key: recommendationFeedback.key, kind: recommendationFeedback.kind, createdAt: recommendationFeedback.createdAt })
         .from(recommendationFeedback)
         .where(eq(recommendationFeedback.userId, userId))
         .orderBy(asc(recommendationFeedback.createdAt), asc(recommendationFeedback.key))
+
+      // Deleted sessions are included as the tombstones they are, like comments.
+      const sessionRows = await tx
+        .select()
+        .from(watchSessions)
+        .where(eq(watchSessions.userId, userId))
+        .orderBy(asc(watchSessions.franchiseId), asc(watchSessions.ordinal), asc(watchSessions.id))
 
       // Soft-deleted comments are included as the tombstones they are (body '' — the text is gone).
       const commentRows = await tx
@@ -256,15 +285,20 @@ export async function buildAccountExport(userId: string, nowMs: number = Date.no
             addedAt: ms(r.addedAt),
           })),
           progress: progressRows.map((r) => ({ mediaId: r.mediaId, episodes: r.episodes, updatedAt: ms(r.updatedAt) })),
-          preferences: preferences
-            ? {
-                country: preferences.country,
-                language: preferences.language,
-                providerIds: preferences.providerIds ?? [],
-                updatedAt: preferences.updatedAt.toISOString(),
-              }
+          // null only when the server holds neither a preferences row nor an audience.
+          preferences: preferences || audience
+            ? withAudience(
+                {
+                  country: preferences?.country ?? null,
+                  language: preferences?.language ?? 'en',
+                  providerIds: preferences?.providerIds ?? [],
+                  updatedAt: preferences ? preferences.updatedAt.toISOString() : null,
+                },
+                audience,
+              )
             : null,
           recommendationFeedback: feedbackRows.map((r) => ({ key: r.key, kind: r.kind, createdAt: ms(r.createdAt) })),
+          watchSessions: sessionRows.map((r) => ({ ...toWatchSession(r), deletedAt: msOrNull(r.deletedAt) })),
         },
         social: {
           comments: commentRows.map((r) => ({

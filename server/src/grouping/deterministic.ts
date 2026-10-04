@@ -1,5 +1,6 @@
 import type { GroupingInput, GroupingResult, GroupedPart } from './llm.js'
 import type { PartKind } from './partKind.js'
+import { isOptionalPart, partLabel, partRelationship } from './relationship.js'
 
 const seasonRank: Record<string, number> = { WINTER: 0, SPRING: 1, SUMMER: 2, FALL: 3 }
 
@@ -21,8 +22,7 @@ export function deterministicGroup(input: GroupingInput): GroupingResult {
   for (const [kind, arr] of byKind) {
     arr.sort((a, b) => sortKey(a) - sortKey(b))
     arr.forEach((c, i) => {
-      const label = kind === 'season' ? `Season ${i + 1}` : `${capitalize(kind)} ${i + 1}`
-      parts.push({ id: c.id, partKind: kind, sequence: i + 1, label })
+      parts.push({ id: c.id, partKind: kind, sequence: i + 1, label: partLabel(kind, i + 1) })
     })
   }
 
@@ -37,16 +37,12 @@ export function deterministicGroup(input: GroupingInput): GroupingResult {
       return ak - bk || a.sequence - b.sequence || a.id - b.id
     })
   ordered.forEach((part, index) => {
-      const relationships = input.edges
-        .filter((edge) => edge.from === part.id || edge.to === part.id)
-        .map((edge) => edge.to === part.id ? edge.type : invertRelationship(edge.type))
-      const relationship = index === 0 ? null : relationships.find((value) => value === 'SIDE_STORY')
-        ?? relationships.find((value) => value === 'SEQUEL' || value === 'PREQUEL')
-        ?? relationships[0]
-        ?? null
+      // The earliest member is the work's root; every other part is what the edges say it is
+      // (grouping/relationship.ts).
+      const relationship = index === 0 ? null : partRelationship(part.id, input.edges)
       part.watchOrder = index + 1
       part.relationship = relationship
-      part.optional = relationship === 'SIDE_STORY' || part.partKind === 'music'
+      part.optional = isOptionalPart(relationship, part.partKind)
     })
 
   // Canonical name: the earliest TV season's title, else the first candidate's title.
@@ -56,12 +52,6 @@ export function deterministicGroup(input: GroupingInput): GroupingResult {
   const canonicalName = (seasons[0] ?? input.candidates[0])?.title ?? 'Untitled'
 
   return { franchises: [{ canonicalName, parts }], confidence: 0.5, model: null }
-}
-
-function invertRelationship(value: string): string {
-  if (value === 'PREQUEL') return 'SEQUEL'
-  if (value === 'SEQUEL') return 'PREQUEL'
-  return value
 }
 
 function formatToKind(format: string | null): PartKind {
@@ -83,8 +73,4 @@ function formatToKind(format: string | null): PartKind {
 
 function sortKey(c: { seasonYear: number | null; title: string }): number {
   return (c.seasonYear ?? 9999) * 10
-}
-
-function capitalize(s: string): string {
-  return s.length ? s[0]!.toUpperCase() + s.slice(1) : s
 }

@@ -242,6 +242,60 @@ describe('toggles: set-state PUT/DELETE, 204, scoped to the caller', () => {
     ])
   })
 
+  it('likes an episode that is out before the viewer has watched it, never one that has not aired', async () => {
+    // `ep:` is also Following's "Episode N is out" post: a like shows nothing of the room.
+    mocks.getEpisodeAccess.mockResolvedValue({ ...openGate, access: 'unwatched', progress: 11 })
+    expect((await inject('PUT', '/me/likes', { subject: EP })).statusCode).toBe(204)
+    expect(mocks.putLike).toHaveBeenCalledWith(CALLER, EP)
+
+    mocks.putLike.mockClear()
+    mocks.getEpisodeAccess.mockResolvedValue({ ...openGate, access: 'unaired' })
+    const unaired = await inject('PUT', '/me/likes', { subject: EP })
+    expect(unaired.statusCode).toBe(409)
+    expect(unaired.json()).toEqual({ error: 'episode_locked', reason: 'unaired' })
+    expect(mocks.putLike).not.toHaveBeenCalled()
+  })
+
+  it('saves and hides an episode post once the episode is out, watched or not; a reminder on it is 400', async () => {
+    mocks.getEpisodeAccess.mockResolvedValue({ ...openGate, access: 'unwatched', progress: 11, franchiseId: FRANCHISE })
+    expect((await inject('PUT', '/me/saves', { postId: EP })).statusCode).toBe(204)
+    expect((await inject('PUT', '/me/hides', { kind: 'post', target: EP })).statusCode).toBe(204)
+    expect((await inject('DELETE', '/me/saves', { postId: EP })).statusCode).toBe(204)
+    expect((await inject('DELETE', '/me/hides', { kind: 'post', target: EP })).statusCode).toBe(204)
+    expect(mocks.putSave).toHaveBeenCalledWith(CALLER, EP, FRANCHISE)
+    expect(mocks.putHide).toHaveBeenCalledWith(CALLER, 'post', EP)
+    expect(mocks.deleteSave).toHaveBeenCalledWith(CALLER, EP)
+    expect(mocks.deleteHide).toHaveBeenCalledWith(CALLER, 'post', EP)
+    // The episode is resolved by its own gate (aired or not), never as a catalogue post.
+    expect(mocks.getEpisodeAccess).toHaveBeenCalledWith(CALLER, 154587, 12)
+    expect(mocks.resolveSubject).not.toHaveBeenCalled()
+
+    // An episode that is out has nothing left to be reminded of.
+    for (const method of ['PUT', 'DELETE'] as const) {
+      const res = await inject(method, '/me/reminders', { postId: EP })
+      expect(res.statusCode).toBe(400)
+      expect(res.json()).toEqual({ error: 'invalid request' })
+    }
+    expect(mocks.putReminder).not.toHaveBeenCalled()
+    expect(mocks.deleteReminder).not.toHaveBeenCalled()
+  })
+
+  it('an episode that has not aired, or that the catalogue does not hold, is no post to save or hide', async () => {
+    for (const gate of [{ ...openGate, access: 'unaired' as const }, null]) {
+      mocks.getEpisodeAccess.mockResolvedValue(gate)
+      for (const [url, payload] of [
+        ['/me/saves', { postId: EP }],
+        ['/me/hides', { kind: 'post', target: EP }],
+      ] as const) {
+        const res = await inject('PUT', url, payload)
+        expect(res.statusCode, url).toBe(404)
+        expect(res.json()).toEqual({ error: 'post not found' })
+      }
+    }
+    expectNothingWritten()
+    expect(mocks.rateCheck).not.toHaveBeenCalled()
+  })
+
   it('saves and reminds a post with its franchise, and clears both', async () => {
     for (const path of ['/me/saves', '/me/reminders']) {
       expect((await inject('PUT', path, { postId: NEWS })).statusCode).toBe(204)
@@ -293,10 +347,11 @@ describe('toggles: set-state PUT/DELETE, 204, scoped to the caller', () => {
       ['PUT', '/me/likes', { subject: `NEWS:${ANN}` }],
       ['PUT', '/me/likes', { subject: NEWS, userId: MIRA }],
       ['DELETE', '/me/likes', { subject: 'ep:1:0' }],
-      ['PUT', '/me/saves', { postId: EP }],
+      ['PUT', '/me/saves', { postId: 'ep:1:0' }],
       ['PUT', '/me/saves', { postId: NEWS, franchiseId: FRANCHISE }],
       ['DELETE', '/me/saves', { post: NEWS }],
       ['PUT', '/me/reminders', { postId: 'catalog:0' }],
+      ['PUT', '/me/reminders', { postId: EP }],
       ['DELETE', '/me/reminders', {}],
       ['PUT', '/me/hides', { kind: 'post', target: FRANCHISE }],
       ['PUT', '/me/hides', { kind: 'show', target: NEWS }],
@@ -347,11 +402,11 @@ describe('toggles: set-state PUT/DELETE, 204, scoped to the caller', () => {
     expect(mocks.rateCheck).not.toHaveBeenCalled()
   })
 
-  it('a like or rating on a locked episode room is 409 episode_locked with the reason', async () => {
+  it('a rating on a locked episode room is 409 episode_locked with the reason, unwatched or unaired', async () => {
     mocks.getEpisodeAccess.mockResolvedValue({ ...openGate, access: 'unwatched', progress: 11 })
-    const like = await inject('PUT', '/me/likes', { subject: EP })
-    expect(like.statusCode).toBe(409)
-    expect(like.json()).toEqual({ error: 'episode_locked', reason: 'unwatched' })
+    const unwatched = await inject('PUT', '/me/ratings', { mediaId: 154587, episode: 12, score: 50 })
+    expect(unwatched.statusCode).toBe(409)
+    expect(unwatched.json()).toEqual({ error: 'episode_locked', reason: 'unwatched' })
 
     mocks.getEpisodeAccess.mockResolvedValue({ ...openGate, access: 'unaired' })
     const rating = await inject('PUT', '/me/ratings', { mediaId: 154587, episode: 12, score: 50 })

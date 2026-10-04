@@ -1,4 +1,5 @@
 import type { EpisodeAccess, EpisodeMeta } from '../types/api.js'
+import { slotPassed } from './airingSlot.js'
 import { deriveAiredEpisodes } from './franchiseView.js'
 
 // "Has episode n aired by now?" — ONE rule, shared by the progress clamp (`PUT /me/progress`, the
@@ -34,27 +35,8 @@ export interface AiredCount {
   known: boolean
 }
 
-const DAY_MS = 86_400_000
-
-/** The earliest instant ANY time zone's local date passes a date-only slot's UTC date (UTC+14). */
-export const DATE_ONLY_LEAD_MS = 14 * 3_600_000
-
-/**
- * Whether an airing slot has struck.
- *
- * A timed slot (AniList) has aired once its instant has passed. A TMDB slot is a calendar DATE (the
- * sync synthesises 17:00 UTC, tmdb/mapping.ts), and the iOS client counts it from the day after
- * that date in the DEVICE's local day. The earliest zone on Earth (UTC+14) reaches that day at
- * 10:00 UTC on the slot's own UTC date, so the server counts it from then: never stricter than any
- * client — a room the app shows unlocked, the server accepts.
- */
-export function slotPassed(atMs: number, source: string, nowMs: number): boolean {
-  if (source === 'tmdb') {
-    const utcMidnight = Math.floor(atMs / DAY_MS) * DAY_MS
-    return nowMs >= utcMidnight + DAY_MS - DATE_ONLY_LEAD_MS
-  }
-  return atMs <= nowMs
-}
+// The slot rule itself lives in airingSlot.ts (no imports, so the feed's pure composer can share it).
+export { DATE_ONLY_LEAD_MS, slotPassed, slotStrikesAt } from './airingSlot.js'
 
 /** The statuses whose episodes are still (or were only partly) coming: counted from evidence only. */
 const OPEN_ENDED = new Set(['RELEASING', 'HIATUS', 'CANCELLED'])

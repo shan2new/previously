@@ -8,16 +8,19 @@ import SwiftUI
 // MARK: - Colour
 
 extension ThemeColor {
-    // X's iOS palette, measured at 393 pt (25 Sep). The feed, thread, activity and composer only —
-    // the rest of the app keeps its own ramp.
-    static let feedText = Color(hex: 0xE7E9EA)
-    /// X's grey, LIFTED: #71767B is 4.58:1 on X's #000 but 4.34:1 on this canvas (#09090B) and
-    /// 3.88:1 on `feedCard` — under AA for the 13–16-pt stamps, meta lines and excerpts it sets.
-    /// #7D8287 keeps X's hue at 5.13:1 on the canvas and 4.58:1 on `feedCard` (computed).
-    static let feedSecondary = Color(hex: 0x7D8287)
-    static let feedSeparator = Color(hex: 0x2F3336)
-    static let feedCard = Color(hex: 0x16181C)
-    static let feedField = Color(hex: 0x202327)
+    // The feed's GRID is X's, measured at 393 pt (25 Sep); its INK is the app's own (4 Oct:
+    // "improve the design system and colours everywhere", owner). It wore X's palette too — a cool
+    // white (#E7E9EA), a blue-grey (#7D8287), blue-black cards — one tab away from Home's warm
+    // ivory and graphite: two temperatures in one app, and the feed's read as someone else's. The
+    // roles and their contrast are X's still; the hues are this ramp's.
+    static let feedText = ThemeColor.textPrimary
+    /// The feed's grey: X's ROLE (stamps, handles, meta) at X's weight, in the app's warm grey.
+    /// #8C8781 is 5.5:1 on the canvas and 4.9:1 on `feedCard` (X's own #71767B was 4.34 and 3.88
+    /// here — under AA for the 13–16-pt lines it sets).
+    static let feedSecondary = Color(hex: 0x8C8781)
+    static let feedSeparator = Color(hex: 0x302F33)
+    static let feedCard = ThemeColor.surfaceFlat
+    static let feedField = Color(hex: 0x222225)
     /// A row's ground while pressed (X lifts the row a shade; no scale).
     static let feedPressed = Color.white.opacity(0.045)
     /// The like: the icon's rose gel — warmth, not news (red) and not a fact (amber).

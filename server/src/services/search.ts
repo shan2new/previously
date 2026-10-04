@@ -110,7 +110,9 @@ export async function searchFranchises(
   }
 
   if (!trimmed) {
-    const candidates = await getTrendingFranchises(Math.min(100, Math.max(limit, limit * 4)))
+    // One catalogue's trending is ranked within that catalogue: the mixed ranking's head is all
+    // anime (TMDB rows carry no trend score), so filtering it for TV would come back empty.
+    const candidates = await getTrendingFranchises(Math.min(100, Math.max(limit, limit * 4)), opts.filters?.source)
     const allowed = await filterFranchiseIds(candidates.map((item) => item.id), opts.filters)
     const allowedSet = new Set(allowed)
     const franchises = candidates.filter((item) => allowedSet.has(item.id)).slice(0, limit)

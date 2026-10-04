@@ -343,6 +343,61 @@ extension Copy {
 extension Copy {
     /// "Recommended for you" — Today's discovery shelf and its caught-up billboard. The REASON is
     /// the product: every title says which of your shows it comes from, never a black-box "For you".
+    /// "What do you watch?" — the audience (`Audience`, AppModel+Audience.swift).
+    enum Watching {
+        /// The row in Profile.
+        static let row = "What you watch"
+        static let question = "What do you watch?"
+        static let lede = "Recommendations, Trending and Discover show only this. Your library is never hidden."
+        static let changeLater = "You can change this any time in Profile."
+        static let kept = "Shows already in your library stay, whatever you choose."
+        static let continueWord = "Continue"
+
+        static func name(_ audience: Audience) -> String {
+            switch audience {
+            case .anime: "Anime"
+            case .tv: "TV"
+            case .both: "Anime and TV"
+            }
+        }
+
+        static func detail(_ audience: Audience) -> String {
+            switch audience {
+            case .anime: "Series, films and OVAs. No TV shows."
+            case .tv: "Series from everywhere else. No anime."
+            case .both: "Everything, side by side."
+            }
+        }
+
+        /// The receipt when the choice changes.
+        static func receipt(_ audience: Audience) -> String {
+            switch audience {
+            case .anime: "Showing anime only"
+            case .tv: "Showing TV only"
+            case .both: "Showing anime and TV"
+            }
+        }
+
+        /// The chart's title, in the viewer's words: for one audience it is simply theirs.
+        static func trending(_ audience: Audience) -> String {
+            switch audience {
+            case .anime: "Trending anime"
+            case .tv: "Trending TV"
+            case .both: Copy.Label.trending
+            }
+        }
+
+        /// Under a search that found nothing, for a viewer who sees one kind only: why, and where
+        /// the door is.
+        static func searchingOnly(_ audience: Audience) -> String? {
+            switch audience {
+            case .anime: "You\u{2019}re seeing anime only. Change it in Profile \u{203A} What you watch."
+            case .tv: "You\u{2019}re seeing TV only. Change it in Profile \u{203A} What you watch."
+            case .both: nil
+            }
+        }
+    }
+
     enum ForYou {
         static let shelf = "Recommended for you"
         /// The billboard's badge when a recommendation takes the stage (nothing of yours needs it).

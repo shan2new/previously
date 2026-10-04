@@ -828,12 +828,13 @@ extension Copy {
         // per constant and per function, and a package that adds a string adds its sample with it.
         out += Feed.sampleStrings + Stories.sampleStrings + Social.sampleStrings + Discover.sampleStrings
         out += Video.sampleStrings
+        out += FirstRun.sampleStrings
         out += ShowPage.sampleStrings
         out += [ForYou.becauseWatching("Re:ZERO"), ForYou.becauseWatched("Frieren"), ForYou.moreLike("One Piece"),
                 ForYou.moreForYou, ForYou.topPick, ForYou.details,
                 Schedule.outNow, Schedule.tonightAt("7:30 PM"), Schedule.episodeRange(5, 8),
                 Action.markEpisodeUnwatched(19)]
-        for copy in [EmptyStateCopy.emptyAccount, .emptyToday, .emptySchedule,
+        for copy in [EmptyStateCopy.emptyAccount, .emptyToday, .emptyHome, .emptySchedule,
                      .noWatching, .offlineCached, .offlineNoData,
                      .searchFailed, .searchLaunchpad, .noSessions,
                      .serverNoCache, .noFilterMatches, .noScheduleMatches, .nothingScheduled, .everythingSynced,

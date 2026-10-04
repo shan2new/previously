@@ -20,6 +20,24 @@ const mocks = vi.hoisted(() => ({
   findLocalFranchise: vi.fn(),
 }))
 
+/** The caller's stored audience (services/audience.ts reads it for real, from this fake table). */
+const viewer = vi.hoisted(() => ({ audience: null as string | null, reads: 0 }))
+
+vi.mock('../db/index.js', () => ({
+  db: {
+    select: () => ({
+      from: () => ({
+        where: () => ({
+          limit: async () => {
+            viewer.reads += 1
+            return viewer.audience ? [{ audience: viewer.audience, updatedAt: new Date(0) }] : []
+          },
+        }),
+      }),
+    }),
+  },
+  sql: {},
+}))
 vi.mock('../services/watchAvailability.js', () => ({
   getWatchAvailability: mocks.getWatchAvailability,
   getAvailabilityPreviews: mocks.getAvailabilityPreviews,
@@ -69,6 +87,8 @@ async function appWithUser() {
 }
 
 beforeEach(() => {
+  viewer.audience = null
+  viewer.reads = 0
   mocks.getWatchAvailability.mockReset()
   mocks.getFranchise.mockReset()
   mocks.getSummaries.mockReset().mockResolvedValue([])
@@ -244,6 +264,51 @@ describe('GET /search', () => {
       kind: 'trailer',
     })
     expect(mocks.enqueueAnimeVideoFallback).toHaveBeenCalledWith(ID)
+    await app.close()
+  })
+})
+
+describe('the audience is the default catalogue of trending and search', () => {
+  /** The `source` filter the route handed to Search for one request. */
+  const searched = async (url: string) => {
+    mocks.searchFranchises.mockClear()
+    const app = await appWithUser()
+    const res = await app.inject({ method: 'GET', url })
+    await app.close()
+    expect(res.statusCode, url).toBe(200)
+    return mocks.searchFranchises.mock.calls[0]![2].filters.source
+  }
+
+  it('searches the viewer\'s own catalogue when the request names none: trending, an empty q and a typed query', async () => {
+    for (const [audience, source] of [['anime', 'anilist'], ['tv', 'tmdb'], ['both', undefined], [null, undefined]] as const) {
+      viewer.audience = audience
+      expect(await searched('/franchises/trending'), `trending ${audience}`).toBe(source)
+      expect(await searched('/search'), `search, no q ${audience}`).toBe(source)
+      expect(await searched('/search?q=frieren'), `search q ${audience}`).toBe(source)
+    }
+  })
+
+  it('lets an explicit source win over the audience, without reading the preference', async () => {
+    viewer.audience = 'anime'
+    expect(await searched('/franchises/trending?source=tmdb')).toBe('tmdb')
+    expect(await searched('/search?source=tmdb')).toBe('tmdb')
+    expect(await searched('/search?q=severance&source=tmdb')).toBe('tmdb')
+    viewer.audience = 'tv'
+    expect(await searched('/search?q=frieren&source=anilist')).toBe('anilist')
+    expect(viewer.reads).toBe(0)
+  })
+
+  it('leaves the routes that name a title alone: detail and resolve never read the audience', async () => {
+    viewer.audience = 'anime'
+    mocks.getFranchise.mockResolvedValue({ id: ID, source: 'tmdb', title: 'Severance', upcoming: null, featuredVideo: { id: 'v' } })
+    mocks.findLocalFranchise.mockResolvedValue(ID)
+    mocks.getSummaries.mockResolvedValue([{ id: ID, source: 'tmdb', title: 'Severance' }])
+    const app = await appWithUser()
+    // An anime viewer opens a TV show's page, and resolves a TV title, as anyone can.
+    expect((await app.inject({ method: 'GET', url: `/franchises/${ID}` })).json().source).toBe('tmdb')
+    const resolved = await app.inject({ method: 'POST', url: '/franchises/resolve', payload: { source: 'tmdb', externalId: 95396 } })
+    expect(resolved.json().source).toBe('tmdb')
+    expect(viewer.reads).toBe(0)
     await app.close()
   })
 })

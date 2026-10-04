@@ -112,7 +112,7 @@ struct SuggestedModule: View {
             .fixedSize()
             .padding(.horizontal, ModuleLayout.addPadding)
             .frame(minHeight: ModuleLayout.addHeight)
-            .background(owned ? Color.clear : ThemeColor.feedText, in: Capsule())
+            .background(owned ? AnyShapeStyle(Color.clear) : AnyShapeStyle(ThemeGradient.ivory), in: Capsule())
             .overlay(Capsule().strokeBorder(owned ? ThemeColor.feedSeparator : .clear, lineWidth: FeedMetrics.hairline))
             .frame(minHeight: FeedMetrics.actionHitHeight)
             .contentShape(Rectangle())
@@ -127,44 +127,43 @@ struct SuggestedModule: View {
 
 // MARK: - Trending
 
-/// X's "What's happening", under For you (and under an empty account): the chart listed as X lists
-/// trends — a grey context line with the rank, the name in bold, one grey fact. Type only.
+/// The chart, under For you (and under an empty account), as a SHELF OF POSTERS — the Library's
+/// card, as Discover's "Trending now" draws it. It was X's "What's happening": eight rows of type,
+/// a rank, a truncated name and one grey fact each — six hundred points of text in the middle of
+/// a feed of pictures, in an app whose subject is the pictures ("For you visuals look poorly
+/// built", owner, 4 Oct). The rank is the order; VoiceOver says it.
 struct TrendingModule: View {
     let items: [FranchiseSummary]
     let onOpen: (String) -> Void
 
+    @Environment(AppModel.self) private var appModel
+
     var body: some View {
         if !items.isEmpty {
             VStack(alignment: .leading, spacing: 0) {
-                FeedModuleTitle(text: Copy.Feed.trendingTitle)
-                ForEach(Array(items.enumerated()), id: \.element.id) { i, s in
-                    Button { onOpen(s.id) } label: {
-                        VStack(alignment: .leading, spacing: ThemeSpace.x0_5) {
-                            Text(Copy.Feed.trendingContext(rank: i + 1,
-                                                           scope: s.source == .tmdb ? Copy.Filter.tv : Copy.Filter.anime))
-                                .type(ThemeType.feedSmall)
-                                .foregroundStyle(ThemeColor.feedSecondary)
-                            Text(s.title.shelfShortened)
-                                .type(ThemeType.feedNoteTitle)
-                                .foregroundStyle(ThemeColor.feedText)
-                                .lineLimit(1)
-                            if let fact = Self.fact(s) {
-                                Text(fact)
-                                    .type(ThemeType.feedSmall)
-                                    .foregroundStyle(ThemeColor.feedSecondary)
-                                    .lineLimit(1)
-                            }
+                // In the viewer's words: for one audience the chart is simply theirs.
+                FeedModuleTitle(text: Copy.Watching.trending(appModel.audience))
+                ScrollView(.horizontal) {
+                    LazyHStack(alignment: .top, spacing: ThemeMetrics.shelfGap) {
+                        ForEach(Array(items.enumerated()), id: \.element.id) { i, s in
+                            let fact = Self.fact(s) ?? ""
+                            ShelfPosterTile(poster: s.portraitArt, title: s.title.shelfShortened(fitting: 26), facts: fact,
+                                            accessibilityLabel: Copy.Feed.separated([
+                                                Copy.Feed.trendingContext(rank: i + 1,
+                                                                          scope: s.source == .tmdb ? Copy.Filter.tv : Copy.Filter.anime),
+                                                s.title, fact,
+                                            ]),
+                                            onOpen: { onOpen(s.id) }) { EmptyView() }
                         }
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        .padding(.horizontal, ThemeMetrics.gutter)
-                        .padding(.vertical, ModuleLayout.rowVertical)
-                        .contentShape(Rectangle())
                     }
-                    .buttonStyle(FeedRowPressStyle())
-                    .accessibilityElement(children: .combine)
+                    .scrollTargetLayout()
                 }
+                .contentMargins(.horizontal, ThemeMetrics.gutter, for: .scrollContent)
+                .scrollTargetBehavior(.viewAligned)
+                .scrollIndicators(.hidden)
+                .padding(.top, ThemeSpace.x1)
+                .padding(.bottom, ThemeSpace.x4)
                 FeedHairline()
-                    .padding(.top, ThemeSpace.x1)
             }
         }
     }

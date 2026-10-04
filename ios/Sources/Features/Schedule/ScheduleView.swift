@@ -28,6 +28,8 @@ struct ScheduleView: View {
     /// This tab is the one on screen (`RootView`'s selection, once the surface is ready). A VISIT
     /// begins when it turns true — the arrival plays once per visit (`ScheduleLit.swift`).
     var active: Bool = true
+    /// The bar's scroll-away state, owned by `MainTabView` (the tab bar rides it).
+    var rootChrome = RootChromeState()
     @Environment(LaunchHandoff.self) private var launch: LaunchHandoff?
 
     // MARK: - State
@@ -334,6 +336,10 @@ struct ScheduleView: View {
                 }
                 .scrollTargetLayout()
                 .coordinateSpace(.named(Self.feedSpace))
+                // The bar's scroll probe (`RootChromeState`). Only a READER's scroll moves the bar
+                // (its phase, below): the landing on today is the app's scroll, with the past days
+                // above it, and must not open the screen with its bars gone.
+                .rootChromeProbe(rootChrome, rest: ThemeMetrics.topSafeInset + FeedMetrics.headerRow)
                 // A user-requested layout change (a filter) is what `uiSnappy` is for, and it
                 // belongs on the thing that re-lays out.
                 .animation(ThemeMotion.pick(ThemeMotion.uiSnappy, reduceMotion: reduceMotion), value: derived.feedKey)
@@ -347,7 +353,7 @@ struct ScheduleView: View {
             // re-pinned to the top on every layout change, so a row's own press-scale moved the
             // feed 28 pt under the finger and the tap arrived as a cancelled scroll. The two
             // programmatic scrolls (a grid tap, "Today") are one-shot.
-            .safeAreaInset(edge: .top, spacing: 0) { chrome }
+            .safeAreaInset(edge: .top, spacing: 0) { chrome(proxy) }
             .onGeometryChange(for: CGFloat.self, of: { $0.size.height }, action: { viewportH = $0 })
             // Nothing may come to rest under the tab bar. A scroll-content MARGIN, not padding:
             // padding inside a stack shorter than the viewport changes no layout at all.
@@ -356,6 +362,7 @@ struct ScheduleView: View {
             .scrollIndicators(.hidden)
             // The moment a finger touches the feed it belongs to the reader.
             .onScrollPhaseChange { _, phase in
+                rootChrome.phase(phase)
                 if phase == .interacting { userScrolled = true }
                 // At rest, the calendar's selection moves to the day that was read — and only at
                 // rest: every automatic movement of a date control while the feed was moving was
@@ -386,7 +393,9 @@ struct ScheduleView: View {
             // bar.
             calendarOverlay(proxy)
             }
-        .toolbarBackground(.hidden, for: .navigationBar)
+        // The bar is the page's own (4 Oct — see `chrome`): the system's is hidden, and says so (a
+        // pop from a page that shows one otherwise leaves its height in the top inset).
+        .toolbar(.hidden, for: .navigationBar)
         .chromeScrollEdgeHidden(.top)
         .previouslyRefreshable { await appModel.reload() }
         .task { await ScheduleReminders.shared.refresh() }
@@ -407,33 +416,12 @@ struct ScheduleView: View {
         .onChange(of: visiting, initial: true) { _, on in visit(on) }
         // A card the reader marked stays until they leave; the next visit opens on what is next.
         .onDisappear { heldHero = nil }
-        .brandNavigationTitle(Copy.Schedule.title)
-        // Inline: a large title collapses on the first scroll and moves the top safe area ~50 pt
-        // mid-flight.
-        .navigationBarTitleDisplayMode(.inline)
-        .toolbar {
-            // The calendar's switch. A TAP, not a pull — this screen already owns the pull gesture
-            // for refresh. ONE glyph in both states, tinted when the grid is down: a control that
-            // changes its symbol on press reads as a different control.
-            ToolbarItem(placement: .topBarTrailing) {
-                Button { toggleCalendar() } label: { AppGlyph(systemName: "calendar") }
-                    .tint(monthOpen ? ThemeColor.accent : ThemeColor.textPrimary)
-                    .accessibilityLabel(Copy.Schedule.calendar)
-                    .accessibilityValue(monthOpen ? Copy.Schedule.calendarShown : Copy.Schedule.calendarHidden)
-            }
-            .chromeSharedBackgroundHidden()
-            ToolbarItem(placement: .topBarTrailing) { filterMenu }
-                .chromeSharedBackgroundHidden()
-            // The way back once the reader has scrolled away from today. Ink, not amber: a command.
-            if awayFromToday {
-                ToolbarItem(placement: .topBarLeading) {
-                    Button(Copy.Schedule.today) { goToToday(proxy) }
-                        .tint(ThemeColor.interactive)
-                        .accessibilityLabel(Copy.Schedule.scrollToToday)
-                        .accessibilityHint(Copy.Schedule.scrollToTodayHint)
-                }
-                .chromeSharedBackgroundHidden()
-            }
+        // The title stays for VoiceOver and for the back button of what this root pushes.
+        .navigationTitle(Copy.Schedule.title)
+        // The way back to today is in the bar: it returns the moment there is somewhere to go back
+        // from, even with the bar scrolled away.
+        .onChange(of: awayFromToday) { _, away in
+            if away { rootChrome.reveal() }
         }
         // An alert, not a popover pinned under the bar 180 pt from the ring (interactive review):
         // a batch changes a number the user did not type, and it always offers Cancel.
@@ -576,8 +564,10 @@ struct ScheduleView: View {
             ZStack(alignment: .top) {
                 // Anywhere off the grid closes it, as a menu does. The feed under it steps BACK,
                 // light enough that the day the grid is about to take you to still reads.
+                // From under the band: the bar stays in the light, and its switch closes the grid.
                 Color.black.opacity(0.45)
-                    .ignoresSafeArea()
+                    .padding(.top, bandHeight)
+                    .ignoresSafeArea(edges: [.horizontal, .bottom])
                     .contentShape(Rectangle())
                     .onTapGesture { toggleCalendar() }
                     .accessibilityHidden(true)
@@ -604,7 +594,7 @@ struct ScheduleView: View {
                     .strokeBorder(ThemeColor.stroke, lineWidth: 1))
                 .shadow(.card)
                 .padding(.horizontal, ThemeSpace.x3)
-                .padding(.top, ThemeSpace.x1)
+                .padding(.top, bandHeight + ThemeSpace.x1)
                 .transition(.move(edge: .top).combined(with: .opacity))
             }
             .zIndex(2)
@@ -612,20 +602,56 @@ struct ScheduleView: View {
     }
 
     private func toggleCalendar() {
+        // The grid hangs from the bar: the bar is there when it opens.
+        rootChrome.reveal()
         withAnimation(ThemeMotion.pick(ThemeMotion.uiSnappy, reduceMotion: reduceMotion)) {
             monthOpen.toggle()
         }
     }
 
+    /// The band's height under the status band (the bar's row, and the filter chips when there
+    /// are any) — what the calendar hangs under.
+    private var bandHeight: CGFloat { max(FeedMetrics.headerRow, chromeBottom - ThemeMetrics.topSafeInset) }
+
     // MARK: - Chrome
 
     /// The band under the title: the active filters as removable tokens, and otherwise nothing —
     /// there is no date chrome at rest. Opaque canvas, flush with the feed, as Today's bar is.
-    private var chrome: some View {
+    ///
+    /// The BAR is here too (4 Oct, "the top and bottom header and nav are there even when
+    /// scrolling", owner): the title, the way back to today, the calendar's switch and the filter,
+    /// as the page's own row — the system bar it replaced could not leave with the scroll. The whole
+    /// band slides by the row's height (`RootChromeSlide`), so an active filter's chips stay under
+    /// the clock when the row has gone.
+    private func chrome(_ proxy: ScrollViewProxy) -> some View {
         VStack(alignment: .leading, spacing: 0) {
-            // The band's permanent job is the ground behind the bar: a band with nothing in it
-            // draws no background at all, and the feed printed through the title (6 Sep).
-            Color.clear.frame(height: 1)
+            RootHeaderRow(title: Copy.Schedule.title, chrome: rootChrome) {
+                // The way back once the reader has scrolled away from today. Ink, not amber: a
+                // command.
+                if awayFromToday {
+                    Button(Copy.Schedule.today) { goToToday(proxy) }
+                        .buttonStyle(.plain)
+                        .type(ThemeType.listAction)
+                        .foregroundStyle(ThemeColor.interactive)
+                        .frame(minHeight: FeedMetrics.actionHitHeight)
+                        .contentShape(Rectangle())
+                        .accessibilityLabel(Copy.Schedule.scrollToToday)
+                        .accessibilityHint(Copy.Schedule.scrollToTodayHint)
+                        .transition(.opacity)
+                }
+            } trailing: {
+                // The calendar's switch. A TAP, not a pull — this screen already owns the pull
+                // gesture for refresh. ONE glyph in both states, tinted when the grid is down: a
+                // control that changes its symbol on press reads as a different control.
+                RootHeaderGlyph(systemName: "calendar",
+                                tint: monthOpen ? ThemeColor.accent : ThemeColor.textPrimary) { toggleCalendar() }
+                    .accessibilityLabel(Copy.Schedule.calendar)
+                    .accessibilityValue(monthOpen ? Copy.Schedule.calendarShown : Copy.Schedule.calendarHidden)
+                filterMenu
+                    .font(.system(size: 20, weight: .medium))
+                    .frame(width: FeedMetrics.actionHitHeight, height: FeedMetrics.actionHitHeight)
+                    .contentShape(Rectangle())
+            }
             filterChips
         }
         // Only the filter chips can give this band height, so only they earn its padding.
@@ -641,6 +667,7 @@ struct ScheduleView: View {
         }
         .onGeometryChange(for: CGFloat.self, of: { $0.frame(in: .global).maxY },
                           action: { chromeBottom = $0 })
+        .modifier(RootChromeSlide(chrome: rootChrome))
     }
 
     private var filterMenu: some View {

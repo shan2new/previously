@@ -50,13 +50,33 @@ struct LibraryView: View {
     @Binding var requestedAll: AllTitlesRoute?
     /// Re-selecting the tab pops All titles back to this root (see `MainTabView.selection`).
     var popSignal: Int = 0
+    /// The bar's scroll-away state, owned by `MainTabView` (the tab bar rides it).
+    var chrome = RootChromeState()
     /// True while the user's finger owns a pull. The system's own indicator is then the only
     /// spinner on screen — see `L-17` above.
     @State private var pullDriving = false
     /// The scroll view's own height, so a state that owns the whole surface can be centred in it.
     @State private var contentHeight: CGFloat = 0
-    /// Content has scrolled under the bar — the soft top veil hardens (see the geometry probe).
-    @State private var raisedTop = false
+
+    /// The door to All titles, in the bar: a word that opens a list carries its chevron (review
+    /// i4: a grey numeral read as a fact, and it is the only door to the unfiltered list).
+    private var allTitlesDoor: some View {
+        Button {
+            all = AllTitlesRoute()
+        } label: {
+            HStack(spacing: 4) {
+                Text(Copy.titles(appModel.library.count))
+                AppGlyph(systemName: "chevron.forward")
+                    .font(.system(size: 12, weight: .semibold))
+            }
+        }
+        .buttonStyle(.plain)
+        .type(ThemeType.listAction)
+        .foregroundStyle(ThemeColor.interactive)
+        .frame(minWidth: 44, minHeight: 44)
+        .accessibilityLabel(Copy.Library.allTitlesAccessibility(appModel.library.count))
+        .accessibilityHint(Copy.Library.allTitlesHint)
+    }
 
     /// Where a `See all` lands. Two independent axes, because the root's buckets are not all
     /// statuses: `Returning` and `Announced` are facts about a show's future, not list states.
@@ -110,20 +130,16 @@ struct LibraryView: View {
                         }
                     }
                 }
-                // The raised-edge probe: geometry-based, because `onScrollGeometryChange` never
-                // fires on the iOS 27 simulator (the Today fix pass's discovery). When the content
-                // top passes under the status band, the soft top veil hardens — this is the fix
-                // for the label ghosting through the clock that Schedule's chrome documented.
-                .background {
-                    Color.clear.onGeometryChange(for: CGFloat.self) { proxy in
-                        proxy.frame(in: .global).minY
-                    } action: { minY in
-                        // Under the BAR, not under the clock: the veil hardens the moment a row
-                        // would otherwise sit half-lit beneath the title.
-                        let raised = minY < ThemeMetrics.inlineBarBottom
-                        if raised != raisedTop { raisedTop = raised }
-                    }
-                }
+                // The bar's scroll probe (`RootChromeState`): the content's distance from its
+                // resting top — geometry, because `onScrollGeometryChange` never fires on the
+                // iOS 27 simulator.
+                .rootChromeProbe(chrome, rest: ThemeMetrics.topSafeInset + FeedMetrics.headerRow)
+            }
+            // The bar is the page's own (4 Oct): the title and the door to All titles on the
+            // canvas, leaving with the scroll and taking the tab bar with it — the system bar it
+            // replaced could only stay.
+            .safeAreaInset(edge: .top, spacing: 0) {
+                RootHeader(title: Copy.Library.title, chrome: chrome, leading: { EmptyView() }, trailing: { allTitlesDoor })
             }
             .scrollIndicators(.hidden)
             // A scroll-content MARGIN, not padding inside the stack: padding under a stack that is
@@ -132,44 +148,20 @@ struct LibraryView: View {
             .tabBarContentMargin()
             .onScrollPhaseChange { _, phase in
                 pullDriving = (phase == .tracking || phase == .interacting)
+                chrome.phase(phase)
             }
             .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { contentHeight = $0 }
             .previouslyRefreshable { await appModel.reload() }
         }
-        // The TOP is Today's flush bar; the bottom is the app's (`AppTabBar`).
-        .flushTopBar(ThemeMetrics.inlineBarBottom)
-        .toolbarBackground(.hidden, for: .navigationBar)
+        // The system bar is hidden on the root (and says so: a pop from a page that shows one
+        // otherwise leaves its height in the top inset); the title stays for VoiceOver and for the
+        // back button of what this root pushes.
+        .navigationTitle(Copy.Library.title)
+        .toolbar(.hidden, for: .navigationBar)
         .chromeScrollEdgeHidden(.top)
-        .brandNavigationTitle(Copy.Library.title)
-        // Inline on every root — Schedule's model. A large title collapses on the first scroll and
-        // moves the top safe area ~50 pt mid-flight; an inline one holds still.
-        .navigationBarTitleDisplayMode(.inline)
-        .toolbar(.visible, for: .navigationBar)
-        .toolbar {
-            ToolbarItem(placement: .topBarTrailing) {
-                Button {
-                    all = AllTitlesRoute()
-                } label: {
-                    // A word that opens a list carries its chevron (review i4: a grey numeral
-                    // read as a fact, and it is the only door to the unfiltered list).
-                    HStack(spacing: 4) {
-                        Text(Copy.titles(appModel.library.count))
-                        AppGlyph(systemName: "chevron.forward")
-                            .font(.system(size: 12, weight: .semibold))
-                    }
-                }
-                // Keep this as the reference's quiet count/action, not a second glass island
-                // competing with the tab bar.
-                .buttonStyle(.plain)
-                .type(ThemeType.listAction)
-                .foregroundStyle(ThemeColor.interactive)
-                .frame(minWidth: 44, minHeight: 44)
-                .accessibilityLabel(Copy.Library.allTitlesAccessibility(appModel.library.count))
-                .accessibilityHint(Copy.Library.allTitlesHint)
-            }
-            // On iOS 27 the capsule belongs to the toolbar item, not to the ButtonStyle. This is
-            // the same treatment Profile uses for its plain text action.
-            .chromeSharedBackgroundHidden()
+        // Leaving the root (All titles) brings the bars back: a pushed page keeps them.
+        .onChange(of: all) { _, route in
+            if route != nil { chrome.reveal() }
         }
         .navigationDestination(item: $all) { route in
             // The push carries the root's own wash art, so All titles opens in the same light.

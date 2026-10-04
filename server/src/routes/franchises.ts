@@ -14,12 +14,15 @@ import { enqueueAnimeVideoFallback, refreshAnimeVideoFallback } from '../service
 import { ensureTvFranchise, refreshTvUpcomingFact } from '../tmdb/service.js'
 import type { FranchiseSummary } from '../types/api.js'
 import { withTimeout } from '../util/abort.js'
+import { suggestionSource } from '../services/audience.js'
 import { applyProviderPreferences, resolveUserPreferences } from '../services/preferences.js'
 import { findLocalFranchise } from '../services/recommendations.js'
 import { groupFromSeed } from '../grouping/service.js'
+import { getStarterFranchises, STARTER_MAX } from '../services/starter.js'
 
 const countrySchema = z.string().regex(/^[a-z]{2}$/i).transform((value) => value.toUpperCase())
 const filterFields = {
+  // Absent = the viewer's audience decides (services/audience.ts); an explicit catalogue wins.
   source: z.enum(['anilist', 'tmdb']).optional(),
   year: z.coerce.number().int().min(1880).max(2200).optional(),
   status: z.enum(['FINISHED', 'RELEASING', 'NOT_YET_RELEASED', 'CANCELLED', 'HIATUS']).optional(),
@@ -28,6 +31,10 @@ const filterFields = {
   country: countrySchema.optional(),
 }
 const trendingQuery = z.object({ limit: z.coerce.number().min(1).max(100).default(30), ...filterFields })
+const starterQuery = z.object({
+  limit: z.coerce.number().int().min(1).max(STARTER_MAX).default(60),
+  source: z.enum(['anilist', 'tmdb']).optional(),
+})
 // `exact=1` opts out of the LLM spell-correction: the caller wants the literal query searched.
 const searchQuery = z.object({
   q: z.string().default(''),
@@ -75,9 +82,10 @@ export const franchiseRoutes: FastifyPluginAsync = async (app) => {
     if (query.providerId != null && !country) {
       return reply.code(400).send({ error: 'country is required when filtering by provider' })
     }
+    const source = await suggestionSource(req.user!.id, query.source)
     const response = await searchFranchises('', query.limit, {
       filters: {
-        source: query.source,
+        source: source ?? undefined,
         year: query.year,
         status: query.status,
         theme: query.theme,
@@ -94,6 +102,15 @@ export const franchiseRoutes: FastifyPluginAsync = async (app) => {
     return { franchises: response.franchises }
   })
 
+  // First run's picker: the catalogue's best-known shows (services/starter.ts), so a new viewer
+  // finds theirs. Like every suggestion route, no `source` = the viewer's audience.
+  app.get('/franchises/starter', async (req, reply) => {
+    const query = starterQuery.safeParse(req.query)
+    if (!query.success) return reply.code(400).send({ error: 'invalid request' })
+    const source = await suggestionSource(req.user!.id, query.data.source)
+    return { franchises: await getStarterFranchises(source, query.data.limit) }
+  })
+
   app.get('/search', async (req, reply) => {
     const query = searchQuery.parse(req.query)
     const { q, limit, exact } = query
@@ -102,6 +119,9 @@ export const franchiseRoutes: FastifyPluginAsync = async (app) => {
     if (query.providerId != null && !country) {
       return reply.code(400).send({ error: 'country is required when filtering by provider' })
     }
+    // Trending (an empty `q`) and a typed query alike: with no explicit `source`, the viewer's
+    // audience is the catalogue searched.
+    const source = await suggestionSource(req.user!.id, query.source)
     const controller = new AbortController()
     const abort = () => controller.abort()
     const abortIfUnsent = () => {
@@ -119,7 +139,7 @@ export const franchiseRoutes: FastifyPluginAsync = async (app) => {
           profile = value
         },
         filters: {
-          source: query.source,
+          source: source ?? undefined,
           year: query.year,
           status: query.status,
           theme: query.theme,

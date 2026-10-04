@@ -75,7 +75,10 @@ const year = (y: number, m = 1): ReleaseWindow => ({
 
 const validYear = (y: number): boolean => y >= 1900 && y <= 2100
 const validMonth = (m: number): boolean => m >= 1 && m <= 12
-const validDay = (d: number): boolean => d >= 1 && d <= 31
+const validDay = (y: number, m: number, d: number): boolean => {
+  const back = new Date(Date.UTC(y, m - 1, d))
+  return back.getUTCFullYear() === y && back.getUTCMonth() === m - 1 && back.getUTCDate() === d
+}
 
 /**
  * Parse one release window. Rules are tried strongest-precision first, and each one matches
@@ -90,7 +93,7 @@ export function parseReleaseWindow(release: string | null | undefined): ReleaseW
   const iso = ISO_DAY.exec(s)
   if (iso) {
     const [y, m, d] = [Number(iso[1]), Number(iso[2]), Number(iso[3])]
-    if (validYear(y) && validMonth(m) && validDay(d)) return day(y, m, d)
+    return validYear(y) && validMonth(m) && validDay(y, m, d) ? day(y, m, d) : UNKNOWN
   }
 
   for (const re of [NAMED_DAY, DAY_NAMED]) {
@@ -100,13 +103,13 @@ export function parseReleaseWindow(release: string | null | undefined): ReleaseW
     const [name, num] = re === NAMED_DAY ? [hit[1]!, Number(hit[2])] : [hit[2]!, Number(hit[1])]
     const y = Number(hit[3])
     const m = monthIndex(name)
-    if (validYear(y) && validMonth(m) && validDay(num)) return day(y, m, num)
+    return validYear(y) && validMonth(m) && validDay(y, m, num) ? day(y, m, num) : UNKNOWN
   }
 
   const isoMonth = ISO_MONTH.exec(s)
   if (isoMonth) {
     const [y, m] = [Number(isoMonth[1]), Number(isoMonth[2])]
-    if (validYear(y) && validMonth(m)) return month(y, m, 'month')
+    return validYear(y) && validMonth(m) ? month(y, m, 'month') : UNKNOWN
   }
 
   const named = NAMED_MONTH.exec(s)
@@ -153,7 +156,7 @@ export function parseReleaseWindow(release: string | null | undefined): ReleaseW
  * sorts to the end with the genuinely undated. Every other status states what it knows.
  */
 export function resolveReleaseWindow(u: FranchiseUpcoming): ReleaseWindow {
-  if (u.status === 'rumored') return UNKNOWN
+  if (['rumored', 'concluded', 'recently_aired', 'announced_no_date'].includes(u.status)) return UNKNOWN
   return parseReleaseWindow(u.release)
 }
 

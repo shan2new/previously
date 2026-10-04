@@ -1,0 +1,250 @@
+[
+  {
+    "id": "6e2a1730-42a5-4300-8cf3-d7c89d82aae1",
+    "title": "The Boys",
+    "patch": {
+      "status": "concluded",
+      "next": "",
+      "release": "TBA",
+      "source": "https://www.aboutamazon.com/news/entertainment/the-boys-eric-kripke-season-5-prime-video",
+      "note": "The Boys ended with its series finale on May 20, 2026. Vought Rising is a separate prequel series.",
+      "evidence": [
+        {
+          "url": "https://www.aboutamazon.com/news/entertainment/the-boys-eric-kripke-season-5-prime-video",
+          "tier": "reputable",
+          "primary": true,
+          "publisher": null,
+          "publishedAt": null
+        }
+      ]
+    },
+    "reason": "Separate spin-off was incorrectly attached to the original series.",
+    "retract": true
+  },
+  {
+    "id": "c101456a-89e6-45e4-8842-4e4b07894b32",
+    "title": "Game of Thrones",
+    "patch": {
+      "status": "concluded",
+      "next": "",
+      "release": "TBA",
+      "source": "https://www.skygroup.sky/en-gb/article/eighth-and-final-series-of-game-of-thrones-breaks-records-for-sky-atlantic",
+      "note": "The original series ended with Season 8 in 2019. Spin-off development does not renew the original series.",
+      "evidence": [
+        {
+          "url": "https://www.skygroup.sky/en-gb/article/eighth-and-final-series-of-game-of-thrones-breaks-records-for-sky-atlantic",
+          "tier": "reputable",
+          "primary": true,
+          "publisher": null,
+          "publishedAt": null
+        }
+      ]
+    },
+    "reason": "Separate spin-off was incorrectly attached to the original series.",
+    "retract": true
+  },
+  {
+    "id": "96063cb7-c4d5-4cbd-b168-d95acf198b2a",
+    "title": "The Big Bang Theory",
+    "patch": {
+      "status": "concluded",
+      "next": "",
+      "release": "TBA",
+      "source": "https://www.themoviedb.org/tv/1418",
+      "note": "The original series ended in 2019. Stuart Fails to Save the Universe is a separate series.",
+      "evidence": [
+        {
+          "url": "https://www.themoviedb.org/tv/1418",
+          "tier": "catalogue",
+          "primary": false,
+          "publisher": null,
+          "publishedAt": null
+        }
+      ]
+    },
+    "reason": "Separate spin-off was incorrectly attached to the original series.",
+    "retract": true
+  },
+  {
+    "id": "406d416d-ca4d-4fe6-b3b2-1f0828673ee5",
+    "title": "ted",
+    "patch": {
+      "status": "concluded",
+      "next": "",
+      "release": "TBA",
+      "source": "https://www.themoviedb.org/tv/201834",
+      "note": "The live-action series is listed as ended. Ted: The Animated Series is a separate animated spin-off.",
+      "evidence": [
+        {
+          "url": "https://www.themoviedb.org/tv/201834",
+          "tier": "catalogue",
+          "primary": false,
+          "publisher": null,
+          "publishedAt": null
+        }
+      ]
+    },
+    "reason": "Separate spin-off was incorrectly attached to the original series.",
+    "retract": true
+  },
+  {
+    "id": "2c299052-8729-4112-8d39-7d5dba1340a2",
+    "title": "The Traitors",
+    "patch": null,
+    "reason": "Irish RTE research was attached to the Indian Prime Video adaptation; use its own catalogue.",
+    "retract": true
+  },
+  {
+    "id": "73dfa0b0-c621-4b5a-a66b-e050c8a24087",
+    "title": "The Traitors",
+    "patch": null,
+    "reason": "September 17 future claim expired. NBC New Blood versus Peacock season numbering disagrees with provider grouping; identity remains unresolved.",
+    "retract": true
+  },
+  {
+    "id": "97d433c0-0f76-422a-8142-fb0c7ad0c35c",
+    "title": "Hunter x Hunter (2011)",
+    "patch": null,
+    "reason": "The stored sources or note do not substantiate this specific renewal, date, or series conclusion. Withdraw unsupported certainty; absence of news is not conclusion.",
+    "retract": true
+  },
+  {
+    "id": "1f2268b9-58b1-4fb0-8964-6e1250d35c67",
+    "title": "Hell’s Paradise",
+    "patch": null,
+    "reason": "The stored sources or note do not substantiate this specific renewal, date, or series conclusion. Withdraw unsupported certainty; absence of news is not conclusion.",
+    "retract": true
+  },
+  {
+    "id": "79ae2351-06a9-4fb6-8522-156a9abe2b22",
+    "title": "M",
+    "patch": null,
+    "reason": "The stored sources or note do not substantiate this specific renewal, date, or series conclusion. Withdraw unsupported certainty; absence of news is not conclusion.",
+    "retract": true
+  },
+  {
+    "id": "db05faa2-9e30-446f-b5ad-d617974b1795",
+    "title": "ChäoS;HEAd",
+    "patch": null,
+    "reason": "The stored sources or note do not substantiate this specific renewal, date, or series conclusion. Withdraw unsupported certainty; absence of news is not conclusion.",
+    "retract": true
+  },
+  {
+    "id": "b8ad796b-c362-4e49-82df-8d83b0650d5f",
+    "title": "Juju Sanpo: Gekijouban",
+    "patch": null,
+    "reason": "The stored sources or note do not substantiate this specific renewal, date, or series conclusion. Withdraw unsupported certainty; absence of news is not conclusion.",
+    "retract": true
+  },
+  {
+    "id": "56f956bc-5db3-43b8-b3b4-25f47818f140",
+    "title": "Seven Mortal Sins",
+    "patch": null,
+    "reason": "The stored sources or note do not substantiate this specific renewal, date, or series conclusion. Withdraw unsupported certainty; absence of news is not conclusion.",
+    "retract": true
+  },
+  {
+    "id": "b0a4479c-8f66-4cf2-9b0b-fcd7f401dd0e",
+    "title": "T-sensei",
+    "patch": null,
+    "reason": "The stored sources or note do not substantiate this specific renewal, date, or series conclusion. Withdraw unsupported certainty; absence of news is not conclusion.",
+    "retract": true
+  },
+  {
+    "id": "4859d377-7645-4f7f-a643-57ae54f81c3f",
+    "title": "The Big Boss",
+    "patch": null,
+    "reason": "The stored sources or note do not substantiate this specific renewal, date, or series conclusion. Withdraw unsupported certainty; absence of news is not conclusion.",
+    "retract": true
+  },
+  {
+    "id": "818238ce-cbdf-43b3-a90b-6e5f65c32463",
+    "title": "Tower of God",
+    "patch": null,
+    "reason": "The stored sources or note do not substantiate this specific renewal, date, or series conclusion. Withdraw unsupported certainty; absence of news is not conclusion.",
+    "retract": true
+  },
+  {
+    "id": "c8d5a0c7-d110-456d-856e-04f25f66b519",
+    "title": "Overlord",
+    "patch": null,
+    "reason": "The stored sources or note do not substantiate this specific renewal, date, or series conclusion. Withdraw unsupported certainty; absence of news is not conclusion.",
+    "retract": true
+  },
+  {
+    "id": "93bdcec5-b599-4e44-8b21-5384dd0b19f3",
+    "title": "Detective Conan",
+    "patch": null,
+    "reason": "The stored sources or note do not substantiate this specific renewal, date, or series conclusion. Withdraw unsupported certainty; absence of news is not conclusion.",
+    "retract": true
+  },
+  {
+    "id": "2e581714-c4f0-455f-aa05-5113e0b2cfd5",
+    "title": "Mayday",
+    "patch": null,
+    "reason": "A spin-off article and fan reports do not substantiate Season 27.",
+    "retract": true
+  },
+  {
+    "id": "11f567be-27ac-48bc-bd8d-4ce8a98fb38e",
+    "title": "The Witcher",
+    "patch": {
+      "status": "announced_no_date",
+      "release": "TBA",
+      "source": "https://about.netflix.com/en/news/the-witcher-season-4-begins-production-in-the-uk-and-netflix-announces-fifth",
+      "note": "Netflix confirmed a fifth and final season. The previously displayed 2027 window was not officially confirmed.",
+      "evidence": [
+        {
+          "url": "https://about.netflix.com/en/news/the-witcher-season-4-begins-production-in-the-uk-and-netflix-announces-fifth",
+          "tier": "official",
+          "primary": true,
+          "publisher": "Netflix",
+          "publishedAt": "2024-04-18"
+        }
+      ]
+    },
+    "reason": "Retain confirmed renewal; remove unconfirmed delay window.",
+    "retract": false
+  },
+  {
+    "id": "edd7637b-9417-420c-b4f7-5ca62f8e5ab6",
+    "title": "Stuart Fails to Save the Universe",
+    "patch": {
+      "status": "announced_no_date",
+      "release": "TBA",
+      "note": "Season 2 is announced. A hoped-for fall 2027 release is not a confirmed premiere window."
+    },
+    "reason": "Creator aspiration was promoted to a confirmed window.",
+    "retract": false
+  },
+  {
+    "id": "d60f86d6-488a-4758-b345-9bcdd5e1954e",
+    "title": "Mushoku Tensei",
+    "patch": {
+      "next": "Season 3 Part 2",
+      "note": "Season 3 Part 2 was announced for 2027. The app previously called it Season 6 by counting cours as seasons."
+    },
+    "reason": "Correct the official installment name.",
+    "retract": false
+  },
+  {
+    "id": "8e768809-0376-49b9-8d4c-bd379feb23b2",
+    "title": "Kaiju No. 8",
+    "patch": {
+      "next": "Final Chapter",
+      "source": "https://kaiju-no8.net/news/detail_251220_01.html",
+      "note": "The official anime site announced production of the Final Chapter. No release date or numbered-season designation is given.",
+      "evidence": [
+        {
+          "url": "https://kaiju-no8.net/news/detail_251220_01.html",
+          "tier": "reputable",
+          "primary": true,
+          "publisher": "Official Kaiju No. 8 anime website",
+          "publishedAt": "2025-12-20"
+        }
+      ]
+    },
+    "reason": "Use announced title, without inventing season numbering.",
+    "retract": false
+  }
+]

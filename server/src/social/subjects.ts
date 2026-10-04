@@ -10,6 +10,11 @@ import { z } from 'zod'
 // "PostId" is one of the first three; "ThreadSubject" is any of the four. Ids are lowercase only
 // (a Postgres uuid always prints lowercase, and one spelling per subject is what keeps one thread),
 // and every integer is bounded by the int4 columns it is joined against.
+//
+// Following's "Episode N is out" post has no id of its own: it IS the episode's `ep:` subject, so
+// the post and the room are one thread. A "feed post id" (`feedPostIdSchema`) is therefore any of
+// the four — the post page, saves and hides take it; reminders stay PostId-only (an episode that is
+// out has nothing to be reminded of).
 
 export type ParsedSubject =
   | { kind: 'news'; announcementId: string }
@@ -99,6 +104,12 @@ export const threadSubjectSchema = z
 
 /** Alias of `threadSubjectSchema`: every subject is a thread subject. */
 export const subjectSchema = threadSubjectSchema
+
+/**
+ * An id a feed post can carry: a PostId, or an episode's `ep:` subject (the "Episode N is out"
+ * post). Every subject is one, so this is `threadSubjectSchema` under the name its callers mean.
+ */
+export const feedPostIdSchema = threadSubjectSchema
 
 /** A PostId (news, catalog or trailer — never an episode room). Outputs the string unchanged. */
 export const postIdSchema = z

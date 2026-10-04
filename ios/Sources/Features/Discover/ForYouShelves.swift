@@ -61,7 +61,7 @@ struct ForYouGroup: Identifiable {
 extension RecommendationItem {
     /// "Anime · 2019 · Action · Fantasy" — what it is, when, two genres.
     var factsLine: String {
-        var bits = [source.kindWord]
+        var bits = [source.kindLead].compactMap { $0 }
         if let year { bits.append(String(year)) }
         bits += genres.prefix(2)
         return bits.joined(separator: " \u{00B7} ")
@@ -69,7 +69,7 @@ extension RecommendationItem {
 
     /// The tile's one fact — as short as the Library card's ("Anime · 2019"): the two genres wrapped
     /// the grey line to a second row, so For you's cards stood taller than the Library's.
-    var tileFacts: String { [source.kindWord, year.map(String.init)].compactMap { $0 }.joined(separator: " \u{00B7} ") }
+    var tileFacts: String { [source.kindLead, year.map(String.init)].compactMap { $0 }.joined(separator: " \u{00B7} ") }
 
     var posterURL: String? { stub?.tilePoster.url ?? images?.portrait }
 }
@@ -236,7 +236,7 @@ struct ForYouTopPick: View {
                     .foregroundStyle(owned ? ThemeColor.textPrimary : ThemeColor.canvas)
                     .lineLimit(1)
                     .frame(maxWidth: .infinity, minHeight: 44)
-                    .background(owned ? ThemeColor.textPrimary.opacity(0.2) : ThemeColor.textPrimary, in: Capsule())
+                    .background(owned ? AnyShapeStyle(ThemeColor.textPrimary.opacity(0.2)) : AnyShapeStyle(ThemeGradient.ivory), in: Capsule())
                     .contentShape(Capsule())
             }
             .buttonStyle(FeedIconPressStyle())
@@ -297,7 +297,7 @@ struct TrendingShelfTile: View {
     let onOpen: () -> Void
 
     var body: some View {
-        let facts = [item.source.kindWord, item.year.map(String.init)].compactMap { $0 }.joined(separator: " \u{00B7} ")
+        let facts = [item.source.kindLead, item.year.map(String.init)].compactMap { $0 }.joined(separator: " \u{00B7} ")
         ShelfPosterTile(poster: item.tilePoster.url ?? item.portraitArt, name: item.tilePoster.name, title: item.title.shelfShortened(fitting: 26),
                         facts: facts, accessibilityLabel: spoken, onOpen: onOpen) {
             add

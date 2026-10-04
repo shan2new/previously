@@ -1,4 +1,5 @@
 import type {
+  Airing,
   AnnouncementEvidenceTier,
   FeedFranchise,
   FeedPartRef,
@@ -16,7 +17,8 @@ import type {
   WatchStatus,
 } from '../types/api.js'
 import { announcementForPart, installmentName, matchPart } from '../news/installment.js'
-import { catalogProviderUrl, pickCatalogUpcomingPart } from '../services/catalogUpcoming.js'
+import { slotPassed, slotStrikesAt } from '../services/airingSlot.js'
+import { catalogProviderUrl, currentUpcoming, pickCatalogUpcomingPart } from '../services/catalogUpcoming.js'
 import { resolveReleaseWindow } from '../services/releaseWindow.js'
 import { formatSubject, parseSubject } from '../social/subjects.js'
 import {
@@ -31,8 +33,10 @@ import {
 
 // The Today feed's one composer (docs/api-contract.md, "Today feed"): research observations, the
 // catalogue and the trailer catalogue in, posts out. A rule-for-rule port of the spike's
-// FeedSpikeModel.swift, with every deviation named at its rule. Pure and deterministic given
-// `nowMs` — nothing in here reads the clock, the database or the viewer.
+// FeedSpikeModel.swift, with every deviation named at its rule — plus two kinds of post the spike
+// never had: "Episode N is out" (Following) and the discovery trailer (For you). Pure and
+// deterministic given `nowMs` — nothing in here reads the clock or the database, and the only thing
+// read of the viewer is the library status a franchise was loaded with.
 
 const DAY_MS = 86_400_000
 /** Reports within this span of the newest one are one news cluster ("when the news broke"). */
@@ -56,6 +60,8 @@ const FOUNDING_WINDOW_MS = 60 * 60_000
  * of its day, which ends in the last time zone 24 h later): the post is no longer news.
  */
 const PREMIERE_SPENT_MS = DAY_MS
+/** An episode is news for this long after it airs. */
+const EPISODE_NEWS_MS = 7 * DAY_MS
 
 // ---------- Inputs ----------
 
@@ -102,13 +108,19 @@ export interface ComposeInput {
    * link needs it; without an entry that link is null. Additive to the spec's input (see the P1 notes).
    */
   externalIds?: ReadonlyMap<string, number | null>
+  /**
+   * Compose "Episode N is out" posts (kind 'episode'). OFF unless asked for: a client that predates
+   * the kind renders an unknown one with the "announced" wording, so only a request that opts in
+   * (`GET /me/feed?episodes=1`) — or one for a single `ep:` post by id — may be answered with them.
+   */
+  episodes?: boolean
   nowMs: number
 }
 
 /** A post before per-viewer state. `thread` is internal (the storyline's input); routes strip it. */
-export type ComposedPost = Omit<FeedPost, 'viewer' | 'counts' | 'fresh'> & { thread: ComposeObservation[] }
+export type ComposedPost = Omit<FeedPost, 'viewer' | 'counts' | 'fresh' | 'context'> & { thread: ComposeObservation[] }
 
-type NewsKind = Exclude<FeedPostKind, 'trailer'>
+type NewsKind = Exclude<FeedPostKind, 'trailer' | 'episode'>
 
 /** Research status → post kind. Every other status (airing, recently_aired, concluded) is not news. */
 const KIND: Readonly<Record<string, NewsKind>> = {
@@ -189,7 +201,8 @@ function sanitizeVideo(v: FranchiseVideo): FranchiseVideo {
 
 const videoKey = (v: Pick<FranchiseVideo, 'site' | 'id'>): string => `${v.site.toLowerCase()}:${v.id}`
 
-function compareText(a: string, b: string): number {
+/** The feed's one text order (code units, no locale): equal times and scores never flicker. */
+export function compareText(a: string, b: string): number {
   return a < b ? -1 : a > b ? 1 : 0
 }
 
@@ -376,6 +389,7 @@ function researchPost(
     installment,
     isMovie,
     part: part ? toPartRef(part) : null,
+    episode: null,
     time,
     discoveredAt: oldestSame.observedAt,
     premiere,
@@ -441,6 +455,7 @@ function cataloguePost(f: Franchise, p: FranchisePart, input: ComposeInput): Com
     installment: p.label,
     isMovie: p.kind === 'movie',
     part: toPartRef(p),
+    episode: null,
     time,
     discoveredAt: attachedLater ? addedAt : 0,
     premiere: slot != null ? { at: slot, precision: precisionFor(f) } : null,
@@ -461,9 +476,15 @@ function cataloguePost(f: Franchise, p: FranchisePart, input: ComposeInput): Com
 function newsCandidate(f: Franchise, obs: readonly ComposeObservation[], input: ComposeInput): ComposedPost | null {
   const latest = obs[0]
   const catPart = pickCatalogUpcomingPart(f.parts, input.nowMs)
+  if (latest && (input.announcements.get(f.id) ?? []).some(a => a.id === latest.announcementId && a.status === 'retracted')) {
+    return catPart ? cataloguePost(f, catPart, input) : null
+  }
   const research = !!latest && kindOf(latest.status) != null && !!latest.announcementId && latest.next.trim() !== ''
 
-  if (latest && research) {
+  const validResearch = latest && research && currentUpcoming({
+    ...upcomingOf(latest, latest.next), checked: new Date(latest.observedAt).toISOString(),
+  }, f.parts, input.nowMs) != null
+  if (latest && validResearch) {
     if (latest.status !== 'rumored' || !catPart) return researchPost(f, latest, obs, null, input.nowMs)
     // A rumour the catalogue has since confirmed keeps its thread (`news:<id>`) and takes the
     // catalogue's kind; a rumour about some OTHER installment yields to the confirmed one — a
@@ -476,7 +497,7 @@ function newsCandidate(f: Franchise, obs: readonly ComposeObservation[], input: 
   }
   // No research news. The catalogue speaks when research knows nothing, or only that the last
   // installment ended; a stored `airing` is kept over it, as `resolveUpcomingWithCatalog` does.
-  if (catPart && (!latest || latest.status === 'recently_aired' || latest.status === 'concluded')) {
+  if (catPart && (!latest || (research && !validResearch) || latest.status === 'unknown' || latest.status === 'recently_aired' || latest.status === 'concluded')) {
     return cataloguePost(f, catPart, input)
   }
   return null
@@ -542,6 +563,7 @@ function trailerPost(
     installment: installmentName(label || part?.label || '').name,
     isMovie: part?.kind === 'movie',
     part: part ? toPartRef(part) : null,
+    episode: null,
     // A publish date up to a day ahead parses (D6); the post still cannot be dated after now.
     time: { at: Math.min(t.ms, nowMs), dateOnly: t.dateOnly, basis: 'published' },
     // Video rows carry no first-seen stamp; the trailer sweep's lag is small (spec §14.1).
@@ -610,6 +632,7 @@ function orphanTrailerPost(f: Franchise, id: string, at: number): ComposedPost {
     installment: '',
     isMovie: false,
     part: null,
+    episode: null,
     time: { at, dateOnly: false, basis: 'observed' },
     discoveredAt: 0,
     premiere: null,
@@ -620,6 +643,178 @@ function orphanTrailerPost(f: Franchise, id: string, at: number): ComposedPost {
     isOfficial: false,
     thread: [],
   }
+}
+
+// ---------- The discovery trailer (For you, a recommended show) ----------
+
+/** The better cut to introduce a show with: a trailer before a teaser before an announcement. */
+const DISCOVERY_KIND_ORDER: Partial<Record<FranchiseVideo['kind'], number>> = { trailer: 0, teaser: 1, announcement: 2 }
+
+/**
+ * The trailer that introduces a show to someone who has not seen it, WHATEVER ITS AGE — For you
+ * adds it for a show the recommender picked (feed/service.ts), because most such shows have no news
+ * and `trailerPosts` only posts the last 200 days. The same post as any trailer post (`trailerPost`,
+ * the same id), honestly dated at the video's publish instant; the caller ranks it as evergreen.
+ *
+ * `posts` are the show's feed posts as composed. Null when:
+ *   - the feed already carries a trailer post for the show (its recent cut keeps its real recency,
+ *     and an old trailer must not outrank it);
+ *   - the catalogue has no usable video — postable as `trailerPosts` means it (a trailer, teaser or
+ *     announcement, not disowned, not a re-cut), DATED (an AniList trailer carries no publish date,
+ *     and a date is never invented), not ahead of now, and not the live news post's own campaign
+ *     (its attached video, or one published within ten days of it — the news post is that story).
+ *
+ * The pick: the franchise's featured video when it is usable (the cut the show page leads with),
+ * else an official cut before an unmarked one, a trailer before a teaser before an announcement,
+ * the newest first.
+ */
+export function discoveryTrailer(f: Franchise, posts: readonly ComposedPost[], nowMs: number): ComposedPost | null {
+  const own = posts.filter((post) => post.franchiseId === f.id)
+  if (own.some((post) => post.kind === 'trailer')) return null
+  const news = own.find((post) => post.kind !== 'episode') ?? null
+
+  const usable: { v: FranchiseVideo; t: { ms: number; dateOnly: boolean }; id: string }[] = []
+  for (const v of videoPool(f)) {
+    if (!isPostableVideo(v)) continue
+    const t = parseEvidenceDate(v.publishedAt, nowMs)
+    if (!t || t.ms > nowMs) continue
+    if (news?.video && videoKey(news.video) === videoKey(v)) continue
+    if (news && Math.abs(t.ms - news.time.at) <= VIDEO_NEAR_MS) continue
+    const id = trailerId(f, v)
+    if (!id) continue
+    usable.push({ v, t, id })
+  }
+  const featuredKey = f.featuredVideo ? videoKey(f.featuredVideo) : null
+  const best =
+    usable.find((u) => videoKey(u.v) === featuredKey) ??
+    usable.sort(
+      (a, b) =>
+        Number(b.v.official === true) - Number(a.v.official === true) ||
+        (DISCOVERY_KIND_ORDER[a.v.kind] ?? 9) - (DISCOVERY_KIND_ORDER[b.v.kind] ?? 9) ||
+        b.t.ms - a.t.ms ||
+        compareText(a.v.id, b.v.id) ||
+        compareText(a.id, b.id),
+    )[0]
+  return best ? trailerPost(f, best.v, best.t, best.id, nowMs) : null
+}
+
+// ---------- Episode posts ("Episode N is out", Following) ----------
+
+/**
+ * The library statuses whose shows post their episodes: being watched, watched, or paused. A
+ * planned show has not been started and a dropped one was left; a franchise loaded for nobody
+ * (For you) has no status at all — which is what keeps these posts in Following.
+ */
+const EPISODE_STATUSES: ReadonlySet<WatchStatus> = new Set<WatchStatus>(['watching', 'completed', 'paused'])
+/**
+ * A part of the main story, by the rule the app itself uses (ios `FranchisePart.isMainStory`) and by
+ * nothing the stored rows are unreliable about: `optional`, and SIDE_STORY on a season, were written
+ * for seasons that merely HAVE a side story (grouping/relationship.ts — true until
+ * `npm run relations:backfill -- --apply` has run), and reading them here kept My Hero Academia's
+ * and Gintama's seasons out of the episode posts.
+ *   a season: not short-form, not a spin-off;
+ *   an ONA run (a show with no such season): the root, or a link in its sequel chain.
+ */
+function isMainStory(p: FranchisePart): boolean {
+  if (p.format === 'TV_SHORT') return false
+  const relationship = (p.relationship ?? '').toUpperCase()
+  if (p.kind === 'season') return relationship !== 'SPIN_OFF'
+  return relationship === '' || relationship === 'SEQUEL' || relationship === 'PREQUEL'
+}
+
+/** The parts whose episodes are news: the main-story seasons; for a show with none, its main-story ONAs. */
+function episodicParts(f: Franchise): FranchisePart[] {
+  const seasons = f.parts.filter((p) => p.kind === 'season' && isMainStory(p))
+  return seasons.length > 0 ? seasons : f.parts.filter((p) => p.kind === 'ona' && isMainStory(p))
+}
+
+/**
+ * The part's newest episode that has aired by now — the rule the progress clamp and the episode
+ * gate use (`slotPassed`: a timed slot at its instant, a date-only TMDB one from the day after its
+ * date in the earliest time zone), read from the dated episodes the payload carries (`airings`: 8
+ * days back). A slot that has struck counts at once, before the hourly sync moves `next` on. A part
+ * still NOT_YET_RELEASED has aired nothing, whatever a passed slot says (as `airedCount`). Episodes
+ * sharing an instant (a season drop) yield the highest number.
+ */
+function latestAired(p: FranchisePart, source: Franchise['source'], nowMs: number): Airing | null {
+  if (p.status === 'NOT_YET_RELEASED') return null
+  let latest: Airing | null = null
+  for (const a of p.airings) {
+    if (!slotPassed(a.at, source, nowMs)) continue
+    if (!latest || a.at > latest.at || (a.at === latest.at && a.episode > latest.episode)) latest = a
+  }
+  return latest
+}
+
+/** The post itself. Its id is the episode's own thread subject: the post and the room are one. */
+function episodePost(f: Franchise, p: FranchisePart, episode: number, time: FeedTime, discoveredAt: number): ComposedPost | null {
+  const id = formatSubject({ kind: 'episode', mediaId: p.mediaId, episode })
+  if (parseSubject(id)?.kind !== 'episode') return null
+  return {
+    id,
+    kind: 'episode',
+    origin: 'catalogue',
+    franchiseId: f.id,
+    installment: p.label,
+    isMovie: p.kind === 'movie',
+    part: toPartRef(p),
+    episode,
+    time,
+    discoveredAt,
+    // No title, no still, no synopsis: an episode's own details are spoilers.
+    premiere: null,
+    window: null,
+    note: null,
+    video: null,
+    sources: [],
+    isOfficial: false,
+    thread: [],
+  }
+}
+
+/**
+ * An aired episode as a post, dated from its airing. A TMDB airing is a calendar date (its 17:00
+ * UTC is synthesised): the post is carried at 12:00 UTC of that date, never after now, and never
+ * prints a clock. It is NEW from the instant the slot struck (`slotStrikesAt`) — for a date-only
+ * episode that is before its noon, so a visit between the two does not see it as new twice.
+ */
+function airedEpisodePost(f: Franchise, p: FranchisePart, airing: Airing, nowMs: number): ComposedPost | null {
+  const dateOnly = f.source === 'tmdb'
+  const at = dateOnly ? Math.min(Math.floor(airing.at / DAY_MS) * DAY_MS + DAY_MS / 2, nowMs) : airing.at
+  return episodePost(f, p, airing.episode, { at, dateOnly, basis: 'aired' }, slotStrikesAt(airing.at, f.source))
+}
+
+/**
+ * "Episode N is out": for a show the viewer watches, watched or paused, one post per main-story
+ * part — its newest aired episode, for a week after it aired, whether or not the viewer has seen it.
+ * Composed only for a request that asked (`ComposeInput.episodes`).
+ */
+function episodePosts(f: Franchise, nowMs: number): ComposedPost[] {
+  const status = f.subscription?.status
+  if (!status || !EPISODE_STATUSES.has(status)) return []
+  const posts: ComposedPost[] = []
+  for (const p of episodicParts(f)) {
+    const airing = latestAired(p, f.source, nowMs)
+    if (!airing || nowMs - slotStrikesAt(airing.at, f.source) > EPISODE_NEWS_MS) continue
+    const post = airedEpisodePost(f, p, airing, nowMs)
+    if (post) posts.push(post)
+  }
+  return posts
+}
+
+/**
+ * An episode post by id, for any part of the franchise and any episode that is out (D16: its likes,
+ * saves and room stay reachable after the feed lets it go). Dated from its airing while the payload
+ * still carries it; an older episode's air instant is gone from the lean payload, so — as a delisted
+ * trailer — it composes only while someone holds a row on it, dated at that row (`orphanAt`), and is
+ * never new. Null for an episode that has not aired.
+ */
+function episodePostById(f: Franchise, p: FranchisePart, episode: number, nowMs: number, orphanAt: number | null): ComposedPost | null {
+  if (p.status === 'NOT_YET_RELEASED') return null
+  const airing = p.airings.find((a) => a.episode === episode)
+  if (airing) return slotPassed(airing.at, f.source, nowMs) ? airedEpisodePost(f, p, airing, nowMs) : null
+  if (episode > p.airedEpisodes || orphanAt == null) return null
+  return episodePost(f, p, episode, { at: Math.min(orphanAt, nowMs), dateOnly: false, basis: 'observed' }, 0)
 }
 
 // ---------- Composition ----------
@@ -640,11 +835,19 @@ function isSpentNews(post: ComposedPost, nowMs: number): boolean {
 }
 
 function composeFranchise(f: Franchise, input: ComposeInput): ComposedPost[] {
-  const news = newsCandidate(f, observationsFor(input, f.id), input)
+  const obs = observationsFor(input, f.id)
+  const news = newsCandidate(f, obs, input)
   const live = news && !isSpentNews(news, input.nowMs) ? news : null
+  const latest = obs[0]
+  const withdrawn = latest && (input.announcements.get(f.id) ?? []).some(a => a.id === latest.announcementId && a.status === 'retracted')
+  const trailerOwner = news ?? (latest && !withdrawn ? researchPost(f, latest, obs, null, input.nowMs) : null)
   // A spent news post still claims its own trailer (and the ones cut around it): the installment's
   // story is over in the feed, not re-told as a trailer post.
-  return [...(live ? [live] : []), ...trailerPosts(f, news, input.nowMs)]
+  return [
+    ...(live ? [live] : []),
+    ...trailerPosts(f, trailerOwner, input.nowMs),
+    ...(input.episodes === true ? episodePosts(f, input.nowMs) : []),
+  ]
 }
 
 /** Every post for every franchise, in franchise order, unordered within. `orderPosts` sorts them. */
@@ -655,20 +858,24 @@ export function composePosts(input: ComposeInput): ComposedPost[] {
 /** What `composePostById` needs beyond the input to keep a thread reachable. */
 export interface ComposeByIdOptions {
   /**
-   * For a `trailer:` id whose video the catalogue no longer lists: the instant of the thread's
-   * first social row (like, comment, save or reminder). Given, the post composes bare
-   * (`orphanTrailerPost`); absent — nobody holds a row on it — the id composes to null.
+   * The instant of the thread's first social row (like, comment, save or reminder), for a post the
+   * catalogue can no longer date: a `trailer:` id whose video it no longer lists (composed bare,
+   * `orphanTrailerPost`), or an `ep:` id whose air instant has left the payload (`episodePostById`).
+   * Absent — nobody holds a row on it — such an id composes to null.
    */
-  orphanTrailerAt?: number | null
+  orphanAt?: number | null
 }
 
 /**
  * One post by id, including one the feed no longer carries (D16: real comments stay reachable from
  * notifications and Saved after the post leaves the feed). `live` is true exactly when
- * `composePosts` also emits the returned id. A `catalog:` part that has premiered since still
- * composes (not live), as does a `news:` post whose installment has arrived. Null for an episode
- * subject, an unknown id, a part or franchise the catalogue no longer has, or a delisted trailer
- * nobody holds a row on.
+ * `composePosts` also emits the returned id — for an `ep:` id, only for a viewer whose Following
+ * carries it (the franchise loaded with their status, the input composing episodes; the post
+ * itself composes by id either way). A `catalog:` part that has premiered since
+ * still composes (not live), as does a `news:` post whose installment has arrived and an episode
+ * that is no longer its part's newest. Null for an unknown id, a part or franchise the catalogue no
+ * longer has, an episode that has not aired, or a delisted trailer (or an episode the payload can
+ * no longer date) nobody holds a row on.
  */
 export function composePostById(
   input: ComposeInput,
@@ -676,7 +883,7 @@ export function composePostById(
   opts: ComposeByIdOptions = {},
 ): { post: ComposedPost; live: boolean } | null {
   const parsed = parseSubject(postId)
-  if (!parsed || parsed.kind === 'episode') return null
+  if (!parsed) return null
 
   let found: { f: Franchise; post: ComposedPost } | null = null
   switch (parsed.kind) {
@@ -688,6 +895,8 @@ export function composePostById(
           (input.observations.get(candidate.id) ?? []).some((o) => o.announcementId === a),
       )
       if (!f) return null
+      // A corrected identity/source error must not resurrect from immutable snapshots on a saved link.
+      if ((input.announcements.get(f.id) ?? []).some(row => row.id === a && row.status === 'retracted')) return null
       const obs = observationsFor(input, f.id)
       const ofAnnouncement = obs.filter((o) => o.announcementId === a && o.next.trim() !== '')
       // The newest observation of this announcement when it states news, else the newest one that did.
@@ -724,12 +933,20 @@ export function composePostById(
       const id = v ? trailerId(f, v) : null
       if (v && t && id) {
         found = { f, post: trailerPost(f, v, t, id, input.nowMs) }
-      } else if (opts.orphanTrailerAt != null) {
+      } else if (opts.orphanAt != null) {
         // Delisted (or no longer a postable, dated trailer) while the thread holds rows: bare.
-        found = { f, post: orphanTrailerPost(f, formatSubject(parsed), opts.orphanTrailerAt) }
+        found = { f, post: orphanTrailerPost(f, formatSubject(parsed), opts.orphanAt) }
       } else {
         return null
       }
+      break
+    }
+    case 'episode': {
+      const f = input.franchises.find((candidate) => candidate.parts.some((p) => p.mediaId === parsed.mediaId))
+      const part = f?.parts.find((p) => p.mediaId === parsed.mediaId)
+      if (!f || !part) return null
+      const post = episodePostById(f, part, parsed.episode, input.nowMs, opts.orphanAt ?? null)
+      if (post) found = { f, post }
       break
     }
   }

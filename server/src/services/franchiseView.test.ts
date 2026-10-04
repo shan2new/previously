@@ -49,10 +49,10 @@ describe('deriveAiredEpisodes', () => {
 
   it('never reports the user´s own progress for a releasing part with no next slot', () => {
     // The regression this guards: the count must not move with `watched`, and an undated list
-    // (AniList streamingEpisodes carry no airDate) falls back to the catalogue total.
+    // (AniList streamingEpisodes carry no airDate) cannot prove the advertised run has aired.
     const episodes = eps(12, null)
-    expect(deriveAiredEpisodes({ status: 'RELEASING', totalEpisodes: 12, next: null, episodes, nowMs: NOW })).toBe(12)
-    expect(deriveAiredEpisodes({ status: 'RELEASING', totalEpisodes: 12, next: null, episodes: [], nowMs: NOW })).toBe(12)
+    expect(deriveAiredEpisodes({ status: 'RELEASING', totalEpisodes: 12, next: null, episodes, nowMs: NOW })).toBe(0)
+    expect(deriveAiredEpisodes({ status: 'RELEASING', totalEpisodes: 12, next: null, episodes: [], nowMs: NOW })).toBe(0)
   })
 
   it('takes the latest aired number, not the count, from a sparse dated list', () => {

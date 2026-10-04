@@ -22,6 +22,7 @@
     "anime-videos": "tsx src/scripts/backfill-anime-videos.ts",
     "reco": "tsx src/scripts/reco-one.ts",
     "reco:backfill": "tsx src/scripts/reco-backfill.ts",
+    "relations:backfill": "tsx src/scripts/relations-backfill.ts",
     "auth:smoke": "tsx src/scripts/auth-smoke.ts",
     "moderation": "tsx src/scripts/moderation.ts",
     "test": "vitest run"

@@ -1,6 +1,7 @@
 import type { FastifyPluginAsync } from 'fastify'
 import { z } from 'zod'
 import { decodeGenreCursor, genreByKey } from '../discover/genres.js'
+import { suggestionSource } from '../services/audience.js'
 import { getDiscoverGenrePage, getDiscoverGenres } from '../services/discover.js'
 import type { DiscoverGenrePage, DiscoverGenresResponse } from '../types/api.js'
 
@@ -10,6 +11,9 @@ import type { DiscoverGenrePage, DiscoverGenresResponse } from '../types/api.js'
 // Every input is safeParse'd: a bad source, limit or cursor answers 400 and reaches no service (a
 // thrown ZodError would be a 500 — there is no error handler). Unknown query keys are ignored, as on
 // the other list routes (/franchises/trending, /me/recommendations); their VALUES are validated.
+//
+// With no `source` the viewer's AUDIENCE is the catalogue browsed (services/audience.ts) — All only
+// for a viewer whose audience is both; an explicit one wins. The response's `source` says which was used.
 
 const sourceSchema = z.enum(['anilist', 'tmdb'])
 
@@ -28,7 +32,7 @@ export const discoverRoutes: FastifyPluginAsync = async (app) => {
   app.get('/discover/genres', async (req, reply) => {
     const query = listQuery.safeParse(req.query)
     if (!query.success) return reply.code(400).send({ error: 'invalid request' })
-    const body: DiscoverGenresResponse = await getDiscoverGenres(query.data.source ?? null)
+    const body: DiscoverGenresResponse = await getDiscoverGenres(await suggestionSource(req.user!.id, query.data.source))
     return body
   })
 
@@ -48,7 +52,7 @@ export const discoverRoutes: FastifyPluginAsync = async (app) => {
     }
 
     const body: DiscoverGenrePage = await getDiscoverGenrePage(req.user!.id, def, {
-      source: query.data.source ?? null,
+      source: await suggestionSource(req.user!.id, query.data.source),
       limit: query.data.limit,
       offset,
     })

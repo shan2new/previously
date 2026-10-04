@@ -14,6 +14,9 @@ extension AppModel {
     /// The same rule over any list (the See-all screen's longer one).
     func visibleRecommendations(in list: [RecommendationItem]) -> [RecommendationItem] {
         list.filter { r in
+            // The viewer's kind only (`Audience`): the server ranks for it; a list fetched before
+            // the choice, or by an older server, is held to it here.
+            guard audience.allows(r.source) else { return false }
             guard !hiddenRecommendationKeys.contains(r.key) else { return false }
             // One added from the shelf keeps its tile, ticked, until the next list.
             return addedRecommendationKeys.contains(r.key) || !isOwned(r)

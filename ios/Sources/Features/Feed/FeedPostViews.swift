@@ -81,8 +81,37 @@ struct FeedPostRow: View, @MainActor Equatable {
             .accessibilityElement(children: .contain)
     }
 
+    /// X's social-context line: why this post is in For you, a small glyph under the avatar's
+    /// column and the reason on the words' axis.
+    @ViewBuilder private var contextLine: some View {
+        if let line = model.contextLine {
+            HStack(spacing: FeedMetrics.gap) {
+                AppGlyph(systemName: isTaste ? "arrow.up.right" : "tv")
+                    .font(ThemeType.feedSmall.font.weight(.semibold))
+                    .frame(width: FeedMetrics.avatar, alignment: .trailing)
+                Text(line)
+                    .type(ThemeType.feedSmall)
+                    .lineLimit(1)
+                Spacer(minLength: 0)
+            }
+            .foregroundStyle(ThemeColor.feedSecondary)
+            .padding(.horizontal, FeedMetrics.inset)
+            .padding(.top, FeedMetrics.rowTop)
+            // The name keeps its place under the line: the row's own top padding folds into it.
+            .padding(.bottom, -FeedMetrics.rowTop + ThemeSpace.x1)
+            .accessibilityElement(children: .ignore)
+            .accessibilityLabel(line)
+        }
+    }
+
+    private var isTaste: Bool {
+        if case .taste = model.post.context { return true }
+        return false
+    }
+
     private var content: some View {
         VStack(spacing: 0) {
+            contextLine
             HStack(alignment: .top, spacing: FeedMetrics.gap) {
                 Button(action: onOpenShow) {
                     ShowAvatar(franchise: model.franchise)
@@ -168,9 +197,8 @@ private struct PostAccessibilityActions: ViewModifier {
             .accessibilityAction(named: appModel.isSaved(id) ? Copy.Feed.unsave : Copy.Feed.save) {
                 appModel.toggleSave(model)
             }
-            .accessibilityAction(named: appModel.isReminded(id) ? Copy.Feed.reminderOn : Copy.Feed.remindMe) {
-                appModel.toggleRemind(model)
-            }
+            .modifier(OptionalAction(name: appModel.isReminded(id) ? Copy.Feed.reminderOn : Copy.Feed.remindMe,
+                                     enabled: model.post.kind != .episode, action: { appModel.toggleRemind(model) }))
             .modifier(OptionalAction(name: Copy.Feed.replies(appModel.commentCount(id)),
                                      enabled: appModel.feedCapabilities.comments, action: onComment))
             .accessibilityAction(named: Copy.Feed.share) {
@@ -343,7 +371,7 @@ struct ShowAddCapsule: View {
                 .fixedSize()
                 .padding(.horizontal, FeedPostLayout.addPadding)
                 .frame(minHeight: FeedPostLayout.addHeight)
-                .background(owned ? Color.clear : ThemeColor.feedText, in: Capsule())
+                .background(owned ? AnyShapeStyle(Color.clear) : AnyShapeStyle(ThemeGradient.ivory), in: Capsule())
                 .overlay(Capsule().strokeBorder(owned ? ThemeColor.feedSeparator : .clear, lineWidth: FeedMetrics.hairline))
                 .frame(minHeight: FeedMetrics.actionHitHeight)
                 .contentShape(Rectangle())

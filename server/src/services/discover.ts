@@ -47,7 +47,7 @@ const WATCH_STATUSES: ReadonlySet<string> = new Set<WatchStatus>(['watching', 'c
 const genresArray = sql`(case when jsonb_typeof(${franchise.genres}) = 'array' then ${franchise.genres} else '[]'::jsonb end)`
 
 /** The non-genre half of the qualifying rule (the member join is the caller's). */
-function baseConditions(source: MediaSource | null): SQL[] {
+export function baseConditions(source: MediaSource | null): SQL[] {
   const conditions = [
     sql`(${franchise.enrichment} -> 'isAdult') is distinct from 'true'::jsonb`,
     sql`not (${genresArray} @> '["Hentai"]'::jsonb)`,

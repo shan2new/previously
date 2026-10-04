@@ -321,6 +321,21 @@ final class APIClient: @unchecked Sendable {
         return res.franchises
     }
 
+    /// First run's picker: the catalogue's best-known shows for the viewer's audience
+    /// (`GET /franchises/starter`). A server that predates the route answers 404 — the caller
+    /// falls back to the chart.
+    func starter(limit: Int = 60) async throws -> [FranchiseSummary] {
+        let res: FranchiseListResponse = try await request("/franchises/starter?limit=\(limit)", idempotent: true)
+        return res.franchises
+    }
+
+    /// What is airing now, by the chart (`status=RELEASING`), for the viewer's audience.
+    func airingNow(limit: Int = 60) async throws -> [FranchiseSummary] {
+        let res: FranchiseListResponse = try await request("/franchises/trending?limit=\(limit)&status=RELEASING",
+                                                           idempotent: true)
+        return res.franchises
+    }
+
     /// The full search response, including what the server corrected and which catalogue failed.
     /// `exact` opts out of the server's spell-correction.
     func search(query: String, exact: Bool = false) async throws -> SearchResponse {
@@ -364,6 +379,25 @@ final class APIClient: @unchecked Sendable {
 
     /// "Recommended for you" — server-ranked, second-degree (docs/api-contract.md). An older
     /// server answers 404; the caller hides the shelf.
+    // MARK: Audience (`GET` / `PUT /me/preferences`, `audience`)
+
+    /// The account's audience; nil when it has never answered (or the server predates the field).
+    func audience() async throws -> Audience? {
+        struct Preferences: Decodable { let audience: String? }
+        let res: Preferences = try await request("/me/preferences", idempotent: true)
+        return res.audience.flatMap(Audience.init(rawValue:))
+    }
+
+    /// Sets the account's audience. The other preferences are left as they are.
+    func saveAudience(_ value: Audience) async throws {
+        struct Body: Encodable { let audience: String }
+        struct Saved: Decodable { let audience: String? }
+        let saved: Saved = try await request("/me/preferences", method: "PUT",
+                                             body: Body(audience: value.rawValue), idempotent: true)
+        // A server that does not keep the field yet answers without it: the choice stays owed.
+        guard saved.audience == value.rawValue else { throw APIError.infrastructure(503, "audience not saved") }
+    }
+
     func recommendations(limit: Int = 12) async throws -> RecommendationsResponse {
         try await request("/me/recommendations?limit=\(limit)", idempotent: true)
     }
@@ -379,6 +413,24 @@ final class APIClient: @unchecked Sendable {
     func removeRecommendationFeedback(key: String) async throws {
         let _: NoContent = try await request("/me/recommendations/feedback", method: "DELETE",
                                              body: RecommendationFeedbackBody(key: key, kind: nil),
+                                             idempotent: true)
+    }
+
+    /// The account's watch sessions (first watches and rewatches), deleted ones excluded.
+    func watchSessions() async throws -> [WatchSessionWire] {
+        let res: WatchSessionsResponse = try await request("/me/watch-sessions", idempotent: true)
+        return res.sessions
+    }
+
+    /// Creates or replaces one session, whole. 410 = deleted on another device; 404 = its
+    /// franchise is gone. Both are final.
+    func putWatchSession(id: UUID, _ body: WatchSessionBody) async throws {
+        let _: NoContent = try await request("/me/watch-sessions/\(id.uuidString.lowercased())", method: "PUT",
+                                             body: body, idempotent: true)
+    }
+
+    func deleteWatchSession(id: UUID) async throws {
+        let _: NoContent = try await request("/me/watch-sessions/\(id.uuidString.lowercased())", method: "DELETE",
                                              idempotent: true)
     }
 
@@ -442,8 +494,13 @@ final class APIClient: @unchecked Sendable {
     /// answered). When sent, the server orders and marks `fresh` against it and echoes it as the
     /// response's `prevOpenedAt`; when nil (or not positive) the key is omitted and the server
     /// reads its stored anchor.
+    ///
+    /// `episodes=1` on Following asks for the "Episode N is out" posts (4 Oct): the server sends
+    /// them only to a build that says it can draw them — an older one reads an unknown kind as an
+    /// announcement.
     func feed(tab: FeedTab, since: Int64? = nil) async throws -> FeedResponse {
         var path = "/me/feed?tab=\(tab.rawValue)"
+        if tab == .following { path += "&episodes=1" }
         if let since, since > 0 { path += "&since=\(since)" }
         return try await request(path, idempotent: true)
     }

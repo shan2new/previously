@@ -25,6 +25,7 @@ import type {
 import { createPacer } from '../util/pacer.js'
 import { BoundedTaskQueue } from '../util/taskQueue.js'
 import { enqueueAnimeVideoFallback } from './animeVideoFallback.js'
+import { audienceSource } from './audience.js'
 import { deriveAiredEpisodes, getSummaries } from './franchiseView.js'
 import {
   rankRecommendations,
@@ -309,15 +310,22 @@ async function present(
 /**
  * `GET /me/recommendations`: the user's ranked list for today (deterministic for user + UTC day).
  * Served titles without a show page are queued for background materialisation.
+ *
+ * Only titles of the viewer's AUDIENCE (services/audience.ts) — resolved HERE, not in the callers,
+ * so the route, the nightly materialiser and any future call site inherit the rule; `source`
+ * overrides it (null = both catalogues). The ranker filters before it selects, so the list is full.
  */
 export async function getRecommendations(
   userId: string,
   limit = 12,
-  options: { now?: number; materialise?: boolean } = {},
+  options: { now?: number; materialise?: boolean; source?: MediaSource | null } = {},
 ): Promise<RecommendationsResponse> {
   const now = options.now ?? Date.now()
-  const { input, series } = await loadRankInput(userId, now)
-  const ranked = rankRecommendations(input, { userId, limit })
+  const [{ input, series }, source] = await Promise.all([
+    loadRankInput(userId, now),
+    options.source !== undefined ? options.source : audienceSource(userId),
+  ])
+  const ranked = rankRecommendations(input, { userId, limit, source })
   const items = await present(ranked.items, series)
   if (options.materialise !== false) {
     queueMaterialisation(items)

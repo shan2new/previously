@@ -15,12 +15,20 @@ function cleanEpisodeTitle(raw: string): string {
 
 /**
  * Best-effort per-episode metadata for an AniList media, from `streamingEpisodes`. AniList exposes
- * no per-episode air date or overview; titles/thumbnails come as an ordered (but un-numbered) list,
- * so episodes are numbered by position. Sparse or empty for many titles — the client then falls
+ * titles/thumbnails in a potentially reversed or sparse list. Only explicit episode numbers can
+ * identify those entries; airingSchedule supplies dates. Sparse or empty for many titles — the client then falls
  * back to "Episode N", and the next-episode date badge uses the season-level `nextAiringAt`.
  */
-function aniListEpisodes(m: AniListMedia): EpisodeMeta[] {
+export function aniListEpisodes(m: AniListMedia): EpisodeMeta[] {
   const se = m.streamingEpisodes ?? []
+  // Streaming entries are often newest-first or incomplete. Their position is not an episode
+  // number. Unnumbered titles cannot safely be attached to an episode.
+  const byNumber = new Map<number, (typeof se)[number]>()
+  for (const episode of se) {
+    const match = /^\s*Episode\s+(\d+)\s*(?:[-–:]|$)/i.exec(episode.title ?? '')
+    const number = match ? Number(match[1]) : 0
+    if (number > 0 && number <= 10_000) byNumber.set(number, episode)
+  }
   // AniList's airingSchedule gives the exact instant per episode (seconds). It is the only source
   // of per-episode dates for anime, so the list carries it even for episodes without a streaming
   // entry (no title/still yet) — the client then never has to invent a cadence.
@@ -28,10 +36,10 @@ function aniListEpisodes(m: AniListMedia): EpisodeMeta[] {
   for (const n of m.airingSchedule?.nodes ?? []) {
     if (n.episode > 0 && n.airingAt > 0) airBy.set(n.episode, n.airingAt * 1000)
   }
-  const count = Math.max(se.length, ...airBy.keys(), 0)
+  const count = Math.max(...byNumber.keys(), ...airBy.keys(), 0)
   const out: EpisodeMeta[] = []
   for (let i = 0; i < count; i++) {
-    const e = se[i]
+    const e = byNumber.get(i + 1)
     out.push({
       number: i + 1,
       title: e?.title ? cleanEpisodeTitle(e.title) : null,

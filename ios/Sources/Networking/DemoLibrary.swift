@@ -391,6 +391,34 @@ enum AnnouncementRegression {
               "a one-episode ONA beside seasons is an extra")
         check(longRunner.resumePart == nil, "caught up on a long-runner leaves nothing to resume")
 
+        // 4 Oct: the shorts that air beside a season are extras (Re:ZERO's "Break Time" took
+        // Home's billboard as "19 EPISODES LEFT · Ona 4 · Episode 1"), and a finished run nobody
+        // started is a backlog, not news.
+        func run(_ id: Int, _ kind: PartKind, _ seq: Int, _ label: String, rel: String?, format: String? = nil,
+                 total: Int, progress: Int, airedAgo: Int64? = nil) -> FranchisePart {
+            FranchisePart(mediaId: id, kind: kind, sequence: seq, label: label, title: label, cover: nil, banner: nil,
+                          format: format, relationship: rel, status: "FINISHED", isReleasing: false,
+                          totalEpisodes: total, airedEpisodes: total, nextEpisodeNumber: nil, nextAiringAt: nil,
+                          lastAiredAt: airedAgo.map { now - $0 }, synopsis: nil, genres: [], progress: progress,
+                          airings: airedAgo.map { [Airing(episode: total, at: now - $0)] } ?? [])
+        }
+        let shorts = run(20, .ona, 4, "Ona 4", rel: "PARENT", total: 19, progress: 0, airedAgo: day)
+        let finale = run(21, .season, 5, "Season 4", rel: "SEQUEL", total: 19, progress: 18, airedAgo: day)
+        check(!shorts.isMainStory, "an ONA whose one tie is its PARENT is an extra")
+        check(shorts.canonicalLabel == "ONA 4", "an initialism is not a word")
+        let breakTime = run(22, .season, 6, "Season 6", rel: "PARENT", format: "TV_SHORT", total: 11, progress: 0)
+        check(breakTime.isSpinOff && !breakTime.isMainStory, "a short-form series under a PARENT is a spin-off")
+        check(finale.isNews(now: now, window: window), "a finale one behind is news")
+        check(!shorts.isNews(now: now, window: window), "a finished run never started is a backlog, not news")
+        let beside = Franchise(copying: base, parts: [
+            run(23, .season, 4, "Season 3", rel: "SEQUEL", total: 16, progress: 16), shorts, finale, breakTime,
+        ])
+        check(beside.resumePart?.mediaId == finale.mediaId, "the season is resumed, not the shorts beside it")
+        check(Franchise(copying: base, parts: [
+            run(23, .season, 4, "Season 3", rel: "SEQUEL", total: 16, progress: 16), shorts,
+            run(21, .season, 5, "Season 4", rel: "SEQUEL", total: 19, progress: 19), breakTime,
+        ]).resumePart == nil, "caught up on the story leaves its shorts out of the queue")
+
         // "I'm on Season 3" marks Seasons 1–2 and nothing else (`WatchedBatch(before:)`).
         let three = Franchise(copying: base, parts: [
             part(1, total: 10, upcoming: false), part(2, total: 12, upcoming: false),
@@ -402,6 +430,37 @@ enum AnnouncementRegression {
         check(before.status == .watching, "part-way leaves the show Watching")
         check(WatchedBatch(franchise: three, before: three.parts[0], now: now).parts.isEmpty,
               "part-way on Season 1 marks nothing")
+
+        // First run places a picked show with the same batches (`FirstRunWrite`): one write per
+        // show, whatever the answer.
+        let seenAll = FirstRunWrite(three, placement: .caughtUp, now: now)
+        check(Set(seenAll.parts.map(\.mediaId)) == [1, 2, 3] && seenAll.status == .completed,
+              "first run: caught up on a finished show marks every released season and files it Watched")
+        let midway = FirstRunWrite(three, placement: .partWay(seasonId: 2, episode: 5), now: now)
+        check(midway.parts == [.init(mediaId: 1, episodes: 10), .init(mediaId: 2, episodes: 5)]
+              && midway.status == .watching,
+              "first run: part-way marks the seasons before, and the season to its episode")
+        check(FirstRunWrite(three, placement: .partWay(seasonId: 2, episode: 99), now: now).parts.last?.episodes == 12,
+              "first run: part-way cannot pass what is out")
+        let placed = midway.applied(to: three)
+        check(placed.parts[0].progress == 10 && placed.parts[1].progress == 5 && placed.effectiveStatus == .watching,
+              "first run: the library draws the placement before the server answers")
+        let fresh = FirstRunWrite(three, placement: .starting, now: now)
+        check(fresh.parts.isEmpty && fresh.status == .watching, "first run: just starting is Watching at zero")
+        check(FirstRunWrite(three, placement: .later, now: now).status == .planned, "first run: later is Planned")
+        check(FirstRunWrite(three, placement: nil, now: now).status == .planned,
+              "first run: a finished show that was not asked about takes the plain add's shelf")
+        check(FirstRunModel.asks(three, now: now), "first run: a show with episodes out is asked about")
+        check(!FirstRunModel.asks(Franchise(copying: base, parts: [part(1, total: 0, upcoming: true)]), now: now),
+              "first run: a show with nothing out is not")
+        let onBoard = FirstRunModel.row(placed, ready: (placed.parts[1], 6), now: now)
+        check(onBoard.when == .now && onBoard.detail == "Season 2 \u{00B7} Episode 6",
+              "first run: a part-way show is on the lineup as its next episode, to watch now")
+        check(FirstRunModel.row(seenAll.applied(to: three), ready: nil, now: now).when == .done,
+              "first run: a finished show closes the lineup, whatever extras it has left")
+        check(FirstRunModel.row(FirstRunWrite(three, placement: .later, now: now).applied(to: three),
+                                ready: nil, now: now).when == .later,
+              "first run: a show saved for later says so")
 
         // A series with nothing out yet is NEW, not "Season 1 announced".
         let brandNew = Franchise(copying: base, parts: [part(1, total: 0, upcoming: true)])

@@ -134,7 +134,8 @@ struct DiscoverView: View {
                             chrome: chrome,
                             searchPrompt: Copy.Search.prompt(for: appModel.mediaFilter),
                             onSearch: { fieldPresented = true },
-                            scope: AnyView(scopeMenu),
+                            // One audience has no scope to choose (`Audience`).
+                            scope: appModel.audience.isSingle ? AnyView(EmptyView()) : AnyView(scopeMenu),
                             searching: searching)
                 .opacity(searching ? 0 : 1)
                 .allowsHitTesting(!searching)
@@ -207,7 +208,9 @@ struct DiscoverView: View {
         // The scope (All / Anime / TV) is a menu in the bar, as Schedule's filter is — X's Explore
         // keeps its settings there; the resting chips went with the launchpad.
         .toolbar {
-            ToolbarItem(placement: .topBarTrailing) { scopeMenu }
+            if !appModel.audience.isSingle {
+                ToolbarItem(placement: .topBarTrailing) { scopeMenu }
+            }
         }
         // The field lives UNDER the title, always — Apple Music's Search (user reference, 24 Aug):
         // title, field, then the browse grid; focused, the field pins to the top with Cancel, the
@@ -228,7 +231,8 @@ struct DiscoverView: View {
         // down for a choice that had nothing to filter yet; the bar's scope menu (`scopeMenu`)
         // chooses and shows the scope at rest instead.
         .searchScopes($model.mediaFilter, activation: .onTextEntry) {
-            ForEach(MediaFilter.allCases, id: \.self) { filter in
+            // No scopes for one audience: an empty builder draws no bar.
+            ForEach(appModel.audience.isSingle ? [] : MediaFilter.allCases, id: \.self) { filter in
                 // The segment labels are ours; the bar around them is the system's. At AX1 they
                 // were measured at exactly the same cap height as at the default size — the only
                 // controls on the screen still at default size, so the whole bar read as a strip
@@ -485,7 +489,9 @@ struct DiscoverView: View {
 
     /// The scope, not the query, emptied the list.
     private func scopedOut(_ results: ResultSet) -> Bool {
-        appModel.mediaFilter != .all && results.isEmpty && !appModel.searchResults.isEmpty
+        // One audience has no wider scope to offer: its empty answer is "no results" (with why).
+        !appModel.audience.isSingle
+            && appModel.mediaFilter != .all && results.isEmpty && !appModel.searchResults.isEmpty
     }
 
     private var scopedOutCopy: EmptyStateCopy {
@@ -602,7 +608,8 @@ struct DiscoverView: View {
     private func trendFacts(_ item: FranchiseSummary) -> TrendFacts {
         let what: [String] = {
             let themes = item.themes.prefix(2)
-            let parts = [item.source.kindWord] + (themes.isEmpty ? [item.year.map(String.init) ?? ""] : Array(themes))
+            let parts = [item.source.kindLead].compactMap { $0 }
+                + (themes.isEmpty ? [item.year.map(String.init) ?? ""] : Array(themes))
             return parts.filter { !$0.isEmpty }
         }()
         if let airs = when(item) {
@@ -629,7 +636,7 @@ struct DiscoverView: View {
         if let airs = when(item) {
             return (airs, true)
         }
-        return ([item.source.kindWord, item.year.map(String.init)].compactMap { $0 }
+        return ([item.source.kindLead, item.year.map(String.init)].compactMap { $0 }
                     .joined(separator: FactLine.separator), false)
     }
 
@@ -893,6 +900,14 @@ struct DiscoverView: View {
                     notices(refreshFailed: false, inset: false)
                     EmptyState(appModel.searchError ? errorCopy : .noSearchResults(query: query),
                                primary: appModel.searchError ? { appModel.retrySearch() } : nil)
+                    // For one audience: the wall is why, and Profile is the door.
+                    if !appModel.searchError, let why = Copy.Watching.searchingOnly(appModel.audience) {
+                        Text(why)
+                            .type(ThemeType.metadata)
+                            .foregroundStyle(ThemeColor.textTertiary)
+                            .multilineTextAlignment(.center)
+                            .padding(.horizontal, ThemeMetrics.gutter)
+                    }
                 }
             }
         } else {
@@ -1171,7 +1186,7 @@ struct DiscoverView: View {
     private func rowFacts(_ item: FranchiseSummary, ambiguous: Set<String>) -> [String] {
         var facts: [String] = []
         if let f = appModel.franchise(id: item.id) { facts.append(Copy.Status(f.effectiveStatus)) }
-        facts.append(item.source.kindWord)
+        if let kind = item.source.kindLead { facts.append(kind) }
         // …and it goes when the title is already carrying it, because a disambiguated result
         // printed "ONE PIECE (2023)" over "TV · 2023 · 3 seasons" — the same number twice, 20 pt
         // apart, on a line whose whole job is telling this result apart from the one above it.
@@ -1187,7 +1202,7 @@ struct DiscoverView: View {
     private func shelfFacts(_ item: FranchiseSummary) -> [String] {
         var facts: [String] = []
         if let f = appModel.franchise(id: item.id) { facts.append(Copy.Status(f.effectiveStatus)) }
-        facts.append(item.source.kindWord)
+        if let kind = item.source.kindLead { facts.append(kind) }
         if let y = item.year { facts.append(String(y)) }
         if let s = size(item) { facts.append(s) }
         return facts

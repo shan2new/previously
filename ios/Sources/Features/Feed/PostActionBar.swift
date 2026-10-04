@@ -52,9 +52,14 @@ struct PostActionBar: View {
             like(liked: appModel.isLiked(id), count: appModel.likeCount(id))
                 .frame(maxWidth: large ? nil : .infinity, alignment: .leading)
             if large { Spacer(minLength: 0) }
-            remind(on: appModel.isReminded(id))
-                .frame(maxWidth: large ? nil : .infinity, alignment: .leading)
-            if large { Spacer(minLength: 0) }
+            // Nothing to be reminded of once the episode is out.
+            if model.post.kind != .episode {
+                remind(on: appModel.isReminded(id))
+                    .frame(maxWidth: large ? nil : .infinity, alignment: .leading)
+                if large { Spacer(minLength: 0) }
+            } else if !large {
+                Spacer(minLength: 0)
+            }
             save(on: appModel.isSaved(id))
                 .frame(width: large ? nil : FeedMetrics.actionSlotSmall * pinnedScale)
             if large { Spacer(minLength: 0) }

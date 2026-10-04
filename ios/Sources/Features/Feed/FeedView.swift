@@ -309,7 +309,15 @@ struct FeedView: View {
         switch row {
         case .post(let m):
             FeedPostRow(model: m, tab: t, zoom: mediaZoom,
-                        onOpen: { onOpenRoute(.post(id: m.id)) },
+                        // An episode's post opens its show (where the episode is marked); every
+                        // other post opens its page.
+                        onOpen: {
+                            if m.post.kind == .episode {
+                                onOpenDetail(m.post.franchiseId, "post/\(m.id)")
+                            } else {
+                                onOpenRoute(.post(id: m.id))
+                            }
+                        },
                         onOpenShow: { onOpenDetail(m.post.franchiseId, "post/\(m.id)") },
                         onViewMedia: { viewing = m },
                         onComment: { composing = composeTarget(m) },

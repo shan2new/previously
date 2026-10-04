@@ -147,9 +147,23 @@ extension Copy {
             }
         }
 
-        /// "Season 3 is confirmed" · a film: "New film: The Movie".
+        /// An episode that aired this week: "Episode 19 is out" · a later season's first: "Season 2
+        /// has started" · a show's very first: "The first episode is out".
+        static func headlineEpisode(installment: String, episode: Int) -> String {
+            guard episode == 1 else { return "\(Copy.episode(episode)) is out" }
+            return installment.isEmpty ? "The first episode is out" : "\(installment) has started"
+        }
+
+        /// A first season nobody has seen is a series, not "Season 1".
+        static let newSeries = "A new series"
+        /// A film the catalogue only numbers ("Movie 1"): it has no name to print yet.
+        static let newFilm = "A new film"
+
+        /// "Season 3 is confirmed" · a film: "New film: The Movie" · a film with no name yet: "A
+        /// new film is confirmed".
         static func headlineAnnounced(name: String, isMovie: Bool) -> String {
-            isMovie ? "New film: \(name)" : "\(name) is confirmed"
+            guard isMovie else { return "\(name) is confirmed" }
+            return name == newFilm ? "\(newFilm) is confirmed" : "New film: \(name)"
         }
 
         /// "Season 4 is rumoured" · an installment the research only knows as a sequel: "A sequel
@@ -169,15 +183,19 @@ extension Copy {
                              premiereLine: String?) -> String {
             let lead: String
             switch kind {
-            case .dated, .window, .rumour, .trailer:
+            case .dated, .window, .rumour, .trailer, .episode:
                 lead = closed(headline)
             case .announced, .unknown:
-                lead = isMovie
-                    ? "A new film, \(name), is in production. No date yet."
-                    : "\(headline) \u{2014} no date yet."
+                if isMovie {
+                    lead = name == newFilm
+                        ? "\(newFilm) is in production \u{2014} no date yet."
+                        : "A new film, \(name), is in production. No date yet."
+                } else {
+                    lead = "\(headline) \u{2014} no date yet."
+                }
             }
             switch kind {
-            case .dated, .announced, .unknown:
+            case .dated, .announced, .episode, .unknown:
                 return lead
             case .window, .rumour, .trailer:
                 guard let premiereLine, !premiereLine.isEmpty else { return lead }
@@ -305,6 +323,28 @@ extension Copy {
         /// Crunchyroll News".
         static func separated(_ parts: [String]) -> String {
             parts.map { $0.trimmingCharacters(in: .whitespaces) }.filter { !$0.isEmpty }.joined(separator: separator)
+        }
+        /// Why a For you post is in the feed, over its name (X's social context line): the shows
+        /// of yours it comes from, in the words Discover uses for the same recommendation
+        /// (`ForYou.reason`: "Like Re:ZERO and Slime", "Because you finished Game of Thrones") —
+        /// each named as your library names it (`name`), short enough that two fit the line — or
+        /// the genre of yours it trends in.
+        static func context(_ context: FeedPostContext,
+                            name: (RecommendationItem.Seed) -> String = { $0.title }) -> String {
+            switch context {
+            case .recommended(let kind, let seeds, let count):
+                var named = seeds.map {
+                    RecommendationItem.Seed(franchiseId: $0.franchiseId, title: name($0).shelfShortened(fitting: 20))
+                }
+                // A name that fits leads: behind "That Time I Got Reincarnated as a Slime" the
+                // line ended "and 4…" — the count is the half that says how sure the pick is.
+                if let fits = named.firstIndex(where: { $0.title.count <= 22 }), fits > 0 {
+                    named.insert(named.remove(at: fits), at: 0)
+                }
+                return ForYou.reason(.init(kind: kind, seeds: named, count: count))
+            case .taste(let genres):
+                return "Trending in \(genres.joined(separator: " and "))"
+            }
         }
         /// A fact that follows another on its line, drawn as its own run: "· 2h".
         static func afterDot(_ fact: String) -> String { "\u{00B7} \(fact)" }

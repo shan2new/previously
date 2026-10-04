@@ -42,7 +42,12 @@ struct HomeDropCard: View {
     let entry: AppModel.ScheduleEntry
     /// Episodes out and unwatched up to this one.
     let run: Int
+    /// What there is to watch, in the page's words: "Season 2 · Episode 1", "Episodes 22–24".
+    let line: String
     let now: Int64
+    /// The card's width: the shelf's, or the page's when it is the only drop (a shelf of one runs
+    /// gutter to gutter — at 300 pt it sat beside ninety points of nothing).
+    var width: CGFloat = HomeDropCard.shelfWidth
     var committing: Bool = false
     let onOpen: () -> Void
     let onMark: () -> Void
@@ -50,16 +55,12 @@ struct HomeDropCard: View {
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var glow: Color?
 
-    static let width: CGFloat = 300
-    private var height: CGFloat { (Self.width * 9 / 16).rounded() }
+    static let shelfWidth: CGFloat = 300
+    private var height: CGFloat { (width * 9 / 16).rounded() }
 
     private var f: Franchise { entry.franchise }
     private var scene: String? { f.sceneArt }
     private var poster: String? { PosterPick.shared.choice(for: f)?.url ?? f.portraitArt }
-
-    private var episodes: String {
-        run > 1 ? Copy.episodeRange(entry.episode - run + 1, entry.episode) : Copy.episode(entry.episode)
-    }
 
     private var aired: String { TemporalCopy.aired(at: entry.at, now: now, source: f.source) }
 
@@ -77,7 +78,7 @@ struct HomeDropCard: View {
                                             placeholderHidden: true)
                         }
                     }
-                    .frame(width: Self.width, height: height)
+                    .frame(width: width, height: height)
                     .clipped()
                     LinearGradient(stops: [.init(color: .clear, location: 0.35),
                                            .init(color: .black.opacity(0.72), location: 1)],
@@ -85,7 +86,7 @@ struct HomeDropCard: View {
                     name
                         .padding(ThemeSpace.x3)
                 }
-                .frame(width: Self.width, height: height)
+                .frame(width: width, height: height)
                 .background(ThemeColor.surfaceRaised)
                 .clipShape(shape)
                 .overlay(shape.strokeBorder(ThemeColor.posterEdge, lineWidth: 1))
@@ -100,20 +101,21 @@ struct HomeDropCard: View {
                 HomeMarkDisc(committing: committing, label: Copy.Action.markEpisodeWatched(entry.episode), action: onMark)
                     .padding(ThemeSpace.x1)
             }
-            // The card sits in its own light: a soft pool of the scene's colour under it.
+            // The card sits in its own light: a soft pool of the scene's colour under it, cast by
+            // the card's own shape (Schedule's lit card) — a blurred layer flattened to its bounds
+            // (`drawingGroup`) ends on the bounds' straight edges.
             .background {
                 if let glow {
-                    shape.fill(glow)
+                    // Cast from the card's lower half: nothing of it rises past the card's top (a
+                    // card waiting under the tab bar lit the bar's edge with its colour).
+                    shape.fill(ThemeColor.canvas.shadow(.drop(color: glow.opacity(0.4), radius: 22, x: 0, y: 14)))
                         .padding(.horizontal, 18)
-                        .offset(y: 14)
-                        .blur(radius: 22)
-                        .opacity(0.45)
-                        .drawingGroup()
+                        .padding(.top, height * 0.45)
                         .allowsHitTesting(false)
                 }
             }
             VStack(alignment: .leading, spacing: 2) {
-                Text(episodes)
+                Text(line)
                     .type(ThemeType.bodyEmphasis)
                     .foregroundStyle(ThemeColor.textPrimary)
                     .contentTransition(.numericText())
@@ -124,9 +126,9 @@ struct HomeDropCard: View {
             .lineLimit(1)
             .padding(.horizontal, ThemeSpace.x0_5)
         }
-        .frame(width: Self.width, alignment: .leading)
+        .frame(width: width, alignment: .leading)
         .accessibilityElement(children: .contain)
-        .accessibilityLabel("\(f.displayTitle), \(episodes), \(aired)")
+        .accessibilityLabel("\(f.displayTitle), \(line), \(aired)")
         .task(id: scene ?? poster) {
             guard let url = scene ?? poster else { return }
             let tint = await PaletteCache.shared.resolve(url: url, maxPixel: 240)
@@ -138,7 +140,7 @@ struct HomeDropCard: View {
     @ViewBuilder private var name: some View {
         if f.hasDrawableLogo, let logo = f.billboardLogo {
             ArtworkLogo(name: .logo(logo), title: f.displayTitle, height: 40, alignment: .bottomLeading)
-                .frame(maxWidth: Self.width * 0.55, alignment: .bottomLeading)
+                .frame(maxWidth: width * 0.55, alignment: .bottomLeading)
         } else {
             Text(f.displayTitle)
                 .type(ThemeType.rowTitle)

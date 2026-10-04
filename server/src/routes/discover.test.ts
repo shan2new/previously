@@ -11,8 +11,24 @@ const mocks = vi.hoisted(() => ({
   getDiscoverGenres: vi.fn(),
   getDiscoverGenrePage: vi.fn(),
 }))
+/** The caller's stored audience (services/audience.ts reads it for real, from this fake table). */
+const viewer = vi.hoisted(() => ({ audience: null as string | null, reads: 0 }))
 
-vi.mock('../db/index.js', () => ({ db: {}, sql: {} }))
+vi.mock('../db/index.js', () => ({
+  db: {
+    select: () => ({
+      from: () => ({
+        where: () => ({
+          limit: async () => {
+            viewer.reads += 1
+            return viewer.audience ? [{ audience: viewer.audience, updatedAt: new Date(0) }] : []
+          },
+        }),
+      }),
+    }),
+  },
+  sql: {},
+}))
 vi.mock('../services/discover.js', () => mocks)
 
 const { discoverRoutes } = await import('./discover.js')
@@ -40,8 +56,38 @@ async function app() {
 }
 
 beforeEach(() => {
+  viewer.audience = null
+  viewer.reads = 0
   mocks.getDiscoverGenres.mockReset().mockImplementation(async (source: string | null) => ({ ...LIST, source }))
   mocks.getDiscoverGenrePage.mockReset().mockResolvedValue(PAGE)
+})
+
+describe('the audience is the default catalogue', () => {
+  it('browses the viewer\'s own catalogue when the request names none, and says which', async () => {
+    const server = await app()
+    for (const [audience, source] of [['anime', 'anilist'], ['tv', 'tmdb'], ['both', null], [null, null]] as const) {
+      viewer.audience = audience
+      mocks.getDiscoverGenres.mockClear()
+      mocks.getDiscoverGenrePage.mockClear()
+      const list = await server.inject({ method: 'GET', url: '/discover/genres' })
+      expect(list.json().source, String(audience)).toBe(source)
+      expect(mocks.getDiscoverGenres).toHaveBeenCalledWith(source)
+      await server.inject({ method: 'GET', url: '/discover/genres/action' })
+      expect(mocks.getDiscoverGenrePage.mock.calls[0]![2], String(audience)).toEqual({ source, limit: 24, offset: 0 })
+    }
+    await server.close()
+  })
+
+  it('lets an explicit source win over the audience, without reading the preference', async () => {
+    viewer.audience = 'anime'
+    const server = await app()
+    expect((await server.inject({ method: 'GET', url: '/discover/genres?source=tmdb' })).json().source).toBe('tmdb')
+    await server.inject({ method: 'GET', url: '/discover/genres/action?source=tmdb' })
+    expect(mocks.getDiscoverGenres).toHaveBeenCalledWith('tmdb')
+    expect(mocks.getDiscoverGenrePage.mock.calls[0]![2].source).toBe('tmdb')
+    expect(viewer.reads).toBe(0)
+    await server.close()
+  })
 })
 
 describe('GET /discover/genres', () => {

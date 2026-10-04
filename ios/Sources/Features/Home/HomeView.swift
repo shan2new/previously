@@ -29,6 +29,8 @@ struct HomeView: View {
     let onOpenLibrary: (WatchStatus) -> Void
     let onOpenRoute: (FeedRoute) -> Void
     let onAddShow: () -> Void
+    /// The empty account's button: first run's picker (a wall of shows to tap), not a bare field.
+    var onPickShows: (() -> Void)? = nil
     /// Bumped when Home is re-selected: every sheet goes, and the page goes to its top.
     let topSignal: Int
     /// Bumped by the notification route: every sheet goes (the route then pushes).
@@ -38,7 +40,8 @@ struct HomeView: View {
     @Environment(LaunchHandoff.self) private var launch: LaunchHandoff?
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
-    @State private var chrome = HomeChrome()
+    /// The bar's state, owned by `MainTabView`: the tab bar rides it away with a scroll.
+    let chrome: HomeChrome
     @State private var box = HomeFeedBox()
     @State private var showProfile = false
     /// A feed page asked for from inside Profile (Saved → a post): opened once the sheet has gone.
@@ -50,8 +53,10 @@ struct HomeView: View {
     @State private var committingTiles: Set<String> = []
     @State private var committingRows: Set<String> = []
     @State private var artMarked = false
-    /// The billboard art's palette colour: the page's ground and the bar are painted from it.
-    @State private var heroTint: Color?
+    /// The billboard art's palette colour, with the picture it was read from: the page's ground and
+    /// the bars are painted from it. Kept beside its picture — a hand-off's first frames wore the
+    /// LAST show's colour until the next one's had been read.
+    @State private var heroTint: (art: String, color: Color?)?
     /// The picture each show's billboard settled on (`HomeBillboard.settle`), by franchise id.
     @State private var heroArts: [String: String] = [:]
     /// RINGS (`RecentDirection`): the story viewer, opened from Recently aired's rings as the feed's
@@ -66,15 +71,30 @@ struct HomeView: View {
         static let top = "home/top"
     }
 
-    /// The billboard's share of the window (26 Sep, "make the art take more height", owner): most of
-    /// the screen above the tab bar, the next section's title peeking under its foot so the page
-    /// says there is more. A titled poster fills the frame below the bar; a logo'd one is whole.
-    private static let billboardFraction: CGFloat = 0.84
     /// How long a control holds its marked state before the write lands and the page moves on —
     /// the episode list's `beginCommit` hold.
     private static let commitBeat: Duration = .milliseconds(550)
 
-    private var billboardHeight: CGFloat { (ThemeMetrics.windowHeight * Self.billboardFraction).rounded() }
+    /// A section title's line (`sectionTitle`), growing with the text size.
+    @ScaledMetric(relativeTo: .title3) private var sectionTitleLine: CGFloat = 25
+
+    /// The tab bar's top edge, in the window.
+    private var barTop: CGFloat { ThemeMetrics.windowHeight - ThemeMetrics.tabBarVisualHeight }
+
+    /// The billboard's height (26 Sep, "make the art take more height", owner): the screen above the
+    /// tab bar, less the next section's TITLE — which peeks under its foot so the page says there is
+    /// more — and nothing of that section's cards. Measured from the bar, not a share of the window:
+    /// at 0.84 the first card's top fifteen points stood on the bar's edge with half a NEW tag ("the
+    /// bottom nav looks weird when there is a recently aired item", owner, 4 Oct). The same height
+    /// with nothing under it: the lockup keeps its place when a mark empties the page (the frame
+    /// must not grow under a hand-off), and the receipt lane clears the mark.
+    private var billboardHeight: CGFloat {
+        (barTop - ThemeSpace.x4 - sectionTitleLine - ThemeMetrics.labelGap + Self.cardTuck).rounded()
+    }
+
+    /// How far the first card starts under the bar's edge, so not a hairline of it shows at rest.
+    private static let cardTuck: CGFloat = 3
+
     private var band: CGFloat { ThemeMetrics.topSafeInset + FeedMetrics.headerRow }
 
     /// The billboard's picture: what it settled on, else the show's stored pick (`PosterPick`),
@@ -89,19 +109,34 @@ struct HomeView: View {
     /// The art's colour — resolved this visit, else remembered from the last (`PaletteCache`
     /// persists), so the page opens in its colour on the first frame.
     private func tint(_ feed: HomeFeed) -> Color? {
-        heroTint ?? PaletteCache.shared.tint(for: heroArt(feed))
+        let art = heroArt(feed)
+        if let heroTint, heroTint.art == art, let color = heroTint.color { return color }
+        return PaletteCache.shared.tint(for: art)
     }
 
-    /// The shows whose pictures Home is about to draw: the billboard's first, then the shelf's.
-    private func pickRequest(_ feed: HomeFeed) -> String {
-        ([feed.hero?.franchise.id] + feed.queue.map(\.id)).compactMap { $0 }.joined(separator: ",")
+    /// How hard the bar's veil is drawn over the art: the billboard's own protection, from the
+    /// picture's lightness (`PaletteCache` holds it once the tint has been read).
+    private func veil(_ feed: HomeFeed) -> Double? {
+        guard feed.hero != nil else { return nil }
+        return HeroProtection.strength(lightness: PaletteCache.shared.lightness(for: heroArt(feed)))
     }
 
-    /// The show's hue at canvas depth — where the billboard lands and the bar sits (canvas with no
-    /// billboard).
+    /// The shows whose pictures Home is about to draw: the billboard's first, then Recently aired's
+    /// (a mark hands the billboard to the next of them), then the shelf's.
+    private func pickShows(_ feed: HomeFeed) -> [Franchise] {
+        [feed.hero?.franchise].compactMap { $0 } + feed.recent.map(\.entry.franchise) + feed.queue.map(\.franchise)
+    }
+
+    /// The show's hue at canvas depth — where the billboard lands (canvas with no billboard).
     private func groundTop(_ feed: HomeFeed) -> Color {
         guard feed.hero != nil else { return ThemeColor.canvas }
         return DetailTint.ground(tint(feed), lightness: DetailTint.groundTopLightness)
+    }
+
+    /// What the page stands on — the bars draw the same ground (`HomeGroundWindow`).
+    private func pageGround(_ feed: HomeFeed) -> HomePageGround {
+        guard feed.hero != nil else { return .canvas }
+        return .show(tint: tint(feed), top: groundTop(feed), billboard: billboardHeight)
     }
 
     /// Composed once per library and minute — never in a body.
@@ -119,6 +154,7 @@ struct HomeView: View {
     var body: some View {
         let feed = feed
         let billboard = feed.hero == nil ? 0 : billboardHeight
+        let ground = pageGround(feed)
         ScrollViewReader { proxy in
             ZStack(alignment: .top) {
                 ScrollView {
@@ -145,13 +181,22 @@ struct HomeView: View {
                 // stops cards above the icon row, rather than letting artwork compete with it.
                 .ignoresSafeArea(edges: .top)
                 .scrollIndicators(.hidden)
+                .onScrollPhaseChange { _, phase in chrome.phase(phase) }
                 .laneClearance(appModel, base: ThemeSpace.x3)
                 .previouslyRefreshable { await appModel.reload() }
 
                 HomeHeader(chrome: chrome,
-                           ground: groundTop(feed),
+                           ground: ground,
+                           veil: veil(feed),
                            onProfile: { showProfile = true },
                            onTop: { scrollToTop(proxy) })
+            }
+            // The tab bar's ground is Home's: the page's own, seen through the bar, so the icons
+            // stand on exactly what is behind them and no card shows under them. The root's bar
+            // draws no ground here (`TabBarGroundKey` is clear).
+            .overlay(alignment: .bottom) {
+                HomeFootGround(chrome: chrome, ground: ground, barTop: barTop)
+                    .alignmentGuide(.bottom) { $0[.top] }
             }
             .onChange(of: topSignal) { _, _ in
                 dismissAll()
@@ -167,7 +212,7 @@ struct HomeView: View {
             #endif
         }
         .background(ThemeColor.canvas.ignoresSafeArea())
-        .preference(key: TabBarGroundKey.self, value: chrome.solid ? ThemeColor.canvas : groundTop(feed))
+        .preference(key: TabBarGroundKey.self, value: Color.clear)
         // The bar is Home's own; no system edge effect and no system navigation bar under it.
         .chromeScrollEdgeHidden(.all)
         .toolbar(.hidden, for: .navigationBar)
@@ -214,13 +259,20 @@ struct HomeView: View {
         .task(id: heroArt(feed)) {
             guard let url = heroArt(feed) else { return }
             let resolved = await PaletteCache.shared.resolve(url: url, maxPixel: 360)
-            withAnimation(ThemeMotion.uiPoster) { heroTint = resolved }
+            withAnimation(ThemeMotion.uiPoster) { heroTint = (url, resolved) }
         }
         // Each show's picture is chosen by eye (`PosterPick`, graded once and kept): the
-        // billboard's show first — the billboard waits a moment for it — then the shelf's.
-        .task(id: pickRequest(feed)) {
-            if let hero = feed.hero { await PosterPick.shared.resolve(hero.franchise) }
-            for item in feed.queue { await PosterPick.shared.resolve(item.franchise) }
+        // billboard's show first — the billboard waits a moment for it — then the rest, in the
+        // order they could take the billboard.
+        .task(id: pickShows(feed).map(\.id).joined(separator: ",")) {
+            let shows = pickShows(feed)
+            for show in shows { await PosterPick.shared.resolve(show) }
+            // The shows a mark could hand the billboard to: their pictures and colours are read
+            // now, so a hand-off is the next picture arriving — it was an empty frame in the last
+            // show's colour for as long as a 2,000-px poster takes to download (4 Oct).
+            for show in [feed.recent.first?.entry.franchise, feed.queue.first?.franchise].compactMap({ $0 }) {
+                await warmBillboard(show)
+            }
         }
         .onAppear {
             #if DEBUG
@@ -238,9 +290,10 @@ struct HomeView: View {
         } else if appModel.library.isEmpty {
             EmptyState(appModel.loadError
                        ? (SyncCenter.shared.isOnline ? .serverNoCache : .offlineNoData)
-                       : .emptyToday,
+                       : .emptyHome,
                        prominence: .major,
-                       primary: appModel.loadError ? { Task { await appModel.reload() } } : onAddShow)
+                       artwork: .flapBoard,
+                       primary: appModel.loadError ? { Task { await appModel.reload() } } : (onPickShows ?? onAddShow))
                 .padding(.horizontal, ThemeMetrics.gutter)
                 .padding(.top, band + ThemeSpace.x10 * 2)
         } else if feed.isEmpty {
@@ -298,41 +351,66 @@ struct HomeView: View {
         }
     }
 
-    /// DROPS: a shelf of the shows' scenes, newest drop first.
+    /// DROPS: a shelf of the shows' scenes, newest drop first. A single drop is not a shelf: its
+    /// card runs gutter to gutter.
     private func recentDrops(_ items: [HomeAiring], leading: Bool) -> some View {
         VStack(alignment: .leading, spacing: ThemeMetrics.labelGap) {
             SectionHeaderRow(Copy.Home.recentlyAired, action: onOpenSchedule)
                 .padding(.horizontal, ThemeMetrics.gutter)
-            ScrollView(.horizontal) {
-                LazyHStack(alignment: .top, spacing: ThemeMetrics.shelfGap) {
-                    ForEach(items) { item in
-                        let e = item.entry
-                        HomeDropCard(entry: e, run: max(1, e.episode - e.part.progress), now: appModel.nowMinute,
-                                     committing: committingRows.contains(item.id),
-                                     onOpen: {
-                                         onOpenDetail(e.franchise.id, "home-drop/\(item.id)",
-                                                      EpisodeFocus(mediaId: e.part.mediaId, episode: e.part.progress + 1))
-                                     },
-                                     onMark: { markThrough(item) })
-                            .franchiseQuickActions(appModel.isInLibrary(e.franchise.id) ? e.franchise : nil, appModel: appModel)
-                            .scrollTransition(axis: .horizontal) { content, phase in
-                                content
-                                    .scaleEffect(phase.isIdentity || reduceMotion ? 1 : 0.95, anchor: .bottom)
-                                    .opacity(phase.isIdentity ? 1 : 0.75)
-                            }
-                            .transition(.scale(scale: 0.85).combined(with: .opacity))
+            if items.count == 1, let item = items.first {
+                dropCard(item, width: ThemeMetrics.windowWidth - 2 * ThemeMetrics.gutter)
+                    .padding(.horizontal, ThemeMetrics.gutter)
+                    .transition(.scale(scale: 0.94).combined(with: .opacity))
+            } else {
+                ScrollView(.horizontal) {
+                    LazyHStack(alignment: .top, spacing: ThemeMetrics.shelfGap) {
+                        ForEach(items) { item in
+                            dropCard(item, width: HomeDropCard.shelfWidth)
+                                .scrollTransition(axis: .horizontal) { content, phase in
+                                    content
+                                        .scaleEffect(phase.isIdentity || reduceMotion ? 1 : 0.95, anchor: .bottom)
+                                        .opacity(phase.isIdentity ? 1 : 0.75)
+                                }
+                                .transition(.scale(scale: 0.85).combined(with: .opacity))
+                        }
                     }
+                    .scrollTargetLayout()
+                    .animation(ThemeMotion.pick(ThemeMotion.uiSettle, reduceMotion: reduceMotion), value: items.map(\.id))
                 }
-                .scrollTargetLayout()
-                .animation(ThemeMotion.pick(ThemeMotion.uiSettle, reduceMotion: reduceMotion), value: items.map(\.id))
+                .contentMargins(.horizontal, ThemeMetrics.gutter, for: .scrollContent)
+                .scrollTargetBehavior(.viewAligned)
+                .scrollIndicators(.hidden)
+                .scrollClipDisabled()
             }
-            .contentMargins(.horizontal, ThemeMetrics.gutter, for: .scrollContent)
-            .scrollTargetBehavior(.viewAligned)
-            .scrollIndicators(.hidden)
-            .scrollClipDisabled()
         }
         .padding(.top, leading ? ThemeSpace.x4 : ThemeMetrics.sectionGap)
         .id("home/recent")
+    }
+
+    private func dropCard(_ item: HomeAiring, width: CGFloat) -> some View {
+        let e = item.entry
+        let run = max(1, e.episode - e.part.progress)
+        return HomeDropCard(entry: e, run: run, line: dropLine(e, run: run), now: appModel.nowMinute, width: width,
+                            committing: committingRows.contains(item.id),
+                            onOpen: {
+                                onOpenDetail(e.franchise.id, "home-drop/\(item.id)",
+                                             EpisodeFocus(mediaId: e.part.mediaId, episode: e.part.progress + 1))
+                            },
+                            onMark: { markThrough(item) })
+            .franchiseQuickActions(appModel.isInLibrary(e.franchise.id) ? e.franchise : nil, appModel: appModel)
+    }
+
+    /// What a drop offers, as the billboard would say it: "Season 2 · Episode 1" — the season
+    /// wherever the show has more than one (`watchContext`) — and a run by its range, "Season 4 ·
+    /// Episodes 22–24". A bare "Episode 1" under a show eight years on the shelf said nothing about
+    /// the new season it was the first of.
+    private func dropLine(_ e: AppModel.ScheduleEntry, run: Int) -> String {
+        let f = e.franchise
+        guard run > 1, e.part.kind != .movie else { return f.watchContext(part: e.part, episode: e.episode) }
+        let range = Copy.episodeRange(e.episode - run + 1, e.episode)
+        let label = Copy.compactPartLabel(e.part.canonicalLabel)
+        let named = !e.part.isMainStory || f.mainStoryEpisodicParts.count > 1
+        return named && !label.isEmpty ? "\(label) \u{00B7} \(range)" : range
     }
 
     /// RINGS: the feed's stories for the shows with a new episode — a tap is the story.
@@ -582,6 +660,17 @@ struct HomeView: View {
         } else {
             commit()
         }
+    }
+
+    /// A show's billboard picture and its colour, fetched ahead of the billboard that will draw
+    /// them (the decode `ArtHeader` asks for, so it is a cache hit there).
+    private func warmBillboard(_ f: Franchise) async {
+        let art = PosterPick.shared.choice(for: f).map { WideArt.billboard(portrait: $0.url, landscape: nil) }
+            ?? f.billboardArt
+        guard let string = art.url, let url = URL(string: string) else { return }
+        let pixels: CGFloat = art.portraitSource ? 2048 : (art.ultraWide ? 1900 : 1536)
+        _ = try? await ImageLoader.shared.image(for: url, maxPixel: pixels)
+        _ = await PaletteCache.shared.resolve(url: string, maxPixel: 360)
     }
 
     private func scrollToTop(_ proxy: ScrollViewProxy) {

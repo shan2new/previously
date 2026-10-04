@@ -10,9 +10,9 @@ import { isJapaneseAnimation } from '../tmdb/mapping.js'
 import { ensureTvFranchise, refreshTvShow } from '../tmdb/service.js'
 import { mapWithConcurrency } from '../util/concurrency.js'
 
-// v2 deliberately restarts the completed trailer-only cursor: MEDIA_FIELDS now also carries
-// native titles, synonyms and artwork, and pre-v2 rows need one full catalogue pass to gain them.
-const ANILIST_TRAILER_SWEEP_KEY = 'anilist_catalog_metadata_v2'
+// v3 rechecks metadata after fixing reversed/sparse streaming episode numbering. It also retains
+// the v2 native-title, synonym and artwork enrichment.
+const ANILIST_TRAILER_SWEEP_KEY = 'anilist_catalog_metadata_v3'
 const ANILIST_TRAILER_SWEEP_LIMIT = 2_500
 const ANILIST_TRAILER_REQUEST_SIZE = 50
 const ANILIST_TRAILER_REQUEST_INTERVAL_MS = 2_300
@@ -145,14 +145,21 @@ export async function refreshAiring(): Promise<number> {
 export async function refreshAiringTv(): Promise<number> {
   if (!tmdbEnabled()) return 0
   const rows = await db
-    .selectDistinct({ id: franchise.id, externalId: franchise.externalId })
+    .select({ id: franchise.id, externalId: franchise.externalId })
     .from(franchise)
     .leftJoin(franchiseMember, eq(franchiseMember.franchiseId, franchise.id))
     .leftJoin(media, eq(media.id, franchiseMember.mediaId))
     .leftJoin(subscriptions, eq(subscriptions.franchiseId, franchise.id))
     .where(
-      and(eq(franchise.source, 'tmdb'), or(eq(media.status, 'RELEASING'), isNotNull(subscriptions.userId))),
+      and(eq(franchise.source, 'tmdb'), or(
+        inArray(media.status, ['RELEASING', 'NOT_YET_RELEASED']),
+        isNotNull(subscriptions.userId),
+        sql`${franchise.updatedAt} < now() - interval '7 days'`,
+      )),
     )
+    .groupBy(franchise.id, franchise.externalId)
+    // Rotate through oldest media; an unordered LIMIT starves the same titles forever.
+    .orderBy(sql`min(${media.fetchedAt}) asc nulls first`, asc(franchise.id))
     .limit(100)
 
   const results = await mapWithConcurrency(rows, 5, async ({ id, externalId }) => {

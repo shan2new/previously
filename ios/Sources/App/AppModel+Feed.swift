@@ -23,6 +23,7 @@ final class FeedDerivedCache {
         let trending: Int        // appModel.trending.count (empty-account module)
         let online: Bool         // SyncCenter.shared.isOnline (the offline notice)
         let hides: Int           // hidesVersion (mutes and hides from anywhere)
+        let audience: Audience   // the viewer's kind (For you and its modules are held to it)
     }
     var rows: [FeedTab: (key: Key, rows: [FeedRow])] = [:]
     /// The fresh post models of a tab's current rows (the new-posts pill).
@@ -263,17 +264,20 @@ extension AppModel {
         let chart = trending
         let folds = feedFolds
         let online = SyncCenter.shared.isOnline
+        let kind = audience
         let key = FeedDerivedCache.Key(tab: tab, feed: feedVersion, library: libraryVersion, minute: minute,
                                        prevOpenedAt: prev, recs: recs, trending: chart.count, online: online,
-                                       hides: hidesVersion)
+                                       hides: hidesVersion, audience: kind)
         if let hit = feedDerived.rows[tab], hit.key == key { return hit.rows }
 
-        let untracked = Array(chart.filter { !isInLibrary($0.id) }.prefix(FeedComposer.maxTrending))
+        let untracked = Array(chart.filter { !isInLibrary($0.id) && kind.allows($0.source) }
+            .prefix(FeedComposer.maxTrending))
         let rows = FeedComposer.rows(
             tab: tab, state: state, library: libraryCopies, libraryIndex: { self.franchise(id: $0) },
             now: minute, folds: folds,
             hidden: hiddenPostIds, muted: mutedShowIds, recommendationKeys: recs,
-            untrackedTrending: untracked, libraryEmpty: libraryCopies.isEmpty, online: online)
+            untrackedTrending: untracked, libraryEmpty: libraryCopies.isEmpty, online: online,
+            allows: { kind.allows($0) })
 
         var models: [String: FeedPostModel] = [:]
         var fresh: [FeedPostModel] = []

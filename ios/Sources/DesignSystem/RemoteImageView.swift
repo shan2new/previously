@@ -1018,8 +1018,9 @@ struct ArtworkActionStyle: ButtonStyle {
             .padding(.horizontal, ThemeSpace.x5)
             .padding(.vertical, ThemeSpace.x2)
             .frame(minHeight: 44)
-            .background(filled ? ThemeColor.accent : Color.white.opacity(0.14), in: Capsule())
-            .overlay(Capsule().strokeBorder(.white.opacity(filled ? 0 : 0.3), lineWidth: 1))
+            .background(filled ? AnyShapeStyle(ThemeGradient.accent) : AnyShapeStyle(Color.white.opacity(0.14)),
+                        in: Capsule())
+            .overlay(Capsule().strokeBorder(filled ? ThemeGradient.litEdgeStrong : ThemeGradient.litEdge, lineWidth: 1))
             .opacity(configuration.isPressed ? 0.76 : 1)
     }
 }

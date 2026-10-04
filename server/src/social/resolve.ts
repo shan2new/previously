@@ -102,7 +102,7 @@ export interface InstallmentIndex {
   /** Parts in watch order (`comparePartOrder`), labelled and titled as `FranchisePart` is. */
   parts: MatchablePart[]
   /** Announcements oldest first (`first_seen_at`, then id): the order the feed's composer reads. */
-  announcements: { id: string; next: string }[]
+  announcements: { id: string; next: string; status?: string }[]
 }
 
 /** Two indexed reads; the same parts and announcements, in the same order, as the feed composes from. */
@@ -123,7 +123,7 @@ export async function loadInstallmentIndex(franchiseId: string): Promise<Install
       .innerJoin(media, eq(media.id, franchiseMember.mediaId))
       .where(eq(franchiseMember.franchiseId, franchiseId)),
     db
-      .select({ id: announcements.id, next: announcements.next })
+      .select({ id: announcements.id, next: announcements.next, status: announcements.status })
       .from(announcements)
       .where(eq(announcements.franchiseId, franchiseId))
       .orderBy(asc(announcements.firstSeenAt), asc(announcements.id)),

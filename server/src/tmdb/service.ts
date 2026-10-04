@@ -69,7 +69,7 @@ export async function refreshTvUpcomingFact(
     .update(franchise)
     .set({
       enrichment,
-      ...(catalogUpcoming && resolved === catalogUpcoming ? { upcoming: catalogUpcoming } : {}),
+      upcoming: resolved,
       updatedAt: new Date(),
     })
     .where(eq(franchise.id, franchiseId))
@@ -247,7 +247,7 @@ export async function refreshTvShow(
       description: show.overview || null,
       genres: (show.genres ?? []).map((genre) => genre.name).slice(0, 6),
       enrichment: tmdbFranchiseEnrichment(show, now),
-      ...(catalogUpcoming && resolved === catalogUpcoming ? { upcoming: catalogUpcoming } : {}),
+      upcoming: resolved,
       updatedAt: new Date(),
     })
     .where(eq(franchise.id, franchiseId))

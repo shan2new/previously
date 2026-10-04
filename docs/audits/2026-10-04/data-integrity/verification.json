@@ -1,0 +1,641 @@
+{
+  "checked": "2026-10-04T09:06:48.819Z",
+  "franchises": 1320,
+  "parts": 4681,
+  "retracted": 9,
+  "posts": 422,
+  "notificationRecipientsChecked": 4,
+  "failures": [],
+  "samples": [
+    {
+      "id": "c101456a-89e6-45e4-8842-4e4b07894b32",
+      "title": "Game of Thrones",
+      "isReleasing": false,
+      "upcoming": {
+        "next": "",
+        "note": "The original series ended with Season 8 in 2019. Spin-off development does not renew the original series.",
+        "source": "https://www.skygroup.sky/en-gb/article/eighth-and-final-series-of-game-of-thrones-breaks-records-for-sky-atlantic",
+        "status": "concluded",
+        "checked": "2026-10-04T08:58:17.654Z",
+        "release": "TBA",
+        "evidence": [
+          {
+            "url": "https://www.skygroup.sky/en-gb/article/eighth-and-final-series-of-game-of-thrones-breaks-records-for-sky-atlantic",
+            "tier": "reputable",
+            "primary": true,
+            "publisher": null,
+            "publishedAt": null
+          }
+        ],
+        "releaseWindow": {
+          "date": null,
+          "precision": "unknown",
+          "sortKey": null
+        }
+      },
+      "parts": [
+        {
+          "label": "Season 1",
+          "status": "FINISHED",
+          "aired": 10,
+          "total": 10
+        },
+        {
+          "label": "Season 2",
+          "status": "FINISHED",
+          "aired": 10,
+          "total": 10
+        },
+        {
+          "label": "Season 3",
+          "status": "FINISHED",
+          "aired": 10,
+          "total": 10
+        },
+        {
+          "label": "Season 4",
+          "status": "FINISHED",
+          "aired": 10,
+          "total": 10
+        },
+        {
+          "label": "Season 5",
+          "status": "FINISHED",
+          "aired": 10,
+          "total": 10
+        },
+        {
+          "label": "Season 6",
+          "status": "FINISHED",
+          "aired": 10,
+          "total": 10
+        },
+        {
+          "label": "Season 7",
+          "status": "FINISHED",
+          "aired": 7,
+          "total": 7
+        },
+        {
+          "label": "Season 8",
+          "status": "FINISHED",
+          "aired": 6,
+          "total": 6
+        },
+        {
+          "label": "Specials",
+          "status": "FINISHED",
+          "aired": 300,
+          "total": 300
+        }
+      ]
+    },
+    {
+      "id": "97d433c0-0f76-422a-8142-fb0c7ad0c35c",
+      "title": "Hunter x Hunter (2011)",
+      "isReleasing": false,
+      "upcoming": null,
+      "parts": [
+        {
+          "label": "Season 1",
+          "status": "FINISHED",
+          "aired": 148,
+          "total": 148
+        },
+        {
+          "label": "Phantom Rouge",
+          "status": "FINISHED",
+          "aired": 1,
+          "total": 1
+        },
+        {
+          "label": "The Last Mission",
+          "status": "FINISHED",
+          "aired": 1,
+          "total": 1
+        }
+      ]
+    },
+    {
+      "id": "8e768809-0376-49b9-8d4c-bd379feb23b2",
+      "title": "Kaiju No. 8",
+      "isReleasing": false,
+      "upcoming": {
+        "next": "Final Chapter",
+        "note": "The official anime site announced production of the Final Chapter. No release date or numbered-season designation is given.",
+        "source": "https://kaiju-no8.net/news/detail_251220_01.html",
+        "status": "announced_no_date",
+        "checked": "2026-10-04T08:58:17.654Z",
+        "release": "TBA",
+        "evidence": [
+          {
+            "url": "https://kaiju-no8.net/news/detail_251220_01.html",
+            "tier": "reputable",
+            "primary": true,
+            "publisher": "Official Kaiju No. 8 anime website",
+            "publishedAt": "2025-12-20"
+          }
+        ],
+        "releaseWindow": {
+          "date": null,
+          "precision": "unknown",
+          "sortKey": null
+        }
+      },
+      "parts": [
+        {
+          "label": "Season 1",
+          "status": "FINISHED",
+          "aired": 12,
+          "total": 12
+        },
+        {
+          "label": "Season 2",
+          "status": "FINISHED",
+          "aired": 11,
+          "total": 11
+        },
+        {
+          "label": "Movie 1",
+          "status": "FINISHED",
+          "aired": 1,
+          "total": 1
+        },
+        {
+          "label": "ONA 1",
+          "status": "FINISHED",
+          "aired": 31,
+          "total": 31
+        },
+        {
+          "label": "Season 3",
+          "status": "NOT_YET_RELEASED",
+          "aired": 0,
+          "total": 0
+        },
+        {
+          "label": "Special 1",
+          "status": "FINISHED",
+          "aired": 1,
+          "total": 1
+        },
+        {
+          "label": "Special 2",
+          "status": "FINISHED",
+          "aired": 4,
+          "total": 4
+        }
+      ]
+    },
+    {
+      "id": "d60f86d6-488a-4758-b345-9bcdd5e1954e",
+      "title": "Mushoku Tensei",
+      "isReleasing": false,
+      "upcoming": {
+        "next": "Season 3 Part 2",
+        "note": "Season 3 Part 2 was announced for 2027. The app previously called it Season 6 by counting cours as seasons.",
+        "source": "https://www.animenewsnetwork.com/news/2026-09-27/mushoku-tensei-jobless-reincarnation-season-3-anime-part-2-airs-in-2027/.242246",
+        "status": "announced",
+        "checked": "2026-10-04T08:58:17.654Z",
+        "release": "2027",
+        "evidence": [
+          {
+            "url": "https://www.animenewsnetwork.com/news/2026-09-27/mushoku-tensei-jobless-reincarnation-season-3-anime-part-2-airs-in-2027/.242246",
+            "tier": "trade",
+            "primary": false,
+            "publisher": "Anime News Network",
+            "publishedAt": "2026-09-27"
+          },
+          {
+            "url": "https://x.com/animeupdates/status/2104232216251212190",
+            "tier": "reputable",
+            "primary": false,
+            "publisher": "Anime Updates (X, reposting official trailer)",
+            "publishedAt": "2026-09-27"
+          },
+          {
+            "url": "https://animecorner.me/mushoku-tensei-season-3-cour-2-officially-announced/",
+            "tier": "reputable",
+            "primary": false,
+            "publisher": "Anime Corner",
+            "publishedAt": "2026-09-27"
+          }
+        ],
+        "releaseWindow": {
+          "date": "2027",
+          "precision": "year",
+          "sortKey": 20270101
+        }
+      },
+      "parts": [
+        {
+          "label": "Season 1",
+          "status": "FINISHED",
+          "aired": 11,
+          "total": 11
+        },
+        {
+          "label": "Season 2",
+          "status": "FINISHED",
+          "aired": 12,
+          "total": 12
+        },
+        {
+          "label": "Season 3",
+          "status": "FINISHED",
+          "aired": 13,
+          "total": 13
+        },
+        {
+          "label": "Season 4",
+          "status": "FINISHED",
+          "aired": 12,
+          "total": 12
+        },
+        {
+          "label": "Season 5",
+          "status": "FINISHED",
+          "aired": 14,
+          "total": 14
+        },
+        {
+          "label": "Special 1",
+          "status": "FINISHED",
+          "aired": 1,
+          "total": 1
+        },
+        {
+          "label": "Season 6",
+          "status": "NOT_YET_RELEASED",
+          "aired": 0,
+          "total": 0
+        }
+      ]
+    },
+    {
+      "id": "406d416d-ca4d-4fe6-b3b2-1f0828673ee5",
+      "title": "ted",
+      "isReleasing": false,
+      "upcoming": {
+        "next": "",
+        "note": "The live-action series is listed as ended. Ted: The Animated Series is a separate animated spin-off.",
+        "source": "https://www.themoviedb.org/tv/201834",
+        "status": "concluded",
+        "checked": "2026-10-04T08:58:17.654Z",
+        "release": "TBA",
+        "evidence": [
+          {
+            "url": "https://www.themoviedb.org/tv/201834",
+            "tier": "catalogue",
+            "primary": false,
+            "publisher": null,
+            "publishedAt": null
+          }
+        ],
+        "releaseWindow": {
+          "date": null,
+          "precision": "unknown",
+          "sortKey": null
+        }
+      },
+      "parts": [
+        {
+          "label": "Season 1",
+          "status": "FINISHED",
+          "aired": 7,
+          "total": 7
+        },
+        {
+          "label": "Season 2",
+          "status": "FINISHED",
+          "aired": 8,
+          "total": 8
+        }
+      ]
+    },
+    {
+      "id": "96063cb7-c4d5-4cbd-b168-d95acf198b2a",
+      "title": "The Big Bang Theory",
+      "isReleasing": false,
+      "upcoming": {
+        "status": "announced_no_date",
+        "next": "Specials",
+        "release": "TBA",
+        "note": null,
+        "source": "https://www.themoviedb.org/tv/1418",
+        "checked": "2026-09-02T19:53:01.805Z",
+        "evidence": [
+          {
+            "url": "https://www.themoviedb.org/tv/1418",
+            "publisher": "TMDB",
+            "publishedAt": null,
+            "tier": "catalogue",
+            "primary": false
+          }
+        ],
+        "releaseWindow": {
+          "date": null,
+          "precision": "unknown",
+          "sortKey": null
+        }
+      },
+      "parts": [
+        {
+          "label": "Season 1",
+          "status": "FINISHED",
+          "aired": 17,
+          "total": 17
+        },
+        {
+          "label": "Season 2",
+          "status": "FINISHED",
+          "aired": 23,
+          "total": 23
+        },
+        {
+          "label": "Season 3",
+          "status": "FINISHED",
+          "aired": 23,
+          "total": 23
+        },
+        {
+          "label": "Season 4",
+          "status": "FINISHED",
+          "aired": 24,
+          "total": 24
+        },
+        {
+          "label": "Season 5",
+          "status": "FINISHED",
+          "aired": 24,
+          "total": 24
+        },
+        {
+          "label": "Season 6",
+          "status": "FINISHED",
+          "aired": 24,
+          "total": 24
+        },
+        {
+          "label": "Season 7",
+          "status": "FINISHED",
+          "aired": 24,
+          "total": 24
+        },
+        {
+          "label": "Season 8",
+          "status": "FINISHED",
+          "aired": 24,
+          "total": 24
+        },
+        {
+          "label": "Season 9",
+          "status": "FINISHED",
+          "aired": 24,
+          "total": 24
+        },
+        {
+          "label": "Season 10",
+          "status": "FINISHED",
+          "aired": 24,
+          "total": 24
+        },
+        {
+          "label": "Season 11",
+          "status": "FINISHED",
+          "aired": 24,
+          "total": 24
+        },
+        {
+          "label": "Season 12",
+          "status": "FINISHED",
+          "aired": 24,
+          "total": 24
+        },
+        {
+          "label": "Specials",
+          "status": "NOT_YET_RELEASED",
+          "aired": 0,
+          "total": 3
+        }
+      ]
+    },
+    {
+      "id": "6e2a1730-42a5-4300-8cf3-d7c89d82aae1",
+      "title": "The Boys",
+      "isReleasing": false,
+      "upcoming": {
+        "next": "",
+        "note": "The Boys ended with its series finale on May 20, 2026. Vought Rising is a separate prequel series.",
+        "source": "https://www.aboutamazon.com/news/entertainment/the-boys-eric-kripke-season-5-prime-video",
+        "status": "concluded",
+        "checked": "2026-10-04T08:58:17.654Z",
+        "release": "TBA",
+        "evidence": [
+          {
+            "url": "https://www.aboutamazon.com/news/entertainment/the-boys-eric-kripke-season-5-prime-video",
+            "tier": "reputable",
+            "primary": true,
+            "publisher": null,
+            "publishedAt": null
+          }
+        ],
+        "releaseWindow": {
+          "date": null,
+          "precision": "unknown",
+          "sortKey": null
+        }
+      },
+      "parts": [
+        {
+          "label": "Season 1",
+          "status": "FINISHED",
+          "aired": 8,
+          "total": 8
+        },
+        {
+          "label": "Season 2",
+          "status": "FINISHED",
+          "aired": 8,
+          "total": 8
+        },
+        {
+          "label": "Season 3",
+          "status": "FINISHED",
+          "aired": 8,
+          "total": 8
+        },
+        {
+          "label": "Season 4",
+          "status": "FINISHED",
+          "aired": 8,
+          "total": 8
+        },
+        {
+          "label": "Season 5",
+          "status": "FINISHED",
+          "aired": 8,
+          "total": 8
+        },
+        {
+          "label": "Specials",
+          "status": "FINISHED",
+          "aired": 76,
+          "total": 76
+        }
+      ]
+    },
+    {
+      "id": "2c299052-8729-4112-8d39-7d5dba1340a2",
+      "title": "The Traitors",
+      "isReleasing": false,
+      "upcoming": null,
+      "parts": [
+        {
+          "label": "Season 1",
+          "status": "FINISHED",
+          "aired": 10,
+          "total": 10
+        },
+        {
+          "label": "Season 2",
+          "status": "FINISHED",
+          "aired": 11,
+          "total": 11
+        }
+      ]
+    },
+    {
+      "id": "73dfa0b0-c621-4b5a-a66b-e050c8a24087",
+      "title": "The Traitors",
+      "isReleasing": true,
+      "upcoming": {
+        "status": "announced_no_date",
+        "next": "Season 6",
+        "release": "TBA",
+        "note": null,
+        "source": "https://www.themoviedb.org/tv/215943",
+        "checked": "2026-10-04T08:58:37.220Z",
+        "evidence": [
+          {
+            "url": "https://www.themoviedb.org/tv/215943",
+            "publisher": "TMDB",
+            "publishedAt": null,
+            "tier": "catalogue",
+            "primary": false
+          }
+        ],
+        "releaseWindow": {
+          "date": null,
+          "precision": "unknown",
+          "sortKey": null
+        }
+      },
+      "parts": [
+        {
+          "label": "Season 1",
+          "status": "FINISHED",
+          "aired": 11,
+          "total": 11
+        },
+        {
+          "label": "Season 2",
+          "status": "FINISHED",
+          "aired": 12,
+          "total": 12
+        },
+        {
+          "label": "Season 3",
+          "status": "FINISHED",
+          "aired": 12,
+          "total": 12
+        },
+        {
+          "label": "Season 4",
+          "status": "FINISHED",
+          "aired": 12,
+          "total": 12
+        },
+        {
+          "label": "Season 5",
+          "status": "RELEASING",
+          "aired": 4,
+          "total": 12
+        },
+        {
+          "label": "Season 6",
+          "status": "NOT_YET_RELEASED",
+          "aired": 0,
+          "total": 0
+        }
+      ]
+    },
+    {
+      "id": "11f567be-27ac-48bc-bd8d-4ce8a98fb38e",
+      "title": "The Witcher",
+      "isReleasing": false,
+      "upcoming": {
+        "next": "Season 5",
+        "note": "Netflix confirmed a fifth and final season. The previously displayed 2027 window was not officially confirmed.",
+        "source": "https://about.netflix.com/en/news/the-witcher-season-4-begins-production-in-the-uk-and-netflix-announces-fifth",
+        "status": "announced_no_date",
+        "checked": "2026-10-04T08:58:17.654Z",
+        "release": "TBA",
+        "evidence": [
+          {
+            "url": "https://about.netflix.com/en/news/the-witcher-season-4-begins-production-in-the-uk-and-netflix-announces-fifth",
+            "tier": "official",
+            "primary": true,
+            "publisher": "Netflix",
+            "publishedAt": "2024-04-18"
+          }
+        ],
+        "releaseWindow": {
+          "date": null,
+          "precision": "unknown",
+          "sortKey": null
+        }
+      },
+      "parts": [
+        {
+          "label": "Season 1",
+          "status": "FINISHED",
+          "aired": 8,
+          "total": 8
+        },
+        {
+          "label": "Season 2",
+          "status": "FINISHED",
+          "aired": 8,
+          "total": 8
+        },
+        {
+          "label": "Season 3",
+          "status": "FINISHED",
+          "aired": 8,
+          "total": 8
+        },
+        {
+          "label": "Season 4",
+          "status": "FINISHED",
+          "aired": 8,
+          "total": 8
+        }
+      ]
+    },
+    {
+      "id": "ba042b6c-f59f-42d0-8724-82425e682376",
+      "title": "The Witcher",
+      "isReleasing": false,
+      "upcoming": null,
+      "parts": [
+        {
+          "label": "Season 1",
+          "status": "FINISHED",
+          "aired": 13,
+          "total": 13
+        }
+      ]
+    }
+  ]
+}

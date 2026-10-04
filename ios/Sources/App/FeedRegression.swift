@@ -32,7 +32,8 @@ enum FeedRegression {
                      failed: Bool = false, unavailable: Bool = false,
                      folds: [String: FeedFold] = [:], hidden: Set<String> = [], muted: Set<String> = [],
                      recs: [String] = ["r1", "r2", "r3", "r4"], trending: [FranchiseSummary] = [],
-                     libraryEmpty: Bool = false, online: Bool = true) -> [FeedRow] {
+                     libraryEmpty: Bool = false, online: Bool = true,
+                     allows: @escaping (MediaSource) -> Bool = { _ in true }) -> [FeedRow] {
             var state = FeedTabState(response: res, fromCache: fromCache, loadedAt: now)
             state.failed = failed
             state.unavailable = unavailable
@@ -40,9 +41,24 @@ enum FeedRegression {
             return FeedComposer.rows(tab: tab, state: state, library: [], libraryIndex: { _ in nil },
                                      now: now, folds: folds, hidden: hidden,
                                      muted: muted, recommendationKeys: recs, untrackedTrending: trending,
-                                     libraryEmpty: libraryEmpty, online: online)
+                                     libraryEmpty: libraryEmpty, online: online, allows: allows)
         }
         let f1 = { (id: String, fresh: Bool) in Self.post(id, fid: "fa", fresh: fresh, time: now - hour) }
+
+        // The audience's wall (4 Oct): For you carries the viewer's kind only, whatever the response
+        // holds; Following is their own shows and is never filtered. The fixtures' shows are anime.
+        let wall = [f1("w1", false), f1("w2", false)]
+        let posts = { (rows: [FeedRow]) in rows.filter { $0.id.hasPrefix("post/") }.count }
+        check(posts(compose(response(tab: "foryou", posts: wall, prevOpenedAt: prev), tab: .forYou,
+                            allows: { $0 == .tmdb })) == 0, "a TV viewer's For you holds no anime post")
+        check(posts(compose(response(tab: "foryou", posts: wall, prevOpenedAt: prev), tab: .forYou,
+                            allows: { $0 == .anilist })) == 2, "an anime viewer's For you keeps them")
+        check(posts(compose(following(wall), allows: { $0 == .tmdb })) == 2, "Following is never filtered by audience")
+        check(Audience.anime.allows(.anilist) && !Audience.anime.allows(.tmdb)
+              && Audience.tv.allows(.tmdb) && !Audience.tv.allows(.anilist)
+              && Audience.both.allows(.anilist) && Audience.both.allows(.tmdb), "each audience allows its own kind")
+        check(Audience.anime.filter == .anime && Audience.tv.filter == .tv && Audience.both.filter == .all,
+              "a single audience fixes the scope")
 
         // Two fresh, three not: the marker sits between the blocks; Suggested after the 3rd post.
         let mixed = following([f1("n1", true), f1("n2", true), f1("o1", false), f1("o2", false), f1("o3", false)])
@@ -364,6 +380,9 @@ enum FeedRegression {
         let announced = part(progress: 0, releasing: false, aired: 0, total: 12, status: "NOT_YET_RELEASED")
         check(AppModel.episodeAccess(part: announced, anchor: .local, episode: 1, now: now) == .unaired, "gate: announced")
         let finished = part(progress: 12, releasing: false, aired: 0, total: 12, status: "FINISHED")
+        let unknownAired = part(progress: 0, releasing: true, aired: 0, total: 26, status: "RELEASING")
+        check(unknownAired.availableEpisodes() == 0, "missing aired count does not expose planned episodes")
+        check(!unknownAired.isCaughtUp, "missing aired count cannot establish caught up")
         check(AppModel.episodeAccess(part: finished, anchor: .local, episode: 12, now: now) == .open,
               "gate: a finished season with no aired count is its size")
         // One aired count for the mark and the room: a date-only slot whose synthesised instant

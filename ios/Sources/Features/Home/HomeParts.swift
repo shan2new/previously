@@ -1,4 +1,5 @@
 import SwiftUI
+import UIKit
 
 // Home's pieces: what it draws (`HomeFeed`, composed once per library and minute) and the views
 // that draw it — the bar, the billboard, the Up next tiles. See `HomeView`.
@@ -85,7 +86,7 @@ enum HomeCompose {
         // continuing first); within each, the shelf's own order.
         let shelf: [HomeQueueItem] = m.watchingShelf.compactMap { f in
             guard let part = f.resumePart else { return nil }
-            return HomeQueueItem(franchise: f, part: part, fresh: freshCount(f, now: now))
+            return HomeQueueItem(franchise: f, part: part, fresh: freshCount(f, part: part, now: now))
         }
         let rank = Dictionary(uniqueKeysWithValues: shelf.enumerated().map { ($1.id, $0) })
         let queue = shelf.sorted { a, b in
@@ -109,10 +110,16 @@ enum HomeCompose {
         // SHOW — its newest episode ("Only the most recent episode of that series NOT multiple
         // unseen episodes", owner, same day). The row names the run still to watch ("Episodes
         // 22–24") and its ring marks through it, the count confirmed first.
+        // The STORY's episodes only (`isMainStory`): the shorts that air beside a season are on the
+        // calendar, and half an hour later than the episode — so, newest first, they were the one
+        // row a show kept (Re:ZERO's "Break Time" for Season 4's finale, 4 Oct).
         var listed = Set<String>()
         let recent: [HomeAiring] = days
             .filter { $0.id <= 0 && $0.id > -7 }
-            .flatMap { d in d.entries.filter { $0.aired && !$0.watched }.map { HomeAiring(entry: $0, day: d.id, noon: d.noon) } }
+            .flatMap { d in
+                d.entries.filter { $0.aired && !$0.watched && $0.part.isMainStory }
+                    .map { HomeAiring(entry: $0, day: d.id, noon: d.noon) }
+            }
             .sorted { $0.entry.at > $1.entry.at }
             .filter { listed.insert($0.entry.franchise.id).inserted }
         // The billboard is something you can WATCH before anything you can only wait for (26 Sep:
@@ -141,7 +148,7 @@ enum HomeCompose {
             if let item = queue.first(where: { $0.id == id }) {
                 hero = heroFor(item, now: now)
             } else if let part = f.resumePart {
-                hero = heroFor(HomeQueueItem(franchise: f, part: part, fresh: freshCount(f, now: now)), now: now)
+                hero = heroFor(HomeQueueItem(franchise: f, part: part, fresh: freshCount(f, part: part, now: now)), now: now)
             } else if let next = days.lazy.flatMap(\.entries).first(where: { $0.franchise.id == id && !$0.aired }) {
                 hero = HomeHero(franchise: f, part: next.part, episode: next.episode, kind: .airing(at: next.at))
             }
@@ -163,19 +170,21 @@ enum HomeCompose {
     /// so a thousand-episode backlog that gained one this week stays a backlog, not a drop.
     private static func dropItem(_ airing: HomeAiring, now: Int64) -> HomeQueueItem? {
         let f = airing.entry.franchise, part = airing.entry.part
-        let behind = part.unwatchedOut(now: now, anchor: f.timeAnchor)
+        // The airing has struck, whatever the catalogue's count says yet: a premiere is out while
+        // its season still reads "not yet released" (Black Clover's Season 2, the morning after).
+        let behind = max(part.unwatchedOut(now: now, anchor: f.timeAnchor), airing.entry.episode - part.progress)
         guard behind > 0, part.isNews(now: now, anchor: f.timeAnchor, window: AppModel.outNowWindow) else { return nil }
         return HomeQueueItem(franchise: f, part: part, fresh: behind)
     }
 
-    /// Unwatched episodes of a drop inside the out-now window — `AppModel.outNow`'s own test, minus
-    /// its "still releasing" gate: a FINALE is the freshest drop there is, and the season it ends
-    /// stops releasing the moment it airs (Slime's Season 4, 25 Sep, was out of `outNow` the next
-    /// morning with three episodes unwatched).
-    private static func freshCount(_ f: Franchise, now: Int64) -> Int {
+    /// Unwatched episodes of a drop inside the out-now window, on the part you would RESUME —
+    /// `AppModel.outNow`'s own test, minus its "still releasing" gate: a FINALE is the freshest drop
+    /// there is, and the season it ends stops releasing the moment it airs (Slime's Season 4,
+    /// 25 Sep, was out of `outNow` the next morning with three episodes unwatched). Asked of the
+    /// resume part itself: `Franchise.freshPart` answers the first part in catalogue order with a
+    /// recent drop, which for Re:ZERO was a run of shorts — so its finale was not fresh at all.
+    private static func freshCount(_ f: Franchise, part: FranchisePart, now: Int64) -> Int {
         let window = AppModel.outNowWindow
-        guard let part = f.freshPart(now: now, window: window) ?? f.resumePart,
-              part.mediaId == f.resumePart?.mediaId || f.resumePart == nil else { return 0 }
         let behind = part.unwatchedOut(now: now, anchor: f.timeAnchor)
         guard behind > 0, part.isNews(now: now, anchor: f.timeAnchor, window: window),
               let last = part.lastAired(now: now, anchor: f.timeAnchor), now - last <= window else { return 0 }
@@ -212,16 +221,39 @@ final class HomeFeedBox {
 /// Whether the billboard has gone under the bar — written by the scroll probe, read only by the bar
 /// (the app's rule: the scroll offset is never screen state).
 @MainActor @Observable
-final class HomeChrome {
+final class HomeChrome: ScrollAwayChrome {
     private(set) var solid = false
+    /// The page's content top in the window, to the pixel — read only by the bars' grounds
+    /// (`HomeGroundWindow`), which draw the page's own ground where the page draws it.
+    private(set) var contentTop: CGFloat = 0
+    /// How far the bar's row has slid up: 0 (all there) … its height (gone) — the bars leave with
+    /// a reader's scroll and return with it, as every root's do (`RootChromeState`, 4 Oct).
+    private(set) var offset: CGFloat = 0
 
     @ObservationIgnored private var billboardBottom: CGFloat = 0
     @ObservationIgnored private var copyTop: CGFloat = .infinity
+    @ObservationIgnored private var lastY: CGFloat = 0
+    /// The READER is moving the page (a finger, or its momentum) — not the app (a scroll to top).
+    @ObservationIgnored private var following = false
 
     private var barBottom: CGFloat { ThemeMetrics.topSafeInset + FeedMetrics.headerRow }
+    private var rowHeight: CGFloat { FeedMetrics.headerRow }
+
+    var awayFraction: CGFloat { offset / rowHeight }
 
     /// The page's content top, in the window, and the billboard's height (0 without one).
     func track(contentTop y: CGFloat, billboard: CGFloat) {
+        let px = ThemeMetrics.pixel
+        let top = (y / px).rounded() * px
+        if top != contentTop { contentTop = top }
+        // The bars ride a reader's scroll (VoiceOver keeps them).
+        let scrolled = -y
+        let dy = scrolled - lastY
+        lastY = scrolled
+        if following, !UIAccessibility.isVoiceOverRunning {
+            let next: CGFloat = scrolled <= 0 ? 0 : min(max(offset + dy, 0), rowHeight)
+            if abs(next - offset) >= 0.5 || (next == 0 && offset != 0) { offset = next }
+        }
         billboardBottom = y + billboard
         if billboard == 0 { copyTop = .infinity }
         update()
@@ -239,6 +271,24 @@ final class HomeChrome {
         let next = copyTop < barBottom + 12 || billboardBottom < barBottom + 24
         if next != solid { solid = next }
     }
+
+    /// The page's scroll phase: only a reader's scroll moves the bars, and at rest they are either
+    /// shown or gone.
+    func phase(_ phase: ScrollPhase) {
+        following = phase == .interacting || phase == .decelerating
+        guard phase == .idle, offset > 0, offset < rowHeight else { return }
+        let gone = offset > rowHeight / 2 && lastY > rowHeight
+        withAnimation(Self.motion) { offset = gone ? rowHeight : 0 }
+    }
+
+    func reveal() {
+        guard offset != 0 else { return }
+        withAnimation(Self.motion) { offset = 0 }
+    }
+
+    private static var motion: Animation {
+        ThemeMotion.pick(ThemeMotion.uiSnappy, reduceMotion: UIAccessibility.isReduceMotionEnabled)
+    }
 }
 
 // MARK: - The bar
@@ -249,9 +299,15 @@ final class HomeChrome {
 /// canvas and one physical pixel of rule.
 struct HomeHeader: View {
     let chrome: HomeChrome
-    /// The bar's ground once solid: the page's own top colour (the show's hue at canvas depth, or
-    /// the canvas), so the bar is FLUSH with what it sits on — never a black lid over a tinted page.
-    var ground: Color = ThemeColor.canvas
+    /// The bar's ground once solid: the PAGE'S OWN ground, seen through the bar (`HomeGroundWindow`)
+    /// — the show's hue at canvas depth over the billboard, the canvas further down — so the bar
+    /// is FLUSH with what it sits on, never a black lid over a tinted page nor a tinted one over
+    /// the canvas.
+    var ground: HomePageGround = .canvas
+    /// The veil the glyphs and the clock stand on while art is under them — the billboard's
+    /// protection (`HeroProtection`), nil with no billboard. PINNED here: on the billboard it
+    /// scrolled away with the page, and the picture, moving slower, slid bare under the clock.
+    var veil: Double? = nil
     let onProfile: () -> Void
     let onTop: () -> Void
 
@@ -281,25 +337,43 @@ struct HomeHeader: View {
         }
         .padding(.horizontal, ThemeMetrics.gutter)
         .frame(height: FeedMetrics.headerRow)
-        .background { HomeHeaderGround(chrome: chrome, ground: ground) }
+        // The row leaves with the scroll (and the tab bar with it); the veil and the status
+        // band's ground stay for the clock.
+        .modifier(RootChromeFade(chrome: chrome))
+        .modifier(RootChromeSlide(chrome: chrome))
+        .background(alignment: .top) { HomeHeaderGround(chrome: chrome, ground: ground, veil: veil) }
     }
 }
 
-/// The bar's ground and rule — the only reader of `HomeChrome`.
+/// The bar's veil, ground and rule — with `HomeGroundWindow`, the only readers of `HomeChrome`.
 private struct HomeHeaderGround: View {
     let chrome: HomeChrome
-    let ground: Color
+    let ground: HomePageGround
+    let veil: Double?
+
+    private var band: CGFloat { ThemeMetrics.topSafeInset + FeedMetrics.headerRow }
 
     var body: some View {
-        ground
-            .ignoresSafeArea(edges: .top)
-            .overlay(alignment: .bottom) {
-                Rectangle().fill(ThemeColor.feedSeparator).frame(height: FeedMetrics.hairline)
+        // The solid ground goes up with the row, down to the status band alone.
+        let away = chrome.offset
+        ZStack(alignment: .top) {
+            if let veil {
+                HeroTopVeil(band: band, ramp: 100, strength: veil)
+                    .opacity(chrome.solid ? 0 : 1)
             }
-            .opacity(chrome.solid ? 1 : 0)
-            .animation(ThemeMotion.uiGentle, value: chrome.solid)
-            .allowsHitTesting(false)
-            .accessibilityHidden(true)
+            HomeGroundWindow(chrome: chrome, ground: ground, top: -away, height: band)
+                .overlay(alignment: .bottom) {
+                    Rectangle().fill(ThemeColor.feedSeparator).frame(height: FeedMetrics.hairline)
+                }
+                .offset(y: -away)
+                .opacity(chrome.solid ? 1 : 0)
+        }
+        // From the window's top edge: the status band is the bar's too.
+        .frame(height: FeedMetrics.headerRow, alignment: .top)
+        .offset(y: -ThemeMetrics.topSafeInset)
+        .animation(ThemeMotion.uiGentle, value: chrome.solid)
+        .allowsHitTesting(false)
+        .accessibilityHidden(true)
     }
 }
 
@@ -369,6 +443,10 @@ struct HomeBillboard: View {
     /// How long the billboard waits for the show's pick (`PosterPick`, graded on first sight) before
     /// it takes the catalogue's own picture. A pick is kept for good, so this is a first visit's wait.
     private static let pickPatience: Duration = .milliseconds(2000)
+    /// The pool of light under the lockup: its width as a share of the window's (lit to the
+    /// screen's edges, spent beyond them) and its height.
+    private static let poolWidth: CGFloat = 1.5
+    private static let poolHeight: CGFloat = 400
 
     /// A pick made before this billboard existed — on its first frame.
     private var storedPick: Shown? { PosterPick.shared.choice(for: hero.franchise).map(shown(from:)) }
@@ -424,7 +502,7 @@ struct HomeBillboard: View {
         ZStack(alignment: .bottom) {
             Button(action: onOpen) {
                 ArtHeader(url: art.url, height: h, tint: tint, scrimTop: 0, scrimBottom: 0,
-                          focus: .top, portraitSource: art.portraitSource, drift: true,
+                          focus: .top, portraitSource: art.portraitSource, portraitFill: true, drift: true,
                           ultraWide: art.ultraWide, onArtLoaded: artLoaded,
                           // A poster's own logotype is INK a veil cannot remove: a name set in
                           // type starts its poster under the bar (the old Today's rule).
@@ -448,24 +526,32 @@ struct HomeBillboard: View {
                     .scaleEffect(1 + pull / max(h, 1), anchor: .bottom)
                     .offset(y: push)
             }
+            // Nothing of the PICTURE below the frame — it leans and moves with the scroll inside
+            // it — while a pull may still stretch it up past the top. The picture alone: the
+            // lockup's light is not cut here (below).
+            .clipShape(BelowClip())
             .accessibilityLabel("\(badge), \(hero.franchise.displayTitle), \(line)")
             .accessibilityHint(Copy.Accessibility.opensTheShowHint)
 
             HeroCopyScrim(copyHeight: copyHeight, strength: strength, landing: landing)
-
-            // The lockup sits in a pool of the poster's own light, not on a dead ground.
-            if let light = HeroLight.glow(tint) {
-                RadialGradient(colors: [light.opacity(0.26), light.opacity(0)], center: .center,
-                               startRadius: 2, endRadius: 230)
-                    .frame(height: 320)
-                    .scaleEffect(x: 1.25, y: 0.85)
-                    .blendMode(.plusLighter)
-                    .padding(.bottom, max(0, copyHeight - 230))
-                    .opacity(artIn && curtainUp ? 1 : 0)
-                    .animation(reduceMotion ? nil : .easeOut(duration: 1.2), value: artIn && curtainUp)
-                    .allowsHitTesting(false)
-                    .accessibilityHidden(true)
-            }
+                // The lockup sits in a pool of the poster's own light, not on a dead ground. An
+                // ellipse that is spent at its own rim, centred on the lockup and free to run past
+                // the billboard's foot onto the page (an overlay, so its size is not the
+                // billboard's): as a circle wider than its frame, cut again by the billboard, it
+                // ended on two straight lines under the mark ("the seam looks ugly", owner, 4 Oct).
+                .overlay(alignment: .bottom) {
+                    if let light = HeroLight.glow(tint) {
+                        EllipticalGradient(colors: [light.opacity(0.26), light.opacity(0)], center: .center,
+                                           startRadiusFraction: 0, endRadiusFraction: 0.5)
+                            .frame(width: ThemeMetrics.windowWidth * Self.poolWidth, height: Self.poolHeight)
+                            .blendMode(.plusLighter)
+                            .offset(y: Self.poolHeight / 2 - (ThemeSpace.x5 + copyHeight * 0.55))
+                            .opacity(artIn && curtainUp ? 1 : 0)
+                            .animation(reduceMotion ? nil : .easeOut(duration: 1.2), value: artIn && curtainUp)
+                            .allowsHitTesting(false)
+                            .accessibilityHidden(true)
+                    }
+                }
 
             lockup(name: name)
                 .padding(.horizontal, ThemeMetrics.gutter)
@@ -475,10 +561,6 @@ struct HomeBillboard: View {
         }
         .frame(height: h)
         .frame(maxWidth: .infinity)
-        // Nothing of the picture below the frame — it leans and moves with the scroll inside it —
-        // while a pull may still stretch it up past the top.
-        .clipShape(BelowClip())
-        .overlay(alignment: .top) { HeroTopVeil(band: band, ramp: 100, strength: strength) }
         .onAppear { if !reduceMotion { HeroTilt.shared.start() } }
         .onDisappear { if !reduceMotion { HeroTilt.shared.stop() } }
         .task(id: art.url) {
@@ -637,6 +719,9 @@ struct HomeGround: View {
     let top: Color
     let billboard: CGFloat
 
+    /// How far below the billboard the hue takes to reach the canvas.
+    static let fade: CGFloat = 520
+
     var body: some View {
         VStack(spacing: 0) {
             top.frame(height: max(0, billboard))
@@ -644,16 +729,72 @@ struct HomeGround: View {
                                    .init(color: top, location: 0.18),
                                    .init(color: ThemeColor.canvas, location: 1)],
                            startPoint: .top, endPoint: .bottom)
-                .frame(height: 520)
-                .overlay(alignment: .top) {
-                    RadialGradient(colors: [(tint ?? .clear).opacity(DetailTint.groundPool), .clear],
-                                   center: .init(x: 0.5, y: 0.1), startRadius: 0, endRadius: 320)
+                .frame(height: Self.fade)
+                .overlay {
+                    // The pool is an ellipse wholly INSIDE the fade: nothing at the billboard's
+                    // foot, nothing at the sides, its light where the first section sits. Centred
+                    // near the top with a radius past the box, it began at full strength on the
+                    // billboard's bottom edge — a line across the page under the mark ("the seam
+                    // looks ugly", owner, 4 Oct).
+                    EllipticalGradient(colors: [(tint ?? .clear).opacity(DetailTint.groundPool), .clear],
+                                       center: .center, startRadiusFraction: 0, endRadiusFraction: 0.5)
                         .blendMode(.plusLighter)
                 }
             Spacer(minLength: 0)
         }
         .allowsHitTesting(false)
         .accessibilityHidden(true)
+    }
+}
+
+/// What the page is standing on: the canvas, or a show's hue under and below its billboard.
+enum HomePageGround: Equatable {
+    case canvas
+    case show(tint: Color?, top: Color, billboard: CGFloat)
+}
+
+/// The tab bar's ground on Home: the page's own, under the icons — and leaving with them, slid
+/// down by what the bar has gone (`AppTabBar` rides the same state).
+struct HomeFootGround: View {
+    let chrome: HomeChrome
+    let ground: HomePageGround
+    /// The tab bar's top edge at rest, in the window.
+    let barTop: CGFloat
+
+    var body: some View {
+        let away = chrome.awayFraction * ThemeMetrics.tabBarVisualHeight
+        HomeGroundWindow(chrome: chrome, ground: ground, top: barTop + away,
+                         height: ThemeMetrics.tabBarVisualHeight)
+            .offset(y: away)
+    }
+}
+
+/// A bar's ground as a WINDOW onto the page's: the same `HomeGround`, drawn where the page draws
+/// it, cut to the bar. The page's ground is a gradient with a pool of light in it, so no single
+/// colour is flush with it for longer than a point of scroll — the tab bar was painted the hue's
+/// top colour, sat a shade off the page behind it, and snapped to canvas when the header turned
+/// solid (4 Oct). With `HomeHeaderGround`, the only reader of `HomeChrome.contentTop`: a scroll
+/// frame re-runs this body and nothing else.
+struct HomeGroundWindow: View {
+    let chrome: HomeChrome
+    let ground: HomePageGround
+    /// The bar's own top edge, in the window.
+    let top: CGFloat
+    let height: CGFloat
+
+    var body: some View {
+        ThemeColor.canvas
+            .frame(height: height)
+            .overlay(alignment: .top) {
+                if case .show(let tint, let colour, let billboard) = ground {
+                    HomeGround(tint: tint, top: colour, billboard: billboard)
+                        .frame(height: billboard + HomeGround.fade, alignment: .top)
+                        .offset(y: chrome.contentTop - top)
+                }
+            }
+            .clipped()
+            .allowsHitTesting(false)
+            .accessibilityHidden(true)
     }
 }
 
@@ -767,7 +908,7 @@ struct HomeNewTag: View {
             .fixedSize()
             .padding(.horizontal, 6)
             .padding(.vertical, 3)
-            .background(ThemeColor.accent, in: RoundedRectangle(cornerRadius: 4, style: .continuous))
+            .background(ThemeGradient.accent, in: RoundedRectangle(cornerRadius: 4, style: .continuous))
             .accessibilityHidden(true)
     }
 }

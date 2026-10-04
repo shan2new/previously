@@ -138,6 +138,7 @@ export interface TmdbSeason {
 export interface TmdbShow {
   id: number
   name: string
+  first_air_date?: string | null
   original_name?: string | null
   status: TmdbShowStatus
   number_of_seasons: number

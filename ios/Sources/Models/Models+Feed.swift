@@ -79,13 +79,15 @@ enum FeedTab: String, Codable, Sendable, CaseIterable, Hashable {
     case forYou = "foryou"
 }
 
-enum FeedPostKind: String, Codable, Sendable { case dated, window, announced, rumour, trailer, unknown }
+/// `episode` (4 Oct): "Episode 19 is out" — an episode of a show you follow that aired this week
+/// (Following only; the post's id is the episode's room, `ep:<mediaId>:<n>`).
+enum FeedPostKind: String, Codable, Sendable { case dated, window, announced, rumour, trailer, episode, unknown }
 enum FeedPostOrigin: String, Codable, Sendable { case research, catalogue, video, unknown }
 
 /// When the news happened. A date-only fact is carried at 12:00 UTC of its day (`dateOnly`).
 struct FeedTime: Codable, Sendable, Hashable {
     enum Basis: String, Codable, Sendable {
-        case primary, firstReport = "first_report", observed, catalogue, published, unknown
+        case primary, firstReport = "first_report", observed, catalogue, published, aired, unknown
     }
 
     let at: Int64
@@ -329,6 +331,49 @@ extension FeedCapabilities {
     }
 }
 
+/// Why a For you post is in THIS viewer's feed (4 Oct: "for you is not really recommendation based
+/// on user's watch history. It's just too random", owner — the server ranks For you from the
+/// library now, and says why): the recommender picked the show from the viewer's own shows, or it
+/// is a trending show in the genres they watch most. Nil on Following, on an unexplained post, and
+/// from a server that predates it; an unknown kind reads as nil, never as a decode failure.
+enum FeedPostContext: Codable, Sendable, Equatable {
+    /// The recommender's reason: its kind and the viewer's shows behind it, strongest first.
+    case recommended(kind: RecommendationItem.Reason.Kind, seeds: [RecommendationItem.Seed], count: Int)
+    /// One or two genres, the viewer's strongest first.
+    case taste(genres: [String])
+
+    private enum CodingKeys: String, CodingKey { case kind, reason, genres }
+
+    init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        switch (try? c.decode(String.self, forKey: .kind)) ?? "" {
+        case "recommended":
+            let reason = try c.decode(RecommendationItem.Reason.self, forKey: .reason)
+            self = .recommended(kind: reason.kind, seeds: reason.seeds, count: reason.count)
+        case "taste":
+            let genres = ((try? c.decode([String].self, forKey: .genres)) ?? []).filter { !$0.isEmpty }
+            guard !genres.isEmpty else {
+                throw DecodingError.dataCorruptedError(forKey: .genres, in: c, debugDescription: "no genres")
+            }
+            self = .taste(genres: Array(genres.prefix(2)))
+        default:
+            throw DecodingError.dataCorruptedError(forKey: .kind, in: c, debugDescription: "unknown context")
+        }
+    }
+
+    func encode(to encoder: Encoder) throws {
+        var c = encoder.container(keyedBy: CodingKeys.self)
+        switch self {
+        case .recommended(let kind, let seeds, let count):
+            try c.encode("recommended", forKey: .kind)
+            try c.encode(RecommendationItem.Reason(kind: kind, seeds: seeds, count: count), forKey: .reason)
+        case .taste(let genres):
+            try c.encode("taste", forKey: .kind)
+            try c.encode(genres, forKey: .genres)
+        }
+    }
+}
+
 /// Equatable (synthesised over every field) so a composed row redraws when anything it was built
 /// from changes (`FeedPostModel.==`).
 struct FeedPost: Codable, Sendable, Identifiable, Equatable {
@@ -356,10 +401,14 @@ struct FeedPost: Codable, Sendable, Identifiable, Equatable {
     let isOfficial: Bool
     let viewer: FeedViewerState
     let counts: FeedCounts
+    /// For you only: why this post is in the viewer's feed (`FeedPostContext`).
+    let context: FeedPostContext?
+    /// The episode an `.episode` post announces; nil on every other kind.
+    let episode: Int?
 
     enum CodingKeys: String, CodingKey {
         case id, kind, origin, franchiseId, installment, isMovie, part, time, discoveredAt, fresh
-        case premiere, window, note, video, sources, isOfficial, viewer, counts
+        case premiere, window, note, video, sources, isOfficial, viewer, counts, context, episode
     }
 }
 
@@ -386,6 +435,8 @@ extension FeedPost {
         isOfficial = c.value(.isOfficial, or: false)
         viewer = c.value(.viewer, or: .empty)
         counts = c.value(.counts, or: .zero)
+        context = c.maybe(.context)
+        episode = c.maybe(.episode)
     }
 }
 
@@ -415,7 +466,8 @@ struct FeedResponse: Codable, Sendable {
                                   installment: p.installment, isMovie: p.isMovie, part: p.part, time: p.time,
                                   discoveredAt: p.discoveredAt, fresh: false, premiere: p.premiere,
                                   window: p.window, note: p.note, video: p.video, sources: p.sources,
-                                  isOfficial: p.isOfficial, viewer: p.viewer, counts: p.counts)
+                                  isOfficial: p.isOfficial, viewer: p.viewer, counts: p.counts,
+                                  context: p.context, episode: p.episode)
                      },
                      trending: trending)
     }

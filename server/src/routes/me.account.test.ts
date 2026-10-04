@@ -20,6 +20,10 @@ import * as schema from '../db/schema.js'
 const recorded = vi.hoisted(() => ({
   deletes: [] as { table: string; where: unknown }[],
   transactions: 0,
+  /** SAVEPOINTs opened inside the erasure (an optional step runs in one). */
+  savepoints: 0,
+  /** What a delete inside a savepoint fails with: 'missing' = the table does not exist yet. */
+  savepointFailure: null as null | 'missing' | 'other',
   /** 'commit', then the post-commit steps, in the order they ran. */
   events: [] as string[],
   /** Make the erasure transaction fail after its deletes (a rollback). */
@@ -28,6 +32,8 @@ const recorded = vi.hoisted(() => ({
 })) as {
   deletes: { table: string; where: unknown }[]
   transactions: number
+  savepoints: number
+  savepointFailure: null | 'missing' | 'other'
   events: string[]
   failTx: boolean
   clerkOutcome: { outcome: string; error?: string }
@@ -44,6 +50,15 @@ vi.mock('../db/index.js', () => {
           return Promise.resolve([])
         },
       }
+    },
+    /** A nested transaction is a SAVEPOINT: a failure inside it undoes only what ran inside it. */
+    async transaction<T>(fn: (savepoint: unknown) => Promise<T>): Promise<T> {
+      recorded.savepoints += 1
+      if (recorded.savepointFailure === 'missing') {
+        throw Object.assign(new Error('relation "user_audience" does not exist'), { code: '42P01' })
+      }
+      if (recorded.savepointFailure === 'other') throw new Error('deadlock detected')
+      return fn(tx)
     },
   }
   return {
@@ -93,6 +108,8 @@ async function appWithUser(userId: string | null = CALLER) {
 beforeEach(() => {
   recorded.deletes.length = 0
   recorded.transactions = 0
+  recorded.savepoints = 0
+  recorded.savepointFailure = null
   recorded.events.length = 0
   recorded.failTx = false
   recorded.clerkOutcome = { outcome: 'deleted' }
@@ -113,6 +130,38 @@ describe('DELETE /me — the account is erased, not deactivated', () => {
     ])
     // Every delete is scoped — a missing `where` would erase the table for every account.
     expect(recorded.deletes.every((d) => d.where !== undefined)).toBe(true)
+    await app.close()
+  })
+
+  it('erases a table whose migration has not run yet without failing: that step alone is skipped', async () => {
+    // `user_audience` arrives with migration 0012; the API is served from the working tree, so
+    // this code can run before the table exists. Its step runs in a savepoint and is the only one.
+    const optional = accountErasurePlan.filter((s) => s.optional).map((s) => getTableName(s.table))
+    expect(optional).toEqual(['user_audience'])
+
+    recorded.savepointFailure = 'missing'
+    const app = await appWithUser()
+    const res = await app.inject({ method: 'DELETE', url: '/me' })
+
+    expect(res.statusCode).toBe(200)
+    expect(res.json()).toEqual({ deleted: true })
+    expect(recorded.savepoints).toBe(1)
+    // Every other table, in order, then the user row — and the erasure committed.
+    expect(recorded.deletes.map((d) => d.table)).toEqual([
+      ...accountErasurePlan.filter((s) => !s.optional).map((s) => getTableName(s.table)),
+      'users',
+    ])
+    expect(recorded.events).toEqual(['commit', 'recordErasure:user_test', 'clerk:user_test'])
+    await app.close()
+  })
+
+  it('any other failure of an optional step still fails the whole erasure', async () => {
+    recorded.savepointFailure = 'other'
+    const app = await appWithUser()
+    const res = await app.inject({ method: 'DELETE', url: '/me' })
+    expect(res.statusCode).toBe(500)
+    expect(recorded.deletes.map((d) => d.table)).not.toContain('users')
+    expect(recorded.events).toEqual([])
     await app.close()
   })
 

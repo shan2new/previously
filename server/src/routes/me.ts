@@ -32,20 +32,28 @@ import {
   reports,
   saves,
   subscriptions,
+  userAudience,
   userPreferences,
   userProfiles,
   users,
+  watchSessions,
 } from '../db/schema.js'
-import type { AccountDeletedResponse, NotificationsPage, RecommendationsResponse } from '../types/api.js'
+import type {
+  AccountDeletedResponse,
+  NotificationsPage,
+  RecommendationsResponse,
+  WatchSessionsResponse,
+} from '../types/api.js'
 import { decodeCursor } from '../util/cursor.js'
 import { MAX_MEDIA_ID } from '../social/subjects.js'
 import { enqueueAnimeVideoFallback } from '../services/animeVideoFallback.js'
 import { enqueueRecommendationRefresh } from '../services/catalogEnrichment.js'
+import { isMissingTable } from '../services/audience.js'
 import {
   applyProviderPreferences,
   getUserPreferences,
   resolveUserPreferences,
-  saveUserPreferences,
+  updateUserPreferences,
 } from '../services/preferences.js'
 import { getAvailabilityPreviews } from '../services/watchAvailability.js'
 import {
@@ -53,12 +61,48 @@ import {
   getRecommendations,
   recordRecommendationFeedback,
 } from '../services/recommendations.js'
+import { deleteWatchSession, listWatchSessions, putWatchSession } from '../services/watchSessions.js'
 
 // Board 09's status vocabulary. `subscriptions.status` is a text() column, so the two added
 // values need no migration.
 const statusEnum = z.enum(['watching', 'completed', 'planned', 'paused', 'dropped'])
 /** A recommendation's stable key: `anilist:<series root id>` or `tmdb:<show id>`. */
 const recommendationKey = z.string().regex(/^(anilist|tmdb):[1-9][0-9]{0,9}$/)
+
+/** A client ms epoch: 0 ("date unknown") through the year 2100. */
+const msEpoch = z.number().int().min(0).max(4_102_444_800_000)
+const episodeCount = z.number().int().min(0).max(100_000)
+/** PUT /me/watch-sessions/:id. Optional fields default to null, so an older client can omit them. */
+const watchSessionBody = z
+  .object({
+    franchiseId: z.string().uuid(),
+    scopeMediaId: z.number().int().min(1).max(MAX_MEDIA_ID).nullish(),
+    ordinal: z.number().int().min(1).max(999),
+    startedAt: msEpoch.nullish(),
+    completedAt: msEpoch.nullish(),
+    cancelledAt: msEpoch.nullish(),
+    cancelledAtEpisode: episodeCount.nullish(),
+    episodes: episodeCount,
+    restoreProgress: z
+      .record(z.string().regex(/^[1-9][0-9]{0,9}$/), episodeCount)
+      .refine((m) => Object.keys(m).length <= 200, 'too many parts')
+      .nullish(),
+    restoreStatus: statusEnum.nullish(),
+  })
+  .strict()
+  .transform((b) => ({
+    franchiseId: b.franchiseId,
+    scopeMediaId: b.scopeMediaId ?? null,
+    ordinal: b.ordinal,
+    startedAt: b.startedAt ?? null,
+    completedAt: b.completedAt ?? null,
+    cancelledAt: b.cancelledAt ?? null,
+    cancelledAtEpisode: b.cancelledAtEpisode ?? null,
+    episodes: b.episodes,
+    restoreProgress: b.restoreProgress ?? null,
+    restoreStatus: b.restoreStatus ?? null,
+  }))
+const sessionIdParams = z.object({ id: z.string().uuid() })
 const countrySchema = z.string().regex(/^[a-z]{2}$/i).transform((value) => value.toUpperCase())
 const countryQuery = z.object({ country: countrySchema.optional() })
 /** `media.id` and `progress.episodes_watched` are int4: a value past it would be a 500 from Postgres, not a 400. */
@@ -121,14 +165,20 @@ export const meRoutes: FastifyPluginAsync = async (app) => {
 
   app.get('/me/preferences', async (req) => getUserPreferences(req.user!.id))
 
-  app.put('/me/preferences', async (req) => {
+  app.put('/me/preferences', async (req, reply) => {
     const body = z.object({
       country: countrySchema.nullable().optional(),
       language: z.string().trim().min(2).max(35).optional(),
       providerIds: z.array(z.number().int().positive()).max(50)
         .transform((ids) => [...new Set(ids)]).optional(),
+      // Which catalogue the server suggests titles from (services/audience.ts). Omitted = unchanged.
+      audience: z.enum(['anime', 'tv', 'both']).optional(),
     }).strict().parse(req.body)
-    return saveUserPreferences(req.user!.id, body)
+    const result = await updateUserPreferences(req.user!.id, body)
+    // The audience has its own table, which a not-yet-applied migration creates: the other fields
+    // ARE saved, and the client is told this one was not rather than shown a choice that never took.
+    if (!result.ok) return reply.code(503).send({ error: result.error })
+    return result.preferences
   })
 
   // "Recommended for you" — second-degree picks out of the user's own library, deterministic for
@@ -155,6 +205,37 @@ export const meRoutes: FastifyPluginAsync = async (app) => {
     const body = z.object({ key: recommendationKey }).strict().safeParse(req.body)
     if (!body.success) return reply.code(400).send({ error: 'invalid request' })
     await clearRecommendationFeedback(req.user!.id, body.data.key)
+    return reply.code(204).send()
+  })
+
+  // Watch sessions — the first watch and every rewatch — kept so the history survives a new phone.
+  app.get('/me/watch-sessions', async (req) => {
+    const body: WatchSessionsResponse = { sessions: await listWatchSessions(req.user!.id) }
+    return body
+  })
+
+  // The whole session, client-generated id. Idempotent; a deleted id stays deleted (410).
+  app.put('/me/watch-sessions/:id', async (req, reply) => {
+    const params = sessionIdParams.safeParse(req.params)
+    const body = watchSessionBody.safeParse(req.body)
+    if (!params.success || !body.success) return reply.code(400).send({ error: 'invalid request' })
+    const result = await putWatchSession(req.user!.id, params.data.id, body.data)
+    switch (result) {
+      case 'saved':
+        return reply.code(204).send()
+      case 'deleted':
+        return reply.code(410).send({ error: 'session deleted' })
+      case 'franchise_not_found':
+        return reply.code(404).send({ error: 'franchise not found' })
+      case 'not_found':
+        return reply.code(404).send({ error: 'session not found' })
+    }
+  })
+
+  app.delete('/me/watch-sessions/:id', async (req, reply) => {
+    const params = sessionIdParams.safeParse(req.params)
+    if (!params.success) return reply.code(400).send({ error: 'invalid request' })
+    await deleteWatchSession(req.user!.id, params.data.id)
     return reply.code(204).send()
   })
 
@@ -268,7 +349,19 @@ export const meRoutes: FastifyPluginAsync = async (app) => {
         const scope = step.via
           ? sql`${step.column} in (select ${step.via.key} from ${step.via.table} where ${step.via.owner} = ${userId})`
           : eq(step.column, userId)
-        await tx.delete(step.table).where(scope)
+        if (!step.optional) {
+          await tx.delete(step.table).where(scope)
+          continue
+        }
+        // A table that may not exist yet: inside a SAVEPOINT, so "no such table" undoes only this
+        // statement instead of aborting the erasure. Any other failure still fails all of it.
+        try {
+          await tx.transaction(async (savepoint) => {
+            await savepoint.delete(step.table).where(scope)
+          })
+        } catch (error) {
+          if (!isMissingTable(error)) throw error
+        }
       }
       // Last: everything that references it is gone, so this succeeds with or without the cascade.
       await tx.delete(users).where(eq(users.id, userId))
@@ -304,6 +397,12 @@ export interface ErasureStep {
   table: PgTable
   column: PgColumn
   via?: ErasureParent
+  /**
+   * The table comes with a migration that may not have been applied where this code already runs
+   * (the API is served from the working tree): the step is skipped when the table does not exist,
+   * instead of failing the erasure. Its rows cascade from `users` once it does.
+   */
+  optional?: boolean
 }
 
 /** The caller's comments, for the rows that hang off them. */
@@ -343,7 +442,9 @@ export const accountErasurePlan: readonly ErasureStep[] = [
   { table: userProfiles, column: userProfiles.userId }, //                        frees the handle
   { table: subscriptions, column: subscriptions.userId },
   { table: progress, column: progress.userId },
+  { table: watchSessions, column: watchSessions.userId }, //                    tombstones included
   { table: userPreferences, column: userPreferences.userId },
+  { table: userAudience, column: userAudience.userId, optional: true }, //         migration 0012
   { table: recommendationFeedback, column: recommendationFeedback.userId },
 ]
 

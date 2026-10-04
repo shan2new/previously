@@ -19,6 +19,7 @@ import type { AnnouncementEvidence, AnnouncementObservationView, FranchiseUpcomi
 import { BoundedTaskQueue } from '../util/taskQueue.js'
 import { researchFranchiseNews, type NewsResult } from './agent.js'
 import { dedupeKey, sameInstallment } from './installment.js'
+import { getShow } from '../tmdb/client.js'
 
 // Only forward progress through this ladder produces a notification; the agent re-reporting
 // the same news (or waffling back down to a rumor) just bumps lastSeenAt.
@@ -187,16 +188,31 @@ export async function refreshFranchiseNews(franchiseId: string): Promise<{ check
 
   const knownParts = members.map((m) => {
     const name = m.label || m.titleEnglish || m.titleRomaji || 'Unknown'
+    const providerTitle = m.titleEnglish || m.titleRomaji
     const bits = [m.format, m.status, m.seasonYear].filter(Boolean).join(', ')
-    return bits ? `${name} (${bits})` : name
+    const identity = providerTitle && providerTitle !== name ? `${name} — catalogue title: ${providerTitle}` : name
+    return bits ? `${identity} (${bits})` : identity
   })
 
   const priorRows = await db.select().from(announcements).where(eq(announcements.franchiseId, franchiseId))
-  const knownAnnouncements = priorRows.map((a) => `${a.next} (${a.status})`)
+  const knownAnnouncements = priorRows.filter((a) => isNoteworthy(a.status)).map((a) => `${a.next} (${a.status})`)
+
+  // "The Traitors" names multiple unrelated national adaptations. A bare title and Season N
+  // list made the researcher attach Irish RTÉ news to the Indian Prime Video series.
+  let identityContext: string | null = null
+  if (f.source === 'tmdb' && f.externalId != null) {
+    const identity = await getShow(f.externalId, { maxRetries: 0, timeoutMs: 5_000 })
+    if (!identity) return { checked: false, notified: 0 }
+    identityContext = `Original title: ${identity.original_name ?? identity.name}. Countries: ${(identity.origin_country ?? []).join(', ')}. Networks: ${(identity.networks ?? []).map(n => n.name).join(', ')}. Premiere: ${identity.first_air_date ?? 'unknown'}. Provider series status: ${identity.status}.`
+  }
 
   const result = await researchFranchiseNews({
     title: f.title,
     catalogueSource: f.source === 'tmdb' ? 'tmdb' : 'anilist',
+    catalogueUrl: f.source === 'tmdb' && f.externalId != null
+      ? `https://www.themoviedb.org/tv/${f.externalId}`
+      : f.primaryMediaId != null ? `https://anilist.co/anime/${f.primaryMediaId}` : null,
+    identityContext,
     knownParts,
     current: f.upcoming ?? null,
     knownAnnouncements,
@@ -205,49 +221,73 @@ export async function refreshFranchiseNews(franchiseId: string): Promise<{ check
 
   // The stored state carries the same verified evidence the observation rows do.
   const upcoming: FranchiseUpcoming = { ...result, evidence: storableEvidence(result.evidence), checked: new Date().toISOString() }
-  await db.update(franchise).set({ upcoming }).where(eq(franchise.id, franchiseId))
+  const { event, announcementId } = await db.transaction(async (tx) => {
+    await tx.select({ id: franchise.id }).from(franchise).where(eq(franchise.id, franchiseId)).for('update')
+    await tx.update(franchise).set({ upcoming }).where(eq(franchise.id, franchiseId))
 
-  const noteworthy = isNoteworthy(result.status) && !!result.next.trim()
-  const key = noteworthy ? dedupeKey(result.next) : `__state__:${result.status}`
-  const existing = noteworthy ? priorRows.find((a) => sameInstallment(a.dedupeKey, key)) : undefined
-  let event: NewsEvent | null = null
-  let announcementId: string | null = null
-  if (noteworthy) {
-    const newRank = STATUS_RANK[result.status] ?? 0
-    const oldRank = existing ? (STATUS_RANK[existing.status] ?? 0) : 0
-    if (!existing) event = 'new'
-    else if (newRank > oldRank) event = 'upgraded'
-    else if (newRank === oldRank && !isConcreteRelease(existing.release) && isConcreteRelease(result.release)) event = 'dated'
+    const noteworthy = isNoteworthy(result.status) && !!result.next.trim()
+    const key = noteworthy ? dedupeKey(result.next) : `__state__:${result.status}`
+    const currentRows = await tx.select().from(announcements).where(eq(announcements.franchiseId, franchiseId))
+    const existing = noteworthy ? currentRows.find((a) => sameInstallment(dedupeKey(a.next), key)) : undefined
+    let event: NewsEvent | null = null
+    let announcementId: string | null = null
+    if (noteworthy) {
+      const newRank = STATUS_RANK[result.status] ?? 0
+      const oldRank = existing ? (STATUS_RANK[existing.status] ?? 0) : 0
+      if (!existing) event = 'new'
+      else if (newRank > oldRank) event = 'upgraded'
+      else if (newRank === oldRank && !isConcreteRelease(existing.release) && isConcreteRelease(result.release)) event = 'dated'
 
-    if (!existing) {
-      const [row] = await db
-        .insert(announcements)
-        .values({
-          franchiseId,
-          dedupeKey: key,
-          status: result.status,
-          next: result.next,
-          release: result.release,
-          note: result.note,
-          source: result.source,
-        })
-        .returning({ id: announcements.id })
-      announcementId = row!.id
-    } else {
-      // Never let a lower-confidence re-report downgrade a stored announcement.
-      const advance = newRank >= oldRank
-      await db
-        .update(announcements)
-        .set({
-          lastSeenAt: new Date(),
-          ...(advance
-            ? { status: result.status, next: result.next, release: result.release, note: result.note, source: result.source }
-            : {}),
-        })
-        .where(eq(announcements.id, existing.id))
-      announcementId = existing.id
+      if (!existing) {
+        const [row] = await tx
+          .insert(announcements)
+          .values({
+            franchiseId,
+            dedupeKey: key,
+            status: result.status,
+            next: result.next,
+            release: result.release,
+            note: result.note,
+            source: result.source,
+          })
+          .returning({ id: announcements.id })
+        announcementId = row!.id
+      } else {
+        // The rank controls notifications, not truth. A postponed date or corrected report must
+        // update every surface, even when it moves from dated back to TBA.
+        await tx
+          .update(announcements)
+          .set({
+            lastSeenAt: new Date(),
+            status: result.status, next: result.next, release: result.release, note: result.note, source: result.source,
+          })
+          .where(eq(announcements.id, existing.id))
+        announcementId = existing.id
+      }
     }
-  }
+
+    const [observation] = await tx
+      .insert(announcementObservations)
+      .values({
+        franchiseId,
+        announcementId,
+        dedupeKey: key,
+        status: result.status,
+        next: result.next,
+        release: result.release,
+        note: result.note,
+      })
+      .returning({ id: announcementObservations.id })
+    const evidence = normalizedEvidence(result)
+    if (observation && evidence.length > 0) {
+      await tx.insert(announcementEvidence).values(evidence.map((item) => ({
+        observationId: observation.id,
+        ...item,
+      }))).onConflictDoNothing()
+    }
+
+    return { event, announcementId }
+  })
 
   // A catalogue-only feed post about this installment (`catalog:<mediaId>`) becomes this
   // announcement's post (`news:<id>`): its likes, saves, reminders and comments move with it. Runs on
@@ -262,25 +302,6 @@ export async function refreshFranchiseNews(franchiseId: string): Promise<{ check
     }
   }
 
-  const [observation] = await db
-    .insert(announcementObservations)
-    .values({
-      franchiseId,
-      announcementId,
-      dedupeKey: key,
-      status: result.status,
-      next: result.next,
-      release: result.release,
-      note: result.note,
-    })
-    .returning({ id: announcementObservations.id })
-  const evidence = normalizedEvidence(result)
-  if (observation && evidence.length > 0) {
-    await db.insert(announcementEvidence).values(evidence.map((item) => ({
-      observationId: observation.id,
-      ...item,
-    }))).onConflictDoNothing()
-  }
 
   if (!event || !announcementId) return { checked: true, notified: 0 }
 

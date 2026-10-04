@@ -216,7 +216,7 @@ private struct AddControlShape: ViewModifier {
             content
                 .padding(.horizontal, ThemeSpace.x4)
                 .frame(minWidth: Metrics.pillMinWidth, minHeight: Metrics.pillHeight)
-                .background(owned ? Color.clear : ThemeColor.feedText, in: Capsule())
+                .background(owned ? AnyShapeStyle(Color.clear) : AnyShapeStyle(ThemeGradient.ivory), in: Capsule())
                 .overlay(Capsule().strokeBorder(owned ? ThemeColor.feedSeparator : .clear, lineWidth: FeedMetrics.hairline))
                 .frame(minHeight: Metrics.hitTarget)
                 .contentShape(Rectangle())
@@ -381,8 +381,13 @@ struct ScopeChips: View {
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     var body: some View {
+        // One audience has one scope and nothing to choose (`Audience`).
+        if !appModel.audience.isSingle { chips }
+    }
+
+    private var chips: some View {
         let current = appModel.mediaFilter
-        HStack(spacing: ThemeSpace.x2) {
+        return HStack(spacing: ThemeSpace.x2) {
             ForEach(MediaFilter.allCases, id: \.self) { filter in
                 let selected = filter == current
                 Button {

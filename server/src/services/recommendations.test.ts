@@ -310,6 +310,51 @@ describe("rankRecommendations — the owner's library", () => {
     expect(rank(input).items).toEqual([])
   })
 
+  describe('the audience (one catalogue only)', () => {
+    const both = rank(FIXTURE)
+
+    it('serves an anime viewer anime only — and a FULL list, not the mixed one with its TV cut out', () => {
+      const { items, stats } = rankRecommendations(FIXTURE, { userId: USER, limit: 12, source: 'anilist' })
+      expect(items).toHaveLength(12)
+      expect(items.every((item) => item.source === 'anilist' && item.key.startsWith('anilist:'))).toBe(true)
+      expect(new Set(keys(items)).size).toBe(12)
+      // The mixed list holds 8 anime titles: filtering it afterwards would have served 8.
+      expect(both.items.filter((item) => item.source === 'anilist')).toHaveLength(8)
+      expect(stats.tvQuota).toBe(0)
+      expect(stats.excludedCandidates.audience).toBeGreaterThan(0)
+    })
+
+    it('serves a TV viewer TV only, as many as the library\'s TV shows point at', () => {
+      const { items, stats } = rankRecommendations(FIXTURE, { userId: USER, limit: 12, source: 'tmdb' })
+      expect(items.length).toBeGreaterThan(both.items.filter((item) => item.source === 'tmdb').length)
+      expect(items.every((item) => item.source === 'tmdb' && item.key.startsWith('tmdb:'))).toBe(true)
+      expect(new Set(keys(items)).size).toBe(items.length)
+      expect(stats.excludedCandidates.audience).toBeGreaterThan(0)
+    })
+
+    it('never leaks across the catalogues on any day of the rotation', () => {
+      for (const [source, other] of [['anilist', 'tmdb'], ['tmdb', 'anilist']] as const) {
+        for (let d = 0; d < 7; d++) {
+          const { items } = rankRecommendations({ ...FIXTURE, now: FIXTURE.now + d * DAY }, { userId: USER, limit: 30, source })
+          expect(items.length).toBeGreaterThan(0)
+          expect(items.some((item) => item.source === other)).toBe(false)
+        }
+      }
+    })
+
+    it('is exactly today\'s list for both: no source, or null', () => {
+      expect(rankRecommendations(FIXTURE, { userId: USER, limit: 12, source: null })).toEqual(both)
+      expect(rankRecommendations(FIXTURE, { userId: USER, limit: 12, source: undefined })).toEqual(both)
+      expect(both.stats.excludedCandidates.audience).toBe(0)
+    })
+
+    it('recommends nothing to a TV viewer whose library is all anime', () => {
+      const anime = new Set(FIXTURE.seeds.filter((s) => s.source === 'anilist').map((s) => s.franchiseId))
+      const input = { ...FIXTURE, seeds: FIXTURE.seeds.filter((s) => anime.has(s.franchiseId)), edges: FIXTURE.edges.filter((e) => anime.has(e.seedId)) }
+      expect(rankRecommendations(input, { userId: USER, limit: 12, source: 'tmdb' }).items).toEqual([])
+    })
+  })
+
   it('serves no TV and asks for none when the library has no TV shows', () => {
     const anime = new Set(FIXTURE.seeds.filter((s) => s.source === 'anilist').map((s) => s.franchiseId))
     const input = { ...FIXTURE, seeds: FIXTURE.seeds.filter((s) => anime.has(s.franchiseId)), edges: FIXTURE.edges.filter((e) => anime.has(e.seedId)) }

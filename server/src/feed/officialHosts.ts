@@ -23,6 +23,7 @@ export const OFFICIAL_HOSTS: readonly string[] = [
   'hidive.com',
   'primevideo.com',
   'aboutamazon.com',
+  'aboutamazon.in',
   'amazonmgmstudios.com',
   'disneyplus.com',
   'thewaltdisneycompany.com',

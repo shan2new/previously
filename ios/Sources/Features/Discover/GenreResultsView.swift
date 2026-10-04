@@ -234,7 +234,7 @@ struct GenreResultsView: View {
     }
 
     private func facts(_ item: FranchiseSummary) -> [String] {
-        [item.source.kindWord, item.year.map(String.init)].compactMap { $0 }
+        [item.source.kindLead, item.year.map(String.init)].compactMap { $0 }
     }
 
     /// The whole title, then "In Library" when it is yours, then kind and year.

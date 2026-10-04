@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import {
   formatSubject,
+  feedPostIdSchema,
   isPostSubject,
   parseSubject,
   postIdSchema,
@@ -90,5 +91,14 @@ describe('zod schemas', () => {
   it('postIdSchema refuses an episode room', () => {
     expect(postIdSchema.safeParse(`news:${ANN}`).success).toBe(true)
     expect(postIdSchema.safeParse('ep:5:1').success).toBe(false)
+  })
+
+  it('feedPostIdSchema takes every post the feed carries, the episode post under its ep: subject included', () => {
+    for (const id of [`news:${ANN}`, 'catalog:5', `trailer:${FRAN}:youtube:x`, 'ep:5:1']) {
+      expect(feedPostIdSchema.safeParse(id).success, id).toBe(true)
+    }
+    for (const id of ['ep:5:0', 'ep:5', 'nope', `news:${ANN.toUpperCase()}`]) {
+      expect(feedPostIdSchema.safeParse(id).success, id).toBe(false)
+    }
   })
 })

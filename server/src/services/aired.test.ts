@@ -8,6 +8,7 @@ import {
   episodeAccess,
   gatedProgress,
   slotPassed,
+  slotStrikesAt,
   type AiredInput,
 } from './aired.js'
 
@@ -51,6 +52,12 @@ describe('slotPassed', () => {
     expect(slotPassed(Date.UTC(2026, 9, 3, 0), 'tmdb', Date.parse('2026-10-03T10:00:00.000Z'))).toBe(true)
     expect(slotPassed(Date.UTC(2026, 9, 3, 23, 59), 'tmdb', Date.parse('2026-10-03T09:59:59.999Z'))).toBe(false)
     expect(DATE_ONLY_LEAD_MS).toBe(14 * H)
+  })
+
+  it('strikes at the instant slotPassed counts from: a timed slot its own, a date-only one 10:00 UTC of its date', () => {
+    expect(slotStrikesAt(NOW, 'anilist')).toBe(NOW)
+    expect(slotStrikesAt(Date.UTC(2026, 9, 3, 17), 'tmdb')).toBe(Date.UTC(2026, 9, 3, 10))
+    expect(slotStrikesAt(Date.UTC(2026, 9, 3, 0), 'tmdb')).toBe(Date.UTC(2026, 9, 3, 10))
   })
 })
 

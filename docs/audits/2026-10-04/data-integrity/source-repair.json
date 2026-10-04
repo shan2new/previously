@@ -1,0 +1,62 @@
+{
+  "before": {
+    "id": "da83cb93-042e-48d8-95ad-e4a463752caf",
+    "title": "Though I Am an Inept Villainess",
+    "upcoming": {
+      "next": "Season 2",
+      "note": "On September 20, 2026 the anime's staff announced the second cour (\"The First Royal Outing\" arc), our tracked Season 2, will premiere in January 2027 on Crunchyroll, with new cast and a key visual revealed; no specific day given yet.",
+      "source": "https://www.crunchyroll.com/news/latest/2026/9/20/though-i-am-an-inept-villainess-cour-2-january-2027-stream-crunchyroll",
+      "status": "announced",
+      "checked": "2026-09-25T11:01:04.845Z",
+      "release": "January 2027",
+      "evidence": [
+        {
+          "url": "https://www.crunchyroll.com/news/latest/2026/9/20/though-i-am-an-inept-villainess-cour-2-january-2027-stream-crunchyroll",
+          "tier": "official",
+          "primary": false,
+          "publisher": "Crunchyroll News",
+          "publishedAt": "2026-09-20"
+        },
+        {
+          "url": "https://www.animenewsnetwork.com/news/2026-09-20/though-i-am-an-inept-villainess-anime-2nd-part-unveils-cast-key-visual-january-2027-debut/.241998",
+          "tier": "trade",
+          "primary": false,
+          "publisher": "Anime News Network",
+          "publishedAt": "2026-09-20"
+        },
+        {
+          "url": "https://variety.com/2026/tv/news/though-i-am-an-inept-villainess-new-cast-january-2027-return-1236868563/",
+          "tier": "reputable",
+          "primary": false,
+          "publisher": "Variety",
+          "publishedAt": "2026-09-20"
+        },
+        {
+          "url": "https://animecorner.me/though-i-am-an-inept-villainess-cour-2-reveals-first-look-january-2027-return-with-the-first-royal-outing-arc/",
+          "tier": "reputable",
+          "primary": false,
+          "publisher": "Anime Corner",
+          "publishedAt": "2026-09-20"
+        }
+      ]
+    }
+  },
+  "after": {
+    "next": "Season 2",
+    "note": "The official anime website confirms the second cour, The First Royal Outing, premieres in January 2027. No exact day is given.",
+    "source": "https://futsutsuka.net/en/",
+    "status": "announced",
+    "checked": "2026-10-04T09:03:36.799Z",
+    "release": "January 2027",
+    "evidence": [
+      {
+        "url": "https://futsutsuka.net/en/",
+        "tier": "reputable",
+        "primary": true,
+        "publisher": "Official Though I Am an Inept Villainess website",
+        "publishedAt": null
+      }
+    ]
+  },
+  "reason": "Stored Crunchyroll URL returned generic news index; replace with verified official production site."
+}

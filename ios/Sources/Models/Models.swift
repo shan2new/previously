@@ -310,7 +310,7 @@ struct FranchisePart: Codable, Identifiable, Sendable {
     var isBehind: Bool { episodesBehind > 0 }
 
     /// Currently releasing AND fully watched up to the latest aired episode.
-    var isCaughtUp: Bool { isReleasing && episodesBehind == 0 }
+    var isCaughtUp: Bool { isReleasing && airedEpisodes > 0 && episodesBehind == 0 }
 
     // MARK: Airings-derived freshness
     //
@@ -365,7 +365,9 @@ struct FranchisePart: Codable, Identifiable, Sendable {
     /// following it; someone a thousand behind is starting a backlog.
     func isNews(now: Int64, anchor: Formatting.TimeAnchor = .local, window: Int64) -> Bool {
         let recent = passedAirings(now: now, anchor: anchor).filter { now - $0.at <= window }.count
-        let behind = behind(now: now, anchor: anchor)
+        // What is out and unwatched — `behind` is zero on a part that has stopped releasing, which
+        // made every finished run "news": nineteen unwatched shorts counted as a drop (4 Oct).
+        let behind = unwatchedOut(now: now, anchor: anchor)
         if progress > 0 { return behind <= max(Self.followingSlack, recent) }
         return behind <= max(2, recent)
     }
@@ -440,6 +442,7 @@ struct FranchisePart: Codable, Identifiable, Sendable {
     /// has nothing to watch, whatever episode count the catalogue advertises for it.
     func availableEpisodes() -> Int {
         if isUpcoming { return 0 }
+        if isReleasing { return airedEpisodes }
         return airedEpisodes > 0 ? airedEpisodes : totalEpisodes
     }
 

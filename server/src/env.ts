@@ -54,6 +54,11 @@ const schema = z.object({
   NEWS_AGENT_MODEL: z.string().optional(), // unset → the Agent SDK's default model
   NEWS_AGENT_MAX_TURNS: z.coerce.number().default(16),
   NEWS_AGENT_TIMEOUT_MS: z.coerce.number().default(300_000),
+  // Availability fallback uses the machine's Codex ChatGPT login, never an API key.
+  NEWS_CODEX_FALLBACK_ENABLED: envBool(true),
+  NEWS_CODEX_COMMAND: z.string().min(1).default('codex'),
+  NEWS_CODEX_MODEL: z.string().optional(), // unset → the installed CLI's supported default
+  NEWS_CODEX_TIMEOUT_MS: z.coerce.number().int().positive().default(180_000),
   NEWS_MAX_FRANCHISES_PER_RUN: z.coerce.number().default(25),
   NEWS_CHECK_INTERVAL_HOURS: z.coerce.number().default(20),
 

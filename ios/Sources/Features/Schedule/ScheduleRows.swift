@@ -204,7 +204,7 @@ struct ScheduleMarkPill: View {
                 .fixedSize()
                 .padding(.horizontal, ThemeSpace.x4)
                 .frame(minHeight: 36)
-                .background(watched ? Color.clear : ThemeColor.feedText, in: Capsule())
+                .background(watched ? AnyShapeStyle(Color.clear) : AnyShapeStyle(ThemeGradient.ivory), in: Capsule())
                 .overlay(Capsule().strokeBorder(watched ? ThemeColor.feedText.opacity(0.4) : .clear, lineWidth: FeedMetrics.hairline))
                 .frame(minHeight: 44)
                 .contentShape(Rectangle())

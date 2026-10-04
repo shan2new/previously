@@ -7,6 +7,7 @@ vi.mock('../social/blocklist.js', () => ({ BLOCKED_TERMS: [{ term: 'zzbadword', 
 import {
   composePostById,
   composePosts,
+  discoveryTrailer,
   orderPosts,
   tidyNote,
   toFeedFranchise,
@@ -171,6 +172,7 @@ function input(opts: {
   announcements?: Record<string, ComposeAnnouncement[]>
   memberAddedAt?: Record<number, number>
   externalIds?: Record<string, number | null>
+  episodes?: boolean
   nowMs?: number
 } = {}): ComposeInput {
   return {
@@ -181,6 +183,7 @@ function input(opts: {
       Object.entries(opts.memberAddedAt ?? { 100: ADDED, 200: ADDED, 300: ADDED }).map(([k, v]) => [Number(k), v]),
     ),
     externalIds: new Map(Object.entries(opts.externalIds ?? {})),
+    episodes: opts.episodes,
     nowMs: opts.nowMs ?? NOW,
   }
 }
@@ -890,7 +893,7 @@ describe('composePostById (D16)', () => {
     const data = input({ franchises: [franchise({ videos: [] })] })
     const id = `trailer:${FID}:youtube:gone0000001`
     expect(composePostById(data, id)).toBeNull()
-    const found = composePostById(data, id, { orphanTrailerAt: NOW - 3 * D })
+    const found = composePostById(data, id, { orphanAt: NOW - 3 * D })
     expect(found).toEqual({
       live: false,
       post: {
@@ -901,6 +904,7 @@ describe('composePostById (D16)', () => {
         installment: '',
         isMovie: false,
         part: null,
+        episode: null,
         time: { at: NOW - 3 * D, dateOnly: false, basis: 'observed' },
         discoveredAt: 0,
         premiere: null,
@@ -914,18 +918,314 @@ describe('composePostById (D16)', () => {
     })
     // A disowned cut is no longer postable: bare too.
     const disowned = input({ franchises: [franchise({ videos: [video({ id: 'gone0000001', official: false })] })] })
-    expect(composePostById(disowned, id, { orphanTrailerAt: NOW - D })?.post.video).toBeNull()
+    expect(composePostById(disowned, id, { orphanAt: NOW - D })?.post.video).toBeNull()
     // A listed trailer composes as itself, whatever the caller passed.
     const listed = input({ franchises: [franchise({ videos: [video({ id: 'gone0000001' })] })] })
-    expect(composePostById(listed, id, { orphanTrailerAt: NOW - D })?.post.video?.id).toBe('gone0000001')
+    expect(composePostById(listed, id, { orphanAt: NOW - D })?.post.video?.id).toBe('gone0000001')
     // The franchise itself is gone: nothing to compose.
-    expect(composePostById(data, `trailer:${FID2}:youtube:gone0000001`, { orphanTrailerAt: NOW - D })).toBeNull()
+    expect(composePostById(data, `trailer:${FID2}:youtube:gone0000001`, { orphanAt: NOW - D })).toBeNull()
   })
 
-  it('returns null for an episode room or a malformed id', () => {
+  it('returns null for a malformed id, and for an episode nothing dates', () => {
     const data = input({ observations: { [FID]: [observation()] } })
+    // Episode 1 of a finished season is out, but its air instant is not in the payload and nobody
+    // holds a row on it (see "episode posts").
     expect(composePostById(data, 'ep:100:1')).toBeNull()
     expect(composePostById(data, 'news:not-a-uuid')).toBeNull()
+  })
+})
+
+describe('episode posts ("Episode N is out")', () => {
+  const H = 3_600_000
+  const watching = { status: 'watching', addedAt: ADDED } as const
+  /** A season on air: episode 5 aired two days ago, episode 6 airs in five. */
+  const airing = (overrides: Partial<FranchisePart> = {}) =>
+    part({
+      status: 'RELEASING',
+      isReleasing: true,
+      airedEpisodes: 5,
+      airings: [{ episode: 5, at: NOW - 2 * D }, { episode: 6, at: NOW + 5 * D }],
+      ...overrides,
+    })
+  /** The episode posts of a request that asked for them. */
+  const episodes = (f: Franchise, nowMs = NOW) =>
+    composePosts(input({ franchises: [f], episodes: true, nowMs })).filter((p) => p.kind === 'episode')
+
+  it('composes none unless the request asked: a client that predates the kind never receives it', () => {
+    const f = franchise({ subscription: watching, videos: [video()], parts: [airing(), nyr()] })
+    const asked = composePosts(input({ franchises: [f], episodes: true }))
+    expect(asked.map((p) => p.kind).sort()).toEqual(['dated', 'episode', 'trailer'])
+    // Not asked (the default, and an explicit false): the feed exactly as it was — the same posts
+    // minus the episode one, nothing else moved.
+    for (const off of [input({ franchises: [f] }), input({ franchises: [f], episodes: false })]) {
+      expect(composePosts(off)).toEqual(asked.filter((p) => p.kind !== 'episode'))
+    }
+  })
+
+  it('posts the newest aired episode of a show the viewer watches, keyed on the episode\'s own subject', () => {
+    const p = airing()
+    const f = franchise({ subscription: watching, parts: [p] })
+    expect(episodes(f)).toEqual([{
+      id: 'ep:100:5',
+      kind: 'episode',
+      origin: 'catalogue',
+      franchiseId: FID,
+      installment: 'Season 1',
+      isMovie: false,
+      part: toPartRef(p),
+      episode: 5,
+      time: { at: NOW - 2 * D, dateOnly: false, basis: 'aired' },
+      // New from the moment it aired.
+      discoveredAt: NOW - 2 * D,
+      premiere: null,
+      window: null,
+      note: null,
+      video: null,
+      sources: [],
+      isOfficial: false,
+      thread: [],
+    }])
+  })
+
+  it('keeps an episode for seven days after it airs, and only the newest one', () => {
+    const at = (days: number, episode = 5) => franchise({ subscription: watching, parts: [airing({ airings: [{ episode, at: NOW - days * D }] })] })
+    expect(episodes(at(6.9)).map((p) => p.id)).toEqual(['ep:100:5'])
+    expect(episodes(at(7.1))).toEqual([])
+    // Two aired inside the week: one post, the later one.
+    const two = franchise({
+      subscription: watching,
+      parts: [airing({ airings: [{ episode: 4, at: NOW - 6 * D }, { episode: 5, at: NOW - D }, { episode: 6, at: NOW + 6 * D }] })],
+    })
+    expect(episodes(two).map((p) => p.id)).toEqual(['ep:100:5'])
+    // Nothing in the dated window has aired yet: no post.
+    expect(episodes(franchise({ subscription: watching, parts: [airing({ airings: [{ episode: 6, at: NOW + D }] })] }))).toEqual([])
+  })
+
+  it('counts a slot the moment it strikes, before the hourly sync moves the catalogue on', () => {
+    const next = (at: number) =>
+      franchise({ subscription: watching, parts: [airing({ airings: [{ episode: 5, at: NOW - 7 * D + H }, { episode: 6, at }] })] })
+    expect(episodes(next(NOW - 60_000)).map((p) => p.id)).toEqual(['ep:100:6'])
+    expect(episodes(next(NOW)).map((p) => p.id)).toEqual(['ep:100:6'])
+    expect(episodes(next(NOW + 60_000)).map((p) => p.id)).toEqual(['ep:100:5'])
+  })
+
+  it('counts a date-only (TMDB) episode from 10:00 UTC of its date, carries it at noon and never prints its clock', () => {
+    // TMDB gives a calendar date; the sync synthesises 17:00 UTC. NOW is 12:00 UTC of that date.
+    const today = Date.UTC(2026, 8, 25)
+    const f = franchise({ source: 'tmdb', subscription: watching, parts: [airing({ airings: [{ episode: 3, at: today + 17 * H }] })] })
+    // 09:59 UTC: no time zone has reached the day after it yet.
+    expect(episodes(f, today + 10 * H - 60_000)).toEqual([])
+    // 11:00 UTC: out. The post is never dated after now, and is new from 10:00 — not from its noon.
+    expect(episodes(f, today + 11 * H)).toMatchObject([{
+      id: 'ep:100:3',
+      episode: 3,
+      time: { at: today + 11 * H, dateOnly: true, basis: 'aired' },
+      discoveredAt: today + 10 * H,
+    }])
+    // Afterwards: noon of its date.
+    expect(episodes(f, NOW + 2 * D)[0]).toMatchObject({ time: { at: today + 12 * H, dateOnly: true }, discoveredAt: today + 10 * H })
+    // The week runs from the instant it struck.
+    expect(episodes(f, today + 10 * H + 7 * D)).toHaveLength(1)
+    expect(episodes(f, today + 10 * H + 7 * D + 60_000)).toEqual([])
+  })
+
+  it('posts for watching, watched and paused shows only', () => {
+    const of = (status: string | null) =>
+      episodes(franchise({ subscription: status ? { status: status as 'watching', addedAt: ADDED } : null, parts: [airing()] })).length
+    expect(['watching', 'completed', 'paused'].map(of)).toEqual([1, 1, 1])
+    expect(['planned', 'dropped'].map(of)).toEqual([0, 0])
+    // A franchise loaded for nobody (For you): no library, no episode posts.
+    expect(of(null)).toBe(0)
+  })
+
+  it('posts once per main-story part, whether or not the viewer has seen the episode', () => {
+    const f = franchise({
+      subscription: watching,
+      parts: [
+        airing({ progress: 5 }),
+        airing({ mediaId: 300, sequence: 2, watchOrder: 2, label: 'Season 2', airings: [{ episode: 1, at: NOW - 3 * H }] }),
+      ],
+    })
+    expect(episodes(f).map((p) => [p.id, p.installment, p.episode])).toEqual([
+      ['ep:100:5', 'Season 1', 5],
+      ['ep:300:1', 'Season 2', 1],
+    ])
+  })
+
+  it('leaves shorts, spin-offs and extras out; ONAs speak only for a show with no season', () => {
+    const side = (overrides: Partial<FranchisePart>) => airing({ mediaId: 300, sequence: 2, watchOrder: 2, label: 'Extra', ...overrides })
+    const ids = (parts: FranchisePart[]) => episodes(franchise({ subscription: watching, parts })).map((p) => p.id)
+    expect(ids([airing(), side({ format: 'TV_SHORT' })])).toEqual(['ep:100:5'])
+    expect(ids([airing(), side({ relationship: 'SPIN_OFF' })])).toEqual(['ep:100:5'])
+    expect(ids([airing(), side({ kind: 'special' })])).toEqual(['ep:100:5'])
+    expect(ids([airing(), side({ kind: 'ona', format: 'ONA' })])).toEqual(['ep:100:5'])
+    // A sequel season is the main story.
+    expect(ids([airing(), side({ relationship: 'SEQUEL' })])).toEqual(['ep:100:5', 'ep:300:5'])
+    // No main-story season at all: the show's main ONAs are its episodes — not its spin-off ONA,
+    // nor one whose only tie is a parent (the shorts beside a season, as the old rows store them).
+    expect(ids([
+      airing({ kind: 'ona', format: 'ONA' }),
+      side({ kind: 'ona', format: 'ONA', relationship: 'SPIN_OFF' }),
+      side({ mediaId: 400, format: 'TV_SHORT' }),
+      side({ mediaId: 500, kind: 'ona', format: 'ONA', relationship: 'PARENT' }),
+    ])).toEqual(['ep:100:5'])
+  })
+
+  it('a season is the story whatever the stored rows call it: `optional` and SIDE_STORY are not trusted', () => {
+    // The stored flags were written for seasons that merely HAVE a side story (My Hero Academia,
+    // Gintama): the app counts them as seasons, so their episodes are posts.
+    const season = (overrides: Partial<FranchisePart>) => airing({ mediaId: 300, sequence: 2, watchOrder: 2, label: 'Season 2', ...overrides })
+    const ids = (parts: FranchisePart[]) => episodes(franchise({ subscription: watching, parts })).map((p) => p.id)
+    expect(ids([airing(), season({ optional: true })])).toEqual(['ep:100:5', 'ep:300:5'])
+    expect(ids([airing(), season({ relationship: 'SIDE_STORY', optional: true })])).toEqual(['ep:100:5', 'ep:300:5'])
+  })
+
+  it('never posts for a part that has not premiered, and names the last episode of a same-day drop', () => {
+    const unreleased = franchise({ subscription: watching, parts: [airing({ status: 'NOT_YET_RELEASED', airings: [{ episode: 1, at: NOW - H }] })] })
+    expect(episodes(unreleased)).toEqual([])
+    const drop = franchise({
+      subscription: watching,
+      parts: [airing({ airings: [1, 2, 3, 4].map((episode) => ({ episode, at: NOW - D })) })],
+    })
+    expect(episodes(drop).map((p) => p.id)).toEqual(['ep:100:4'])
+  })
+
+  it('rides beside the show\'s news and trailers, and orders as any post: new since the visit first', () => {
+    const f = franchise({
+      subscription: watching,
+      videos: [video({ publishedAt: iso(NOW - 30 * D) })],
+      parts: [airing(), nyr()],
+    })
+    const posts = composePosts(input({ franchises: [f], episodes: true }))
+    expect(posts.map((p) => p.kind).sort()).toEqual(['dated', 'episode', 'trailer'])
+    // The episode aired after the previous visit; the catalogue post and the trailer did not arrive since.
+    const ordered = orderPosts(posts, NOW - 3 * D)
+    expect(ordered.map((p) => [p.kind, p.fresh])).toEqual([['episode', true], ['trailer', false], ['dated', false]])
+  })
+
+  describe('by id', () => {
+    const data = (status: 'watching' | 'planned' | null = 'watching', asked = true) =>
+      input({
+        franchises: [franchise({ subscription: status ? { status, addedAt: ADDED } : null, parts: [airing()] })],
+        episodes: asked,
+      })
+
+    it('composes the feed\'s post, live for a viewer whose Following carries it', () => {
+      expect(composePostById(data(), 'ep:100:5')).toMatchObject({
+        live: true,
+        post: { id: 'ep:100:5', kind: 'episode', episode: 5, time: { at: NOW - 2 * D, basis: 'aired' } },
+      })
+      // By id the post composes whether or not the input composes episodes; only `live` follows it.
+      expect(composePostById(data('watching', false), 'ep:100:5')).toMatchObject({ live: false, post: { id: 'ep:100:5', episode: 5 } })
+      // The same post for anyone else it is out for — a planned show, or no library row at all.
+      expect(composePostById(data('planned'), 'ep:100:5')).toMatchObject({ live: false, post: { id: 'ep:100:5', episode: 5 } })
+      expect(composePostById(data(null), 'ep:100:5')).toMatchObject({ live: false, post: { id: 'ep:100:5' } })
+    })
+
+    it('is null for an episode that has not aired, and for a part the catalogue does not hold', () => {
+      expect(composePostById(data(), 'ep:100:6')).toBeNull()
+      expect(composePostById(data(), 'ep:100:6', { orphanAt: NOW - D })).toBeNull()
+      expect(composePostById(data(), 'ep:100:99', { orphanAt: NOW - D })).toBeNull()
+      expect(composePostById(data(), 'ep:999:1', { orphanAt: NOW - D })).toBeNull()
+      const unreleased = input({ franchises: [franchise({ parts: [nyr({ airedEpisodes: 3 })] })] })
+      expect(composePostById(unreleased, 'ep:200:1', { orphanAt: NOW - D })).toBeNull()
+    })
+
+    it('keeps an older episode reachable only while someone holds a row on it, dated at that row', () => {
+      // Episode 3 is out (5 have aired) but its air instant left the payload with the dated window.
+      expect(composePostById(data(), 'ep:100:3')).toBeNull()
+      expect(composePostById(data(), 'ep:100:3', { orphanAt: NOW - 20 * D })).toMatchObject({
+        live: false,
+        post: {
+          id: 'ep:100:3',
+          kind: 'episode',
+          episode: 3,
+          installment: 'Season 1',
+          time: { at: NOW - 20 * D, dateOnly: false, basis: 'observed' },
+          discoveredAt: 0,
+        },
+      })
+    })
+  })
+})
+
+describe('the discovery trailer (For you, a recommended show)', () => {
+  const old = (overrides: Partial<FranchiseVideo> = {}) => video({ publishedAt: iso(NOW - 400 * D), ...overrides })
+  /** The show's feed posts as composed, then its discovery trailer. */
+  const discover = (f: Franchise, observations: ComposeObservation[] = []) => {
+    const data = input({ franchises: [f], observations: observations.length ? { [FID]: observations } : {} })
+    const posts = composePosts(data)
+    return { data, posts, trailer: discoveryTrailer(f, posts, NOW) }
+  }
+
+  it('posts a trailer the feed left out for its age: the same post, honestly dated', () => {
+    const f = franchise({ videos: [old()] })
+    const { data, posts, trailer } = discover(f)
+    expect(posts).toEqual([])
+    expect(trailer).toMatchObject({
+      id: `trailer:${FID}:youtube:vid00000001`,
+      kind: 'trailer',
+      origin: 'video',
+      franchiseId: FID,
+      episode: null,
+      time: { at: NOW - 400 * D, dateOnly: false, basis: 'published' },
+      video: { id: 'vid00000001' },
+      isOfficial: true,
+    })
+    // It is the post the id composes to, so its page, likes and saves work as any trailer's.
+    expect(composePostById(data, trailer!.id)).toEqual({ post: trailer, live: false })
+  })
+
+  it('adds nothing when the feed already carries a trailer for the show', () => {
+    const f = franchise({ videos: [old(), video({ id: 'new00000001', publishedAt: iso(NOW - 20 * D) })] })
+    const { posts, trailer } = discover(f)
+    expect(posts.map((p) => p.video?.id)).toEqual(['new00000001'])
+    expect(trailer).toBeNull()
+    // Another show's trailer in the list is not this show's.
+    expect(discoveryTrailer(franchise({ id: FID2, videos: [old()] }), posts, NOW)?.video?.id).toBe('vid00000001')
+  })
+
+  it('leads with the featured video, else an official cut, a trailer before a teaser, the newest first', () => {
+    const videos = [
+      old({ id: 'teaser00001', kind: 'teaser', publishedAt: iso(NOW - 250 * D) }),
+      old({ id: 'unmarked001', official: null, publishedAt: iso(NOW - 210 * D) }),
+      old({ id: 'trailer0001', publishedAt: iso(NOW - 900 * D) }),
+      old({ id: 'trailer0002', publishedAt: iso(NOW - 500 * D) }),
+    ]
+    expect(discover(franchise({ videos })).trailer?.video?.id).toBe('trailer0002')
+    expect(discover(franchise({ videos, featuredVideo: videos[2]! })).trailer?.video?.id).toBe('trailer0001')
+    // A featured video that is not postable (a featurette) is passed over.
+    const featurette = old({ id: 'feature0001', kind: 'featurette' })
+    expect(discover(franchise({ videos: [...videos, featurette], featuredVideo: featurette })).trailer?.video?.id).toBe('trailer0002')
+    // With no official cut, the newest unmarked one.
+    expect(discover(franchise({ videos: [videos[1]!, old({ id: 'unmarked002', official: null })] })).trailer?.video?.id).toBe('unmarked001')
+  })
+
+  it('needs a usable video: postable, dated, and not from the future', () => {
+    const none = (v: FranchiseVideo) => expect(discover(franchise({ videos: [v] })).trailer).toBeNull()
+    // An AniList trailer carries no publish date, and a date is never invented.
+    none(old({ publishedAt: null }))
+    none(old({ official: false }))
+    none(old({ kind: 'clip' }))
+    none(old({ title: 'Official Trailer (Audio Described)' }))
+    none(old({ publishedAt: iso(NOW + 2 * 3_600_000) }))
+    expect(discover(franchise({ videos: [] })).trailer).toBeNull()
+    // A part's own video counts as the show's.
+    const scoped = old({ id: 'part0000001', scope: { type: 'part', mediaId: 100, label: 'Season 1' } })
+    expect(discover(franchise({ parts: [part({ videos: [scoped] })] })).trailer).toMatchObject({ installment: 'Season 1', video: { id: 'part0000001' } })
+  })
+
+  it('never re-posts the live news post\'s own campaign', () => {
+    const news = [observation({ observedAt: NOW - D })]
+    const attached = video({ id: 'attached001', publishedAt: iso(NOW - 2 * D) })
+    const sameWeek = video({ id: 'sameweek001', publishedAt: iso(NOW - 9 * D) })
+    // The news post carries one cut and claims the other; neither becomes a trailer post.
+    const claimed = discover(franchise({ videos: [attached, sameWeek] }), news)
+    expect(claimed.posts.map((p) => [p.kind, p.video?.id])).toEqual([['window', 'attached001']])
+    expect(claimed.trailer).toBeNull()
+    // An older cut is a different story: it introduces the show beside the news.
+    const withOld = discover(franchise({ videos: [attached, sameWeek, old()] }), news)
+    expect(withOld.trailer?.video?.id).toBe('vid00000001')
   })
 })
 
@@ -1093,5 +1393,17 @@ describe('wire rows', () => {
       images: p.images,
       artwork: p.artwork,
     })
+  })
+})
+
+describe('data integrity retractions', () => {
+  it('suppresses retracted research in both live and saved-post resolution', () => {
+    const i = input({ observations: { [FID]: [observation()] }, announcements: { [FID]: [announcement({ status: 'retracted' })] } })
+    expect(composePosts(i).some(p => p.id === `news:${A1}`)).toBe(false)
+    expect(composePostById(i, `news:${A1}`)).toBeNull()
+  })
+  it('retains a real future catalogue part after withdrawing unrelated research', () => {
+    const i = input({ franchises: [franchise({ parts: [part({ mediaId: 200, status: 'NOT_YET_RELEASED', label: 'Season 2', sequence: 2 })] })], observations: { [FID]: [observation()] }, announcements: { [FID]: [announcement({ status: 'retracted' })] } })
+    expect(composePosts(i).some(p => p.id === 'catalog:200')).toBe(true)
   })
 })

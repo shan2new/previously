@@ -157,7 +157,8 @@ function latestAiredFromEpisodes(episodes: EpisodeMeta[], nowMs: number): number
  * user's own `watched` count, which is not evidence of anything: a fresh subscriber saw every
  * episode as un-aired ("upcoming", progress 0), and a partway viewer got a season header claiming
  * they were caught up. Derive it from the episode list when it is dated, else from the catalogue's
- * total — never from progress.
+ * total only once it is finished — never from progress. A releasing part with no evidence
+ * reports zero verified episodes, not the advertised future total.
  */
 export function deriveAiredEpisodes(m: {
   status: string | null
@@ -171,7 +172,7 @@ export function deriveAiredEpisodes(m: {
   // an episode surfaced as a backlog ("S3 · 1 left") and lost its premiere-date treatment.
   if (m.status === 'NOT_YET_RELEASED') return 0
   if (m.next) return Math.max(0, m.next.episode - 1)
-  if (m.status === 'RELEASING') return latestAiredFromEpisodes(m.episodes, m.nowMs) ?? m.totalEpisodes
+  if (m.status === 'RELEASING') return latestAiredFromEpisodes(m.episodes, m.nowMs) ?? 0
   return m.totalEpisodes
 }
 
@@ -256,9 +257,9 @@ function toPart(
   const lastAiredAt =
     m.lastAiredAt != null && m.lastAiredAt > 0
       ? m.lastAiredAt
-      : next && next.episode > 1
-        ? next.airingAt * 1000 - 7 * D
-        : null
+      : eps.reduce<number | null>((latest, episode) =>
+          episode.airDate != null && episode.airDate <= Date.now()
+            ? Math.max(latest ?? 0, episode.airDate) : latest, null)
 
   // Episodes sharing the exact next airing instant ⇒ a same-day multi-episode / full-season drop.
   const nextAiringCount = nextAiringAt != null ? eps.filter((e) => e.airDate === nextAiringAt).length : 0
@@ -348,6 +349,7 @@ function catalogUpcomingParts(mems: MemberRow[], mediaById: Map<number, MediaRow
       kind: mem.partKind as PartKind,
       sequence: mem.sequence,
       label: mem.label || m.titleEnglish || m.titleRomaji || `Part ${mem.sequence}`,
+      title: m.titleEnglish || m.titleRomaji || '',
       status: m.status,
       nextAiringAt,
       fetchedAt: m.fetchedAt,
@@ -391,7 +393,7 @@ function buildFranchise(
     franchiseExternalId: f.externalId,
     parts: catalogUpcomingParts(mems, mediaById),
   })
-  const upcoming = resolveUpcomingWithCatalog(f.upcoming, catalogUpcoming)
+  const upcoming = resolveUpcomingWithCatalog(f.upcoming, catalogUpcoming, { parts })
   const videos = franchiseVideos(f.enrichment?.videos, parts)
   const images = artwork(
     f.cover || parts.find((part) => part.images.portrait)?.images.portrait,
@@ -554,6 +556,7 @@ export async function getSummaries(franchiseIds: string[]): Promise<FranchiseSum
               franchiseExternalId: f.externalId,
               parts: catalogUpcomingParts(mems, mediaById),
             }),
+            { parts: catalogUpcomingParts(mems, mediaById) },
           ),
         ),
         year: primary?.seasonYear ?? minYear,
@@ -581,17 +584,24 @@ export async function getSummaries(franchiseIds: string[]): Promise<FranchiseSum
  * shelf (for example an "f" search became the next user's "Trending now"). AniList's persisted
  * `media.trending` score is the correct product fact; popularity is only a deterministic tie-break.
  */
-export async function getTrendingFranchises(limit: number): Promise<FranchiseSummary[]> {
-  return getSummaries(await trendingFranchiseIds(limit))
+export async function getTrendingFranchises(limit: number, source?: MediaSource | null): Promise<FranchiseSummary[]> {
+  return getSummaries(await trendingFranchiseIds(limit, source))
 }
 
-/** The trending ranking alone (see `getTrendingFranchises`): franchise ids, most trending first. */
-export async function trendingFranchiseIds(limit: number): Promise<string[]> {
+/**
+ * The trending ranking alone (see `getTrendingFranchises`): franchise ids, most trending first.
+ *
+ * `source` ranks ONE catalogue. It has to be part of the ranking, not a filter over its head: only
+ * AniList carries a `trending` score (TMDB rows store null and rank by popularity), so every anime
+ * franchise sorts above every TV one and the first N of the mixed ranking hold no TV show at all.
+ */
+export async function trendingFranchiseIds(limit: number, source?: MediaSource | null): Promise<string[]> {
   const rows = await db
     .select({ id: franchise.id })
     .from(franchise)
     .innerJoin(franchiseMember, eq(franchiseMember.franchiseId, franchise.id))
     .innerJoin(media, eq(media.id, franchiseMember.mediaId))
+    .where(source ? eq(franchise.source, source) : undefined)
     .groupBy(franchise.id)
     .orderBy(
       sql`max(${media.trending}) desc nulls last`,

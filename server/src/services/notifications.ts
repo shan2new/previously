@@ -199,6 +199,7 @@ export function toNotificationsPage(
 function visibleTo(userId: string, includeSocial: boolean): SQL {
   const conditions: SQL[] = [
     eq(notifications.userId, userId),
+    sql`not exists (select 1 from ${announcements} where ${announcements.id} = ${notifications.announcementId} and ${announcements.status} = 'retracted')`,
     sql`(${notifications.actorUserId} is null or (
       ${notifications.actorUserId} not in (select ${blocks.blockedUserId} from ${blocks} where ${blocks.userId} = ${userId})
       and ${notifications.actorUserId} not in (select ${blocks.userId} from ${blocks} where ${blocks.blockedUserId} = ${userId})

@@ -12,11 +12,14 @@ export const dedupeKey = (next: string): string => next.toLowerCase().replace(/[
 
 /**
  * Whether two normalized keys name the same installment. Exact match, or one key's tokens
- * fully contained in the other's — the agent rewording "Season 4" as "Season 4: The Culling
- * Game Part 2" across runs must not create a second announcement.
+ * fully contained in the other's, with identical numeric identity. Adding a subtitle can retain
+ * an announcement; adding another part number cannot.
  */
 export function sameInstallment(a: string, b: string): boolean {
   if (a === b) return true
+  // Numbers carry identity: Season 2 and Season 2 Part 2 are not the same announcement. A set
+  // loses the repeated 2 and silently merges their evidence, reminders and release dates.
+  if (JSON.stringify(a.match(/\d+/g) ?? []) !== JSON.stringify(b.match(/\d+/g) ?? [])) return false
   const ta = new Set(a.split(' ').filter(Boolean))
   const tb = new Set(b.split(' ').filter(Boolean))
   const [small, big] = ta.size <= tb.size ? [ta, tb] : [tb, ta]
@@ -41,7 +44,7 @@ export function installmentKey(s: string): string {
 /** "Infinity Castle - Part 2 (movie)" → { name: "Infinity Castle - Part 2", isMovie: true }. */
 export function installmentName(next: string): { name: string; isMovie: boolean } {
   const isMovie = next.toLowerCase().includes('(movie)')
-  const name = next.replaceAll(' (movie)', '').replaceAll('(movie)', '').trim()
+  const name = next.replace(/\s*\(movie\)/gi, '').trim()
   return { name, isMovie }
 }
 
@@ -66,13 +69,16 @@ export interface MatchablePart {
 export function matchPart<P extends MatchablePart>(name: string, parts: readonly P[]): P | null {
   const k = installmentKey(name)
   if (k === '') return null
-  const exact = parts.find((p) => installmentKey(p.label) === k)
-  if (exact) return exact
+  const exact = parts.filter((p) => installmentKey(p.label) === k)
+  if (exact.length > 1) return null // Ambiguous labels cannot identify a release reliably.
+  if (exact.length === 1) return exact[0]!
   return (
     parts.find((p) => {
-      if (installmentKey(p.title).includes(k)) return true
+      const contains = (whole: string, term: string) => (` ${whole} `).includes(` ${term} `)
+      const numbers = (value: string) => JSON.stringify(value.match(/\d+/g) ?? [])
+      if (contains(installmentKey(p.title), k) && numbers(installmentKey(p.title)) === numbers(k)) return true
       const label = installmentKey(p.label)
-      return label !== '' && k.includes(label) && p.status === 'NOT_YET_RELEASED'
+      return label !== '' && contains(k, label) && numbers(k) === numbers(label) && p.status === 'NOT_YET_RELEASED'
     }) ?? null
   )
 }
@@ -84,8 +90,7 @@ export function matchPart<P extends MatchablePart>(name: string, parts: readonly
  * (feed/adopt.ts) and the write-side canonical subject (social/resolve.ts) all read this one rule,
  * so a thread can never be keyed on one id while the feed shows another.
  *
- * `sameInstallment` is NOT this: it is the announcement table's own identity (a token SUBSET, so
- * "Season 2" would claim a "Season 2 Part 2" part and hand its catalogue post the old season's thread).
+ * `sameInstallment` is the announcement table's identity; this separately resolves catalogue parts.
  */
 export function announcedPart<P extends MatchablePart>(next: string, parts: readonly P[]): P | null {
   return matchPart(installmentName(next).name, parts)
@@ -96,10 +101,10 @@ export function announcedPart<P extends MatchablePart>(next: string, parts: read
  * given wins; callers pass a franchise's announcements oldest first (`first_seen_at`, then id), so
  * the answer never moves once a thread has been keyed on it.
  */
-export function announcementForPart<A extends { next: string }>(
+export function announcementForPart<A extends { next: string; status?: string }>(
   part: Pick<MatchablePart, 'mediaId'>,
   announcements: readonly A[],
   parts: readonly MatchablePart[],
 ): A | null {
-  return announcements.find((a) => a.next.trim() !== '' && announcedPart(a.next, parts)?.mediaId === part.mediaId) ?? null
+  return announcements.find((a) => a.status !== 'retracted' && a.next.trim() !== '' && announcedPart(a.next, parts)?.mediaId === part.mediaId) ?? null
 }

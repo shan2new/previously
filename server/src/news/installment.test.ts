@@ -24,8 +24,9 @@ describe('dedupeKey / sameInstallment (moved from news/service.ts unchanged)', (
 
   it('treats a reworded installment as the same one when one key contains the other', () => {
     expect(sameInstallment('season 4', 'season 4')).toBe(true)
-    expect(sameInstallment('season 4', 'season 4 the culling game part 2')).toBe(true)
-    expect(sameInstallment('season 4 the culling game part 2', 'season 4')).toBe(true)
+    expect(sameInstallment('season 4', 'season 4 the culling game')).toBe(true)
+    expect(sameInstallment('season 4 the culling game', 'season 4')).toBe(true)
+    expect(sameInstallment('season 4', 'season 4 part 2')).toBe(false)
     expect(sameInstallment('season 4', 'season 5')).toBe(false)
     expect(sameInstallment('', 'season 4')).toBe(false)
   })
@@ -106,7 +107,7 @@ describe('announcedPart / announcementForPart (the one announcement ↔ part rul
 
   it('never hands a later part the old season\'s announcement (sameInstallment would)', () => {
     // "season 2" ⊂ "season 2 part 2": the announcement table's subset rule calls them one installment.
-    expect(sameInstallment(dedupeKey('Season 2'), dedupeKey(s2p2.label))).toBe(true)
+    expect(sameInstallment(dedupeKey('Season 2'), dedupeKey(s2p2.label))).toBe(false)
     expect(announcementForPart(s2p2, [ann('a', 'Season 2')], parts)).toBeNull()
     expect(announcementForPart(s2, [ann('a', 'Season 2')], parts)?.id).toBe('a')
   })
@@ -114,7 +115,7 @@ describe('announcedPart / announcementForPart (the one announcement ↔ part rul
   it('agrees with adoption where the old alias disagreed ("Part 2" against "Season 1 Part 2")', () => {
     // The old alias said yes (token subset) while adoption's part matcher found no part, so the feed
     // showed `news:<A>` and the rows stayed on `catalog:<M>`. Now both read one answer: no.
-    expect(sameInstallment(dedupeKey('Part 2'), dedupeKey(s1p2.label))).toBe(true)
+    expect(sameInstallment(dedupeKey('Part 2'), dedupeKey(s1p2.label))).toBe(false)
     expect(announcedPart('Part 2', parts)).toBeNull()
     expect(announcementForPart(s1p2, [ann('a', 'Part 2')], parts)).toBeNull()
     // With the part's title carrying the name, both say yes.

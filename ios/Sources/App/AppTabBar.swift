@@ -26,6 +26,8 @@ import UIKit
 protocol ScrollAwayChrome: AnyObject {
     /// How far the header has gone: 0 (all there) … 1 (gone).
     var awayFraction: CGFloat { get }
+    /// The header (and the bar with it) comes back: a re-selected tab, a push, a pop.
+    func reveal()
 }
 
 struct AppTabBar: View {

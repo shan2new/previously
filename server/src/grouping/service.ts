@@ -18,6 +18,9 @@ import {
   type LlmGrouper,
 } from './llm.js'
 import { partKindForFormat } from './partKind.js'
+import { planAttach, SEASON_RANK } from './attach.js'
+import { validateGrouping } from './validate.js'
+import { isOptionalPart, partRelationship } from './relationship.js'
 import type { ArtworkGallery, FranchiseEnrichment, FranchiseUpcoming } from '../types/api.js'
 
 export interface GroupOptions {
@@ -80,6 +83,7 @@ export async function groupKnownComponent(
   let result: GroupingResult
   try {
     result = await grouper.group(input)
+    validateGrouping(result, input)
   } catch (err) {
     if (grouper instanceof DeterministicGrouper) throw err // nothing left to fall back to
     console.warn(`grouping LLM failed for seed ${seedId}; using deterministic fallback:`, err)
@@ -251,39 +255,12 @@ async function attachNewMembers(
   alreadyMembers: Set<number>,
   exec: Executor = db,
 ): Promise<number> {
-  const fresh = [...component.values()].filter((m) => !alreadyMembers.has(m.id))
-  if (fresh.length === 0) return 0
+  if (![...component.keys()].some((id) => !alreadyMembers.has(id))) return 0
 
-  // Determine next sequence per kind from existing members.
+  // What each new member becomes (its kind, order, relationship and label) is grouping/attach.ts.
   const existingParts = await exec.select().from(franchiseMember).where(inArray(franchiseMember.franchiseId, [franchiseId]))
-  const nextSeq = new Map<string, number>()
-  for (const p of existingParts) nextSeq.set(p.partKind, Math.max(nextSeq.get(p.partKind) ?? 0, p.sequence))
-  let nextWatchOrder = Math.max(0, ...existingParts.map((part) => part.watchOrder))
-
-  const values = fresh
-    .slice()
-    .sort((a, b) => catalogueOrderKey(a) - catalogueOrderKey(b) || a.id - b.id)
-    .map((m) => {
-    const kind = partKindForFormat(m.format)
-    const seq = (nextSeq.get(kind) ?? 0) + 1
-    nextSeq.set(kind, seq)
-    const label = kind === 'season' ? `Season ${seq}` : `${kind[0]!.toUpperCase()}${kind.slice(1)} ${seq}`
-    const rawRelationship = (m.relations?.edges ?? []).find((edge) => alreadyMembers.has(edge.node.id))?.relationType ?? null
-    // AniList describes the RELATED node from the current media's perspective. When a newly
-    // attached title says the old title is its PREQUEL, this new title's franchise relationship is
-    // therefore SEQUEL (and vice versa).
-    const relationship = invertDirectedRelationship(rawRelationship)
-    return {
-      mediaId: m.id,
-      franchiseId,
-      partKind: kind,
-      sequence: seq,
-      watchOrder: ++nextWatchOrder,
-      relationship,
-      optional: relationship === 'SIDE_STORY' || kind === 'music',
-      label,
-    }
-  })
+  const values = planAttach(existingParts, component, alreadyMembers).map((member) => ({ ...member, franchiseId }))
+  if (values.length === 0) return 0
   await exec.insert(franchiseMember).values(values).onConflictDoNothing()
   await exec.update(franchise).set({ updatedAt: new Date() }).where(inArray(franchise.id, [franchiseId]))
   return values.length
@@ -322,18 +299,6 @@ function buildInput(component: Map<number, AniListMedia>): GroupingInput {
   return { candidates, edges }
 }
 
-const SEASON_RANK: Record<string, number> = { WINTER: 0, SPRING: 1, SUMMER: 2, FALL: 3 }
-
-function catalogueOrderKey(media: Pick<AniListMedia, 'seasonYear' | 'season'>): number {
-  return (media.seasonYear ?? 9999) * 10 + (SEASON_RANK[media.season ?? ''] ?? 0)
-}
-
-function invertDirectedRelationship(value: string | null): string | null {
-  if (value === 'PREQUEL') return 'SEQUEL'
-  if (value === 'SEQUEL') return 'PREQUEL'
-  return value
-}
-
 /** Add one global, source-grounded order without asking the grouping model to invent chronology. */
 function decoratePartOrder(result: GroupingResult, input: GroupingInput): void {
   const candidates = new Map(input.candidates.map((candidate) => [candidate.id, candidate]))
@@ -348,17 +313,15 @@ function decoratePartOrder(result: GroupingResult, input: GroupingInput): void {
         const bk = (bb?.seasonYear ?? 9999) * 10 + (SEASON_RANK[bb?.season ?? ''] ?? 0)
         return ak - bk || a.sequence - b.sequence || a.id - b.id
       })
+    // The relations inside THIS franchise only: the model may have split the component.
+    const within = input.edges.filter((edge) => ids.has(edge.from) && ids.has(edge.to))
     ordered.forEach((part, index) => {
-        const relations = input.edges.filter(
-          (edge) => ids.has(edge.from) && ids.has(edge.to) && (edge.from === part.id || edge.to === part.id),
-        ).map((edge) => edge.to === part.id ? edge.type : invertDirectedRelationship(edge.type))
-        const relationship = index === 0 ? null : relations.find((value) => value === 'SIDE_STORY')
-          ?? relations.find((value) => value === 'SEQUEL' || value === 'PREQUEL')
-          ?? relations[0]
-          ?? null
+        // The earliest member is the work's root; every other part is what the edges say it is
+        // (grouping/relationship.ts).
+        const relationship = index === 0 ? null : partRelationship(part.id, within)
         part.watchOrder = index + 1
         part.relationship = relationship
-        part.optional = relationship === 'SIDE_STORY' || part.partKind === 'music'
+        part.optional = isOptionalPart(relationship, part.partKind)
       })
   }
 }

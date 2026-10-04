@@ -144,6 +144,8 @@ final class AppModel {
     @ObservationIgnored var feedDerived = FeedDerivedCache()
     @ObservationIgnored var socialLanes: [SocialToggleKey: Task<Void, Never>] = [:]
     @ObservationIgnored var ratingLanes: [String: Task<Void, Never>] = [:]
+    /// The one task sending queued watch-session words (AppModel+Rewatch).
+    @ObservationIgnored var rewatchLane: Task<Void, Never>?
     @ObservationIgnored var feedCacheWrite: Task<Void, Never>?
     @ObservationIgnored var socialPersistWrite: Task<Void, Never>?
     /// Bookkeeping the extensions need and nothing draws: when each post page last landed (its LRU
@@ -232,7 +234,19 @@ final class AppModel {
     var searchFieldRequested = false
     // Anime/TV filter — SEARCH ONLY. Today, Schedule and Library are your shows and always show
     // everything: a filter set once while browsing used to silently hide half of what aired.
-    var mediaFilter: MediaFilter = .all
+    // A single AUDIENCE (below) fixes it: someone who watches only anime has no All and no TV.
+    var mediaFilter: MediaFilter = Audience.stored.filter
+    /// What the viewer watches — anime, TV or both (`AppModel+Audience.swift`): everything the app
+    /// SUGGESTS is of that kind and nothing else; what they own is never hidden.
+    var audience: Audience = Audience.stored
+    /// The account has answered "What do you watch?" (here or on another device).
+    var audienceChosen: Bool = Audience.storedChosen
+    /// The one-time question is due (`askAudienceIfNeeded`).
+    var audiencePromptDue = false
+    /// First run (`AppModel+FirstRun.swift`): the flow a new account goes through before its
+    /// Home exists. Known at launch for a device that has been through it; asked of the server
+    /// otherwise (`resolveFirstRun`).
+    var firstRun: FirstRunPhase = FirstRun.launchPhase
 
     // Live clock for countdowns.
     var now: Int64 = .nowMs {
@@ -327,6 +341,8 @@ final class AppModel {
         startClock()
         // A failed change restored from a previous launch retries by replaying its write here.
         SyncCenter.shared.replay = { [weak self] intent in await self?.replay(intent) }
+        // Every rewatch change queues a word for the server; this sends it.
+        RewatchStore.shared.onChange = { [weak self] in self?.flushWatchSessions() }
         // A suspension raised from ANY route (iD14), before the caller's `catch` runs — so no
         // failure it causes is filed as a write to retry (`fileFailure`).
         if !isolated {
@@ -374,7 +390,22 @@ final class AppModel {
             await loadReminders()
             await loadHides()
         }
-        Task { await reload() }
+        Task {
+            await reload()
+            // The account's audience, once the library is known (it suggests the first answer).
+            await syncAudience()
+            // …and with both in hand: a new account goes through first run instead of the app.
+            resolveFirstRun()
+        }
+        // The hold on the brand is bounded: on a connection that never answers, the app opens.
+        if firstRun == .checking {
+            let epoch = accountEpoch
+            Task { [weak self] in
+                try? await Task.sleep(for: FirstRun.checkPatience)
+                guard let self, epoch == self.accountEpoch else { return }
+                self.abandonFirstRunCheck()
+            }
+        }
     }
 
     // MARK: - Offline copy
@@ -472,6 +503,9 @@ final class AppModel {
             lastLoadedAt = .nowMs
             Self.persistLibrary(res, at: lastLoadedAt)
             refreshRecommendationsIfNeeded()
+            // Off the reload's clock — the pull's spinner never waits on the rewatch history — and
+            // ahead of the alerts, whose scheduling can take seconds.
+            Task { await syncWatchSessions() }
             await syncAmbient()
         } catch APIError.unauthorized {
             guard seq == reloadSeq else { return }
@@ -542,6 +576,9 @@ final class AppModel {
                          command: write.command)
         }
         flushSocial()
+        flushWatchSessions()
+        // A choice of audience made offline is owed to the account.
+        Task { await syncAudience() }
         for comment in pendingComments where comment.state == .sending {
             Task { _ = await retryComment(id: comment.id) }
         }
@@ -570,6 +607,7 @@ final class AppModel {
         visitStamped = false
         pendingRoute = nil
         recentFragmentsPruned = false
+        rewatchLane?.cancel(); rewatchLane = nil
         RewatchStore.shared.reset()
         SeasonSweepLedger.reset()
         Self.clearCachedLibrary()
@@ -609,7 +647,9 @@ final class AppModel {
         searchSources = nil
         trending = []
         searchFieldRequested = false
-        mediaFilter = .all
+        // The next account answers for itself.
+        clearAudience()
+        resetFirstRun()
 
         justCaught = []
         undo = nil
@@ -643,6 +683,8 @@ final class AppModel {
             await loadFeed(currentFeedTab, force: true)
             await loadActivity(reset: true)
             flushSocial()
+            // The audience may have been changed on another device.
+            await syncAudience()
         }
     }
 
@@ -848,8 +890,10 @@ final class AppModel {
         guard trending.isEmpty, trendingTask == nil else { return }
         trendingTask = Task { [weak self] in
             defer { self?.trendingTask = nil }
-            guard let items = try? await self?.api.trending(limit: 10) else { return }
-            self?.trending = items
+            guard let self, let items = try? await self.api.trending(limit: 10) else { return }
+            // The server answers for the audience; an older one sends both, so the app keeps
+            // the wall itself.
+            self.trending = items.filter { self.audience.allows($0.source) }
         }
     }
 
@@ -857,7 +901,9 @@ final class AppModel {
     func refreshTrending() async {
         trendingTask?.cancel()
         trendingTask = nil
-        if let items = try? await api.trending(limit: 10), !items.isEmpty { trending = items }
+        if let items = try? await api.trending(limit: 10), !items.isEmpty {
+            trending = items.filter { audience.allows($0.source) }
+        }
     }
 
     private func nextSeq() -> Int {

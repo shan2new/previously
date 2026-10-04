@@ -2,7 +2,7 @@ import type { FastifyPluginAsync, FastifyReply, FastifyRequest } from 'fastify'
 import { z } from 'zod'
 import { env } from '../env.js'
 import { getFeed, getPostDetail, getReminders, getSaved } from '../feed/service.js'
-import { postIdSchema } from '../social/subjects.js'
+import { feedPostIdSchema } from '../social/subjects.js'
 import { rateKeyOf, rateLimiter, sendRateLimited } from '../util/rateLimit.js'
 
 // The Today feed: GET /me/feed, GET /feed/posts/:id, GET /me/saved, GET /me/reminders
@@ -19,11 +19,17 @@ const feedQuery = z
       .regex(/^[0-9]{1,15}$/)
       .transform(Number)
       .optional(),
+    // Opt-in to Following's "Episode N is out" posts: `1` or `true`. Anything else — and its absence,
+    // which is every client that predates the `episode` kind — is off, never a 400.
+    episodes: z
+      .union([z.string(), z.array(z.string())])
+      .optional()
+      .transform((value) => value === '1' || value === 'true'),
   })
   .strict()
 // Fastify has already percent-decoded the segment, so `news%3A<uuid>` and `news:<uuid>` both arrive
-// as `news:<uuid>`.
-const postParams = z.object({ id: postIdSchema }).strict()
+// as `news:<uuid>`. An `ep:<mediaId>:<n>` id is Following's "Episode N is out" post.
+const postParams = z.object({ id: feedPostIdSchema }).strict()
 
 const INVALID = { error: 'invalid request' } as const
 
@@ -47,7 +53,9 @@ export const feedRoutes: FastifyPluginAsync = async (app) => {
     if (!query.success) return reply.code(400).send(INVALID)
     const limited = readLimited(req, reply)
     if (limited) return limited
-    const feed = await getFeed(req.user!.id, query.data.tab, Date.now(), query.data.since ?? null)
+    const feed = await getFeed(req.user!.id, query.data.tab, Date.now(), query.data.since ?? null, {
+      episodes: query.data.episodes,
+    })
     return { ...feed, capabilities: capabilities() }
   })
 

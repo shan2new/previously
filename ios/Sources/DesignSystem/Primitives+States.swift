@@ -71,6 +71,8 @@ struct EmptyState: View {
         case episodeFrames = "empty-library-episode-frames-v2"
         case flapCalendar = "empty-schedule-flap-calendar-v1"
         case bookmarkFrames = "empty-saved-bookmark-frames-v1"
+        /// Home's: a departures board waiting for its first listing (4 Oct).
+        case flapBoard = "empty-home-flap-board-v1"
     }
 
     enum Prominence {
@@ -744,7 +746,7 @@ struct CompactActionButtonStyle: ButtonStyle {
             .background(configuration.isPressed ? ThemeColor.surfacePressed : ThemeColor.surfaceFloating,
                         in: RoundedRectangle(cornerRadius: ThemeRadius.compactControl, style: .continuous))
             .overlay(RoundedRectangle(cornerRadius: ThemeRadius.compactControl, style: .continuous)
-                .strokeBorder(ThemeColor.stroke, lineWidth: 1))
+                .strokeBorder(ThemeGradient.litEdge, lineWidth: 1))
             // Reduce Motion presses in opacity, never in scale (board 11).
             .opacity(isEnabled ? (reduceMotion && configuration.isPressed ? 0.72 : 1) : 0.38)
             .scaleEffect(reduceMotion ? 1 : (configuration.isPressed ? 0.985 : 1))

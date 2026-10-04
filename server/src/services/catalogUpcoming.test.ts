@@ -108,7 +108,7 @@ describe('resolveUpcomingWithCatalog', () => {
     const researched = {
       status: 'announced',
       next: 'Season 6',
-      release: 'Winter 2026',
+      release: 'Winter 2027',
       note: 'Officially announced by Netflix.',
       source: 'https://www.netflix.com/tudum/',
       checked: '2026-09-02T12:00:00.000Z',

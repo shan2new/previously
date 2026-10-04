@@ -4,6 +4,7 @@ const h = vi.hoisted(() => ({
   searchMedia: vi.fn(),
   searchTv: vi.fn(),
   correct: vi.fn(),
+  getTrendingFranchises: vi.fn(async (_limit: number, _source?: string | null) => [] as unknown[]),
 }))
 
 vi.mock('../anilist/client.js', () => ({ searchMedia: h.searchMedia }))
@@ -19,7 +20,7 @@ vi.mock('./mediaStore.js', () => ({
 vi.mock('./queryCorrect.js', () => ({ correctSearchQuery: h.correct }))
 vi.mock('./franchiseView.js', () => ({
   getSummaries: async () => [],
-  getTrendingFranchises: async () => [],
+  getTrendingFranchises: h.getTrendingFranchises,
 }))
 vi.mock('../db/index.js', () => ({
   db: {
@@ -74,5 +75,32 @@ describe('interactive search orchestration', () => {
       sources: { anilist: 'failed', tmdb: 'failed' },
     })
     expect(h.correct).not.toHaveBeenCalled()
+  })
+
+  it('ranks one catalogue\'s trending within that catalogue, and asks no provider', async () => {
+    // The mixed ranking's head is all anime (only AniList carries a trend score): TV has to be
+    // ranked on its own, or a TV viewer's trending comes back empty.
+    h.getTrendingFranchises.mockClear()
+    await searchFranchises('', 30, { filters: { source: 'tmdb' } })
+    await searchFranchises('   ', 30, { filters: { source: 'anilist' } })
+    await searchFranchises('', 30)
+
+    expect(h.getTrendingFranchises.mock.calls.map((call) => call[1])).toEqual(['tmdb', 'anilist', undefined])
+    expect(h.searchMedia).not.toHaveBeenCalled()
+    expect(h.searchTv).not.toHaveBeenCalled()
+  })
+
+  it('searches only the catalogue it is scoped to', async () => {
+    h.searchMedia.mockResolvedValue([])
+    h.searchTv.mockResolvedValue([])
+
+    await searchFranchises('abc', 20, { filters: { source: 'anilist' } })
+    expect(h.searchMedia).toHaveBeenCalledTimes(1)
+    expect(h.searchTv).not.toHaveBeenCalled()
+
+    h.searchMedia.mockClear()
+    await searchFranchises('abd', 20, { filters: { source: 'tmdb' } })
+    expect(h.searchTv).toHaveBeenCalledTimes(1)
+    expect(h.searchMedia).not.toHaveBeenCalled()
   })
 })

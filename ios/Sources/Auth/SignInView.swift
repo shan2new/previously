@@ -8,6 +8,11 @@ import ClerkKitUI
 // A compact brand signature sits above the viewing room. The launch retains its display-scale
 // identity; credential forms keep their focused layout.
 struct SignInView: View {
+    /// The moment after signing in, while the account is being looked at (`FirstRunHold`): the
+    /// same room and the same mark, the action gone — so nothing on screen moves until the app,
+    /// or first run, arrives.
+    var holding = false
+
     @Environment(AuthManager.self) private var auth
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @Environment(\.dynamicTypeSize) private var typeSize
@@ -30,12 +35,15 @@ struct SignInView: View {
                     .position(x: geo.size.width / 2, y: geo.size.height * 0.32)
             }
             .ignoresSafeArea()
-            VStack(spacing: 0) {
-                Spacer(minLength: 0)
-                action
+            if !holding {
+                VStack(spacing: 0) {
+                    Spacer(minLength: 0)
+                    action
+                }
+                .padding(.horizontal, ThemeSpace.x6)
+                .padding(.bottom, ThemeSpace.x10)
+                .transition(.opacity)
             }
-            .padding(.horizontal, ThemeSpace.x6)
-            .padding(.bottom, ThemeSpace.x10)
         }
     }
 

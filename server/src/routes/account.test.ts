@@ -389,7 +389,7 @@ describe('GET /me/export', () => {
     account: { id: CALLER, createdAt: 1, email: null, lastOpenedAt: null, prevOpenedAt: null },
     profile: null,
     moderation: null,
-    library: { subscriptions: [], progress: [], preferences: null, recommendationFeedback: [] },
+    library: { subscriptions: [], progress: [], preferences: null, recommendationFeedback: [], watchSessions: [] },
     social: {
       comments: [],
       likes: [],

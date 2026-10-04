@@ -68,7 +68,26 @@ describe('GET /me/feed', () => {
     const res = await server.inject({ method: 'GET', url: '/me/feed' })
     expect(res.statusCode).toBe(200)
     expect(res.json().tab).toBe('following')
-    expect(mocks.getFeed).toHaveBeenCalledWith(CALLER, 'following', expect.any(Number), null)
+    // No `episodes` parameter — every client that predates the kind — means no episode posts.
+    expect(mocks.getFeed).toHaveBeenCalledWith(CALLER, 'following', expect.any(Number), null, { episodes: false })
+    await server.close()
+  })
+
+  it('asks for "Episode N is out" posts only when episodes is 1 or true', async () => {
+    const server = await app()
+    const asked = async (query: string) => {
+      mocks.getFeed.mockClear()
+      const res = await server.inject({ method: 'GET', url: `/me/feed?${query}` })
+      expect(res.statusCode, query).toBe(200)
+      return mocks.getFeed.mock.calls[0]![4]
+    }
+    expect(await asked('tab=following&episodes=1')).toEqual({ episodes: true })
+    expect(await asked('episodes=true')).toEqual({ episodes: true })
+    expect(await asked('since=1790000000000&episodes=1')).toEqual({ episodes: true })
+    // Anything else is off, never a 400.
+    for (const query of ['tab=following', 'episodes=0', 'episodes=false', 'episodes=', 'episodes=yes', 'episodes=TRUE', 'episodes=11', 'episodes=1&episodes=1']) {
+      expect(await asked(query), query).toEqual({ episodes: false })
+    }
     await server.close()
   })
 
@@ -77,7 +96,7 @@ describe('GET /me/feed', () => {
     const res = await server.inject({ method: 'GET', url: '/me/feed?tab=foryou' })
     expect(res.statusCode).toBe(200)
     expect(res.json().tab).toBe('foryou')
-    expect(mocks.getFeed).toHaveBeenCalledWith(CALLER, 'foryou', expect.any(Number), null)
+    expect(mocks.getFeed).toHaveBeenCalledWith(CALLER, 'foryou', expect.any(Number), null, { episodes: false })
     await server.close()
   })
 
@@ -157,9 +176,20 @@ describe('GET /feed/posts/:id', () => {
     await server.close()
   })
 
+  it('serves an "Episode N is out" post by its ep: id', async () => {
+    const id = 'ep:21:3'
+    mocks.getPostDetail.mockResolvedValue(detail(id))
+    const server = await app()
+    const res = await server.inject({ method: 'GET', url: `/feed/posts/${id}` })
+    expect(res.statusCode).toBe(200)
+    expect(res.json().post.id).toBe(id)
+    expect(mocks.getPostDetail).toHaveBeenCalledWith(CALLER, id)
+    await server.close()
+  })
+
   it('rejects an id that is not a post with 400', async () => {
     const server = await app()
-    for (const id of ['bad', 'ep:21:3', `news:${ANNOUNCEMENT.toUpperCase()}`, 'catalog:0', `news:${ANNOUNCEMENT}x`]) {
+    for (const id of ['bad', 'ep:21:0', 'ep:21', `news:${ANNOUNCEMENT.toUpperCase()}`, 'catalog:0', `news:${ANNOUNCEMENT}x`]) {
       const res = await server.inject({ method: 'GET', url: `/feed/posts/${encodeURIComponent(id)}` })
       expect(res.statusCode).toBe(400)
       expect(res.json()).toEqual({ error: 'invalid request' })
