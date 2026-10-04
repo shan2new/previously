@@ -5,7 +5,9 @@
 Codex read Claude Code session `80a0d5ee-e197-476a-b5ca-f27774597b00` and reviewed its uncommitted
 changes on `first-run-onboarding` (base `683e78b`). Claude had implemented the import pipeline,
 native readers and sheet, and stopped during a simulator walkthrough. Build 9 belonged to the
-previous first-run/design-system work; this import has not been released.
+previous first-run/design-system work. This document records the local verification before
+release; see [the release record](../../docs/history-import-release-2026-10-04.md) for deployment
+and TestFlight evidence.
 
 The retained flow is source → username/file → preview → explicit Add → result, from the
 first-run picker and Profile. Public AniList lists, MAL XML/gzip, and the two TV Time CSV/ZIP
@@ -67,8 +69,10 @@ rewatch events, ratings and comments are not imported. Trakt is out of scope.
 Server jobs remain in memory. A server restart loses unfinished work; successful writes survive
 and re-import is safe. Previews/completed results expire after 30 minutes; running jobs are kept.
 
-No commit, push, production restart, migration, or TestFlight upload was performed. The scratch
-server uses port 8799 with no cron/news agent/LLM; the dedicated simulator uses its test account.
+At the end of the implementation pass, no commit, push, production restart, migration, or
+TestFlight upload had been performed. The subsequent release is recorded separately above.
+The scratch server uses port 8799 with no cron/news agent/LLM; the dedicated simulator uses its
+test account.
 
 To repeat the SQL checks from the repository root:
 
