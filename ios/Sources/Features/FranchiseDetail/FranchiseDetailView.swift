@@ -17,8 +17,6 @@ struct FranchiseDetailView: View {
     @State private var fetched: Franchise?
     @State private var loading = true
     @State private var loadError = false
-    /// A Schedule-routed `focus` lands on its row once (`landOnFocus`).
-    @State private var focusConsumed = false
     @State private var synopsisExpanded = false
     // The paragraph's whole height behind its clamped one: the link is drawn only when they differ.
     @State private var synopsisFullHeight: CGFloat = 0
@@ -202,49 +200,12 @@ struct FranchiseDetailView: View {
                 ToolbarItem(placement: .principal) { barTitle(f) }
                     .chromeSharedBackgroundHidden()
             }
-            if let f = franchise, inLibrary {
-                // The status is the page's Follow pill; the menu keeps it too.
+            if let f = franchise {
                 ToolbarItem(placement: .topBarTrailing) { overflowMenu(f) }
-            } else if let f = franchise, scrolledUnderBar {
-                // The hero carries "Add to Library"; the bar's "+" takes over only once the hero
-                // has scrolled away — one add control on screen at a time (review, 23 Sep).
-                ToolbarItem(placement: .topBarTrailing) { addButton(f) }
-            } else if let f = franchise, let rec = appModel.recommendation(forShow: f.id) {
-                // A recommendation's other two answers, where a show page keeps its secondary
-                // verbs (review i5, N6: the page it opens had no "Not interested").
-                ToolbarItem(placement: .topBarTrailing) {
-                    Menu {
-                        Button { promptMarkSeries(f, anchor: .series) } label: {
-                            AppGlyphLabel(Copy.Action.markSeriesWatched, systemName: "checkmark.circle")
-                        }
-                        // Reversible (the lane's Undo), so not the destructive red Remove wears.
-                        Button { appModel.hideRecommendation(rec, seen: false) } label: {
-                            AppGlyphLabel(Copy.ForYou.notInterested, systemName: "hand.thumbsdown")
-                        }
-                    } label: {
-                        AppGlyph(systemName: "ellipsis")
-                            .font(.system(size: 15, weight: .semibold))
-                            .foregroundStyle(ThemeColor.textPrimary)
-                            .frame(width: 44, height: 44)
-                    }
-                    .accessibilityLabel("More actions")
-                }
             }
         }
         .task(id: franchiseId) {
             await load()
-            // An Add pressed where "Where are you?" could not be asked (Search) raises it here,
-            // from this page's own Add, once the page has laid out.
-            if appModel.pendingAddPrompt == franchiseId {
-                appModel.pendingAddPrompt = nil
-                try? await Task.sleep(for: .milliseconds(450))
-                if let f = franchise, !inLibrary { add(f, anchor: .add) }
-            }
-            if appModel.pendingSeriesPrompt == franchiseId {
-                appModel.pendingSeriesPrompt = nil
-                try? await Task.sleep(for: .milliseconds(450))
-                if let f = franchise { promptMarkSeries(f, anchor: .series) }
-            }
             await loadProviders()
             #if DEBUG
             if isReadOnlyPreview, let f = franchise {
@@ -260,6 +221,20 @@ struct FranchiseDetailView: View {
             }
             #endif
         }
+        .task(id: loading) {
+            // Keep the request through a failed fetch, then consume it only on this page after
+            // a successful retry. Cancellation during a push/pop must not silently eat an Add.
+            guard !loading, !loadError, fetched != nil else { return }
+            try? await Task.sleep(for: .milliseconds(450))
+            guard !Task.isCancelled, let f = franchise else { return }
+            if appModel.pendingAddPrompt == franchiseId {
+                appModel.pendingAddPrompt = nil
+                if !inLibrary { add(f, anchor: .add) }
+            } else if appModel.pendingSeriesPrompt == franchiseId {
+                appModel.pendingSeriesPrompt = nil
+                promptMarkSeries(f, anchor: .series)
+            }
+        }
         // A trailer plays IN its card; full screen is asked for, and is that card's own player,
         // zoomed out of it (a swipe down carries it back, still playing).
         .fullScreenCover(item: Bindable(trailers).fullScreen) { playback in
@@ -273,7 +248,11 @@ struct FranchiseDetailView: View {
         }
         // Nothing plays under a push or in the background.
         .onAppear { onScreen = true }
-        .onDisappear { onScreen = false }
+        .onDisappear {
+            onScreen = false
+            if appModel.pendingAddPrompt == franchiseId { appModel.pendingAddPrompt = nil }
+            if appModel.pendingSeriesPrompt == franchiseId { appModel.pendingSeriesPrompt = nil }
+        }
         .onChange(of: !onScreen || scenePhase != .active, initial: true) { _, held in trailers.suspend(held) }
         .onChange(of: appModel.library.count, initial: true) { _, _ in
             if let lib = appModel.franchise(id: franchiseId) { lastLibraryCopy = lib }
@@ -369,7 +348,7 @@ struct FranchiseDetailView: View {
         #if DEBUG
         if isReadOnlyPreview { return UserDefaults.standard.string(forKey: "detailPreviewState") != "untracked" }
         #endif
-        return appModel.isInLibrary(franchiseId)
+        return appModel.isInLibrary(franchiseId) && !appModel.pendingAdds.contains(franchiseId)
     }
     private func catalogueNews(_ f: Franchise) -> ReleaseNews? {
         // The detail fetch is newer than the library snapshot and is not progress-dependent.
@@ -399,28 +378,6 @@ struct FranchiseDetailView: View {
                     guard tabsPinned else { return }
                     proxy.scrollTo("anchor-tabs", anchor: .top)
                 }
-                .task(id: f.id) { await landOnFocus(f, proxy: proxy) }
-        }
-    }
-
-    /// A Schedule card lands on its episode. The episodes are on this page (6 Sep), so the route
-    /// scrolls to the row instead of pushing a second screen — twice, because the first pass can
-    /// run before the section below the hero has laid out. An extra's episode (an OVA airing)
-    /// still opens its own list, the one place a run outside the seasons is drawn.
-    private func landOnFocus(_ f: Franchise, proxy: ScrollViewProxy) async {
-        guard let focus, !focusConsumed else { return }
-        focusConsumed = true
-        guard f.seasonPartsInOrder.contains(where: { $0.mediaId == focus.mediaId }) else {
-            push(.episodes(franchiseId: f.id, mediaId: focus.mediaId, focusEpisode: focus.episode))
-            return
-        }
-        showTab = .episodes
-        for delay in [0.45, 1.2] {
-            try? await Task.sleep(for: .seconds(delay))
-            guard !Task.isCancelled else { return }
-            withAnimation(ThemeMotion.pick(ThemeMotion.uiSettle, reduceMotion: reduceMotion)) {
-                proxy.scrollTo("ep-\(focus.episode)", anchor: .center)
-            }
         }
     }
 
@@ -598,27 +555,6 @@ struct FranchiseDetailView: View {
         }
     }
 
-    private func addButton(_ f: Franchise) -> some View {
-        Button {
-            add(f)
-        } label: {
-            // A GLYPH, not a word — Apple TV's "+" — as INK on the toolbar's own capsule, sized
-            // and framed like the overflow's `···` so the bar's trailing capsules are one pair.
-            // "+ Add" was the last piece of prose in the bar (and this SDK broke it "Ad / d");
-            // the label below is what VoiceOver says.
-            //
-            // `interactive`, not `accent`: this glyph sits directly above the episode list's
-            // amber "Episode 14 next", so one hue must not mean both "press this" and "this is
-            // what's coming". Amber stays on the fact.
-            AppGlyph(systemName: "plus")
-                .font(.system(size: 17, weight: .semibold))
-                .foregroundStyle(ThemeColor.interactive)
-                .frame(width: 44, height: 44)
-        }
-        .buttonStyle(.plain)
-        .accessibilityLabel("Add \(f.title) to Library")
-    }
-
     private func statusChoices(_ f: Franchise) -> some View {
         ForEach(WatchStatus.menuOrder, id: \.self) { option in
             // A status is a status, wherever it is chosen — the long press does the same. "Watched"
@@ -634,54 +570,40 @@ struct FranchiseDetailView: View {
 
     private func overflowMenu(_ f: Franchise) -> some View {
         Menu {
-            // The status, always reachable here — the pill steps aside over a poster's printed name.
-            Menu {
-                statusChoices(f)
-            } label: {
-                AppGlyphLabel(f.effectiveStatus.displayName, systemName: f.effectiveStatus.menuGlyph)
-            }
-            if let part = f.currentPart, !part.isUpcoming {
-                let behind = max(0, part.markTarget(now: now) - part.progress)
-                // The batch options used to hang off a bare chevron floating inside the primary
-                // capsule. They live here (and on the capsule's long press) instead.
-                // The capsule owns the next-episode verbs; this menu keeps the whole-season and
-                // whole-series ones (interactive review: three mark verbs, each on two lines).
-                if behind > 0 {
-                    // The counted form, the same label the capsule's menu, the Episodes header and
-                    // the long press give this command.
-                    Button(Copy.Action.markAll(behind)) { promptBatchMark(f, part: part, through: part.markTarget(now: now)) }
+            if inLibrary {
+                Menu { statusChoices(f) } label: {
+                    AppGlyphLabel(f.effectiveStatus.displayName, systemName: f.effectiveStatus.menuGlyph)
                 }
-                if part.progress > 0 {
-                    Button(Copy.Action.markAllUnwatched(part.progress)) { promptResetSeason(f, part: part) }
+                // The toolbar acts on the season being shown in Episodes; elsewhere it uses
+                // the same next part as the pinned post.
+                progressChoices(f, part: showTab == .episodes ? focusSeason(f) : f.currentPart)
+                if let session = RewatchStore.shared.activeSession(for: f.id) {
+                    Divider()
+                    Button(Copy.Action.restartRewatch) { promptRestartRewatch(f, session: session) }
+                    Button(DetailCopy.stopRewatch) { promptCancelRewatch(f, session: session) }
+                } else if watchedReleased(f) {
+                    Divider()
+                    Button(Copy.Action.startRewatch) { showStartRewatch = true }
+                }
+                if !RewatchStore.shared.sessions(for: f.id).isEmpty {
+                    Button(Copy.Action.viewWatchHistory) { push(.history(franchiseId: f.id)) }
+                }
+                Divider()
+                RemoveFromLibraryButton(franchise: f, appModel: appModel)
+            } else {
+                Button { add(f, anchor: .add) } label: {
+                    AppGlyphLabel(Copy.Search.addToLibrary, systemName: "plus")
+                }
+                if seriesBehind(f) > 0 {
+                    Button(Copy.Action.markSeriesWatched) { promptMarkSeries(f, anchor: .series) }
+                }
+                if let rec = appModel.recommendation(forShow: f.id) {
+                    Divider()
+                    Button { appModel.hideRecommendation(rec, seen: false) } label: {
+                        AppGlyphLabel(Copy.ForYou.notInterested, systemName: "hand.thumbsdown")
+                    }
                 }
             }
-            // Finishing a series ELSEWHERE was eight separate season confirmations.
-            //
-            // `markCaughtUp` only ever touched the releasing part and `setStatus(.completed)`
-            // changed the word without touching a single episode — so a user who watched all 95
-            // episodes on television had to walk eight seasons by hand, with the seasons list
-            // openly disagreeing with the status chip for the whole journey. One command, one
-            // confirmation naming the real total, and one undo that puts every part back.
-            if seriesBehind(f) > 0 {
-                Button(DetailCopy.markSeriesWatched) { promptMarkSeries(f) }
-            }
-            if let session = RewatchStore.shared.activeSession(for: f.id) {
-                Divider()
-                Button(Copy.Action.restartRewatch) { promptRestartRewatch(f, session: session) }
-                Button(DetailCopy.stopRewatch) { promptCancelRewatch(f, session: session) }
-            } else if watchedReleased(f) {
-                Divider()
-                Button(Copy.Action.startRewatch) { showStartRewatch = true }
-            }
-            // Only when there is something to show. `RewatchStore` records the first watch
-            // implicitly, at the moment a REWATCH starts — so a finished show with no rewatch has
-            // no session, and this door led to "No watch history yet" on a screen whose card, 40 pt
-            // above, said "Watched once". Two answers to the same question.
-            if !RewatchStore.shared.sessions(for: f.id).isEmpty {
-                Button(Copy.Action.viewWatchHistory) { push(.history(franchiseId: f.id)) }
-            }
-            Divider()
-            RemoveFromLibraryButton(franchise: f, appModel: appModel)
         } label: {
             // No local glass disc: the toolbar item supplies the material, and the item is 44 pt,
             // so this sits on the same baseline as the back button and the status pill.
@@ -694,6 +616,26 @@ struct FranchiseDetailView: View {
         // circle and a 56×44 capsule) crowded a poster's printed title (critique, 24 Sep).
         .buttonBorderShape(.circle)
         .accessibilityLabel("More actions")
+        .disabled(loading || appModel.pendingAdds.contains(f.id))
+    }
+
+    /// The same season/series commands in the toolbar and the pinned post.
+    @ViewBuilder
+    private func progressChoices(_ f: Franchise, part: FranchisePart?) -> some View {
+        if let part, !part.isUpcoming {
+            let target = part.markTarget(now: now)
+            if target > part.progress {
+                Button(Copy.Action.markAll(target - part.progress)) {
+                    promptBatchMark(f, part: part, through: target)
+                }
+            }
+            if part.progress > 0 {
+                Button(Copy.Action.markAllUnwatched(part.progress)) { promptResetSeason(f, part: part) }
+            }
+        }
+        if seriesBehind(f) > 0 {
+            Button(Copy.Action.markSeriesWatched) { promptMarkSeries(f, anchor: .series) }
+        }
     }
 
     // MARK: - Next up card
@@ -1161,58 +1103,58 @@ struct FranchiseDetailView: View {
         var choices: [(label: String, perform: () -> Void)] = []
     }
 
-    /// Adding a long run that is on air asks WHERE YOU ARE first (review, 23 Sep): added as
-    /// Watching at zero, One Piece arrived on Today as "1,179 EPISODES BEHIND · Episode 1". The
-    /// two honest answers — from the start, or caught up (the series batch, with its one Undo).
+    /// One Add flow for every entry point. Catalogue state changes the available answers;
+    /// recommendation cache, airing status and the button's position never choose for the user.
     private func add(_ f: Franchise, anchor: PromptAnchor = .page) {
-        // A RECOMMENDED show is saved for later, as its tile and billboard promised ("Add to
-        // Planned") — no "Where are you?" whose every answer starts or marks the show (review i5,
-        // N6: someone opening Hunter x Hunter to read more could not file it without starting it
-        // or marking 148 episodes).
-        if let rec = appModel.recommendation(forShow: f.id) {
-            appModel.addRecommendation(rec)
-            return
-        }
+        guard !loading, !inLibrary, !appModel.pendingAdds.contains(f.id) else { return }
         let batch = WatchedBatch(franchise: f, now: now)
-        // Asked wherever an add could land as a backlog: a long run, or an airing show with more
-        // than its first episode out (review i3 — a cour added mid-season read "12 EPISODES
-        // BEHIND" on Today; only runs over 24 used to be asked).
-        guard batch.episodeCount > 24 || (f.isReleasing && batch.episodeCount >= 2) else {
-            appModel.addToLibrary(franchiseId: f.id, title: f.title, isReleasing: f.isReleasing)
-            return
-        }
+        // A removed/re-added show may retain watch marks. Availability is independent of them;
+        // the caught-up answer still states only the marks that its write will change.
+        let released = WatchedBatch(franchise: Franchise(copying: f, parts: f.parts.map { $0.withProgress(0) }), now: now)
         let seasons = f.seasonPartsInOrder.filter { !$0.isUpcoming && $0.markTarget(now: now) > 0 }
         promptAnchor = anchor
-        prompt = WritePrompt(title: Copy.Confirm.whereAreYou(f.displayTitle),
-                             message: Copy.Confirm.whereAreYouMessage(batch.episodeCount),
-                             confirm: Copy.Confirm.caughtUpAdd(batch.episodeCount, films: batch.filmCount),
-                             perform: {
-                                 guard !isReadOnlyPreview else { return }
-                                 appModel.markWatched(f, batch: batch)
-                             },
-                             alternative: (Copy.Confirm.startFromBeginning, {
-                                 appModel.addToLibrary(franchiseId: f.id, title: f.title, isReleasing: f.isReleasing,
-                                                       status: .watching)
-                             }),
-                             third: (Copy.Confirm.partWay, {
-                                 // One season: Watching, then its episode list, where the rings say
-                                 // where you are. Several: which one — every season before it is
-                                 // marked, so Seasons 1–2 of a show picked up in Season 3 are not
-                                 // counted as left (review i3). The question comes BEFORE the add:
-                                 // it hangs from the Add capsule, which the add takes away.
-                                 guard seasons.count > 1 else {
-                                     appModel.addToLibrary(franchiseId: f.id, title: f.title, isReleasing: f.isReleasing,
-                                                           status: .watching)
-                                     scrollToEpisodes = UUID()
-                                     return
-                                 }
-                                 Task { @MainActor in
-                                     // After this dialog's own dismissal, which clears `prompt`.
-                                     try? await Task.sleep(for: .milliseconds(400))
-                                     promptAnchor = anchor
-                                     prompt = seasonPrompt(f, seasons: seasons)
-                                 }
-                             }))
+        var choice = WritePrompt(
+            title: Copy.Confirm.whereAreYou(f.displayTitle),
+            message: Copy.Confirm.libraryAddMessage(episodes: released.episodeCount, films: released.filmCount),
+            confirm: Copy.ForYou.addToPlanned,
+            perform: {
+                guard !isReadOnlyPreview else { return }
+                appModel.addToLibrary(franchiseId: f.id, title: f.title,
+                                      isReleasing: f.isReleasing, status: .planned)
+            })
+        if !released.parts.isEmpty {
+            choice.alternative = (Copy.Today.startOrContinue(f), {
+                guard !isReadOnlyPreview else { return }
+                appModel.addToLibrary(franchiseId: f.id, title: f.title,
+                                      isReleasing: f.isReleasing, status: .watching)
+            })
+            if released.episodeCount > 1, !seasons.isEmpty {
+                choice.third = (Copy.Confirm.partWay, {
+                    guard !isReadOnlyPreview else { return }
+                    guard seasons.count > 1 else {
+                        appModel.addToLibrary(franchiseId: f.id, title: f.title,
+                                              isReleasing: f.isReleasing, status: .watching)
+                        selectedSeasonId = seasons.first?.mediaId
+                        scrollToEpisodes = UUID()
+                        return
+                    }
+                    Task { @MainActor in
+                        // Let the first alert dismiss before presenting its second step.
+                        try? await Task.sleep(for: .milliseconds(400))
+                        guard onScreen else { return }
+                        promptAnchor = anchor
+                        prompt = seasonPrompt(f, seasons: seasons)
+                    }
+                })
+            }
+            if !batch.parts.isEmpty {
+                choice.choices = [(Copy.Confirm.caughtUpAdd(batch.episodeCount, films: batch.filmCount), {
+                    guard !isReadOnlyPreview else { return }
+                    appModel.markWatched(f, batch: batch)
+                })]
+            }
+        }
+        prompt = choice
     }
 
     /// "Which season are you on?" — the part-way answer's second step.
@@ -1243,7 +1185,7 @@ struct FranchiseDetailView: View {
         guard count > 0 else { return }
         promptAnchor = anchor
         prompt = WritePrompt(title: Copy.Confirm.batchMarkTitle(count),
-                             message: Copy.Confirm.batchMarkMessage(from: part.progress, to: through),
+                             message: Copy.Confirm.batchMarkMessage(title: f.displayTitle, season: part.canonicalLabel, from: part.progress, to: through),
                              confirm: Copy.Confirm.batchMarkConfirm(count)) {
             let prev = part.progress
             let shelvedAs = appModel.resumableStatus(f, part: part)
@@ -1387,7 +1329,7 @@ struct FranchiseDetailView: View {
             let target = part.markTarget(now: now)
             // The profile has no hero capsule: the season's batch lives here (and in the pinned
             // post's `···`).
-            if inLibrary, target > part.progress, f.effectiveStatus != .planned {
+            if inLibrary, target > part.progress {
                 Button(Copy.Action.markAll(target - part.progress)) {
                     promptBatchMark(f, part: part, through: target, anchor: .episodes)
                 }
@@ -1787,7 +1729,10 @@ extension FranchiseDetailView {
 
     @ViewBuilder
     private func followPill(_ f: Franchise) -> some View {
-        if inLibrary {
+        if appModel.pendingAdds.contains(f.id) {
+            ShowFollowPillLabel(text: Copy.Search.adding, filled: false)
+                .accessibilityLabel(Copy.Search.adding)
+        } else if inLibrary {
             Menu { statusChoices(f) } label: {
                 ShowFollowPillLabel(text: f.effectiveStatus.displayName, filled: false, chevron: true)
             }
@@ -1797,13 +1742,13 @@ extension FranchiseDetailView {
             .milestone(token: milestoneToken, reduceMotion: reduceMotion)
             .accessibilityLabel("Change status, \(f.effectiveStatus.displayName)")
         } else {
-            let recommended = appModel.recommendation(forShow: f.id) != nil
             Button { add(f, anchor: .add) } label: {
-                ShowFollowPillLabel(text: recommended ? Copy.ForYou.addToPlanned : Copy.Search.add, filled: true)
+                ShowFollowPillLabel(text: Copy.Search.addToLibrary, filled: true)
             }
             .buttonStyle(FeedIconPressStyle())
             .disabled(loading || appModel.pendingAdds.contains(f.id))
             .accessibilityLabel("Add \(f.title) to Library")
+            .accessibilityHint(Copy.Search.addHint)
         }
     }
 
@@ -2132,16 +2077,9 @@ extension FranchiseDetailView {
     /// X's `···` on the post: the batch verbs a pill has no room for.
     @ViewBuilder
     private func pinnedMenu(_ f: Franchise, part: FranchisePart?) -> some View {
-        let behind = part.map { max(0, $0.markTarget(now: now) - $0.progress) } ?? 0
-        let series = seriesBehind(f)
-        if behind > 1 || series > behind {
+        if inLibrary && (seriesBehind(f) > 0 || (part?.progress ?? 0) > 0) {
             Menu {
-                if let part, behind > 1 {
-                    Button(Copy.Action.markAll(behind)) { promptBatchMark(f, part: part, through: part.markTarget(now: now)) }
-                }
-                if series > behind {
-                    Button(Copy.Action.markSeriesWatched) { promptMarkSeries(f, anchor: .series) }
-                }
+                progressChoices(f, part: part)
             } label: {
                 AppGlyph(systemName: "ellipsis")
                     .font(ThemeType.feedSubhead.font.weight(.medium))
@@ -2168,6 +2106,7 @@ extension FranchiseDetailView {
                     EpisodeList(franchise: f, part: part, tint: DetailTint.quiet(pageTint),
                                 focusEpisode: focus?.mediaId == part.mediaId ? focus?.episode : nil)
                         .id(part.mediaId)
+                        .disabled(appModel.pendingAdds.contains(f.id))
                 }
                 .id("anchor-episodes")
             }
@@ -2543,10 +2482,10 @@ struct SeasonEpisodesView: View {
     private func seasonOverflow(_ f: Franchise, part: FranchisePart) -> some View {
         Menu {
             let target = part.markTarget(now: now)
-            if target > part.progress {
+            if appModel.isInLibrary(f.id), target > part.progress {
                 Button(Copy.Action.markAll(target - part.progress)) { promptMark(f, part: part, through: target) }
             }
-            if part.progress > 0 {
+            if appModel.isInLibrary(f.id), part.progress > 0 {
                 Button(Copy.Action.markAllUnwatched(part.progress), role: .destructive) { promptUnmark(f, part: part, to: 0) }
             }
             Divider()
@@ -2601,7 +2540,7 @@ struct SeasonEpisodesView: View {
     private func promptMark(_ f: Franchise, part: FranchisePart, through: Int) {
         let count = through - part.progress
         guard count > 0 else { return }
-        prompt = .init(title: Copy.Confirm.batchMarkTitle(count), message: Copy.Confirm.batchMarkMessage(from: part.progress, to: through),
+        prompt = .init(title: Copy.Confirm.batchMarkTitle(count), message: Copy.Confirm.batchMarkMessage(title: f.displayTitle, season: part.canonicalLabel, from: part.progress, to: through),
                        confirm: Copy.Confirm.batchMarkConfirm(count)) {
             let prev = part.progress
             appModel.setProgress(franchiseId: f.id, mediaId: part.mediaId, episodes: through)
@@ -2613,7 +2552,7 @@ struct SeasonEpisodesView: View {
         let count = part.progress - to
         guard count > 0 else { return }
         let message = to == 0 ? Copy.Confirm.resetSeason(label: part.canonicalLabel, total: count)
-                              : Copy.Confirm.batchMarkMessage(from: part.progress, to: to)
+                              : Copy.Confirm.batchMarkMessage(title: f.displayTitle, season: part.canonicalLabel, from: part.progress, to: to)
         prompt = .init(title: to == 0 ? Copy.Confirm.resetSeasonTitle(count) : "Mark \(Copy.episodes(count)) as unwatched?",
                        message: message, confirm: to == 0 ? Copy.Confirm.resetSeasonConfirm(count) : "Mark \(Copy.episodes(count)) as unwatched",
                        destructive: true) {

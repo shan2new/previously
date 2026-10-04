@@ -1,7 +1,7 @@
 import SwiftUI
 import UIKit
 
-/// Deep-link target inside the detail: a season part and one episode (Schedule rows pass it).
+/// Episode context carried to Detail. It selects a season without changing the initial landing.
 struct EpisodeFocus: Equatable, Hashable {
     let mediaId: Int
     let episode: Int
@@ -1016,7 +1016,7 @@ struct EpisodeList: View {
     private func promptMark(_ f: Franchise, part: FranchisePart, through: Int) {
         let count = through - part.progress
         guard count > 0 else { return }
-        prompt = .init(title: Copy.Confirm.batchMarkTitle(count), message: Copy.Confirm.batchMarkMessage(from: part.progress, to: through),
+        prompt = .init(title: Copy.Confirm.batchMarkTitle(count), message: Copy.Confirm.batchMarkMessage(title: f.displayTitle, season: part.canonicalLabel, from: part.progress, to: through),
                        confirm: Copy.Confirm.batchMarkConfirm(count)) {
             let prev = part.progress
             let shelvedAs = appModel.resumableStatus(f, part: part)
@@ -1033,7 +1033,7 @@ struct EpisodeList: View {
         let count = part.progress - to
         guard count > 0 else { return }
         let message = to == 0 ? Copy.Confirm.resetSeason(label: part.canonicalLabel, total: count)
-                              : Copy.Confirm.batchMarkMessage(from: part.progress, to: to)
+                              : Copy.Confirm.batchMarkMessage(title: f.displayTitle, season: part.canonicalLabel, from: part.progress, to: to)
         prompt = .init(title: to == 0 ? Copy.Confirm.resetSeasonTitle(count) : "Mark \(Copy.episodes(count)) as unwatched?",
                        message: message, confirm: to == 0 ? Copy.Confirm.resetSeasonConfirm(count) : "Mark \(Copy.episodes(count)) as unwatched",
                        destructive: true) {

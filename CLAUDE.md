@@ -180,6 +180,15 @@ to `news:` with every social row, in one transaction, when research adopts the p
 
 ## iOS conventions
 
+- **Franchise detail actions are independent of entry point (4 Oct, build 11).** Home/Schedule
+  episode context chooses a season only when Episodes is opened; every show starts at its header
+  with Posts selected. All generic Add buttons (Search, Trending, Feed, Detail) use Detail's same
+  library chooser, including Add to Planned. Do not branch the detail action on recommendation
+  cache membership or `isReleasing`; an explicit Add to Planned shortcut remains a direct save.
+  Keep More actions in the toolbar at every scroll position. Its batch commands and the pinned
+  post share `progressChoices`; in Episodes, the toolbar uses the selected season. Batch prompts
+  name the show and season. See `docs/audits/2026-10-04/franchise-cta/README.md` for validation.
+
 - **The deployment target is iOS 18.0, and every iOS 26 API is GATED, never removed** (3 Sep).
   iOS 17 and iOS 18 support the identical iPhone set (XR/XS and later, A12+ — Apple kept 17's
   device list for 18), while iOS 26 needs an iPhone 11, so 18 already reaches every phone 26

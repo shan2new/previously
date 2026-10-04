@@ -603,6 +603,14 @@ enum Copy {
 
         // Adding a long run: where are you in it?
         static func whereAreYou(_ title: String) -> String { "Where are you in \(title)?" }
+        static func libraryAddMessage(episodes: Int, films: Int) -> String {
+            var released: [String] = []
+            if episodes > 0 { released.append(Copy.episodes(episodes)) }
+            if films > 0 { released.append(Copy.plural(films, "film", "films")) }
+            guard !released.isEmpty else { return "Save this show to Planned until you’re ready to watch." }
+            let count = released.joined(separator: " and ")
+            return "\(count.prefix(1).uppercased() + count.dropFirst()) released. Save for later, start watching, or record what you’ve already watched."
+        }
         static func whereAreYouMessage(_ n: Int) -> String {
             "\(Copy.episodes(n).prefix(1).uppercased() + Copy.episodes(n).dropFirst()) have aired. Mark them all as watched, start from the beginning, or pick up where you are."
         }
@@ -611,8 +619,10 @@ enum Copy {
         /// The same answer when the batch also marks the story's films (review i4: "Mark 63
         /// episodes" beside a series prompt that said "63 episodes and 2 films" for one write).
         static func caughtUpAdd(_ n: Int, films: Int) -> String {
-            films == 0 ? caughtUpAdd(n)
-                : "I\u{2019}m caught up \u{00B7} Mark \(Copy.episodes(n)) and \(Copy.plural(films, "film", "films"))"
+            if films == 0 { return caughtUpAdd(n) }
+            let count = n > 0 ? "\(Copy.episodes(n)) and \(Copy.plural(films, "film", "films"))"
+                : Copy.plural(films, "film", "films")
+            return "I\u{2019}m caught up \u{00B7} Mark \(count)"
         }
         static let startFromBeginning = "Start from Episode 1"
         /// "I'm part-way through" names the season (review i3): the seasons before it are marked,

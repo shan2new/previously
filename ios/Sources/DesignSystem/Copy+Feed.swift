@@ -360,7 +360,7 @@ extension Copy {
             return more > 0 ? "Also \(names) and \(more) more" : "Also \(names)"
         }
         /// For you's Add capsule: what it does, spoken.
-        static let addHint = "Adds this show to your library"
+        static var addHint: String { Copy.Search.addHint }
 
         // MARK: Helpers
 

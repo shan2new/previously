@@ -52,10 +52,8 @@ final class AppModel {
     // Ids optimistically added but not yet confirmed by a reload — isInLibrary includes them so
     // "+" buttons flip instantly instead of waiting a network round-trip.
     private(set) var pendingAdds: Set<String> = []
-    /// A show whose Add was pressed somewhere that cannot ask "Where are you in X?" (Search's
-    /// cards carry no episode counts): the show page opens with the question raised, anchored to
-    /// its own Add (review i3 — an airing show added from Search landed on Today as "12 EPISODES
-    /// BEHIND", and a long run as "1,1XX").
+    /// Generic Add actions from Search and Feed open the show's shared library choices. Only an
+    /// explicitly labelled "Add to Planned" shortcut may choose the shelf without this prompt.
     var pendingAddPrompt: String?
     /// "Mark series as watched…" chosen on a recommendation's long press: its page opens with the
     /// series confirmation raised — the count, the Cancel and the Undo every series mark has

@@ -88,10 +88,11 @@ extension Copy {
 
         static let inLibrary = "In Library"
         static let notInLibrary = "Not in library"
-        static let addHint = "Adds it to your library"
+        static let addHint = "Choose how to add this show to your library"
         static let ownedHint = "Change its status or remove it"
         /// The long-press item behind an unowned control — the same verb the tap performs.
         static let addToLibrary = "Add to Library"
+        static let adding = "Adding…"
 
         // MARK: Recents
 

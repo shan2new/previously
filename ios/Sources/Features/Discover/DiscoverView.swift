@@ -63,7 +63,7 @@ struct DiscoverView: View {
     /// An add that stuck armed the primer. Persisted, because the ask is deferred well past the
     /// undo window and the user may leave the tab in the meantime — a `@State` flag would drop it.
     @AppStorage("previously.notifPrimerPending") private var primerPending = false
-    /// An airing show whose Add was taken to its page (`add`): the primer is armed on return.
+    /// A show whose Add was taken to its page (`add`): the primer is armed on return.
     @State private var primerCandidate: FranchiseSummary?
     /// The user has answered the primer once. iOS only ever shows its own alert once per install,
     /// so the primer is one-shot too: it is the thing that earns that one alert.
@@ -1088,7 +1088,7 @@ struct DiscoverView: View {
         AddControl(title: item.title,
                    owned: appModel.isInLibrary(item.id),
                    placement: placement,
-                   asks: item.isReleasing,
+                   asks: true,
                    add: { add(item) }) {
             if let f = appModel.franchise(id: item.id) {
                 FranchiseContextMenu(f: f, appModel: appModel) { part, target in
@@ -1113,23 +1113,10 @@ struct DiscoverView: View {
     }
 
     private func add(_ item: FranchiseSummary) {
-        // An airing show asks WHERE YOU ARE before it is added (the show page's question, which
-        // knows the episode counts this card does not): added straight to Watching at zero it
-        // arrived on Today as a wall of "behind". A finished run lands on Planned — no backlog.
-        if item.isReleasing {
-            appModel.pendingAddPrompt = item.id
-            // The alerts primer follows the add back here: it is armed when this screen returns
-            // with the show in the library (review i4 — routing the add to the page left the
-            // primer unreachable, and Profile the only way to turn alerts on).
-            primerCandidate = item
-            open(item, zoom: "search/\(item.id)")
-            return
-        }
-        appModel.addToLibrary(franchiseId: item.id, title: item.title, isReleasing: item.isReleasing)
-        rememberFromQuery(item)
-        // NOT a permission prompt — see `notificationPrimer`. Nothing at all happens for the whole
-        // undo window; the ask is a card the user chooses to answer, later, on their own screen.
-        armNotificationPrimer(item)
+        guard !appModel.isInLibrary(item.id) else { return }
+        appModel.pendingAddPrompt = item.id
+        primerCandidate = item
+        open(item, zoom: "search/\(item.id)")
     }
 
     // MARK: - Copy helpers

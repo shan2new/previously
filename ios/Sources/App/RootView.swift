@@ -592,9 +592,8 @@ struct MainTabView: View {
         push(selectedTab, DetailRoute(id: id, zoomID: zoomID))
     }
 
-    /// Schedule variant: lands on a specific season + episode. ONE push — the episodes are on the
-    /// show page (6 Sep), which scrolls to the row (`FranchiseDetailView.landOnFocus`); it used to
-    /// append the season screen in the same transaction.
+    /// Episode context selects the season when the viewer opens Episodes. The show still opens
+    /// at its common header, just like Library, Search, a post or a recommendation.
     private func openEpisode(_ id: String, zoomID: String, focus: EpisodeFocus?) {
         push(selectedTab, DetailRoute(id: id, zoomID: zoomID, focus: focus))
     }

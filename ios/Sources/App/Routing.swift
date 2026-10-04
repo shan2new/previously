@@ -2,7 +2,8 @@ import SwiftUI
 
 /// A franchise destination inside a tab's navigation stack (board 02: Detail is navigational
 /// content, never modal). `zoomID` names the tapped card so the same franchise can be reached from
-/// several surfaces; `focus` lands on one episode (Schedule rows).
+/// several surfaces; `focus` selects the relevant season when Episodes is opened. Every entry
+/// starts at the same profile header; navigation never scrolls past its controls automatically.
 struct DetailRoute: Hashable, Identifiable {
     let id: String
     let zoomID: String

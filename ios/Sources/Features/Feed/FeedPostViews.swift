@@ -213,19 +213,13 @@ private struct PostAccessibilityActions: ViewModifier {
     }
 }
 
-/// For you's Add (the capsule and its VoiceOver action). An AIRING show asks where you are before
-/// it is added — Discover's rule (`DiscoverView.add`): its page raises "Where are you?" from
-/// `pendingAddPrompt`. Added straight to Watching at zero, a trending airing show arrived in the
-/// story tray as "N new episodes" and on Schedule as a backlog. A finished run is added here.
+/// For you's Add and its VoiceOver action open the same library choices as Search and Detail.
 @MainActor
 func addFromFeed(_ model: FeedPostModel, appModel: AppModel, onOpenShow: () -> Void) {
     let id = model.post.franchiseId
-    if model.show.isReleasing {
-        appModel.pendingAddPrompt = id
-        onOpenShow()
-    } else {
-        appModel.addToLibrary(franchiseId: id, title: model.show.title, isReleasing: false)
-    }
+    guard !appModel.isInLibrary(id) else { return }
+    appModel.pendingAddPrompt = id
+    onOpenShow()
 }
 
 /// A named accessibility action that exists only when it can do something — conditional inside
@@ -347,10 +341,8 @@ struct PostNameLine: View {
     }
 }
 
-/// X's follow pill, for a show: ink on white until it is yours, then an outline. The add is the
-/// library's own (`addToLibrary`, which signs it with its haptic and its lane receipt) — or, for an
-/// airing show, the show's page asking where you are first (`addFromFeed`). On a For you post's
-/// name line and on the post page's author row.
+/// X's follow pill, for a show: ink on white until it is yours, then an outline. Every generic
+/// Add opens the show's library choices, on a post's name line and on its author row alike.
 struct ShowAddCapsule: View {
     let model: FeedPostModel
     let onOpenShow: () -> Void
@@ -362,7 +354,7 @@ struct ShowAddCapsule: View {
         Button {
             addFromFeed(model, appModel: appModel, onOpenShow: onOpenShow)
         } label: {
-            Text(owned ? Copy.Search.added : Copy.Search.add)
+            Text(owned ? Copy.Search.added : Copy.Search.addAsks)
                 .type(ThemeType.feedSmall)
                 .fontWeight(.bold)
                 .foregroundStyle(owned ? ThemeColor.feedText : ThemeColor.onAccent)
