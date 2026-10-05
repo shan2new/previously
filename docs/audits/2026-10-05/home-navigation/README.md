@@ -22,8 +22,7 @@ repair, rather than a source rollback in the CTA release.
 title height and arrival state are shared through `HomeChrome`. The existing layout, navigation
 geometry, scroll-away logic and Reduce Motion handling are retained.
 
-The reviewed correction is prepared for iOS 1.0 (12). Release evidence is recorded below
-once the archive and upload complete.
+The reviewed correction is included in iOS 1.0 (12). Release evidence is recorded below.
 
 ## Visual evidence
 
@@ -55,3 +54,21 @@ Full measurements are in `seam-measurements.json`.
   No production library data was changed.
 
 Local build logs and extra return-navigation capture are in ignored `ios/build/home-nav-review/`.
+
+## Release — 1.0 (12)
+
+- Implementation commit `57ae71f3257e21b48d44b5ff8813a2e7c7f0f2cd` pushed to `origin/main`.
+- Signed Release archive succeeded at `ios/build/Previously-12.xcarchive`.
+- App `com.cognipin.previously` and widget `com.cognipin.previously.widgets` both report 1.0 (12),
+  minimum iOS 18. Strict deep code-signature verification passed.
+- Archived API is `https://anime.cognipin.com`; the configured Clerk key is present and snapshot
+  overrides are absent. No backend deployment was required.
+- Archived app executable SHA-256:
+  `d94696b72f65ad3314402bc7e3a7e2244ce9e01753e0060416e1a69c07ccfe84`.
+- Existing Xcode account and `ExportOptions-upload.plist` uploaded the archive. At **10:25:43 IST
+  on 5 October 2026**, Apple reported `Upload succeeded.` and `EXPORT SUCCEEDED`, with the package
+  processing. Logs: `ios/build/archive-12.log` and `ios/build/upload-12.log`.
+- The signed-in native TestFlight app subsequently showed **Previously. → Version 1.0 (12)**
+  with an enabled **Install** button, size **27.5 MB**, release date **5 October 2026**, expiring
+  **3 January 2027 at 10:27 AM**. This confirms processing completed and the build is available
+  to the existing tester account. Installation on the physical iPhone is not claimed.
