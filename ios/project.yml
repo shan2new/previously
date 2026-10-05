@@ -17,7 +17,7 @@ settings:
     SWIFT_VERSION: "6.0"
     DEVELOPMENT_LANGUAGE: en
     MARKETING_VERSION: "1.0"
-    CURRENT_PROJECT_VERSION: "11"
+    CURRENT_PROJECT_VERSION: "12"
     # Set SWIFT_STRICT_CONCURRENCY to "complete" once you have validated the build.
     SWIFT_STRICT_CONCURRENCY: minimal
 

@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Home navigation — before and after</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#141414;color:#f3eee8;font:16px/1.5 system-ui,sans-serif;padding:32px}main{max-width:1100px;margin:auto}h1{font-size:28px;margin:0 0 8px}p{color:#c7c2bc;max-width:850px;margin:8px 0 20px}.controls{display:flex;gap:10px;flex-wrap:wrap;margin:24px 0}button{font:inherit;color:inherit;background:#262626;border:1px solid #555;border-radius:8px;padding:9px 14px;cursor:pointer}button[aria-pressed=true]{background:#eee8df;color:#141414;border-color:#eee8df}button:focus-visible{outline:3px solid #eba276;outline-offset:3px}.grid{display:grid;grid-template-columns:1fr 1fr;gap:24px}figure{margin:0;min-width:0}figcaption{font-weight:650;margin-bottom:12px}small{display:block;color:#b6aea6;font-size:13px;font-weight:400}.frame{position:relative;height:300px;overflow:hidden;background:#090909;border-radius:12px}.frame img{position:absolute;bottom:0;width:100%;display:block}.full .frame{height:auto;aspect-ratio:1179/2556}.full .frame img{position:static}details{margin:32px 0}summary{cursor:pointer;font-weight:600}.baseline{max-width:360px;margin-top:16px}.baseline img{width:100%;border-radius:12px}a{color:#ffc198}.status{display:inline-block;background:#2d241b;color:#ffc198;border:1px solid #725136;padding:4px 10px;border-radius:6px;font-size:13px;margin-bottom:12px}@media(max-width:650px){body{padding:18px}.grid{gap:12px}.frame{height:180px}h1{font-size:23px}figcaption{font-size:14px}}
+</style>
+<main>
+<span class="status">Approved correction · build 12</span>
+<h1>Home’s navigation edge</h1>
+<p>The earlier improvements remain in both releases. A leftover seam appears because the bar repeats the page gradient without the title’s extra glow. The proposal continues that same glow through the bar.</p>
+<div class="controls" aria-label="Comparison controls">
+<button id="home" aria-pressed="true" onclick="state('home')">Home at rest</button>
+<button id="recent" aria-pressed="false" onclick="state('recent')">Recently aired</button>
+<button id="full" aria-pressed="false" onclick="full()">Show full screens</button>
+</div>
+<div id="images" class="grid">
+<figure><figcaption>Before · build 11 source<small>The darker band starts above the icons.</small></figcaption><div class="frame"><img id="before" src="build11-home.png" alt="Home before the correction, showing a darker horizontal edge above the bottom navigation"></div></figure>
+<figure><figcaption>After · local correction<small>The glow continues across that edge.</small></figcaption><div class="frame"><img id="after" src="proposed-home.png" alt="Home with the local correction, showing a continuous gradient into bottom navigation"></div></figure>
+</div>
+<p><small>Unedited native screenshots · same iPhone 14 Pro simulator, iOS 27, library snapshot and artwork. Default view enlarges the bottom portion using CSS. These are source-matched simulator builds; the physical iPhone has not been inspected.</small></p>
+<details><summary>Build 10 reference — before the CTA release</summary><p>The same seam is present in build 10. Home and the shared chrome source did not change in the CTA release.</p><div class="baseline"><img id="baseline" src="build10-home.png" alt="Build 10 source, showing the same Home navigation and seam"></div></details>
+<p><a href="README.md">Evidence and verification limits</a></p>
+</main>
+<script>
+function state(s){document.getElementById('before').src='build11-'+s+'.png';document.getElementById('after').src='proposed-'+s+'.png';document.getElementById('baseline').src='build10-'+s+'.png';for(const x of ['home','recent'])document.getElementById(x).setAttribute('aria-pressed',x===s)}
+function full(){const on=document.getElementById('images').classList.toggle('full');const b=document.getElementById('full');b.setAttribute('aria-pressed',on);b.textContent=on?'Show navigation close-up':'Show full screens'}
+</script>
+</html>

@@ -1,0 +1,54 @@
+{
+  "build10-home": {
+    "above": [
+      40,
+      15,
+      7
+    ],
+    "below": [
+      31,
+      10,
+      4
+    ],
+    "rgb_step": 17
+  },
+  "build11-home": {
+    "above": [
+      40,
+      15,
+      7
+    ],
+    "below": [
+      31,
+      10,
+      4
+    ],
+    "rgb_step": 17
+  },
+  "proposed-home": {
+    "above": [
+      40,
+      15,
+      7
+    ],
+    "below": [
+      40,
+      15,
+      7
+    ],
+    "rgb_step": 0
+  },
+  "proposed-return-home": {
+    "above": [
+      40,
+      15,
+      7
+    ],
+    "below": [
+      40,
+      15,
+      7
+    ],
+    "rgb_step": 0
+  }
+}

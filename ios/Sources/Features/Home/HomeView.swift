@@ -307,7 +307,8 @@ struct HomeView: View {
                               onMark: { markHero(hero) },
                               onArtLoaded: markArtReady,
                               onCopyTop: { chrome.trackCopy(top: $0) },
-                              onArt: { url in heroArts[hero.franchise.id] = url })
+                              onArt: { url in heroArts[hero.franchise.id] = url },
+                              onLightingChange: { chrome.trackLighting($0) })
                     .franchiseQuickActions(appModel.isInLibrary(hero.franchise.id) ? hero.franchise : nil,
                                            appModel: appModel)
                     // A new show on the billboard (the last one caught up): the old picture leaves,

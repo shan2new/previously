@@ -229,6 +229,8 @@ final class HomeChrome: ScrollAwayChrome {
     /// How far the bar's row has slid up: 0 (all there) … its height (gone) — the bars leave with
     /// a reader's scroll and return with it, as every root's do (`RootChromeState`, 4 Oct).
     private(set) var offset: CGFloat = 0
+    /// The same title glow is visible through the bars as on the page behind them.
+    private(set) var lighting = HomeLockupLighting()
 
     @ObservationIgnored private var billboardBottom: CGFloat = 0
     @ObservationIgnored private var copyTop: CGFloat = .infinity
@@ -265,6 +267,10 @@ final class HomeChrome: ScrollAwayChrome {
     func trackCopy(top: CGFloat) {
         copyTop = top
         update()
+    }
+
+    func trackLighting(_ next: HomeLockupLighting) {
+        if lighting != next { lighting = next }
     }
 
     private func update() {
@@ -416,6 +422,7 @@ struct HomeBillboard: View {
     var onCopyTop: ((CGFloat) -> Void)? = nil
     /// The picture the billboard settled on — the page is painted from its colour.
     var onArt: ((String?) -> Void)? = nil
+    var onLightingChange: ((HomeLockupLighting) -> Void)? = nil
 
     @Environment(\.dynamicTypeSize) private var typeSize
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
@@ -443,10 +450,10 @@ struct HomeBillboard: View {
     /// How long the billboard waits for the show's pick (`PosterPick`, graded on first sight) before
     /// it takes the catalogue's own picture. A pick is kept for good, so this is a first visit's wait.
     private static let pickPatience: Duration = .milliseconds(2000)
-    /// The pool of light under the lockup: its width as a share of the window's (lit to the
-    /// screen's edges, spent beyond them) and its height.
-    private static let poolWidth: CGFloat = 1.5
-    private static let poolHeight: CGFloat = 400
+
+    private var lighting: HomeLockupLighting {
+        HomeLockupLighting(copyHeight: copyHeight, visible: artIn && curtainUp)
+    }
 
     /// A pick made before this billboard existed — on its first frame.
     private var storedPick: Shown? { PosterPick.shared.choice(for: hero.franchise).map(shown(from:)) }
@@ -540,17 +547,8 @@ struct HomeBillboard: View {
                 // billboard's): as a circle wider than its frame, cut again by the billboard, it
                 // ended on two straight lines under the mark ("the seam looks ugly", owner, 4 Oct).
                 .overlay(alignment: .bottom) {
-                    if let light = HeroLight.glow(tint) {
-                        EllipticalGradient(colors: [light.opacity(0.26), light.opacity(0)], center: .center,
-                                           startRadiusFraction: 0, endRadiusFraction: 0.5)
-                            .frame(width: ThemeMetrics.windowWidth * Self.poolWidth, height: Self.poolHeight)
-                            .blendMode(.plusLighter)
-                            .offset(y: Self.poolHeight / 2 - (ThemeSpace.x5 + copyHeight * 0.55))
-                            .opacity(artIn && curtainUp ? 1 : 0)
-                            .animation(reduceMotion ? nil : .easeOut(duration: 1.2), value: artIn && curtainUp)
-                            .allowsHitTesting(false)
-                            .accessibilityHidden(true)
-                    }
+                    HomeLockupGlow(tint: tint, lighting: lighting)
+                        .offset(y: HomeLockupGlow.height / 2 - lighting.bottomInset)
                 }
 
             lockup(name: name)
@@ -582,6 +580,7 @@ struct HomeBillboard: View {
             if !arrived { arrived = true; logoIn = true }
         }
         .task(id: artIn && curtainUp) { await stage() }
+        .onChange(of: lighting, initial: true) { _, next in onLightingChange?(next) }
     }
 
     /// One line of the lockup rising in, `index` beats after the first (Apple TV's billboard copy).
@@ -708,6 +707,35 @@ private struct HomeArrival: ViewModifier {
 
 // MARK: - The page's ground
 
+/// Measured once when the title lays out; scrolling does not change its geometry.
+struct HomeLockupLighting: Equatable {
+    var copyHeight: CGFloat = 220
+    var visible = false
+
+    var bottomInset: CGFloat { ThemeSpace.x5 + copyHeight * 0.55 }
+}
+
+/// Shared by the billboard and the bars' windows. Repeating only the base gradient omits this
+/// light where it crosses the bar's edge and leaves a straight, darker band under the title.
+struct HomeLockupGlow: View {
+    let tint: Color?
+    let lighting: HomeLockupLighting
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+
+    static let height: CGFloat = 400
+
+    var body: some View {
+        EllipticalGradient(colors: [(HeroLight.glow(tint) ?? .clear).opacity(0.26), .clear],
+                           center: .center, startRadiusFraction: 0, endRadiusFraction: 0.5)
+            .frame(width: ThemeMetrics.windowWidth * 1.5, height: Self.height)
+            .blendMode(.plusLighter)
+            .opacity(lighting.visible ? 1 : 0)
+            .animation(reduceMotion ? nil : .easeOut(duration: 1.2), value: lighting.visible)
+            .allowsHitTesting(false)
+            .accessibilityHidden(true)
+    }
+}
+
 /// The page under the billboard in the show's hue (26 Sep, "maybe add subtle gradient too", owner):
 /// the colour the billboard's scrim lands on, held for a breath, then easing to canvas over half a
 /// screen — with one faint pool of the tint's light where the first section sits. The show page's
@@ -789,6 +817,10 @@ struct HomeGroundWindow: View {
                 if case .show(let tint, let colour, let billboard) = ground {
                     HomeGround(tint: tint, top: colour, billboard: billboard)
                         .frame(height: billboard + HomeGround.fade, alignment: .top)
+                        .overlay(alignment: .top) {
+                            HomeLockupGlow(tint: tint, lighting: chrome.lighting)
+                                .offset(y: billboard - chrome.lighting.bottomInset - HomeLockupGlow.height / 2)
+                        }
                         .offset(y: chrome.contentTop - top)
                 }
             }
