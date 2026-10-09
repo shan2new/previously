@@ -129,9 +129,14 @@ struct FeedPostModel: Identifiable, Equatable, Sendable {
     /// text, drawn whole, as an X post is. A rumour's is the sentence alone: its note is its
     /// Community Note (`RumourNote`).
     let body: String
+    /// The research's note on its own — the body's second paragraph — for the timeline, which draws
+    /// the sentence whole and the note CLAMPED to two lines ending on "Show more" (9 Oct: "the Feed
+    /// feels utterly cramped unlike X", owner — every post was a 280-character, two-paragraph essay).
+    /// Nil on a rumour (its note is its Community Note) and when the research wrote none.
+    let note: String?
     /// X's timeline cut of `body` when it runs past 280 characters — to the last word inside them,
-    /// then "…", and the row ends on "Show more" (`FeedComposer.timelineCut`); nil when the body is
-    /// short enough to draw whole. The post page always draws `body`.
+    /// then "…" (`FeedComposer.timelineCut`); nil when the body is short enough to draw whole. The
+    /// post page always draws `body`; the timeline draws `sentence` + `note`.
     let clippedBody: String?
     /// For you: why the post is here, over its name — "Because you’re watching Re:ZERO",
     /// "Trending in Fantasy" (`FeedPostContext`). Nil on Following and on an unexplained post.
@@ -457,7 +462,7 @@ enum FeedComposer {
         return FeedPostModel(
             post: post, show: show, franchise: franchise, isOwned: owned, showName: showName,
             shortName: franchise.title.shelfShortened(fitting: nameLineBudget),
-            headline: headline, sentence: sentence, body: body, clippedBody: clippedBody,
+            headline: headline, sentence: sentence, body: body, note: note, clippedBody: clippedBody,
             contextLine: post.context.map { Copy.Feed.context($0, name: seedName) },
             stamp: stamp, premiereLine: premiereLine,
             media: media, fresh: fresh,

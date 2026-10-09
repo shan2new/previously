@@ -81,7 +81,9 @@ enum FeedMetrics {
     static let avatar: CGFloat = 44
     /// Avatar → text column.
     static let gap: CGFloat = 8
-    static let rowTop: CGFloat = 12, rowBottom: CGFloat = 6
+    /// The row's foot: 10 (was 6) since 9 Oct — with `FeedPostLayout.barTop` and `mediaTop` opened
+    /// too, the one change that answered "the Feed feels utterly cramped" (owner).
+    static let rowTop: CGFloat = 12, rowBottom: CGFloat = 10
     /// A reply row's reply and like slots (a post's share their room equally — `PostActionBar`).
     static let actionSlot: CGFloat = 68
     /// A post's pinned save and share slots: glyphs 32 apart, as X's bookmark and share are (the hit

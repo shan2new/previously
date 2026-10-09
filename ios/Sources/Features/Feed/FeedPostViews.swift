@@ -22,11 +22,16 @@ enum FeedPostLayout {
     static let nameLift: CGFloat = 4
     /// Name line → words.
     static let sentenceTop: CGFloat = 1
-    /// Words → media (or the rumour's note): 14 from the last baseline, X's 13½ — SF's line keeps
-    /// 5 pt under its baseline where Outfit's kept 4.
-    static let mediaTop: CGFloat = 9
+    /// Words → media (or the rumour's note). 9 Oct: 12 (was 9), with the bar and the row's foot
+    /// opened too — "the Feed feels utterly cramped unlike X" (owner); the packed foot (bar 2 pt
+    /// under the picture, 6 pt to the rule) read as one block from picture to picture.
+    static let mediaTop: CGFloat = 12
     /// Media → action bar.
-    static let barTop: CGFloat = 2
+    static let barTop: CGFloat = 6
+    /// Sentence → the research's note, and the lines the note gets in the timeline before "Show
+    /// more" (the post page draws it whole).
+    static let noteTop: CGFloat = 6
+    static let noteLines = 2
     /// Inside the name line.
     static let nameSpacing: CGFloat = 4
     /// The words' line, as a multiple of their point size (`readingLines`): X's 15 on 20 — in a post,
@@ -147,26 +152,25 @@ struct FeedPostRow: View, @MainActor Equatable {
         }
     }
 
-    /// The name line and the post's words — the sentence and the research's note, as the post page
-    /// draws them (`FeedPostModel.body`), up to X's 280 characters: a longer post is cut at a word
-    /// and ends on "Show more", as X's does, and the row (one press) opens it whole. ONE VoiceOver
-    /// element, labelled with the WHOLE words, carrying the row's actions (the buttons below stay
-    /// reachable by swiping too).
+    /// The name line and the post's words: the SENTENCE whole, then the research's note CLAMPED to
+    /// two lines and ending on "Show more" when it has more (9 Oct — "the Feed feels utterly
+    /// cramped unlike X", owner: with the note drawn to 280 characters every post was a
+    /// two-paragraph essay over a picture; X's posts are a line or two). The row (one press) opens
+    /// the post whole. ONE VoiceOver element, labelled with the WHOLE words, carrying the row's
+    /// actions (the buttons below stay reachable by swiping too).
     private var textColumn: some View {
         VStack(alignment: .leading, spacing: 0) {
             PostNameLine(model: model, suggested: tab == .forYou, onOpenShow: onOpenShow)
-            Text(model.clippedBody ?? model.body)
+            Text(model.sentence)
                 .type(ThemeType.feedBody)
                 .foregroundStyle(ThemeColor.feedText)
                 .multilineTextAlignment(.leading)
                 .readingLines(FeedPostLayout.lineHeight)
                 .fixedSize(horizontal: false, vertical: true)
                 .padding(.top, FeedPostLayout.sentenceTop)
-            if model.clippedBody != nil {
-                // Not a button of its own: the whole row is the press that opens the post.
-                Text(Copy.Feed.showMore)
-                    .type(ThemeType.feedNoteTitle)
-                    .foregroundStyle(ThemeColor.interactive)
+            if let note = model.note {
+                ClampedNote(text: note, lines: FeedPostLayout.noteLines)
+                    .padding(.top, FeedPostLayout.noteTop)
             }
         }
         .accessibilityElement(children: .ignore)
@@ -175,6 +179,46 @@ struct FeedPostRow: View, @MainActor Equatable {
         .accessibilityAction(.default) { onOpen() }
         .modifier(PostAccessibilityActions(model: model, suggested: tab == .forYou,
                                            onComment: onComment, onOpenShow: onOpenShow))
+    }
+}
+
+/// The research's note in the timeline: `lines` lines of the post's own body type, and "Show more"
+/// under them only when the whole note is taller than that — measured behind the clamped one (the
+/// show page's bio does the same), so the link is drawn only where it does something. Not a button
+/// of its own: the whole row is the press that opens the post.
+struct ClampedNote: View {
+    let text: String
+    let lines: Int
+
+    @State private var fullHeight: CGFloat = 0
+    @State private var clampedHeight: CGFloat = 0
+
+    private var overflows: Bool { fullHeight > clampedHeight + 1 }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 0) {
+            Text(text)
+                .type(ThemeType.feedBody)
+                .foregroundStyle(ThemeColor.feedText)
+                .multilineTextAlignment(.leading)
+                .readingLines(FeedPostLayout.lineHeight)
+                .lineLimit(lines)
+                .fixedSize(horizontal: false, vertical: true)
+                .background {
+                    Text(text)
+                        .type(ThemeType.feedBody)
+                        .readingLines(FeedPostLayout.lineHeight)
+                        .fixedSize(horizontal: false, vertical: true)
+                        .hidden()
+                        .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { fullHeight = $0 }
+                }
+                .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { clampedHeight = $0 }
+            if overflows {
+                Text(Copy.Feed.showMore)
+                    .type(ThemeType.feedNoteTitle)
+                    .foregroundStyle(ThemeColor.interactive)
+            }
+        }
     }
 }
 
