@@ -59,6 +59,9 @@ struct HomeView: View {
     @State private var heroTint: (art: String, color: Color?)?
     /// The picture each show's billboard settled on (`HomeBillboard.settle`), by franchise id.
     @State private var heroArts: [String: String] = [:]
+    /// The billboard page in front (a franchise id) when the week's drops page (`HomeBillboardPager`);
+    /// the page's ground and the bars follow it.
+    @State private var heroPage: String?
     /// RINGS (`RecentDirection`): the story viewer, opened from Recently aired's rings as the feed's
     /// tray opens it — the ring turns while the first picture loads (≤ 0.9 s), then the story.
     @State private var story: StoryLaunch?
@@ -97,46 +100,77 @@ struct HomeView: View {
 
     private var band: CGFloat { ThemeMetrics.topSafeInset + FeedMetrics.headerRow }
 
-    /// The billboard's picture: what it settled on, else the show's stored pick (`PosterPick`),
-    /// else the catalogue's selection.
-    private func heroArt(_ feed: HomeFeed) -> String? {
-        guard let f = feed.hero?.franchise else { return nil }
+    /// The QUIET card's height (9 Oct): nothing is out, so the top of the queue or the next airing
+    /// is shown shorter than the stage — about half the window — with its state as a label, not a
+    /// badge. The full bleed is for drops.
+    private var quietHeight: CGFloat { (billboardHeight * 0.56).rounded() }
+
+    /// What the billboard takes: the stage for drops, the quiet card otherwise, nothing when clear.
+    private func billboardHeight(_ feed: HomeFeed) -> CGFloat {
+        if !feed.heroes.isEmpty { return billboardHeight }
+        return feed.quiet == nil ? 0 : quietHeight
+    }
+
+    /// The show the page is painted from: the page in front when the drops page, else the lead.
+    private func currentHero(_ feed: HomeFeed) -> HomeHero? {
+        feed.heroes.first { $0.franchise.id == heroPage } ?? feed.hero
+    }
+
+    /// A show's billboard picture: what its billboard settled on, else the show's stored pick
+    /// (`PosterPick`), else the catalogue's selection.
+    private func heroArt(of f: Franchise) -> String? {
         if let settled = heroArts[f.id] { return settled }
         if let pick = PosterPick.shared.choice(for: f) { return WideArt.billboard(portrait: pick.url, landscape: nil).url }
         return f.billboardArt.url
     }
 
-    /// The art's colour — resolved this visit, else remembered from the last (`PaletteCache`
+    /// The billboard in front's picture.
+    private func heroArt(_ feed: HomeFeed) -> String? {
+        currentHero(feed).flatMap { heroArt(of: $0.franchise) }
+    }
+
+    /// A show's art colour — resolved this visit, else remembered from the last (`PaletteCache`
     /// persists), so the page opens in its colour on the first frame.
-    private func tint(_ feed: HomeFeed) -> Color? {
-        let art = heroArt(feed)
+    private func tint(of f: Franchise) -> Color? {
+        let art = heroArt(of: f)
         if let heroTint, heroTint.art == art, let color = heroTint.color { return color }
         return PaletteCache.shared.tint(for: art)
+    }
+
+    /// The billboard in front's colour.
+    private func tint(_ feed: HomeFeed) -> Color? {
+        currentHero(feed).flatMap { tint(of: $0.franchise) }
     }
 
     /// How hard the bar's veil is drawn over the art: the billboard's own protection, from the
     /// picture's lightness (`PaletteCache` holds it once the tint has been read).
     private func veil(_ feed: HomeFeed) -> Double? {
-        guard feed.hero != nil else { return nil }
+        guard feed.hasBillboard else { return nil }
         return HeroProtection.strength(lightness: PaletteCache.shared.lightness(for: heroArt(feed)))
     }
 
-    /// The shows whose pictures Home is about to draw: the billboard's first, then Recently aired's
-    /// (a mark hands the billboard to the next of them), then the shelf's.
+    /// The shows whose pictures Home is about to draw: the billboard's pages first, then Recently
+    /// aired's (a mark hands the billboard to the next of them), then the shelf's.
     private func pickShows(_ feed: HomeFeed) -> [Franchise] {
-        [feed.hero?.franchise].compactMap { $0 } + feed.recent.map(\.entry.franchise) + feed.queue.map(\.franchise)
+        feed.heroes.map(\.franchise) + [feed.quiet?.franchise].compactMap { $0 }
+            + feed.recent.map(\.entry.franchise) + feed.queue.map(\.franchise)
+    }
+
+    /// A show's hue at canvas depth — where its billboard lands.
+    private func groundTop(of f: Franchise) -> Color {
+        DetailTint.ground(tint(of: f), lightness: DetailTint.groundTopLightness)
     }
 
     /// The show's hue at canvas depth — where the billboard lands (canvas with no billboard).
     private func groundTop(_ feed: HomeFeed) -> Color {
-        guard feed.hero != nil else { return ThemeColor.canvas }
-        return DetailTint.ground(tint(feed), lightness: DetailTint.groundTopLightness)
+        guard let hero = currentHero(feed) else { return ThemeColor.canvas }
+        return groundTop(of: hero.franchise)
     }
 
     /// What the page stands on — the bars draw the same ground (`HomeGroundWindow`).
     private func pageGround(_ feed: HomeFeed) -> HomePageGround {
-        guard feed.hero != nil else { return .canvas }
-        return .show(tint: tint(feed), top: groundTop(feed), billboard: billboardHeight)
+        guard feed.hasBillboard else { return .canvas }
+        return .show(tint: tint(feed), top: groundTop(feed), billboard: billboardHeight(feed))
     }
 
     /// Composed once per library and minute — never in a body.
@@ -153,7 +187,7 @@ struct HomeView: View {
 
     var body: some View {
         let feed = feed
-        let billboard = feed.hero == nil ? 0 : billboardHeight
+        let billboard = billboardHeight(feed)
         let ground = pageGround(feed)
         ScrollViewReader { proxy in
             ZStack(alignment: .top) {
@@ -163,9 +197,11 @@ struct HomeView: View {
                         content(feed)
                     }
                     .background(alignment: .top) {
-                        if feed.hero != nil {
+                        if feed.hasBillboard {
                             HomeGround(tint: tint(feed), top: groundTop(feed), billboard: billboard)
                                 .animation(ThemeMotion.uiPoster, value: tint(feed) == nil)
+                                // The ground follows the page in front as the drops page.
+                                .animation(ThemeMotion.uiPoster, value: heroPage)
                         }
                     }
                     // The scroll probe: WRITES the bar's one fact, never screen state.
@@ -253,7 +289,7 @@ struct HomeView: View {
             if appModel.feedOverlayOpen != open { appModel.feedOverlayOpen = open }
         }
         // Nothing to wait for (no billboard, an empty or failed library): the launch may leave.
-        .onChange(of: feed.hero == nil && !(appModel.loading && appModel.library.isEmpty), initial: true) { _, nothing in
+        .onChange(of: !feed.hasBillboard && !(appModel.loading && appModel.library.isEmpty), initial: true) { _, nothing in
             if nothing { markArtReady() }
         }
         .task(id: heroArt(feed)) {
@@ -267,10 +303,12 @@ struct HomeView: View {
         .task(id: pickShows(feed).map(\.id).joined(separator: ",")) {
             let shows = pickShows(feed)
             for show in shows { await PosterPick.shared.resolve(show) }
-            // The shows a mark could hand the billboard to: their pictures and colours are read
-            // now, so a hand-off is the next picture arriving — it was an empty frame in the last
-            // show's colour for as long as a 2,000-px poster takes to download (4 Oct).
-            for show in [feed.recent.first?.entry.franchise, feed.queue.first?.franchise].compactMap({ $0 }) {
+            // The billboard's other pages, and the shows a mark could hand the billboard to: their
+            // pictures and colours are read now, so a swipe or a hand-off is the next picture
+            // arriving — it was an empty frame in the last show's colour for as long as a 2,000-px
+            // poster takes to download (4 Oct).
+            for show in feed.heroes.dropFirst().map(\.franchise)
+                + [feed.recent.first?.entry.franchise, feed.queue.first?.franchise].compactMap({ $0 }) {
                 await warmBillboard(show)
             }
         }
@@ -299,8 +337,25 @@ struct HomeView: View {
         } else if feed.isEmpty {
             caughtUp
         } else {
-            if let hero = feed.hero {
-                HomeBillboard(hero: hero, now: appModel.nowMinute, height: billboardHeight, band: band,
+            if feed.heroes.count > 1 {
+                // The week's drops, paged (9 Oct). The pager is keyed on its SHOWS: a mark rolls a
+                // page in place; a show caught up leaves with the handoff.
+                HomeBillboardPager(heroes: feed.heroes, page: $heroPage, now: appModel.nowMinute,
+                                   height: billboardHeight, band: band, committing: committingHero,
+                                   tint: { tint(of: $0.franchise) }, landing: { groundTop(of: $0.franchise) },
+                                   onOpen: { open($0) },
+                                   onMark: { markHero($0) },
+                                   onArtLoaded: markArtReady,
+                                   onCopyTop: { chrome.trackCopy(top: $0) },
+                                   onArt: { hero, url in heroArts[hero.franchise.id] = url },
+                                   onLightingChange: { chrome.trackLighting($0) })
+                    .id(feed.heroes.map(\.franchise.id).joined(separator: "|"))
+                    .transition(.handoff(reduceMotion: reduceMotion))
+            } else if let hero = feed.hero {
+                // One drop: the stage. Nothing out: the QUIET card — the top of the queue or the
+                // next airing, shorter and badge-less, so the full bleed keeps its meaning.
+                let quiet = feed.heroes.isEmpty
+                HomeBillboard(hero: hero, now: appModel.nowMinute, height: billboardHeight(feed), band: band,
                               committing: committingHero,
                               tint: tint(feed), landing: groundTop(feed),
                               onOpen: { open(hero) },
@@ -308,12 +363,13 @@ struct HomeView: View {
                               onArtLoaded: markArtReady,
                               onCopyTop: { chrome.trackCopy(top: $0) },
                               onArt: { url in heroArts[hero.franchise.id] = url },
-                              onLightingChange: { chrome.trackLighting($0) })
+                              onLightingChange: { chrome.trackLighting($0) },
+                              quiet: quiet)
                     .franchiseQuickActions(appModel.isInLibrary(hero.franchise.id) ? hero.franchise : nil,
                                            appModel: appModel)
                     // A new show on the billboard (the last one caught up): the old picture leaves,
                     // THEN the next arrives — the app's handoff, never two titles at half opacity.
-                    .id(hero.franchise.id)
+                    .id((quiet ? "quiet/" : "") + hero.franchise.id)
                     .transition(.handoff(reduceMotion: reduceMotion))
             } else {
                 Color.clear.frame(height: band)

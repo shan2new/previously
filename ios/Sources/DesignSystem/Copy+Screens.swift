@@ -158,6 +158,8 @@ extension Copy {
 
 extension Copy.Accessibility {
     static let opensTheShowHint = "Opens the show"
+    /// The show page's index row: a tap scrolls to the section (9 Oct).
+    static let scrollsToSectionHint = "Scrolls to the section"
     static let sectionHeader = "Section"
     static func removeFilter(_ text: String) -> String { "\(text). Remove filter" }
 }

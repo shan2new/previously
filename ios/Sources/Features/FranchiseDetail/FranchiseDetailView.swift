@@ -88,6 +88,20 @@ struct FranchiseDetailView: View {
     /// has reached the bar — a copy pins there (`profileTabs`).
     @State private var showTab: ShowTab = .initial
     @State private var tabsPinned = false
+    /// The STAGE page (9 Oct, `Direction.billboard`): which section is in view (read by the index
+    /// row alone), a tap on the index, the viewport's height for the scroll's landing, and the
+    /// picture the stage settled on (the page is painted from its colour).
+    @State private var indexState = ShowIndexState()
+    @State private var indexJump: IndexJump?
+    @State private var viewportH: CGFloat = ThemeMetrics.windowHeight
+    @State private var stageArt: String?
+    /// A section title's line (`sectionTitle`), growing with the text size — the stage's measure.
+    @ScaledMetric(relativeTo: .title3) private var sectionTitleLine: CGFloat = 25
+
+    struct IndexJump: Equatable {
+        let section: ShowTab
+        let token: UUID
+    }
 
     private var now: Int64 { appModel.now }
     private var isAX: Bool { typeSize.isAccessibilitySize }
@@ -133,6 +147,7 @@ struct FranchiseDetailView: View {
             } content: {
                 if let f = franchise {
                     screen(f)
+                        .qaProgress(f)
                 } else if loadError {
                     EmptyState(SyncCenter.shared.isOnline ? .serverNoCache : .offlineNoData, prominence: .major) {
                         Task { await load() }
@@ -157,12 +172,18 @@ struct FranchiseDetailView: View {
                         band: Self.pinTop + (tabsPinned ? ShowTabsRow.height + FeedMetrics.hairline : 0),
                         color: DetailTint.chrome(pageTint))
         }
-        // X's tabs, pinned under the bar once the page's own have reached it.
+        // The index (X's tabs on the profile), pinned under the bar once the page's own has reached it.
         .overlay(alignment: .top) {
-            if tabsPinned, franchise != nil {
-                ShowTabsRow(selected: $showTab)
-                    .padding(.top, Self.pinTop)
-                    .ignoresSafeArea(edges: .top)
+            if tabsPinned, let f = franchise {
+                Group {
+                    if Direction.current == .profile {
+                        ShowTabsRow(selected: $showTab)
+                    } else {
+                        ShowIndexRow(sections: sectionOrder(f), current: indexState.current, onSelect: jump)
+                    }
+                }
+                .padding(.top, Self.pinTop)
+                .ignoresSafeArea(edges: .top)
             }
         }
         // The page steps BACK while a confirmation is up. The system alert is glass centred over
@@ -362,9 +383,12 @@ struct FranchiseDetailView: View {
         ScrollViewReader { proxy in
             scrollContent(f)
                 .debugDetailDrive(franchise: f, proxy: proxy, trailers: trailers, openRelated: openRelated,
-                                  selectTab: { showTab = $0 })
+                                  selectTab: { tab in
+                                      if Direction.current == .profile { showTab = tab } else { jump(tab) }
+                                  })
                 .onChange(of: scrollToEpisodes) { _, token in
                     guard token != nil else { return }
+                    if Direction.current == .billboard { jump(.episodes); return }
                     showTab = .episodes
                     Task { @MainActor in
                         try? await Task.sleep(for: .milliseconds(120))
@@ -375,26 +399,55 @@ struct FranchiseDetailView: View {
                 }
                 // A switch with the tabs pinned keeps them pinned: the new tab starts under them.
                 .onChange(of: showTab) { _, _ in
-                    guard tabsPinned else { return }
+                    guard Direction.current == .profile, tabsPinned else { return }
                     proxy.scrollTo("anchor-tabs", anchor: .top)
                 }
+                // The index's tap: the section lands under the pinned row (App Store's scroll).
+                .onChange(of: indexJump) { _, jump in
+                    guard let jump else { return }
+                    let under = Self.pinTop + ShowTabsRow.height + FeedMetrics.hairline
+                    withAnimation(ThemeMotion.pick(ThemeMotion.uiSettle, reduceMotion: reduceMotion)) {
+                        proxy.scrollTo(Self.sectionAnchor(jump.section), anchor: UnitPoint(x: 0.5, y: under / max(viewportH, 1)))
+                    }
+                }
+                #if DEBUG
+                // `-detailTab episodes|media|about|posts` on the stage page: a capture scrolled to a section.
+                .task(id: f.id) {
+                    guard Direction.current == .billboard, UserDefaults.standard.string(forKey: "detailTab") != nil else { return }
+                    try? await Task.sleep(for: .milliseconds(900))
+                    jump(ShowTab.initial)
+                }
+                #endif
         }
     }
 
     private func scrollContent(_ f: Franchise) -> some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 0) {
-                profileHeader(f)
-                profileTabs(f)
-                VStack(alignment: .leading, spacing: 0) {
+                if Direction.current == .profile {
+                    profileHeader(f)
+                    profileTabs(f)
+                    VStack(alignment: .leading, spacing: 0) {
+                        if staleAfterFailure {
+                            InlineNotice(Copy.Notice.detailEpisodes) { Task { await load(force: true) } }
+                                .padding(.horizontal, ThemeMetrics.gutter)
+                                .padding(.top, ThemeSpace.x3)
+                        }
+                        profileTabContent(f)
+                    }
+                    .frame(minHeight: Self.tabMinHeight, alignment: .top)
+                } else {
+                    // The STAGE (9 Oct): Home's billboard, continued — the page's state in its
+                    // lockup — then the index and the sections, one scroll.
+                    stageHeader(f)
+                    stageIndex(f)
                     if staleAfterFailure {
                         InlineNotice(Copy.Notice.detailEpisodes) { Task { await load(force: true) } }
                             .padding(.horizontal, ThemeMetrics.gutter)
                             .padding(.top, ThemeSpace.x3)
                     }
-                    profileTabContent(f)
+                    stageSections(f)
                 }
-                .frame(minHeight: Self.tabMinHeight, alignment: .top)
             }
             // The scroll probe — geometry-based, because `onScrollGeometryChange` never fires on
             // the iOS 27 simulator (Today's discovery), which left the bar's veil dead in every
@@ -412,20 +465,33 @@ struct FranchiseDetailView: View {
         // content rather than inset from it. Padding inside the stack does nothing at all when the
         // content is shorter than the viewport, which is exactly the case in which the last line
         // came to rest inside the veil — the synopsis measured 4.39 → 1.04:1 over four lines.
+        .qaIdentifier("qa.scroll.detail")
         .contentMargins(.bottom, bottomClearance, for: .scrollContent)
         .scrollIndicators(.hidden)
         #if DEBUG
         .modifier(DebugScrollY())
         #endif
         .ignoresSafeArea(edges: .top)
+        .onGeometryChange(for: CGFloat.self, of: { $0.size.height }, action: { viewportH = $0 })
         .task(id: f.portraitArt) { tint = await PaletteCache.shared.resolve(url: f.portraitArt, maxPixel: 420) }
-        .task(id: heroArt(f).url) {
-            heroTint = await PaletteCache.shared.resolve(url: heroArt(f).url, maxPixel: 420)
-            heroLightness = PaletteCache.shared.lightness(for: heroArt(f).url)
+        .task(id: pageArt(f)) {
+            let url = pageArt(f)
+            heroTint = await PaletteCache.shared.resolve(url: url, maxPixel: 420)
+            heroLightness = PaletteCache.shared.lightness(for: url)
             // The next loading frame's ground (iD18). `tint(for:)`, not the resolved value: it is
             // nil when the art could not be analysed, so the neutral fallback is never remembered.
-            RememberedTint.remember(PaletteCache.shared.tint(for: heroArt(f).url))
+            RememberedTint.remember(PaletteCache.shared.tint(for: url))
         }
+    }
+
+    /// The picture the page is painted from: the stage's (the show's pick, else the catalogue's
+    /// billboard — and the stored pick on the first frame, before the stage has settled), or the
+    /// profile's banner.
+    private func pageArt(_ f: Franchise) -> String? {
+        guard Direction.current == .billboard else { return heroArt(f).url }
+        if let stageArt { return stageArt }
+        if let pick = PosterPick.shared.choice(for: f) { return WideArt.billboard(portrait: pick.url, landscape: nil).url }
+        return f.billboardArt.url
     }
 
     // MARK: - Hero (identity only)
@@ -462,7 +528,7 @@ struct FranchiseDetailView: View {
     /// frame. Never the cover's (`tint`) first and the billboard's a beat later: two images
     /// resolving at two moments painted the page in one hue and repainted it in another.
     private var pageTint: Color? {
-        heroTint ?? franchise.flatMap { PaletteCache.shared.tint(for: heroArt($0).url) }
+        heroTint ?? franchise.flatMap { PaletteCache.shared.tint(for: pageArt($0)) }
     }
     /// The ground's top, right under the hero — where `HeroCopyScrim` lands.
     private var groundTop: Color { DetailTint.ground(groundColor, lightness: DetailTint.groundTopLightness) }
@@ -494,8 +560,13 @@ struct FranchiseDetailView: View {
 
     /// The loading shape has to be the shape that arrives — composed from the skeleton atoms
     /// (the DS's stale per-screen defaults were deleted in the cohesion pass).
+    @ViewBuilder
     private var detailSkeleton: some View {
-        ShowProfileSkeleton(tint: tint ?? RememberedTint.color, banner: Self.bannerHeight, avatar: Self.profileAvatar)
+        if Direction.current == .profile {
+            ShowProfileSkeleton(tint: tint ?? RememberedTint.color, banner: Self.bannerHeight, avatar: Self.profileAvatar)
+        } else {
+            ShowStageSkeleton(tint: tint ?? RememberedTint.color, height: stageHeight)
+        }
     }
 
     /// The year the WORK premiered — specials excluded.
@@ -1299,7 +1370,8 @@ struct FranchiseDetailView: View {
         let total = part.progressDenominator(now: now, anchor: f.timeAnchor)
         let watched = min(part.progress, total)
         return VStack(alignment: .leading, spacing: ThemeSpace.x2) {
-            // The tab says "Episodes"; the header is the season.
+            // The index (the profile's tab) says "Episodes"; the header is the season. A title here
+            // was the same word twice, stacked (owner, 9 Oct).
             HStack(alignment: .center, spacing: ThemeSpace.x2) {
                 if seasons.count > 1 {
                     SeasonPill(current: part, seasons: seasons) { id in
@@ -2058,6 +2130,7 @@ extension FranchiseDetailView {
                 ScheduleMarkPill(watched: committed, label: Copy.Action.markEpisodeWatched(episode)) {
                     mark(f, part: part)
                 }
+                .qaIdentifier("qa.progress.mark.\(part.mediaId)")
             }
         case .start:
             Button { appModel.setStatus(franchiseId: f.id, status: .watching) } label: {
@@ -2543,8 +2616,12 @@ struct SeasonEpisodesView: View {
         prompt = .init(title: Copy.Confirm.batchMarkTitle(count), message: Copy.Confirm.batchMarkMessage(title: f.displayTitle, season: part.canonicalLabel, from: part.progress, to: through),
                        confirm: Copy.Confirm.batchMarkConfirm(count)) {
             let prev = part.progress
+            let shelvedAs = appModel.resumableStatus(f, part: part)
             appModel.setProgress(franchiseId: f.id, mediaId: part.mediaId, episodes: through)
-            appModel.presentUndo(UndoState(mediaId: part.mediaId, franchiseId: f.id, prevProgress: prev, title: f.title, episode: through, count: count))
+            var receipt = UndoState(mediaId: part.mediaId, franchiseId: f.id, prevProgress: prev, title: f.title, episode: through, count: count)
+            // Marks watch the show (`AppModel.resume`): this run's batch left a Planned show Planned.
+            appModel.resume(shelvedAs, franchiseId: f.id, mediaId: part.mediaId, prevProgress: prev, receipt: &receipt)
+            appModel.presentUndo(receipt)
         }
     }
 
@@ -2617,5 +2694,306 @@ private struct PromptDialog: ViewModifier {
         } message: { p in
             Text(p.message)
         }
+    }
+}
+
+// MARK: - The show's STAGE (9 Oct — Home's billboard, continued; ShowProfileParts.swift has the why)
+
+extension FranchiseDetailView {
+    /// The page's shape. The STAGE is the page since 9 Oct; the X profile of 25 Sep stays reachable
+    /// in DEBUG (`-detailDirection profile`) for the side-by-side photographs, then goes.
+    enum Direction {
+        case billboard, profile
+
+        static var current: Direction {
+            #if DEBUG
+            if UserDefaults.standard.string(forKey: "detailDirection") == "profile" { return .profile }
+            #endif
+            return .billboard
+        }
+    }
+
+    /// The stage's height — Home's measure (the screen above the tab bar), less the index row and
+    /// the first section's title, which peek under its foot so the page says there is more.
+    var stageHeight: CGFloat {
+        (ThemeMetrics.windowHeight - ThemeMetrics.tabBarVisualHeight - ShowTabsRow.height - ThemeSpace.x3
+            - sectionTitleLine - ThemeMetrics.labelGap + 3).rounded()
+    }
+
+    /// The sections, in the order the page stacks them: a TRACKED show leads with where you are, a
+    /// show you do not own with what it is ("what is this?" before "where am I?"). Trailers only
+    /// where there are some; Posts always (news is a promise).
+    func sectionOrder(_ f: Franchise) -> [ShowTab] {
+        let media: [ShowTab] = f.allVideos.isEmpty ? [] : [.media]
+        return inLibrary ? [.episodes] + media + [.about, .posts] : media + [.about, .episodes, .posts]
+    }
+
+    static func sectionAnchor(_ section: ShowTab) -> String { "section-\(section)" }
+
+    func jump(_ section: ShowTab) {
+        // The underline moves with the tap (App Store's); the probes keep it honest from there.
+        indexState.select(section)
+        indexJump = IndexJump(section: section, token: UUID())
+    }
+
+    // MARK: The stage
+
+    private func stageHeader(_ f: Franchise) -> some View {
+        ShowBillboard(franchise: f, height: stageHeight, band: Self.pinTop, tint: pageTint, landing: groundTop,
+                      onCopyTop: { top in
+                          // The bar docks the name the moment the lockup passes under it — a flip,
+                          // never a per-frame write (the scroll-offset rule).
+                          let under = top < Self.pinTop
+                          if under != scrolledUnderBar {
+                              withAnimation(ThemeMotion.pick(ThemeMotion.uiGentle, reduceMotion: reduceMotion)) { scrolledUnderBar = under }
+                          }
+                      },
+                      onArt: { stageArt = $0 },
+                      accessibilityLabel: stageSpoken(f)) { name, arrival in
+            stageLockup(f, name: name, arrival: arrival)
+        }
+        // The clock and the floating glass read over any picture; held through a pull.
+        .overlay(alignment: .top) {
+            HeroTopVeil(band: Self.pinTop, strength: heroStrength)
+                .modifier(HoldsThroughPull(scroll: scroll))
+        }
+    }
+
+    private func stageSpoken(_ f: Franchise) -> String {
+        let state = inLibrary ? nextUpState(f) : nil
+        return [state?.eyebrow, f.displayTitle, stageLine(f, state)].compactMap { $0 }.joined(separator: ", ")
+    }
+
+    /// The lockup: the state in its badge, the show's logo else its name, the one line (the moment,
+    /// then the fact), the season bar, the support line, and the ACTION ROW — the ivory pill beside
+    /// the status capsule (Apple TV's Play + Up Next pair, in the app's materials).
+    private func stageLockup(_ f: Franchise, name: BillboardName, arrival: BillboardArrival) -> some View {
+        let state = inLibrary ? nextUpState(f) : nil
+        let pin = inLibrary ? pinnedContent(f) : nil
+        return VStack(spacing: ThemeSpace.x3) {
+            VStack(spacing: ThemeSpace.x2) {
+                if let state {
+                    HeroBadge(text: state.eyebrow, attention: state.dot)
+                        .contentTransition(.numericText(countsDown: true))
+                        .modifier(arrival.line(0))
+                } else if isTrending(f) {
+                    HeroBadge(text: Copy.Label.trending)
+                        .modifier(arrival.line(0))
+                }
+                if case .logo = name, name.hasGraphicLogo, !isAX {
+                    ArtworkLogo(name: name, title: f.displayTitle, height: 96, halo: 0.55)
+                        .padding(.horizontal, ThemeSpace.x8)
+                        .padding(.vertical, ThemeSpace.x1)
+                        .modifier(arrival.logo)
+                } else if name != .embedded || isAX {
+                    Text(f.displayTitle)
+                        .type(ThemeType.displayXL)
+                        .foregroundStyle(ThemeColor.textPrimary)
+                        .multilineTextAlignment(.center)
+                        .lineLimit(isAX ? 3 : 2)
+                        .minimumScaleFactor(0.82)
+                        .shadow(.art)
+                        .modifier(arrival.line(1))
+                }
+                if let line = stageLine(f, state) {
+                    Text(line)
+                        .type(ThemeType.heroMeta)
+                        .foregroundStyle(ThemeColor.textPrimary.opacity(0.88))
+                        .lineLimit(isAX ? 3 : 1)
+                        .contentTransition(.numericText())
+                        .shadow(.art)
+                        .modifier(arrival.line(2))
+                }
+                if let progress = stageProgress(f, state) {
+                    ProgressBar(value: progress, spoken: nil)
+                        .frame(maxWidth: 200)
+                        .padding(.top, ThemeSpace.x1)
+                        .modifier(arrival.line(2))
+                }
+                if let support = state?.line2 {
+                    Text(support)
+                        .type(ThemeType.feedSmall)
+                        .foregroundStyle(ThemeColor.textPrimary.opacity(0.66))
+                        .lineLimit(isAX ? 2 : 1)
+                        .shadow(.art)
+                        .modifier(arrival.line(3))
+                }
+            }
+            .multilineTextAlignment(.center)
+            .allowsHitTesting(false)
+            stageActions(f, pin)
+                .modifier(arrival.line(4))
+        }
+        .frame(maxWidth: .infinity)
+        .accessibilityElement(children: .contain)
+    }
+
+    /// "Aired yesterday · Season 4 · Episode 19" — the moment, then the fact (Home's grammar); a
+    /// show you do not own says what it is ("Anime · 2016 · Action · Adventure").
+    private func stageLine(_ f: Franchise, _ state: NextUp?) -> String? {
+        guard let state else { return identityLine(f) }
+        let line = [state.moment, state.line1].compactMap { $0 }.filter { !$0.isEmpty }.joined(separator: " \u{00B7} ")
+        return line.isEmpty ? nil : line
+    }
+
+    /// Where you are in the season — only part-way (a full bar is decoration, an empty one noise).
+    private func stageProgress(_ f: Franchise, _ state: NextUp?) -> Double? {
+        guard let state, state.kind != .seriesComplete, let part = state.part else { return nil }
+        let total = max(part.progressDenominator(now: now, anchor: f.timeAnchor), part.progress)
+        return total > 0 && part.progress > 0 && part.progress < total ? Double(part.progress) / Double(total) : nil
+    }
+
+    /// The ivory pill (the mark, Start watching, Start rewatch — the pinned post's verbs) beside the
+    /// status capsule; a show you do not own gets the Add pill alone.
+    private func stageActions(_ f: Franchise, _ pin: PinnedContent?) -> some View {
+        HStack(spacing: ThemeSpace.x3) {
+            if inLibrary, let pin { pinnedAction(f, pin) }
+            followPill(f)
+        }
+    }
+
+    private func isTrending(_ f: Franchise) -> Bool {
+        appModel.trending.contains { $0.id == f.id }
+    }
+
+    // MARK: The index
+
+    /// The index in the page; a copy pins under the bar once this one reaches it (`tabsPinned`).
+    private func stageIndex(_ f: Franchise) -> some View {
+        ShowIndexRow(sections: sectionOrder(f), current: indexState.current, onSelect: jump)
+            .opacity(tabsPinned ? 0 : 1)
+            .background(alignment: .bottom) {
+                Color.clear
+                    .frame(height: ShowTabsRow.height + 1 + Self.pinTop)
+                    .id("anchor-tabs")
+            }
+            .onGeometryChange(for: Bool.self) { $0.frame(in: .global).minY <= Self.pinTop } action: { pinned in
+                if pinned != tabsPinned { tabsPinned = pinned }
+            }
+    }
+
+    // MARK: The sections
+
+    private func stageSections(_ f: Franchise) -> some View {
+        let order = sectionOrder(f)
+        // A section is the one in view once its top is within a chapter's air of the pinned index
+        // — the landing puts it a hair under the row, and a tighter line left the underline on the
+        // section before (the About capture read "Trailers").
+        let threshold = Self.pinTop + ShowTabsRow.height + Self.shelfRhythm + Self.chapterBreak
+        return VStack(alignment: .leading, spacing: Self.shelfRhythm + Self.chapterBreak) {
+            ForEach(order, id: \.self) { section in
+                stageSection(f, section)
+                    // The scroll's target is a 1-pt marker at the section's TOP: `scrollTo`'s unit
+                    // point is applied to the target's own height as well as the viewport's, so a
+                    // tall section anchored on itself landed a fifth of itself above the index.
+                    .background(alignment: .top) {
+                        Color.clear.frame(height: 1).id(Self.sectionAnchor(section))
+                    }
+                    // Which section is in view: the probe writes the index's one fact, on change only.
+                    .onGeometryChange(for: CGFloat.self) { $0.frame(in: .global).minY } action: { top in
+                        indexState.track(section, top: top, threshold: threshold)
+                    }
+            }
+        }
+        .padding(.top, ThemeSpace.x4)
+        .onAppear { indexState.reset(order: order) }
+        .onChange(of: order) { _, next in indexState.reset(order: next) }
+    }
+
+    @ViewBuilder
+    private func stageSection(_ f: Franchise, _ section: ShowTab) -> some View {
+        switch section {
+        case .episodes: stageEpisodes(f)
+        case .media: stageTrailers(f)
+        case .about: stageAbout(f)
+        case .posts: stagePosts(f)
+        }
+    }
+
+    /// Episodes — exactly the profile tab's anatomy: the season pill, the bar between its ends,
+    /// "Mark all N…", the anchored list, then Movies & extras. NO title: the pinned index names the
+    /// section in view, and "Episodes" over "Episodes" was one word twice (owner, 9 Oct) — the same
+    /// for Trailers, About and Posts. It opens with the next episode's row in view, which is where
+    /// a push from Home or Schedule lands.
+    private func stageEpisodes(_ f: Franchise) -> some View {
+        VStack(alignment: .leading, spacing: Self.shelfRhythm) {
+            if let part = focusSeason(f) {
+                VStack(alignment: .leading, spacing: ThemeMetrics.labelGap) {
+                    episodesHeader(f, part: part)
+                        .id("anchor-episodes-header")
+                    EpisodeList(franchise: f, part: part, tint: DetailTint.quiet(pageTint),
+                                focusEpisode: focus?.mediaId == part.mediaId ? focus?.episode : nil)
+                        .id(part.mediaId)
+                        .disabled(appModel.pendingAdds.contains(f.id))
+                }
+                .id("anchor-episodes")
+            }
+            extrasShelf(f)
+        }
+        .padding(.horizontal, ThemeMetrics.gutter)
+    }
+
+    /// The width of a trailer card on the shelf: Home's drop card, 16:9, playing in place.
+    private static let trailerShelfWidth: CGFloat = 300
+
+    /// Trailers — a shelf of 16:9 cards, each playing where it is (the Media tab stacked 31 of
+    /// them full-width: a page of one kind of thing). Headerless: the index is its title.
+    private func stageTrailers(_ f: Franchise) -> some View {
+        ScrollView(.horizontal) {
+            LazyHStack(alignment: .top, spacing: ThemeMetrics.shelfGap) {
+                ForEach(f.allVideos) { v in
+                    TrailerCard(video: v, showTitle: f.title, width: Self.trailerShelfWidth, director: trailers)
+                        .matchedTransitionSource(id: v.id, in: trailerZoom)
+                }
+            }
+            .padding(.horizontal, ThemeMetrics.gutter)
+        }
+        .scrollIndicators(.hidden)
+        .scrollClipDisabled()
+        .environment(\.feedAutoplay, trailers)
+        .id("anchor-trailers")
+    }
+
+    /// About — what the show is: the identity line, the synopsis, the themes, the facts, then the
+    /// catalogue's shelves (watch history, Because you finished, where to watch, cast, related).
+    private func stageAbout(_ f: Franchise) -> some View {
+        VStack(alignment: .leading, spacing: Self.shelfRhythm) {
+            VStack(alignment: .leading, spacing: ThemeSpace.x2) {
+                profileIdentity(f)
+                profileBio(f)
+                themesLine(f)
+                profileFacts(f)
+            }
+            historyRow(f)
+            becauseYouFinished(f)
+            whereToWatch(f)
+            peopleShelf(f)
+            relatedShelf(f)
+        }
+        .padding(.horizontal, ThemeMetrics.gutter)
+    }
+
+    /// Posts — the show's news from the feed, as feed rows; an empty section is one grey line.
+    private func stagePosts(_ f: Franchise) -> some View {
+        let posts = showPosts(f)
+        return VStack(alignment: .leading, spacing: 0) {
+            if posts.isEmpty {
+                Text(Copy.ShowPage.noPostsMessage(f.displayTitle))
+                    .type(ThemeType.feedMeta)
+                    .foregroundStyle(ThemeColor.feedSecondary)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .padding(.horizontal, ThemeMetrics.gutter)
+            } else {
+                FeedHairline()
+                ForEach(posts) { m in
+                    FeedPostRow(model: m,
+                                onOpen: { push(.post(id: m.id)) },
+                                onOpenShow: {},
+                                onViewMedia: { push(.post(id: m.id)) },
+                                onComment: { push(.post(id: m.id)) })
+                }
+            }
+        }
+        .environment(\.feedAutoplay, trailers)
     }
 }

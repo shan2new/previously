@@ -94,6 +94,12 @@ struct ScheduleView: View {
     /// it), and how many times the landing has been re-run for it this visit.
     @State private var landingTop: CGFloat = -1
     @State private var relands = 0
+    /// The card's picture (what the stage settled on) and its colour: today's block stands in it
+    /// (`HomeGround`), as Home's page does under its billboard (9 Oct).
+    @State private var cardArt: String?
+    @State private var cardTint: Color?
+    /// The feed's whole height (the lazy stack's estimate), for the landing's slack.
+    @State private var contentH: CGFloat = 0
 
     private var now: Int64 { appModel.nowMinute }
 
@@ -336,6 +342,14 @@ struct ScheduleView: View {
                 }
                 .scrollTargetLayout()
                 .coordinateSpace(.named(Self.feedSpace))
+                .onGeometryChange(for: CGFloat.self, of: { $0.size.height }) { h in
+                    if abs(h - contentH) > 0.5 { contentH = h }
+                }
+                // The landing's SLACK: with a short week ahead, the card and the few rows under it
+                // were shorter than the screen, so the feed could not bring today to the top and
+                // the previous row's foot showed under the bar (9 Oct). Room at the end for the
+                // landing day to reach the top, and no more.
+                .padding(.bottom, landingSlack)
                 // The bar's scroll probe (`RootChromeState`). Only a READER's scroll moves the bar
                 // (its phase, below): the landing on today is the app's scroll, with the past days
                 // above it, and must not open the screen with its bars gone.
@@ -399,6 +413,12 @@ struct ScheduleView: View {
         .chromeScrollEdgeHidden(.top)
         .previouslyRefreshable { await appModel.reload() }
         .task { await ScheduleReminders.shared.refresh() }
+        .task(id: cardArt) {
+            guard let cardArt else { return }
+            let resolved = await PaletteCache.shared.resolve(url: cardArt, maxPixel: 360)
+            guard !Task.isCancelled else { return }
+            withAnimation(ThemeMotion.uiPoster) { cardTint = resolved }
+        }
         // The feed opens on TODAY — the card — with the past above it, whenever the feed's
         // identity changes and the reader has not taken the wheel. Once more a beat later: the
         // first pass can run before the lazy stack has laid out the days above today, and land
@@ -413,6 +433,7 @@ struct ScheduleView: View {
         // leaving, the library refreshing under a cached copy, the lazy stack measuring the days
         // above for real — used to leave the card's top (and its moment) under the bar.
         .onChange(of: landingTop) { _, _ in reland(proxy) }
+        .onChange(of: landingSlack) { _, _ in reland(proxy) }
         .onChange(of: visiting, initial: true) { _, on in visit(on) }
         // A card the reader marked stays until they leave; the next visit opens on what is next.
         .onDisappear { heldHero = nil }
@@ -472,11 +493,20 @@ struct ScheduleView: View {
         } ?? demoDay ?? 0
     }
 
+    /// How much room the feed needs after its last row for the landing day to reach the top:
+    /// the visible height less what the feed holds from the landing day down. Zero when the week
+    /// ahead fills the screen on its own.
+    private var landingSlack: CGFloat {
+        guard landingTop >= 0, contentH > 0 else { return 0 }
+        let visible = viewportH - bandHeight
+        return max(0, (visible - (contentH - landingTop)).rounded())
+    }
+
     /// The landing day's block moved in the content before the reader touched the feed — land
     /// again. Bounded, so a layout that never settles cannot hold the feed hostage. (Before this, a
     /// first visit drew the past days and jumped to today ~130 ms later.)
     private func reland(_ proxy: ScrollViewProxy) {
-        guard !userScrolled, relands < 8 else { return }
+        guard !userScrolled, relands < 20 else { return }
         relands += 1
         land(proxy)
     }
@@ -794,10 +824,8 @@ struct ScheduleView: View {
     /// lines) — so the swap lands in place.
     private var feedSkeleton: some View {
         VStack(alignment: .leading, spacing: 0) {
-            SkeletonBlock(height: nil, radius: ThemeRadius.card)
-                .aspectRatio(1, contentMode: .fit)
-                .padding(.horizontal, ThemeMetrics.gutter)
-                .padding(.top, ThemeSpace.x3)
+            SkeletonBlock(height: ScheduleStageCard.height, radius: 0)
+                .padding(.top, ThemeSpace.x2)
                 .padding(.bottom, ThemeSpace.x3)
             ForEach(0..<3, id: \.self) { i in
                 HStack(spacing: ThemeSpace.x3) {
@@ -924,7 +952,9 @@ struct ScheduleView: View {
             var block = DayBlock(day: day, rows: rows, hero: card, month: nil, empty: empty)
             if !block.isBlank {
                 let m = Formatting.localParts(day.noon).mo
-                if m != month { block.month = Formatting.formatted(day.noon, skeleton: "MMMM", anchor: .local) }
+                // Never over the card: a small eyebrow stranded above the stage (9 Oct). The month
+                // the card's day opens is the grid's to say.
+                if m != month, card == nil { block.month = Formatting.formatted(day.noon, skeleton: "MMMM", anchor: .local) }
                 month = m
                 if day.id >= landing {
                     let lead = card == nil ? 0 : 1
@@ -959,7 +989,7 @@ struct ScheduleView: View {
                 }
                 if let hero = b.hero {
                     heroCard(hero)
-                        .padding(.top, ThemeSpace.x3)
+                        .padding(.top, ThemeSpace.x2)
                         .padding(.bottom, b.rows.isEmpty ? 0 : ThemeSpace.x3)
                 }
                 ForEach(Array(b.rows.enumerated()), id: \.element.id) { i, r in
@@ -975,6 +1005,14 @@ struct ScheduleView: View {
                 }
             }
             .padding(.top, b.hero == nil && b.month == nil ? Metrics.dayGap : 0)
+            // Today's block stands in the card's hue, easing to canvas by the rows (Home's
+            // `HomeGround` under its billboard): the page under the stage is the picture's.
+            .background(alignment: .top) {
+                if b.hero != nil {
+                    HomeGround(tint: cardTintNow, top: cardGroundTop, billboard: ScheduleStageCard.height + ThemeSpace.x2)
+                        .animation(ThemeMotion.uiPoster, value: cardTintNow == nil)
+                }
+            }
             .background { landingProbe(b) }
             .id(AgendaID.day(b.day.id))
         }
@@ -1105,8 +1143,9 @@ struct ScheduleView: View {
         let line = counts
             ? "\(episodeLine(r)) \u{00B7} \(Copy.Schedule.countdown(Formatting.fmtCountdown(target: r.at, now: now)))"
             : [episodeLine(r), x.time].compactMap { $0 }.joined(separator: " \u{00B7} ")
-        return ScheduleAgendaRow(franchise: f, date: date, isToday: isToday, line: line, state: x.state,
-                                 spoken: spoken(r, line: line, x),
+        let sub = partSub(r)
+        return ScheduleAgendaRow(franchise: f, date: date, isToday: isToday, line: line, sub: sub, state: x.state,
+                                 spoken: spoken(r, line: [line, sub].compactMap { $0 }.joined(separator: ", "), x),
                                  decor: decor(r, counting: counts),
                                  onOpen: openAction(r, x)) {
             AiringStateControl(state: x.state, episode: r.episode, committing: false, title: f.displayTitle,
@@ -1129,23 +1168,31 @@ struct ScheduleView: View {
             .compactMap { $0 }.joined(separator: ", ")
     }
 
-    /// The card, as Home's billboard's sibling (`ScheduleLitCard`).
+    /// The card's colour: resolved this visit, else remembered (`PaletteCache` persists).
+    private var cardTintNow: Color? { cardTint ?? PaletteCache.shared.tint(for: cardArt) }
+    /// Where the card's scrim lands and the block's ground begins: the picture's hue at canvas depth.
+    private var cardGroundTop: Color { DetailTint.ground(cardTintNow, lightness: DetailTint.groundTopLightness) }
+
+    /// The card: the show's STAGE, full bleed (`ScheduleStageCard` — Home's billboard, continued).
     private func heroCard(_ h: Hero) -> some View {
         let r = h.row
         let f = r.franchise
         let x = facts(r)
-        return ScheduleLitCard(franchise: f, eyebrow: h.eyebrow, line: heroLine(r), state: x.state,
-                               canToggle: x.canToggle,
-                               markLabel: x.state.isWatched ? Copy.Action.markEpisodeUnwatched(r.episode)
-                                                            : Copy.Action.markEpisodeWatched(r.episode),
-                               arrived: arrived,
-                               onToggle: {
-                                   heldHero = r.id
-                                   toggleWatched(r, watched: x.state.isWatched)
-                               },
-                               onOpen: openAction(r, x))
+        return ScheduleStageCard(franchise: f, eyebrow: h.eyebrow, line: heroLine(r), state: x.state,
+                                 canToggle: x.canToggle,
+                                 markLabel: x.state.isWatched ? Copy.Action.markEpisodeUnwatched(r.episode)
+                                                              : Copy.Action.markEpisodeWatched(r.episode),
+                                 tint: cardTintNow, landing: cardGroundTop,
+                                 onToggle: {
+                                     heldHero = r.id
+                                     toggleWatched(r, watched: x.state.isWatched)
+                                 },
+                                 onOpen: openAction(r, x),
+                                 onArt: { url in if url != cardArt { cardArt = url } })
             .franchiseQuickActions(appModel.isInLibrary(f.id) ? f : nil, appModel: appModel)
             .animation(ThemeMotion.pick(ThemeMotion.uiMicro, reduceMotion: reduceMotion), value: x.state.isWatched)
+            // A new show on the card: the old picture leaves, then the next arrives (Home's handoff).
+            .id("card/\(f.id)")
     }
 
     // MARK: - What a row says
@@ -1155,22 +1202,39 @@ struct ScheduleView: View {
     /// season inside the window, so on the rows the season is a constant, and it is dropped.
     private func episodeLine(_ r: Row) -> String {
         if r.part.kind == .movie || r.episodes.lowerBound == 1 {
+            // "Premiere · 7:30 PM" on the row, the part it premieres under it (`partSub`): "Season
+            // 2 premiere · 7:30 PM" wrapped onto two lines in the words' lane (9 Oct).
             let count = r.episodes.count > 1 ? Copy.episodes(r.episodes.count) : nil
-            return [Copy.Schedule.premiere(premiereName(r)), count].compactMap { $0 }.joined(separator: " \u{00B7} ")
+            return [Copy.Schedule.premiere(""), count].compactMap { $0 }.joined(separator: " \u{00B7} ")
         }
-        let episodes = r.episodes.count > 1
+        // The episode and the time only: the part, where it must be named, is the row's SUB line
+        // (`partSub`) — on the caption it pushed the time off the row (9 Oct).
+        return r.episodes.count > 1
             ? Copy.Schedule.episodeRange(r.episodes.lowerBound, r.episodes.upperBound)
             : Copy.episode(r.episode)
-        guard namesPart(r) else { return episodes }
-        if r.episodes.count == 1 { return r.franchise.watchContext(part: r.part, episode: r.episode) }
+    }
+
+    /// The part under the caption, only where the row is from one other than the reader's
+    /// (`namesPart`): "Season 2", an extra's own label. Nil on a premiere, which names it itself.
+    private func partSub(_ r: Row) -> String? {
+        if r.part.kind == .movie || r.episodes.lowerBound == 1 {
+            // A premiere names what premieres: the season, or the film by its title.
+            let name = premiereName(r)
+            return name.isEmpty ? nil : name
+        }
+        guard namesPart(r) else { return nil }
         let label = Copy.compactPartLabel(r.part.canonicalLabel)
-        return label.isEmpty ? episodes : "\(label) \u{00B7} \(episodes)"
+        return label.isEmpty ? nil : label
     }
 
     /// The card stands alone, so it says the season with the episode ("Season 4 · Episode 21");
     /// a premiere or a drop in its own words.
     private func heroLine(_ r: Row) -> String {
-        guard r.episodes.count == 1, r.part.kind != .movie, r.episodes.lowerBound > 1 else { return episodeLine(r) }
+        if r.part.kind == .movie || r.episodes.lowerBound == 1 {
+            let count = r.episodes.count > 1 ? Copy.episodes(r.episodes.count) : nil
+            return [Copy.Schedule.premiere(premiereName(r)), count].compactMap { $0 }.joined(separator: " \u{00B7} ")
+        }
+        guard r.episodes.count == 1 else { return episodeLine(r) }
         return r.franchise.watchContext(part: r.part, episode: r.episode)
     }
 

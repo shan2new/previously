@@ -25,7 +25,7 @@ enum ScheduleCardMetrics {
     static let copyEstimate: CGFloat = 190
     /// The glow: the art's colour as light (`ScheduleHue.glow`) under the card, drawn by the card's
     /// own shape (`cardShadow`'s rule — never a layer shadow, never a live blur).
-    static let glowOpacity: Double = 0.5
+    static let glowOpacity: Double = 0.62
     static let glowRadius: CGFloat = 30
     static let glowDrop: CGFloat = 14
     /// How long the card waits for the show's pick (`PosterPick`) on a first visit before it takes

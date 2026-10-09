@@ -18,7 +18,9 @@ import SwiftUI
 /// The agenda's columns, shared by the airing row and the empty day's row so the two line up. (Not
 /// on the row: it is generic over its trailing view, and a generic type may not carry statics.)
 enum AgendaMetrics {
-    static var avatar: CGFloat { 40 }
+    /// The show's face: 56 since 9 Oct (was X's 40 — "the Schedule screen just feels poorly made",
+    /// owner; the rows had lost their art to a row of badges).
+    static var avatar: CGFloat { 56 }
     static var leading: CGFloat { ThemeMetrics.gutter - ThemeSpace.x1 }
     static var trailing: CGFloat { ThemeSpace.x3 }
     static var vertical: CGFloat { ThemeSpace.x1 + 2 }
@@ -32,6 +34,10 @@ struct ScheduleAgendaRow<Trailing: View>: View {
     let date: (top: String, numeral: String)?
     let isToday: Bool
     let line: String
+    /// Under the caption, where the row is from a part other than the one the reader is in: the
+    /// season ("Season 2"), so the caption keeps its time whatever the name's length (9 Oct: "Season
+    /// 2 · Episode 2 · 7:30…" cut the one fact a schedule exists to give).
+    var sub: String? = nil
     let state: AiringState
     /// What VoiceOver says for the row (the date column is hidden from it).
     let spoken: String
@@ -140,6 +146,12 @@ struct ScheduleAgendaRow<Trailing: View>: View {
                 .foregroundStyle(state.isWatched ? ThemeColor.feedSecondary : ThemeColor.feedText)
                 .lineLimit(typeSize.isAccessibilitySize ? 3 : 1)
             caption
+            if let sub {
+                Text(sub)
+                    .type(ThemeType.feedSmall)
+                    .foregroundStyle(ThemeColor.feedSecondary)
+                    .lineLimit(1)
+            }
         }
         .multilineTextAlignment(.leading)
     }
@@ -150,7 +162,8 @@ struct ScheduleAgendaRow<Trailing: View>: View {
         captionText
             .type(ThemeType.feedMeta)
             .foregroundStyle(ThemeColor.feedSecondary)
-            .lineLimit(typeSize.isAccessibilitySize ? 3 : 1)
+            // Two lines before an ellipsis: a premiere's long caption wraps rather than losing its time.
+            .lineLimit(typeSize.isAccessibilitySize ? 3 : 2)
     }
 
     private var captionText: Text {

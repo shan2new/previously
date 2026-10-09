@@ -74,225 +74,96 @@ struct ScheduleRowDecor {
     static let none = ScheduleRowDecor()
 }
 
-// MARK: - The lit card
+// MARK: - The card — Home's billboard, continued
 
-/// The next thing to watch, as Home's billboard at card scale: the show's
-/// best-looking poster (`PosterPick`, chosen by eye and kept) as a PICTURE, protection only under
-/// the words and scaled to the art's own lightness, landing on the art's hue at depth rather than on
-/// black; the show's logo on clean art (type only where there is none); and a glow of the art's own
-/// colour around the card, drawn once by its shape. The words rise in over the picture once a visit.
+/// The next thing to watch, as the show's STAGE (9 Oct — "The Schedule screen just feels poorly made
+/// and not premium enough like the Home screen", owner): `ShowBillboard`, the one billboard Home and
+/// the show page draw, FULL BLEED across the feed at half the window's height, with the moment on
+/// its badge ("OUT NOW" — a quiet label for an airing still to come), the show's logo else its name,
+/// the episode, and the mark once it is out. The page under it stands in the picture's hue
+/// (`ScheduleView` draws `HomeGround` behind today's block, as Home does under its billboard).
 ///
-/// What it replaced: a scrim of black at 0.6 → 0.9 across the lower half, over the catalogue's
-/// season key visual — a dark smear with the art at maybe 30 %, and on Slime a dark, diagonal
-/// picture with its faces at the edges.
-struct ScheduleLitCard: View {
+/// What it replaced (`ScheduleLitCard`, 26 Sep): a square poster in a rounded box inside the
+/// gutters — a thumbnail, not a stage — under a stranded month eyebrow.
+struct ScheduleStageCard: View {
     let franchise: Franchise
     let eyebrow: String
     let line: String
     let state: AiringState
     let canToggle: Bool
     let markLabel: String
-    /// This visit's arrival has begun.
-    let arrived: Bool
+    /// The art's colour (the page is painted from it too) and the ground the frame lands on.
+    var tint: Color? = nil
+    var landing: Color = ThemeColor.canvas
     let onToggle: () -> Void
     let onOpen: () -> Void
+    /// The picture the stage settled on — the page is painted from its colour.
+    var onArt: ((String?) -> Void)? = nil
 
     @Environment(\.dynamicTypeSize) private var typeSize
-    @State private var settled: Shown?
-    @State private var tint: Color?
-    @State private var lightness: Double?
-    @State private var copyHeight: CGFloat = ScheduleCardMetrics.copyEstimate
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
-    struct Shown: Equatable {
-        let franchiseId: String
-        let url: String?
-        let name: BillboardName
-    }
+    /// Half the window: the agenda keeps its first rows on the landing screen.
+    static var height: CGFloat { (ThemeMetrics.windowHeight * 0.52).rounded() }
 
-    init(franchise: Franchise, eyebrow: String, line: String, state: AiringState, canToggle: Bool,
-         markLabel: String, arrived: Bool, onToggle: @escaping () -> Void, onOpen: @escaping () -> Void) {
-        self.franchise = franchise
-        self.eyebrow = eyebrow
-        self.line = line
-        self.state = state
-        self.canToggle = canToggle
-        self.markLabel = markLabel
-        self.arrived = arrived
-        self.onToggle = onToggle
-        self.onOpen = onOpen
-        // The colour is remembered across launches (`PaletteCache`): the card opens in it on its
-        // first frame when the pick is already known.
-        let url = PosterPick.shared.choice(for: franchise).flatMap { WideArt.billboard(portrait: $0.url, landscape: nil).url }
-        _tint = State(initialValue: PaletteCache.shared.tint(for: url))
-        _lightness = State(initialValue: PaletteCache.shared.lightness(for: url))
-    }
-
-    /// A pick made before this card existed — on its first frame.
-    private var storedPick: Shown? { PosterPick.shared.choice(for: franchise).map(shown(from:)) }
-
-    private func shown(from pick: PosterPick.Choice) -> Shown {
-        Shown(franchiseId: franchise.id,
-              url: WideArt.billboard(portrait: pick.url, landscape: nil).url,
-              name: pick.billboardName(for: franchise, visible: ScheduleCardMetrics.clearBand))
-    }
-
-    private var catalogue: Shown {
-        Shown(franchiseId: franchise.id, url: franchise.billboardArt.url ?? franchise.portraitArt,
-              name: franchise.billboardName)
-    }
-
-    /// The picture this card shows: settled for this show, else the stored pick. Nothing but the
-    /// ground until one is known — never one poster, then another (Home's rule).
-    private var shown: Shown? {
-        if let settled, settled.franchiseId == franchise.id { return settled }
-        return storedPick
-    }
+    /// Out: the badge. Still to come: the moment as a quiet label (a tag is for news).
+    private var isOut: Bool { state != .upcoming }
 
     var body: some View {
-        let width = ThemeMetrics.windowWidth - 2 * ThemeMetrics.gutter
-        let height = (width * ScheduleCardMetrics.aspect).rounded()
-        let shape = RoundedRectangle(cornerRadius: ThemeRadius.card, style: .continuous)
-        let shown = shown
-        let strength = HeroProtection.strength(lightness: lightness)
-        let depth = DetailTint.ground(tint, lightness: ScheduleCardMetrics.groundLightness)
-        ZStack(alignment: .bottom) {
-            Button(action: onOpen) {
-                ZStack(alignment: .bottom) {
-                    (tint == nil ? ThemeColor.surfaceFlat : DetailTint.ground(tint, lightness: DetailTint.groundTopLightness))
-                    if let url = shown?.url {
-                        RemoteImageView(url: url, contentMode: .fill, maxPixel: 1400, alignment: .top,
-                                        placeholderHidden: true)
-                            .frame(width: width, height: height)
-                            .transition(.opacity)
-                    }
-                    // Only under the words, as deep as the art needs (`HeroProtection`), landing on
-                    // the picture's own colour at depth. Part of the picture, drawn with it.
-                    HeroCopyScrim(copyHeight: copyHeight, lead: ScheduleCardMetrics.scrimLead, strength: strength,
-                                  landing: depth)
-                        // Never animated in: on a first visit the tab's page-in transaction carried
-                        // the card's first pass and faded the protection in ~0.1 s after the
-                        // picture — a frame of bare art under words about to arrive.
-                        .transaction { $0.animation = nil }
-                }
-                .frame(width: width, height: height)
-                .clipped()
-            }
-            .buttonStyle(.plain)
-            .accessibilityLabel("\(eyebrow), \(franchise.displayTitle), \(line)")
-            .accessibilityHint(Copy.Accessibility.opensTheShowHint)
-
-            lockup(name: shown?.name ?? .type)
-                .padding(.horizontal, ThemeSpace.x4)
-                .padding(.bottom, ThemeSpace.x4)
-                .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { copyHeight = $0 }
-        }
-        .frame(width: width, height: height)
-        .clipShape(shape)
-        .overlay(shape.strokeBorder(ThemeColor.posterEdge, lineWidth: FeedMetrics.hairline))
-        .background { glow(shape) }
-        .padding(.horizontal, ThemeMetrics.gutter)
-        .task(id: franchise.id) { await settle() }
-        .task(id: shown?.url) { await readArt(shown?.url) }
-    }
-
-    /// The art's colour as light under the card: a canvas-filled copy of its shape whose shadow is
-    /// the colour — drawn with the shape, once (`cardShadow`'s rule), so nothing is re-rendered as
-    /// the card scrolls.
-    @ViewBuilder
-    private func glow(_ shape: RoundedRectangle) -> some View {
-        if let light = ScheduleHue.glow(tint) {
-            shape
-                .fill(ThemeColor.canvas.shadow(.drop(color: light.opacity(ScheduleCardMetrics.glowOpacity),
-                                                     radius: ScheduleCardMetrics.glowRadius,
-                                                     x: 0, y: ScheduleCardMetrics.glowDrop)))
-                .transition(.opacity.animation(ThemeMotion.uiPoster))
-                .allowsHitTesting(false)
-                .accessibilityHidden(true)
+        ShowBillboard(franchise: franchise, height: Self.height, band: 0, tint: tint, landing: landing,
+                      onOpen: onOpen, onArt: onArt,
+                      accessibilityLabel: "\(eyebrow), \(franchise.displayTitle), \(line)",
+                      accessibilityHint: Copy.Accessibility.opensTheShowHint,
+                      pullStretch: false, visibleBand: ScheduleCardMetrics.clearBand) { name, arrival in
+            lockup(name: name, arrival: arrival)
         }
     }
 
-    /// The moment on its tag, the show's logo (else its name), the episode, and the mark once out.
-    private func lockup(name: BillboardName) -> some View {
+    private func lockup(name: BillboardName, arrival: BillboardArrival) -> some View {
         VStack(spacing: ThemeSpace.x3) {
             VStack(spacing: ThemeSpace.x2) {
-                HomeNewTag(text: eyebrow)
-                    .textCase(.uppercase)
-                    .modifier(rise(0))
+                if isOut {
+                    HeroBadge(text: eyebrow, attention: true)
+                        .modifier(arrival.line(0))
+                } else {
+                    Text(eyebrow)
+                        .type(ThemeType.feedEyebrow)
+                        .textCase(.uppercase)
+                        .foregroundStyle(ThemeColor.textPrimary.opacity(0.72))
+                        .lineLimit(2)
+                        .shadow(.art)
+                        .modifier(arrival.line(0))
+                }
                 if case .logo = name, name.hasGraphicLogo, !typeSize.isAccessibilitySize {
-                    ArtworkLogo(name: name, title: franchise.displayTitle, height: ScheduleCardMetrics.logoHeight)
-                        .padding(.horizontal, ThemeSpace.x10)
-                        .modifier(rise(1))
+                    ArtworkLogo(name: name, title: franchise.displayTitle, height: 72, halo: 0.55)
+                        .padding(.horizontal, ThemeSpace.x8)
+                        .padding(.vertical, ThemeSpace.x1)
+                        .modifier(arrival.logo)
                 } else if name != .embedded || typeSize.isAccessibilitySize {
                     Text(franchise.displayTitle)
-                        .type(ThemeType.displayL)
+                        .type(ThemeType.displayXL)
                         .foregroundStyle(ThemeColor.textPrimary)
+                        .multilineTextAlignment(.center)
                         .lineLimit(typeSize.isAccessibilitySize ? 3 : 2)
-                        .minimumScaleFactor(0.75)
+                        .minimumScaleFactor(0.82)
                         .shadow(.art)
-                        .modifier(rise(1))
+                        .modifier(arrival.line(1))
                 }
                 Text(line)
-                    .type(ThemeType.feedMeta)
+                    .type(ThemeType.heroMeta)
                     .foregroundStyle(ThemeColor.textPrimary.opacity(0.88))
                     .lineLimit(typeSize.isAccessibilitySize ? 2 : 1)
                     .shadow(.art)
-                    .modifier(rise(2))
+                    .modifier(arrival.line(2))
             }
             .multilineTextAlignment(.center)
             .allowsHitTesting(false)
             if canToggle {
                 ScheduleMarkPill(watched: state.isWatched, label: markLabel, action: onToggle)
-                    .modifier(rise(3))
+                    .modifier(arrival.line(3))
             }
         }
         .frame(maxWidth: .infinity)
         .accessibilityElement(children: .contain)
-    }
-
-    private func rise(_ index: Int) -> ScheduleRise {
-        ScheduleRise(shown: arrived, delay: Double(index) * ScheduleArrivalMetrics.wordsStep,
-                     distance: ScheduleArrivalMetrics.wordsRise, duration: 0.32)
-    }
-
-    /// The show's pick, when it is known or becomes known within `pickPatience`; else the
-    /// catalogue's picture. Once per show.
-    private func settle() async {
-        let f = franchise
-        if let settled, settled.franchiseId == f.id { return }
-        // Grade the show's pictures if nobody has (Home asks for its billboard's and shelf's shows).
-        Task { await PosterPick.shared.resolve(f) }
-        if PosterPick.shared.choice(for: f) == nil, !PosterPick.candidates(for: f).isEmpty {
-            let deadline = ContinuousClock.now + ScheduleCardMetrics.pickPatience
-            while PosterPick.shared.choice(for: f) == nil, ContinuousClock.now < deadline, !Task.isCancelled {
-                try? await Task.sleep(for: .milliseconds(100))
-            }
-        }
-        guard !Task.isCancelled else { return }
-        let next = PosterPick.shared.choice(for: f).map(shown(from:)) ?? catalogue
-        PerfProbe.mark("schedule-card-settled", PosterPick.shared.choice(for: f) == nil ? "catalogue" : "pick")
-        // The picture already on screen (a stored pick) is kept as it is — an animated no-op
-        // transaction here carried the card's first layout pass with it and faded the scrim in.
-        if next == storedPick {
-            settled = next
-        } else {
-            withAnimation(ThemeMotion.uiPoster) { settled = next }
-        }
-    }
-
-    /// The picture's colour and lightness: the glow, the ground the words land on, and how much
-    /// protection the words need.
-    private func readArt(_ url: String?) async {
-        guard let url else { return }
-        if let hit = PaletteCache.shared.tint(for: url) {
-            if tint != hit { tint = hit }
-            lightness = PaletteCache.shared.lightness(for: url)
-            return
-        }
-        let resolved = await PaletteCache.shared.resolveIfAvailable(url: url, maxPixel: 360)
-        guard !Task.isCancelled, let resolved else { return }
-        withAnimation(ThemeMotion.uiPoster) {
-            tint = resolved
-            lightness = PaletteCache.shared.lightness(for: url)
-        }
     }
 }
