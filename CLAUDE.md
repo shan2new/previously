@@ -97,11 +97,14 @@ grouping. The LLM is only worth spending on when a `SIDE_STORY` might actually b
   e.g. the Gundam alternate universes and MHA Vigilantes, which the app then files under extras);
   `-- --apply` writes it and is the owner's call. Until it has run, readers must not trust
   `optional` or a season's SIDE_STORY (the feed's `isMainStory` and the iOS rules do not).
-- **The production API runs from this working tree** (`com.shan.previously` launchd job: `npx tsx
-  src/index.ts`, KeepAlive, cloudflared → `localhost:8787`, the local Postgres IS production). It
-  does not watch files, but any restart serves whatever is on disk — uncommitted edits included.
-  Keep `server/` compiling and its tests green while working, and never run a writing script
-  against the database without the owner's go-ahead.
+- **The production API runs from an IMMUTABLE RELEASE, not this tree** (since 6 Oct:
+  `com.shan.previously` runs `/opt/homebrew/opt/node@24/bin/node ops/run-server.mjs` from
+  `~/Infra/previously/releases/<stamp>/server`, which wraps the compiled `dist/index.js`;
+  cloudflared → `localhost:8787`; the local Postgres IS production). `server/ops/README.md` is the
+  release sequence (`npm run build`, `npm ci --omit=dev`, `prepare-install.mjs`); a fix in this tree
+  reaches production only when the owner cuts a release. Keep `server/` compiling and its tests
+  green (`.node-version` pins Node 24: use `/opt/homebrew/opt/node@24/bin`), and never run a
+  writing script against the database without the owner's go-ahead.
 
 ## Scheduled sync
 
@@ -668,7 +671,11 @@ to `news:` with every social row, in one transaction, when research adopts the p
     ("Demon Slayer") where a name is "Title: Subtitle"; a body over 280 characters cut at a word
     with X's "Show more" (the post page always whole). Every post shows its whole body (the sentence
     + the research note) — the timeline showed only the sentence until 26 Sep ("why are we
-    unnecessarily clipping text", owner). A glyph sized to the text reads `feedMeta.font`.
+    unnecessarily clipping text", owner). **Since 9 Oct the timeline draws the SENTENCE whole and the research's NOTE clamped to two
+    lines with "Show more"** (`FeedPostModel.note`, `ClampedNote`; the post page still draws the
+    whole body) — "the Feed feels utterly cramped unlike X" (owner): every post was a
+    280-character two-paragraph essay over a picture. The foot opened with it: `mediaTop` 12,
+    `barTop` 6, `rowBottom` 10 (were 9 / 2 / 6). A glyph sized to the text reads `feedMeta.font`.
   - **For you, drawn (4 Oct: "For you visuals look poorly built", owner).** The reason sits over the
     post as X's social-context line (`FeedPostRow.contextLine`, `Copy.Feed.context` → Discover's own
     `Copy.ForYou.reason`, the shows named as the library names them, a name that fits leading: "Like
@@ -746,6 +753,80 @@ to `news:` with every social row, in one transaction, when research adopts the p
   this Mac cannot draw a software keyboard (no Simulator.app ships in this Xcode, and idb's
   companion registers a hardware keyboard — `HardwareKeyboardLastSeen`): the keyboard path was
   checked with a synthetic `keyboardWillChangeFrame` in a throwaway build.
+- **The show page is HOME'S BILLBOARD, CONTINUED (9 Oct: "the Franchise details UX is absolutely
+  shit and disconnected with the rest of the amazing app experience", owner; diagnosis, captures
+  and the direction in `design/show-page-2026-10-09/`).** The X profile below is history (it
+  stays reachable in DEBUG as `-detailDirection profile` for side-by-side photographs, then goes).
+  What the page is now, in `FranchiseDetailView`'s stage extension and `ShowProfileParts.swift`:
+  - **The STAGE is one shared view, `ShowBillboard` (DesignSystem/ShowBillboard.swift)** — the
+    picture, its `PosterPick`, its arrival, the scrim and the glow, extracted from Home's billboard
+    on 9 Oct and verified pixel-identical on Home. `HomeBillboard` is Home's LOCKUP on it, the show
+    page's `stageLockup` the page's, Schedule's `ScheduleStageCard` the card's. The lockup closure
+    is handed the name the stage settled on and a `BillboardArrival` to ride. `pullStretch: false`
+    for a card mid-feed; `visibleBand` for a shorter card's logo rule.
+  - The page's lockup: the STATE badge (the `NextUp` eyebrow the pinned post used to compute —
+    NEW EPISODE, LAST EPISODE OF THE SEASON, COMPLETE, MOVIE ANNOUNCED…), the logo else the name,
+    one line (the moment, then the fact: "Aired yesterday · Season 4 · Episode 19"), the season bar
+    only part-way, the support line, and the ACTION ROW — the ivory pill (the mark, Start watching,
+    Start rewatch; `pinnedAction`) beside the status capsule (`followPill`); a show you do not own
+    gets the Add pill alone, and TRENDING on the badge when it is on the chart. The stage's height
+    is Home's measure from the bar less the index row and the first section's title, which peek.
+  - **ONE page, one scroll, an INDEX that pins** (`ShowIndexRow` — X's tab anatomy, but a tap
+    SCROLLS to the section; the underline follows the section in view, written by the sections'
+    geometry probes into `ShowIndexState` on change only, never per frame). **The index is the
+    only name: no section carries a title under it** ("Episodes" over "Episodes" — "Are you kidding
+    me?", owner, 9 Oct). Sections for a tracked show: Episodes (the season pill, the bar, "Mark
+    all N…", the anchored list, Movies & extras) · Trailers (a headerless shelf of 300-pt cards
+    playing in place; absent when there are none) · About (identity line, synopsis, themes, facts,
+    watch history, Because you finished, where to watch, cast, related) · Posts (the feed's rows,
+    else one grey line). An untracked show: Trailers · About · Episodes · Posts. A push from Home
+    or Schedule lands with the next episode's row in view under the billboard — no second screen,
+    no scroll. **A `scrollTo` with a `UnitPoint` applies it to the TARGET's height too**: the
+    section jumps anchor on a 1-pt marker at each section's top (`.background(alignment: .top)`),
+    else a tall section landed a fifth of itself above the index.
+  - Gone: the banner, the face, the counts line ("84 Watched 85 Episodes" broke the bar rule), the
+    pinned tweet, the Media tab's full-width stack, tabs that swap content, `tabMinHeight`.
+  - The page is painted from the STAGE's picture (`pageArt`: the settled pick, else the stored
+    pick, else the catalogue's billboard), not the banner's. `-detailTab` jumps to a section.
+- **Home's billboard is for DROPS only (9 Oct: "only the most recently aired franchise(s) should be
+  shown in full bleed hero… upcoming and otherwise… loses the significance", owner).**
+  `HomeFeed.heroes` are the week's drops, newest first, up to `billboardLimit` (3): a fresh drop on
+  a Watching show and the newest unmarked episode out this week whatever its shelf; two or more
+  PAGE (`HomeBillboardPager`: a paging `ScrollView` of `HomeBillboard`s keyed on their SHOWS, dots
+  at the foot, only the front page reporting to the bar — `reportsChrome`; the page's ground
+  follows the front page). Nothing out: `HomeFeed.quiet` — the top of the queue, else the next
+  airing — on the QUIET card (`HomeBillboard(quiet: true)`: 0.56 of the stage's height, the moment
+  as a label where the badge was, the logo at 72). `-homeHero` forces a show into whichever it is;
+  it selects, never fabricates. The billboard's pull-stretch and parallax read the VERTICAL scroll
+  view (`.scrollView(axis: .vertical)`), since inside the pager the nearest one scrolls sideways.
+- **Schedule's card is the STAGE, full bleed (9 Oct: "the Schedule screen just feels poorly made and
+  not premium enough like the Home screen", owner).** `ScheduleStageCard` (ScheduleLit.swift) is
+  `ShowBillboard` at 0.52 of the window across the feed — OUT NOW on the badge, an airing still to
+  come as a quiet label, the logo, the episode, the mark once out — and today's block stands in the
+  picture's hue (`HomeGround` behind it, Home's own). The month eyebrow is never printed over the
+  card. Rows: the face is 56 (was 40), the caption keeps its TIME whatever the name — "Episode 2 ·
+  7:30 PM" with the part under it as a `sub` line ("Season 2") only where `namesPart`, and a
+  premiere is "Premiere · 7:30 PM" over "Season 2" (the card still says "Season 2 premiere"); the
+  caption may wrap to two lines, never truncate. **The landing's SLACK** (`landingSlack`): with a
+  short week ahead the card and its few rows were shorter than the screen, so the feed could not
+  bring today to the top and the previous row's foot showed under the bar — room is added after
+  the last row for the landing day to reach the top, and no more. `ScheduleLitCard` is deleted.
+- **The Next up WIDGET (9 Oct, PreviouslyWidgets/NextUpWidget.swift).** The app writes
+  `NextUpSnapshot` (Shared/NextUpSnapshot.swift, a member of both targets) into the App Group
+  `group.com.cognipin.previously` — up to four shows: Home's drops, the quiet card's show, the
+  queue, then the week's airings — with a poster JPEG and a logo PNG per show, debounced 0.8 s
+  after a library reload, a mark or a status move (`AppModel+Widget.swift`,
+  `scheduleWidgetSnapshot`), then `WidgetCenter.reloadTimelines`. The widget (small: the poster,
+  the badge, the logo else the name, the episode; medium: the lead and two more; the Lock Screen's
+  rectangle in words) re-times itself at each airing so "Tonight at 7:30 PM" becomes NEW EPISODE
+  when it strikes, and a tap opens the show through `previously://show/<id>` (the URL scheme is
+  new; `PreviouslyApp.onOpenURL` → `pendingOpen`). The extension carries the Outfit weights
+  (`UIAppFonts` in project.yml's widget `info.properties` — XcodeGen writes Widgets/Info.plist
+  from them; a key added to the file by hand is lost on generate). **Signing:** both entitlements
+  files carry the group; on the simulator the build must be SIGNED (`CODE_SIGNING_ALLOWED=NO` drops
+  the entitlement and the container never exists); on a device, automatic signing registers the
+  App Group on both App IDs the first time Xcode sees it — the owner's Xcode session may be asked.
+  Verified on the QA simulator: the container, the snapshot and the widget on the Home Screen.
 - **The show page is the show's X PROFILE (25 Sep — "Details screen.", owner; three directions were
   photographed on the owner's shows — Netflix's title page, the show as an X profile, the billboard
   kept but lighter with tabs — and the owner chose the profile).** `FranchiseDetailView` +
@@ -1085,6 +1166,16 @@ to `news:` with every social row, in one transaction, when research adopts the p
   bar itself is the app's and draws no amber since 25 Sep) — so back chevrons, alert buttons,
   the search field's Cancel and caret are ink, and only toggles/pickers that mean state carry an
   explicit `.tint(ThemeColor.accent)`.
+- **A mark moves the status, on BOTH sides (9 Oct).** A forward mark on a Planned show moves it to
+  Watching; a write that leaves the story watched through moves a Planned or Watching show to
+  Watched. The server derives it on every progress write (`statusAfterWrites`, `services/library.ts`
+  — conservative: non-spin-off seasons plus non-optional OVA/ONA/films that are not side stories,
+  nothing releasing or announced; where it and the app's finer `isWatchedThrough` disagree it stays
+  silent) and the app mirrors it (`resume` → Watching or Watched with the move on the receipt;
+  `settleCompletion` and the launch sweep take Planned as well as Watching). Watched, Paused and
+  Dropped are never moved by the server. Before this, a Planned show finished in ONE write (Seven
+  Dials, "Mark all 3") stayed Planned for good. `npm run status:backfill` prints the rows the rule
+  would have moved; `-- --apply` writes them (owner's call).
 - **Write rules** (`AppModel`, `AppModel+Writes.swift`): a progress mark never rolls back — a failure
   goes to `SyncCenter.record` and the SyncBanner; membership/status writes roll back. Remove is
   immediate with Undo (`removeWithUndo`), batch marks and season resets confirm with the exact
