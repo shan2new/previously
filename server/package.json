@@ -5,11 +5,11 @@
   "type": "module",
   "description": "Previously backend — franchise grouping, AniList cache, scheduled sync, Clerk auth.",
   "engines": {
-    "node": ">=22"
+    "node": "24.x"
   },
   "scripts": {
     "dev": "tsx watch src/index.ts",
-    "start": "tsx src/index.ts",
+    "start": "node dist/index.js",
     "typecheck": "tsc --noEmit",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "tsx src/db/migrate.ts",
@@ -23,27 +23,31 @@
     "reco": "tsx src/scripts/reco-one.ts",
     "reco:backfill": "tsx src/scripts/reco-backfill.ts",
     "relations:backfill": "tsx src/scripts/relations-backfill.ts",
+    "status:backfill": "tsx src/scripts/status-backfill.ts",
     "auth:smoke": "tsx src/scripts/auth-smoke.ts",
     "moderation": "tsx src/scripts/moderation.ts",
-    "test": "vitest run"
+    "test": "vitest run src",
+    "build": "tsc -p tsconfig.build.json"
   },
   "dependencies": {
     "@anthropic-ai/claude-agent-sdk": "^0.3.205",
     "@clerk/backend": "^1.21.0",
+    "@fastify/compress": "9.2.0",
     "@fastify/cors": "^10.0.1",
     "dotenv": "^16.4.7",
-    "drizzle-orm": "^0.38.3",
-    "fastify": "^5.2.0",
-    "node-cron": "^3.0.3",
+    "drizzle-orm": "0.45.3",
+    "fastify": "5.12.5",
+    "jose": "6.2.3",
+    "node-cron": "4.6.0",
     "postgres": "^3.4.5",
     "zod": "^4.4.3"
   },
   "devDependencies": {
     "@types/node": "^22.10.5",
     "@types/node-cron": "^3.0.11",
-    "drizzle-kit": "^0.30.1",
+    "drizzle-kit": "0.31.11",
     "tsx": "^4.19.2",
     "typescript": "^5.7.3",
-    "vitest": "^2.1.8"
+    "vitest": "4.1.11"
   }
 }

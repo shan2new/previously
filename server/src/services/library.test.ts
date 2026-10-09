@@ -109,3 +109,94 @@ describe('progressWritesForCommand', () => {
     ] }, NOW)).toThrow(FranchiseProgressError)
   })
 })
+
+// The status a progress write leaves a show in (9 Oct 2026: a Planned show finished in one write
+// stayed Planned for good — see `derivedStatusAfterProgress`).
+const { derivedStatusAfterProgress, statusAfterWrites, storyWatchedThrough } = await import('./library.js')
+
+type Member = import('./library.js').StatusMemberRow
+function member(mediaId: number, over: Partial<Member> = {}): Member {
+  return {
+    mediaId, source: 'anilist', status: 'FINISHED', episodes: 12, next: null, episodesList: [],
+    watched: 0, partKind: 'season', relationship: 'SEQUEL', optional: false, ...over,
+  }
+}
+
+describe('derivedStatusAfterProgress', () => {
+  it('files a Planned or Watching show under Watched once the story is through', () => {
+    expect(derivedStatusAfterProgress('planned', { forward: true, watchedThrough: true })).toBe('completed')
+    expect(derivedStatusAfterProgress('watching', { forward: true, watchedThrough: true })).toBe('completed')
+    // A backward write that still leaves the story through (an over-mark trimmed) counts too.
+    expect(derivedStatusAfterProgress('watching', { forward: false, watchedThrough: true })).toBe('completed')
+  })
+
+  it('moves a Planned show to Watching on a forward mark that does not finish it', () => {
+    expect(derivedStatusAfterProgress('planned', { forward: true, watchedThrough: false })).toBe('watching')
+    expect(derivedStatusAfterProgress('planned', { forward: false, watchedThrough: false })).toBeNull()
+  })
+
+  it('leaves Watched, Paused and Dropped alone, and a show not in the library', () => {
+    for (const status of ['completed', 'paused', 'dropped'] as const) {
+      expect(derivedStatusAfterProgress(status, { forward: true, watchedThrough: true })).toBeNull()
+      expect(derivedStatusAfterProgress(status, { forward: true, watchedThrough: false })).toBeNull()
+    }
+    expect(derivedStatusAfterProgress(null, { forward: true, watchedThrough: true })).toBeNull()
+    expect(derivedStatusAfterProgress(undefined, { forward: true, watchedThrough: true })).toBeNull()
+  })
+})
+
+describe('statusAfterWrites', () => {
+  it('Seven Dials: one finished season, Planned, marked 3 of 3 in one write → Watched', () => {
+    const rows = [member(1, { source: 'tmdb', episodes: 3, relationship: null })]
+    expect(statusAfterWrites('planned', rows, [{ mediaId: 1, episodes: 3 }], NOW)).toBe('completed')
+  })
+
+  it('a Planned show marked part-way is being watched', () => {
+    const rows = [member(1), member(2)]
+    expect(statusAfterWrites('planned', rows, [{ mediaId: 1, episodes: 4 }], NOW)).toBe('watching')
+    // Finishing one season of two is still part-way.
+    expect(statusAfterWrites('planned', rows, [{ mediaId: 1, episodes: 12 }], NOW)).toBe('watching')
+  })
+
+  it('a Watching show whose last season is finished by the write is Watched', () => {
+    const rows = [member(1, { watched: 12 }), member(2, { watched: 11 })]
+    expect(statusAfterWrites('watching', rows, [{ mediaId: 2, episodes: 12 }], NOW)).toBe('completed')
+  })
+
+  it('a show with a season still releasing or announced is never filed Watched by the server', () => {
+    const releasing = [member(1, { watched: 12 }), member(2, { status: 'RELEASING', episodes: 12,
+      next: { episode: 8, airingAt: sec(NOW + 3 * 86_400_000) } })]
+    expect(statusAfterWrites('watching', releasing, [{ mediaId: 2, episodes: 7 }], NOW)).toBeNull()
+    const announced = [member(1, { watched: 11 }), member(2, { status: 'NOT_YET_RELEASED', episodes: null })]
+    expect(statusAfterWrites('watching', announced, [{ mediaId: 1, episodes: 12 }], NOW)).toBeNull()
+    // Planned, though, is still being watched after a forward mark.
+    expect(statusAfterWrites('planned', releasing, [{ mediaId: 2, episodes: 7 }], NOW)).toBe('watching')
+  })
+
+  it('a reset or an unmark moves nothing', () => {
+    const rows = [member(1, { watched: 12 })]
+    expect(statusAfterWrites('planned', rows, [{ mediaId: 1, episodes: 0 }], NOW)).toBeNull()
+    expect(statusAfterWrites('watching', rows, [{ mediaId: 1, episodes: 11 }], NOW)).toBeNull()
+  })
+
+  it('a non-optional OVA or film in the story holds the show open; a side story or spin-off does not', () => {
+    const ova = [member(1, { watched: 12 }), member(2, { partKind: 'ova', episodes: 2, relationship: 'SEQUEL' })]
+    // Conservative: the server stays silent and lets the device's finer rule decide.
+    expect(statusAfterWrites('watching', ova, [{ mediaId: 1, episodes: 12 }], NOW)).toBeNull()
+    const side = [member(1, { watched: 11 }), member(2, { partKind: 'ova', episodes: 2, relationship: 'SIDE_STORY', optional: true })]
+    expect(statusAfterWrites('watching', side, [{ mediaId: 1, episodes: 12 }], NOW)).toBe('completed')
+    const spinOff = [member(1, { watched: 11 }), member(2, { relationship: 'SPIN_OFF' })]
+    expect(statusAfterWrites('watching', spinOff, [{ mediaId: 1, episodes: 12 }], NOW)).toBe('completed')
+  })
+
+  it('a franchise of films is through when its films are watched', () => {
+    const films = [member(1, { partKind: 'movie', episodes: 1, relationship: null }), member(2, { partKind: 'movie', episodes: 1 })]
+    expect(statusAfterWrites('planned', films, [{ mediaId: 1, episodes: 1 }, { mediaId: 2, episodes: 1 }], NOW)).toBe('completed')
+    expect(statusAfterWrites('planned', films, [{ mediaId: 1, episodes: 1 }], NOW)).toBe('watching')
+  })
+
+  it('an unsized part is not through (nothing to measure against)', () => {
+    const rows = [member(1, { episodes: null, watched: 0 })]
+    expect(storyWatchedThrough(rows, new Map([[1, 5]]), NOW)).toBe(false)
+  })
+})

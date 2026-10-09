@@ -545,7 +545,7 @@ Detail do a current bounded lookup. Use the batch endpoint to warm a visible she
 | PATCH | `/me/subscriptions/:franchiseId` | `{ status }` | `{ ok: true }` |
 | DELETE | `/me/subscriptions/:franchiseId` | — | `{ ok: true }` |
 | PUT | `/me/progress` | `{ mediaId, episodes }` | `{ ok: true }`. The count is clamped: a NOT_YET_RELEASED part to 0, a **RELEASING part to its aired-by-now count** (see **Episode discussions**; with no evidence of a count at all — no slot, no dated episode — to its size, or unbounded when unsized), anything else to `max(episodes, aired)`. The ceiling bounds only an **increase**: the value already stored stays reachable, so a mark written before the ceiling existed (12 of a season with 5 aired) is never pulled down — writing 11 stores 11, not 5. `404 {"error":"media not found"}` for an unknown `mediaId` — nothing is written, and it is final (discard the pending write, never retry). `400` on a bad body |
-| PUT | `/me/franchises/:franchiseId/progress` | `{ mode: "caught_up" \| "completed" \| "reset", status? }` **or** `{ parts: [{ mediaId, episodes }], status? }` | Atomic canonical `{ ok, franchiseId, status, progress[] }`; rejects foreign/duplicate media IDs before writing; `completed` also upserts completed subscription status |
+| PUT | `/me/franchises/:franchiseId/progress` | `{ mode: "caught_up" \| "completed" \| "reset", status? }` **or** `{ parts: [{ mediaId, episodes }], status? }` | Atomic canonical `{ ok, franchiseId, status, progress[] }`; rejects foreign/duplicate media IDs before writing; `completed` also upserts completed subscription status; with no `status` asked for, the writes may still move the show's status by the rule below, and the response's `status` is canonical |
 | POST | `/me/opened` | — | `{ prevOpenedAt: Int }` — ONE statement moves the last visit into `prevOpenedAt` and stamps now, atomically; returns the value *before* this call. Not idempotent: call it once per new-visit foreground, **before** loading the feed, and use its answer as the session's anchor |
 | GET | `/me/notifications?limit=50&cursor=` | — | `NotificationsPage` `{ items: NotificationItem[], unread: Int, nextCursor }` newest-first — see **NotificationItem**; `limit` 1–200, `400` outside it or on a bad cursor |
 | POST | `/me/notifications/read` | `{ ids?: [uuid] }` (≤ 500) | `{ marked: Int }` — omit `ids` to mark all unread as read; `400` on a bad body |
@@ -691,37 +691,52 @@ route in this API that cannot be undone, so its semantics are exact:
   foreign key declares — the cascade is real and `me.account.test.ts` asserts it (for every foreign
   key to `users`, whatever the column is called), but a database restored from a dump, or a table
   added later without one, must not be able to turn "delete my account" into "orphan my rows".
-- **Scoped to the bearer.** The user id comes from the token; there is no path or body parameter
-  that could name a different account. A body is accepted only if it is empty — an unrecognised
-  field is a `400`, never an ignored one.
+- **Scoped to the bearer.** The user id comes from the verified token. The optional body is
+  `{ "apple": { "identityToken": "…", "authorizationCode": "…" } }`; the Apple token is capped at
+  16 KiB and the code at 8 KiB. Omitted, empty or incomplete proof still permits app-data erasure.
+  Unknown fields or wrong types are `400` before deletion. Proof never selects another app account.
 - **Nothing else is touched.** The catalogue (`media`, `franchise`, `announcements`) is shared and
   survives; only the rows that belong to or are about this user are removed. The user's reports go
   with the account, and a comment's report count is RECOUNTED from the reports that remain the next
   time it is reported (see **Comments** → report), so an erased reporter's report stops counting.
-- **The one disclosed exception: the ban list.** If the account was suspended, its `moderation_bans`
+- **Retained safety records.** The deletion tombstone stores an identity hash, deletion/retry timestamps,
+  and Apple outcome; a pending Clerk cleanup retains its raw retry identity until completion. The
+  independent journal retains the intent and hash-only immutable outcome markers. Tokens/codes are
+  never part of these records. The ban list is also retained. If the account was suspended, its `moderation_bans`
   row — the Clerk identity and the operator's reason — is kept after deletion. It is keyed on the
   Clerk id and has no link to the erased account; without it, deleting and signing back in would
   lift a ban.
 - A suspended account can still call `DELETE /me` (and `GET /me/export`). A suspended identity's
   export only LOOKS its account up — it never re-creates an erased one (nor stores its email
   again): with no account it answers `404 {"error":"account not found"}`.
-- **The sign-in identity is erased too.** Once the transaction has committed, the server deletes the
-  Clerk user (Clerk's backend API, when the server has `CLERK_SECRET_KEY`) — or, for a SUSPENDED
-  identity, **bans** it in Clerk instead, so the same email cannot sign up again for a fresh Clerk id
-  and walk around the ban. A Clerk failure does not undo the erasure (the answer is still
-  `{ deleted: true }`): it is logged as `account.clerk_delete_failed` and the operator retries it with
-  `npm run moderation -- clerk-delete <clerkId>`.
-- **An erased identity is refused for 15 minutes.** A Clerk session token is verified offline and
-  stays valid for up to a minute after the account is gone, and every authenticated route creates an
-  account for a valid token. So for 15 minutes after the erasure, **every** authenticated route
-  answers the Clerk id with `401 {"error":"account deleted"}`, before anything is created — an
-  in-flight or retried write (a like, a rating, a progress mark, a queued comment) can never re-create
-  the account the user just erased. A client stops its write queues BEFORE it sends `DELETE /me`,
-  wipes its local state on success without waiting for sign-out to finish, and treats a
-  `401 account deleted` like any other `401`: the session is gone.
-- The client signs out immediately afterwards. The next sign-in after the hold (a fresh sign-up,
-  once Clerk has deleted the user) creates a brand-new, empty account; a suspended identity cannot
-  sign up again (above).
+- **Durable deletion and identity cleanup.** A private independent journal records the deletion
+  intent before the SQL commit. Production startup, the cleanup worker and authenticated
+  `GET /me/deletion` reconcile it under the same identity lock used by account creation, so a
+  rolled-back commit or an older restored database cannot silently resurrect the account. The
+  server deletes the Clerk user after app-data erasure; failed Clerk cleanup retries in the worker.
+  `DELETE /me` returns `200 { deleted: true, status: "complete", appleRevocation }` when identity
+  cleanup has completed, or `202 { deleted: false, status: "pending", appleRevocation }` when it
+  remains pending. Both mean app-data erasure has committed. `GET /me/deletion` returns the same
+  durable receipt, or `200 { deleted: false, status: "active" }` when no deletion intent exists.
+- **Apple grant outcome.** `appleRevocation` is `"revoked"`, `"manual_required"` or
+  `"not_applicable"`. A fresh Apple ID token must verify against Apple's public keys, issuer,
+  native app audience and freshness; its subject must match a current linked Apple account on
+  the authenticated Clerk user. Only then, after app-data erasure commits, the server exchanges
+  the one-use code, verifies the exchanged token belongs to the same subject/nonce, and revokes
+  that refresh/access grant. Only an Apple `200` revocation receipt establishes `"revoked"`.
+  Current Clerk linkage proving no Apple account establishes `"not_applicable"`. Missing proof,
+  invalid/wrong-owner proof, unavailable linkage, provider failure, lost receipt or interruption
+  stays `"manual_required"`; the client directs the user to revoke Previously in Apple Settings.
+  These failures never prevent app-data erasure. A native cancellation happens before DELETE and
+  erases nothing. Tokens/codes remain ephemeral and never enter logs, SQL or the filesystem journal;
+  only the outcome is retained. A hash-only immutable outcome marker protects a proven revocation
+  when restoring an older deletion snapshot.
+- **Replays and queued writes.** The deletion tombstone survives sign-out, restarts and database
+  restores. Authentication answers same-identity writes with `401 { error: "account deleted" }`
+  before account creation. A repeated DELETE returns the stored receipt (and can retry Clerk cleanup),
+  without reusing its Apple proof. The client holds writes before DELETE, reconciles unknown transport
+  outcomes through `/me/deletion`, clears account-owned local state on accepted erasure, and signs out.
+  A genuinely new Clerk identity can create a new empty account; the old identity remains erased.
 
 ### Account export: `GET /me/export`
 
@@ -1488,7 +1503,16 @@ cannot be liked.
   dated airing the same way.
 
 `PUT /me/progress` shares the rule: a RELEASING part cannot be marked past its aired count (a mark
-already stored above it is kept, never pulled down). A `reset` re-locks rooms for the resetting
+already stored above it is kept, never pulled down). Both progress endpoints also keep the STATUS rule
+(`statusAfterWrites`, services/library.ts; the app mirrors it in `AppModel.resume` /
+`settleCompletion`): a forward mark on a `planned` show moves it to `watching`, and a write that
+leaves the story watched through — every non-spin-off season and every non-optional OVA, ONA and film
+that is not a side story watched to what has aired, with no part releasing or announced — moves a
+`planned` or `watching` show to `completed`. Nothing else moves on the server: `completed`, `paused`
+and `dropped` are the user's word (a Watched show whose story goes on is the app's call, since only
+it knows about a rewatch in flight). The move is sequenced on the subscription like the client's
+own status writes, so a later status from the same writer keeps its place. `PUT /me/progress` does
+not return the status; the next library read carries it. A `reset` re-locks rooms for the resetting
 viewer; comments they already wrote stay visible to others, and Activity stops printing the text of
 replies in rooms that are no longer open to them.
 
@@ -1715,12 +1739,13 @@ For synchronous previews these errors instead use HTTP 422 (missing/private list
 interface ImportPreview {
   id: string // apply this id; it differs from the read-job id
   source: 'anilist' | 'mal' | 'tvtime'
-  listed: number // matched anime list entries, or resolved TV shows
+  listed: number // source entries, including unmatched and policy-skipped rows
   ready: number // grouped franchises already in the catalogue
   toFetch: number // missing anime entries / TV shows, not necessarily distinct franchises
   episodes: number // planned/source watched counts; final writes obey aired ceilings
   byStatus: Record<'watching' | 'completed' | 'planned' | 'paused' | 'dropped', number>
   unmatched: { count: number, titles: string[] } // up to 12 titles
+  skipped: { count: number, reasons: { adult_content: number } }
   sample: FranchiseSummary[] // up to 9 catalogue shows
 }
 ```
@@ -1730,7 +1755,8 @@ interface ImportPreview {
 Apply the completed preview id; GET follows its progress. Re-applying that id is idempotent.
 
 ```ts
-{ id: string, state: 'preview' | 'running' | 'done', shows: number, remaining: number, failed: number }
+{ id: string, state: 'preview' | 'running' | 'done', shows: number, remaining: number, failed: number,
+  skipped: { count: number, reasons: { adult_content: number } } }
 ```
 
 `shows` counts distinct franchises processed successfully (including existing memberships),
@@ -1741,6 +1767,10 @@ increases are atomic and capped to aired episodes. Existing memberships retain t
 An import can correct the status of a membership it just created as more seasons are resolved,
 but only while that same membership and status are unchanged. Removing a show during the tail
 prevents that import from re-adding it. Background import requests share a paced AniList budget.
+
+Titles explicitly flagged adult or carrying the Hentai genre are omitted from consumer catalogue/import
+results. Policy skips are counted separately from unmatched names and provider failures. Cached catalogues
+are checked again when apply writes progress; already-owned records remain in storage and account export.
 
 Unknown, expired or another account's job/preview returns `410 { error: 'import_expired' }`.
 Sessions live in server memory: unused previews and completed results expire after 30 minutes;

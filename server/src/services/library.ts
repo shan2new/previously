@@ -3,41 +3,62 @@ import { db } from '../db/index.js'
 import { franchise, franchiseMember, media, progress, subscriptions, users } from '../db/schema.js'
 import type { EpisodeMeta, FranchiseProgressCommandResponse, WatchStatus } from '../types/api.js'
 import { airedCount, caughtUpValue, clampProgressValue, type AiredInput } from './aired.js'
+import { withClientMutation, type ClientMutationContext, type MutationConnection, type MutationScope } from './clientMutations.js'
+import { spine, type MemberRow } from '../import/plan.js'
 
 /** Subscribe to a franchise. Defaults status to `watching` if any part is releasing, else `planned`. */
-export async function subscribe(userId: string, franchiseId: string, status?: WatchStatus): Promise<void> {
+export async function subscribe(userId: string, franchiseId: string, status?: WatchStatus,
+  context?: ClientMutationContext, connection: MutationConnection = db): Promise<boolean> {
+  if (context) return withClientMutation(context, 'subscribe', { franchiseId, status }, async (tx, scope) => {
+    if (!await scope.apply([`subscription:${franchiseId}`])) return false
+    return subscribe(userId, franchiseId, status, undefined, tx)
+  })
   let resolved = status
   if (!resolved) {
-    const members = await db
+    const members = await connection
       .select({ mediaId: franchiseMember.mediaId })
       .from(franchiseMember)
       .where(eq(franchiseMember.franchiseId, franchiseId))
     const ids = members.map((m) => m.mediaId)
     const releasing = ids.length
-      ? await db.select({ id: media.id }).from(media).where(and(inArray(media.id, ids), eq(media.status, 'RELEASING')))
+      ? await connection.select({ id: media.id }).from(media).where(and(inArray(media.id, ids), eq(media.status, 'RELEASING')))
       : []
     resolved = releasing.length > 0 ? 'watching' : 'planned'
   }
-  await db
+  await connection
     .insert(subscriptions)
     .values({ userId, franchiseId, status: resolved })
     .onConflictDoUpdate({ target: [subscriptions.userId, subscriptions.franchiseId], set: { status: resolved } })
+  return true
 }
 
-export async function setSubscriptionStatus(userId: string, franchiseId: string, status: WatchStatus): Promise<void> {
-  await db
+export async function setSubscriptionStatus(userId: string, franchiseId: string, status: WatchStatus,
+  context?: ClientMutationContext, connection: MutationConnection = db): Promise<boolean> {
+  if (context) return withClientMutation(context, 'subscription_status', { franchiseId, status }, async (tx, scope) => {
+    if (!await scope.apply([`subscription:${franchiseId}`])) return false
+    return setSubscriptionStatus(userId, franchiseId, status, undefined, tx)
+  })
+  await connection
     .update(subscriptions)
     .set({ status })
     .where(and(eq(subscriptions.userId, userId), eq(subscriptions.franchiseId, franchiseId)))
+  return true
 }
 
-export async function unsubscribe(userId: string, franchiseId: string): Promise<void> {
-  await db
+export async function unsubscribe(userId: string, franchiseId: string,
+  context?: ClientMutationContext, connection: MutationConnection = db): Promise<boolean> {
+  if (context) return withClientMutation(context, 'unsubscribe', { franchiseId }, async (tx, scope) => {
+    const key = `subscription:${franchiseId}`
+    if (!await scope.apply([key], { deleted: [key] })) return false
+    return unsubscribe(userId, franchiseId, undefined, tx)
+  })
+  await connection
     .delete(subscriptions)
     .where(and(eq(subscriptions.userId, userId), eq(subscriptions.franchiseId, franchiseId)))
+  return true
 }
 
-export type SetProgressResult = { ok: true; episodes: number } | { ok: false; reason: 'media_not_found' }
+export type SetProgressResult = { ok: true; episodes: number; applied?: boolean } | { ok: false; reason: 'media_not_found' }
 
 /**
  * Store one part's watched count, clamped by `clampProgressValue` (services/aired.ts):
@@ -62,8 +83,48 @@ export type SetProgressResult = { ok: true; episodes: number } | { ok: false; re
  * An unknown `mediaId` writes NOTHING and says so (the route answers 404 `media not found`, which is
  * final): it used to be written unclamped, a row no read would ever surface.
  */
-export async function setProgress(userId: string, mediaId: number, episodes: number): Promise<SetProgressResult> {
-  const [row] = await db
+export async function setProgress(userId: string, mediaId: number, episodes: number,
+  context?: ClientMutationContext, connection: MutationConnection = db): Promise<SetProgressResult> {
+  if (context) return withClientMutation(context, 'progress', { mediaId, episodes }, async (tx, scope) => {
+    const planned = await planProgressWrite(tx, userId, mediaId, episodes)
+    if (!planned.ok) return planned
+    const { plan } = planned
+    // The show's subscription is the mark's barrier: an unsubscribe sequenced after this mark wins.
+    const applied = await scope.apply([`media:${mediaId}`], { barriers: plan.franchiseIds.map((id) => `subscription:${id}`) })
+    if (!applied) {
+      const [saved] = await tx.select({ episodes: progress.episodesWatched }).from(progress)
+        .where(and(eq(progress.userId, userId), eq(progress.mediaId, mediaId))).limit(1)
+      return { ok: true, episodes: saved?.episodes ?? 0, applied: false }
+    }
+    // A status the mark moves is a word on the subscription, sequenced like the client's own: a
+    // status this writer already set LATER keeps its place, and the mark still lands on its own.
+    const statusWrites: ProgressWritePlan['statusWrites'] = []
+    for (const write of plan.statusWrites) {
+      if (await scope.apply([`subscription:${write.franchiseId}`])) statusWrites.push(write)
+    }
+    await commitProgressWrite(tx, userId, { ...plan, statusWrites })
+    return { ok: true, episodes: plan.episodes, applied: true }
+  })
+  const planned = await planProgressWrite(connection, userId, mediaId, episodes)
+  if (!planned.ok) return planned
+  await commitProgressWrite(connection, userId, planned.plan)
+  return { ok: true, episodes: planned.plan.episodes }
+}
+
+interface ProgressWritePlan {
+  mediaId: number
+  /** The count after the clamp. */
+  episodes: number
+  /** Every franchise the part belongs to (its subscription is the write's barrier). */
+  franchiseIds: string[]
+  /** The subscription statuses this write moves (`statusAfterWrites`). */
+  statusWrites: { franchiseId: string; status: WatchStatus }[]
+}
+
+/** The clamp and the status rule, read before anything is written. */
+async function planProgressWrite(connection: MutationConnection, userId: string, mediaId: number, episodes: number,
+  nowMs: number = Date.now()): Promise<{ ok: true; plan: ProgressWritePlan } | { ok: false; reason: 'media_not_found' }> {
+  const [row] = await connection
     .select({
       source: media.source,
       status: media.status,
@@ -77,16 +138,56 @@ export async function setProgress(userId: string, mediaId: number, episodes: num
     .where(eq(media.id, mediaId))
     .limit(1)
   if (!row) return { ok: false, reason: 'media_not_found' }
-  const clamped = clampProgressValue(toAiredInput(row), episodes, Date.now(), row.watched ?? 0)
+  const clamped = clampProgressValue(toAiredInput(row), episodes, nowMs, row.watched ?? 0)
+  const memberships = await connection.select({ id: franchiseMember.franchiseId }).from(franchiseMember)
+    .where(eq(franchiseMember.mediaId, mediaId))
+  const franchiseIds = memberships.map((membership) => membership.id)
+  const statusWrites: ProgressWritePlan['statusWrites'] = []
+  for (const franchiseId of franchiseIds) {
+    const [subscription] = await connection.select({ status: subscriptions.status }).from(subscriptions)
+      .where(and(eq(subscriptions.userId, userId), eq(subscriptions.franchiseId, franchiseId))).limit(1)
+    if (!subscription) continue
+    const status = statusAfterWrites(subscription.status as WatchStatus, await statusMemberRows(connection, userId, franchiseId),
+      [{ mediaId, episodes: clamped }], nowMs)
+    if (status) statusWrites.push({ franchiseId, status })
+  }
+  return { ok: true, plan: { mediaId, episodes: clamped, franchiseIds, statusWrites } }
+}
+
+async function commitProgressWrite(connection: MutationConnection, userId: string, plan: ProgressWritePlan): Promise<void> {
   const now = new Date()
-  await db
+  await connection
     .insert(progress)
-    .values({ userId, mediaId, episodesWatched: clamped, updatedAt: now })
+    .values({ userId, mediaId: plan.mediaId, episodesWatched: plan.episodes, updatedAt: now })
     .onConflictDoUpdate({
       target: [progress.userId, progress.mediaId],
-      set: { episodesWatched: clamped, updatedAt: now },
+      set: { episodesWatched: plan.episodes, updatedAt: now },
     })
-  return { ok: true, episodes: clamped }
+  for (const write of plan.statusWrites) {
+    await connection.update(subscriptions).set({ status: write.status })
+      .where(and(eq(subscriptions.userId, userId), eq(subscriptions.franchiseId, write.franchiseId)))
+  }
+}
+
+/** A franchise's member rows with the caller's counts, as `statusAfterWrites` reads them. */
+async function statusMemberRows(connection: MutationConnection, userId: string, franchiseId: string): Promise<StatusMemberRow[]> {
+  return connection
+    .select({
+      mediaId: media.id,
+      source: media.source,
+      status: media.status,
+      episodes: media.episodes,
+      next: media.nextAiringEpisode,
+      episodesList: media.episodesList,
+      watched: progress.episodesWatched,
+      partKind: franchiseMember.partKind,
+      relationship: franchiseMember.relationship,
+      optional: franchiseMember.optional,
+    })
+    .from(franchiseMember)
+    .innerJoin(media, eq(media.id, franchiseMember.mediaId))
+    .leftJoin(progress, and(eq(progress.mediaId, media.id), eq(progress.userId, userId)))
+    .where(eq(franchiseMember.franchiseId, franchiseId))
 }
 
 export interface ProgressMediaRow {
@@ -114,6 +215,75 @@ function toAiredInput(row: Omit<ProgressMediaRow, 'mediaId'>): AiredInput {
 
 function airedForProgress(row: Omit<ProgressMediaRow, 'mediaId'>, nowMs: number = Date.now()): number {
   return airedCount(toAiredInput(row), nowMs).aired
+}
+
+/** A franchise member as the status rule reads it: the progress row plus the member's place. */
+export interface StatusMemberRow extends ProgressMediaRow {
+  partKind: string
+  relationship: string | null
+  optional: boolean
+}
+
+/**
+ * What a progress write does to the show's STATUS — the server's half of a rule the app also keeps
+ * (`AppModel.settleCompletion` / `resume`), so every writer agrees: a FORWARD mark on a Planned
+ * show is watching it; the story watched THROUGH files a Planned or Watching show under Watched.
+ * Nothing else moves here. A show filed Watched whose story goes on is the client's call (it knows
+ * about a rewatch in flight); Paused and Dropped are the user's own word. Null = unchanged.
+ *
+ * Why the server derives it at all (9 Oct 2026): a show added to Planned and finished in ONE write
+ * stayed Planned for good — the client's settle rule asked for Watching first, its resume rule
+ * bailed once the story was through, and the server never looked. Imports, replays and a second
+ * device all pass through here.
+ */
+export function derivedStatusAfterProgress(current: WatchStatus | null | undefined,
+  change: { forward: boolean; watchedThrough: boolean }): WatchStatus | null {
+  if (!current) return null
+  if (change.watchedThrough && (current === 'planned' || current === 'watching')) return 'completed'
+  if (change.forward && current === 'planned') return 'watching'
+  return null
+}
+
+/**
+ * The story watched through, read CONSERVATIVELY: every season that is not a spin-off (the import
+ * planner's spine), plus every non-optional OVA, ONA and film that is not a side story, watched to
+ * what has aired — and no part of the show still releasing or announced (the app's own
+ * `Franchise.isWatchedThrough`). Where this and the app's finer main-story rule disagree, this one
+ * stays silent and the app's settle rule decides on the device: a server that files a show Watched
+ * too early is the worse failure.
+ */
+export function storyWatchedThrough(rows: StatusMemberRow[], watched: Map<number, number>, nowMs: number): boolean {
+  if (rows.some((row) => row.status === 'RELEASING' || row.status === 'NOT_YET_RELEASED')) return false
+  const members: MemberRow[] = rows.map((row) => ({
+    mediaId: row.mediaId, franchiseId: '', partKind: row.partKind, sequence: 0,
+    relationship: row.relationship, status: row.status, released: airedForProgress(row, nowMs),
+  }))
+  const byId = new Map(rows.map((row) => [row.mediaId, row]))
+  const story = spine(members)
+  const extras = members.filter((member) => {
+    if (story.includes(member)) return false
+    const tie = (member.relationship ?? '').toUpperCase()
+    return ['ova', 'ona', 'movie'].includes(member.partKind) && !byId.get(member.mediaId)!.optional
+      && tie !== 'SIDE_STORY' && tie !== 'SPIN_OFF'
+  })
+  const required = [...story, ...extras].filter((member) => member.released > 0)
+  return required.length > 0 && required.every((member) => (watched.get(member.mediaId) ?? 0) >= member.released)
+}
+
+/**
+ * The status `writes` leave a subscription in, from the member rows as they are BEFORE the writes
+ * (`watched` = the stored count). Null when nothing moves.
+ */
+export function statusAfterWrites(current: WatchStatus | null | undefined, rows: StatusMemberRow[],
+  writes: { mediaId: number; episodes: number }[], nowMs: number): WatchStatus | null {
+  if (current !== 'planned' && current !== 'watching') return null
+  const after = new Map(rows.map((row) => [row.mediaId, row.watched ?? 0]))
+  let forward = false
+  for (const write of writes) {
+    if (write.episodes > (after.get(write.mediaId) ?? 0)) forward = true
+    after.set(write.mediaId, write.episodes)
+  }
+  return derivedStatusAfterProgress(current, { forward, watchedThrough: storyWatchedThrough(rows, after, nowMs) })
 }
 
 /**
@@ -206,30 +376,35 @@ export async function setFranchiseProgress(
   userId: string,
   franchiseId: string,
   command: FranchiseProgressCommand,
+  context?: ClientMutationContext,
 ): Promise<FranchiseProgressCommandResponse> {
-  return db.transaction(async (tx) => {
+  if (context) return withClientMutation(context, 'franchise_progress', { franchiseId, command },
+    (tx, scope) => setFranchiseProgressOn(tx, userId, franchiseId, command, scope, !!context.stamp))
+  return db.transaction((tx) => setFranchiseProgressOn(tx, userId, franchiseId, command))
+}
+
+async function setFranchiseProgressOn(tx: MutationConnection, userId: string, franchiseId: string,
+  command: FranchiseProgressCommand, scope?: MutationScope, stamped = false): Promise<FranchiseProgressCommandResponse> {
     const [exists] = await tx.select({ id: franchise.id }).from(franchise).where(eq(franchise.id, franchiseId)).limit(1)
     if (!exists) throw new FranchiseProgressError('not_found', 'franchise not found')
 
-    const rows: ProgressMediaRow[] = await tx
-      .select({
-        mediaId: media.id,
-        source: media.source,
-        status: media.status,
-        episodes: media.episodes,
-        next: media.nextAiringEpisode,
-        episodesList: media.episodesList,
-        watched: progress.episodesWatched,
-      })
-      .from(franchiseMember)
-      .innerJoin(media, eq(media.id, franchiseMember.mediaId))
-      .leftJoin(progress, and(eq(progress.mediaId, media.id), eq(progress.userId, userId)))
-      .where(eq(franchiseMember.franchiseId, franchiseId))
+    const rows: StatusMemberRow[] = await statusMemberRows(tx, userId, franchiseId)
 
     const writes = progressWritesForCommand(rows, command)
 
+    const requestedStatus = command.status ?? ('mode' in command && command.mode === 'completed' ? 'completed' : undefined)
+    // No status asked for: the writes may still move the one the show has (`statusAfterWrites`).
+    const [current] = requestedStatus ? [] : await tx
+      .select({ status: subscriptions.status })
+      .from(subscriptions)
+      .where(and(eq(subscriptions.userId, userId), eq(subscriptions.franchiseId, franchiseId)))
+      .limit(1)
+    const derivedStatus = requestedStatus ? null : statusAfterWrites(current?.status as WatchStatus | undefined, rows, writes, Date.now())
+    const applied = !scope || await scope.apply([
+      ...writes.map((write) => `media:${write.mediaId}`), ...(requestedStatus ? [`subscription:${franchiseId}`] : []),
+    ], { barriers: [`subscription:${franchiseId}`] })
     const now = new Date()
-    for (const write of writes) {
+    for (const write of applied ? writes : []) {
       await tx
         .insert(progress)
         .values({ userId, mediaId: write.mediaId, episodesWatched: write.episodes, updatedAt: now })
@@ -239,8 +414,7 @@ export async function setFranchiseProgress(
         })
     }
 
-    const requestedStatus = command.status ?? ('mode' in command && command.mode === 'completed' ? 'completed' : undefined)
-    if (requestedStatus) {
+    if (applied && requestedStatus) {
       await tx
         .insert(subscriptions)
         .values({ userId, franchiseId, status: requestedStatus })
@@ -248,6 +422,13 @@ export async function setFranchiseProgress(
           target: [subscriptions.userId, subscriptions.franchiseId],
           set: { status: requestedStatus },
         })
+    } else if (applied && derivedStatus && (!scope || await scope.apply([`subscription:${franchiseId}`]))) {
+      // Sequenced as a word on the subscription (see `setProgress`): a later status from this writer
+      // keeps its place; the marks above have landed either way.
+      await tx
+        .update(subscriptions)
+        .set({ status: derivedStatus })
+        .where(and(eq(subscriptions.userId, userId), eq(subscriptions.franchiseId, franchiseId)))
     }
 
     const [subscription] = await tx
@@ -264,11 +445,11 @@ export async function setFranchiseProgress(
     const savedById = new Map(saved.map((row) => [row.mediaId, row.episodes]))
     return {
       ok: true,
+      ...(stamped ? { applied } : {}),
       franchiseId,
       status: (subscription?.status as WatchStatus | undefined) ?? null,
       progress: rows.map((row) => ({ mediaId: row.mediaId, episodes: savedById.get(row.mediaId) ?? 0 })),
     }
-  })
 }
 
 /**
