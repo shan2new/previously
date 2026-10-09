@@ -1,4 +1,8 @@
 name: Previously
+configs:
+  Debug: debug
+  QA: debug
+  Release: release
 # Deployment target is iOS 18.0, not 26.0 and not 17.0. iOS 17 and iOS 18 support the IDENTICAL
 # iPhone set (iPhone XR / XS and later, A12+) — Apple kept 17's device list for 18 — while iOS 26
 # requires iPhone 11 / SE 2nd gen. So 18 already reaches every phone that 26 excludes, and dropping
@@ -17,7 +21,7 @@ settings:
     SWIFT_VERSION: "6.0"
     DEVELOPMENT_LANGUAGE: en
     MARKETING_VERSION: "1.0"
-    CURRENT_PROJECT_VERSION: "12"
+    CURRENT_PROJECT_VERSION: "15"
     # Set SWIFT_STRICT_CONCURRENCY to "complete" once you have validated the build.
     SWIFT_STRICT_CONCURRENCY: minimal
 
@@ -108,6 +112,11 @@ targets:
           NSAllowsLocalNetworking: true
         # Lock-screen / Dynamic Island airing countdown (AiringLiveActivityManager).
         NSSupportsLiveActivities: true
+        # The Next up widget's deep link: previously://show/<franchiseId> (PreviouslyApp.onOpenURL).
+        CFBundleURLTypes:
+          - CFBundleURLName: com.cognipin.previously
+            CFBundleURLSchemes:
+              - previously
         # === FILL THESE IN ===
         # Your Clerk publishable key (pk_test_… / pk_live_…). Leave the placeholder
         # to run in dev-bypass mode against the local backend.
@@ -142,12 +151,21 @@ targets:
         # text was dated 3 Sep, the landing text still labelled itself a working draft). One
         # source of truth, on the host that does not go down. Custom domain still to come — the
         # default vercel.app URL is fine for the beta, not for a public listing.
-        PRIVACY_POLICY_URL: "https://landing-ten-theta-55.vercel.app/privacy"
-        TERMS_URL: "https://landing-ten-theta-55.vercel.app/terms"
+        PRIVACY_POLICY_URL: "https://previously.cognipin.com/privacy"
+        TERMS_URL: "https://previously.cognipin.com/terms"
         SUPPORT_EMAIL: "shantanusinha95@gmail.com"
         # === SIGNING ===
         DEVELOPMENT_TEAM: YLPZXZS2F4
         CODE_SIGN_STYLE: Automatic
+        CODE_SIGN_ENTITLEMENTS: Sources/App/Previously.entitlements
+      configs:
+        QA:
+          PRODUCT_BUNDLE_IDENTIFIER: com.cognipin.previously.qa
+          CLERK_PUBLISHABLE_KEY: "pk_test_REPLACE_ME"
+          API_BASE_URL: "http://127.0.0.1:18787"
+          SWIFT_ACTIVE_COMPILATION_CONDITIONS: "$(inherited) DEBUG PREVIOUSLY_QA"
+          # Synthetic fixture authentication needs no production Apple App ID capability.
+          CODE_SIGN_ENTITLEMENTS: ""
 
   PreviouslyWidgets:
     type: app-extension
@@ -156,12 +174,21 @@ targets:
     sources:
       - path: Widgets
       - path: Shared
+      # The Next up widget is set in Outfit (registered in Widgets/Info.plist).
+      - path: Resources/Fonts
     info:
       path: Widgets/Info.plist
       properties:
         CFBundleDisplayName: "Previously."
         CFBundleShortVersionString: "$(MARKETING_VERSION)"
         CFBundleVersion: "$(CURRENT_PROJECT_VERSION)"
+        # The Next up widget is set in Outfit: XcodeGen writes this plist from these properties
+        # (a key added to the file by hand is lost on the next generate).
+        UIAppFonts:
+          - Outfit-Regular.ttf
+          - Outfit-Medium.ttf
+          - Outfit-SemiBold.ttf
+          - Outfit-Bold.ttf
         NSExtension:
           NSExtensionPointIdentifier: com.apple.widgetkit-extension
     settings:
@@ -172,6 +199,44 @@ targets:
         TARGETED_DEVICE_FAMILY: "1"
         DEVELOPMENT_TEAM: YLPZXZS2F4
         CODE_SIGN_STYLE: Automatic
+        # The App Group the Next up widget reads its snapshot from (the app's entitlements carry
+        # the same group). Automatic signing registers the group on both App IDs.
+        CODE_SIGN_ENTITLEMENTS: Widgets/PreviouslyWidgets.entitlements
+      configs:
+        QA:
+          PRODUCT_BUNDLE_IDENTIFIER: com.cognipin.previously.qa.widgets
+          SWIFT_ACTIVE_COMPILATION_CONDITIONS: "$(inherited) DEBUG PREVIOUSLY_QA"
+          CODE_SIGN_ENTITLEMENTS: ""
+
+  PreviouslyUITests:
+    type: bundle.ui-testing
+    platform: iOS
+    deploymentTarget: "18.0"
+    sources:
+      - path: UITests
+        excludes:
+          - README.md
+      - path: Sources/App/AccountLocalStore.swift
+      - path: Sources/App/AccountExportStore.swift
+      - path: Sources/App/MutationStamp.swift
+      - path: Sources/App/MutationJournal.swift
+      - path: Sources/App/RewatchStore.swift
+      - path: Sources/Networking/WatchSessionMutationReceipt.swift
+      - path: Sources/Networking/AppConfig.swift
+      - path: Sources/Models/Models+ImportProgress.swift
+      - path: Sources/Auth/AppleDeletionAuthorization.swift
+      - path: Sources/Features/Profile/AccountDeletion.swift
+      - path: Sources/Features/Profile/AccountDeletionNotice.swift
+    dependencies:
+      - target: Previously
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.cognipin.previously.qa.uitests
+        GENERATE_INFOPLIST_FILE: YES
+        TARGETED_DEVICE_FAMILY: "1"
+        DEVELOPMENT_TEAM: YLPZXZS2F4
+        CODE_SIGN_STYLE: Automatic
+        TEST_TARGET_NAME: Previously
 
 # Shared scheme so CLI builds (xcodebuild -scheme Previously) work outside Xcode.
 schemes:
@@ -181,3 +246,16 @@ schemes:
         Previously: all
     run:
       config: Debug
+  PreviouslyQA:
+    build:
+      targets:
+        Previously: all
+        PreviouslyUITests: [test]
+    run:
+      config: QA
+    test:
+      config: QA
+      targets:
+        - name: PreviouslyUITests
+          parallelizable: false
+      randomExecutionOrder: false

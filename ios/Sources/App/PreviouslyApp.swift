@@ -6,10 +6,13 @@ import ClerkKit
 struct PreviouslyApp: App {
     /// The orientation gate (`OrientationGate`): portrait everywhere but the system video player.
     @UIApplicationDelegateAdaptor(AppDelegate.self) private var delegate
-    @State private var auth = AuthManager()
+    @State private var auth: AuthManager
     @State private var appModel: AppModel
 
     init() {
+        #if PREVIOUSLY_QA
+        QARuntime.prepare()
+        #endif
         SplashTrace.mark("app-init")
         #if DEBUG
         // A regex that fails to compile fails loudly, not silently (review i3).
@@ -23,6 +26,9 @@ struct PreviouslyApp: App {
             Clerk.configure(publishableKey: AppConfig.clerkPublishableKey)
         }
         let auth = AuthManager()
+        #if PREVIOUSLY_QA
+        QARuntime.bootstrap(auth)
+        #endif
         let model = AppModel(api: APIClient(tokenProvider: auth))
         // A rejected session is auth's problem, not the loader's: the model hands the 401 back
         // here rather than rendering it as "the server couldn't be reached".
@@ -60,6 +66,13 @@ struct PreviouslyApp: App {
                 // Scale text for accessibility, but cap before the densest grids break.
                 .dynamicTypeSize(...DynamicTypeSize.accessibility2)
                 .task { await auth.bootstrap() }
+                // The Next up widget's tap: previously://show/<franchiseId>, through the route a
+                // tapped episode alert takes.
+                .onOpenURL { url in
+                    guard url.scheme == "previously", url.host == "show",
+                          let id = url.pathComponents.dropFirst().first, !id.isEmpty else { return }
+                    appModel.pendingOpen = id
+                }
         }
     }
 

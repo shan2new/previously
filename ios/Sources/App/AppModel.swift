@@ -95,6 +95,7 @@ final class AppModel {
     var socialBase: [String: SubjectSocial] = [:]
     /// The newest word per toggle that the server has not confirmed (persisted, §4.3).
     var socialPending: [SocialToggleKey: SocialToggleWrite] = [:]
+    var socialPendingRestoreFailed = false
     var pendingRatings: [String: PendingRating] = [:]            // key "m:e"
     var episodeRooms: [String: EpisodeRoom] = [:]                // key = ep: subject
     var threads: [String: CommentThread] = [:]                   // key = subject
@@ -127,6 +128,7 @@ final class AppModel {
     /// request may go out, because the server upserts a user row for any valid JWT and one late
     /// write would bring the erased account back. Lowered by `abortErasure()` and the next `start()`.
     @ObservationIgnored var erasing = false
+    var deletionNeedsConfirmation = false
     /// Bumped on every feed-shaping change (§1.6.3). OBSERVED, like `hidesVersion`: bumping it IS the
     /// invalidation signal. The rows' memo is keyed on it and reads it on every path, so a body that
     /// reads only `feedRows`/`freshPosts` redraws when a `.final` revert, a capabilities change or a
@@ -233,22 +235,23 @@ final class AppModel {
     // Anime/TV filter — SEARCH ONLY. Today, Schedule and Library are your shows and always show
     // everything: a filter set once while browsing used to silently hide half of what aired.
     // A single AUDIENCE (below) fixes it: someone who watches only anime has no All and no TV.
-    var mediaFilter: MediaFilter = Audience.stored.filter
+    var mediaFilter: MediaFilter = .all
     /// What the viewer watches — anime, TV or both (`AppModel+Audience.swift`): everything the app
     /// SUGGESTS is of that kind and nothing else; what they own is never hidden.
-    var audience: Audience = Audience.stored
+    var audience: Audience = .both
     /// The account has answered "What do you watch?" (here or on another device).
-    var audienceChosen: Bool = Audience.storedChosen
+    var audienceChosen = false
     /// The one-time question is due (`askAudienceIfNeeded`).
     var audiencePromptDue = false
     /// An applied history import whose background part is still arriving (`AppModel+Import.swift`):
     /// how far it has got, for whichever surface is saying so. nil when none is in flight.
     var importProgress: ImportProgress? {
         didSet {
+            guard !isolated else { return }
             if let importProgress, let data = try? JSONEncoder().encode(importProgress) {
-                UserDefaults.standard.set(data, forKey: Self.importProgressKey)
+                try? AccountLocalStore.shared.write(data, name: "import-progress.json", owner: accountStorage)
             } else {
-                UserDefaults.standard.removeObject(forKey: Self.importProgressKey)
+                AccountLocalStore.shared.remove("import-progress.json", owner: accountStorage)
             }
         }
     }
@@ -256,7 +259,7 @@ final class AppModel {
     /// First run (`AppModel+FirstRun.swift`): the flow a new account goes through before its
     /// Home exists. Known at launch for a device that has been through it; asked of the server
     /// otherwise (`resolveFirstRun`).
-    var firstRun: FirstRunPhase = FirstRun.launchPhase
+    var firstRun: FirstRunPhase = .checking
 
     // Live clock for countdowns.
     var now: Int64 = .nowMs {
@@ -316,6 +319,8 @@ final class AppModel {
     var onSessionExpired: (@MainActor () -> Void)?
     /// A show a tapped episode alert asks to open; `MainTabView` consumes it.
     var pendingOpen: String?
+    /// The Home Screen widget's snapshot in flight (`AppModel+Widget`), debounced.
+    var widgetSnapshotTask: Task<Void, Never>?
     /// A post or a thread a tapped notification (a reminder, an Activity row) asks to open — the
     /// typed sibling of `pendingOpen`. A `.show` route is always delivered through `pendingOpen`.
     var pendingRoute: OpenRoute?
@@ -329,35 +334,52 @@ final class AppModel {
     /// device shares with the real model — the offline copy, the follow-up reload, the episode
     /// alerts and the Live Activity.
     @ObservationIgnored private let isolated: Bool
+    /// Stable authentication identity, never a display name or an email address.
+    private(set) var currentAccountID: String?
+    @ObservationIgnored private(set) var accountStorage: AccountLocalStore.Snapshot?
     /// `isolated`, for the model's extensions in other files.
     var isIsolated: Bool { isolated }
 
     init(api: APIClient, isolated: Bool = false) {
         self.api = api
         self.isolated = isolated
-        recentSearches = UserDefaults.standard.stringArray(forKey: AppModel.recentsKey) ?? []
-        if let data = UserDefaults.standard.data(forKey: AppModel.recentItemsKey),
-           let items = try? JSONDecoder().decode([FranchiseSummary].self, from: data) {
-            recentItems = items
-        }
     }
 
     // MARK: - Lifecycle
 
-    func start() {
-        // A new session: whatever an erasure held back belonged to the account it erased.
-        erasing = false
-        api.halted = false
+    func start(accountID: String? = nil) {
+        if currentAccountID != accountID, currentAccountID != nil { teardown() }
+        currentAccountID = accountID
+        if !isolated {
+            accountStorage = AccountLocalStore.shared.activate(accountID: accountID)
+            LibraryExport.clearTemporaryFiles()
+            loadRecents()
+            audience = Audience.stored
+            audienceChosen = Audience.storedChosen
+            mediaFilter = audience.filter
+            firstRun = FirstRun.launchPhase
+            RewatchStore.shared.activate(owner: accountStorage)
+            SyncCenter.shared.activateOwner(accountStorage)
+        }
+        // An unanswered DELETE may already have committed. Restore its hold before any replay,
+        // reads or writes; reconciliation uses a separate transport that cannot create an account.
+        erasing = AccountDeletion.hasUnconfirmedRequest(accountID: accountID)
+        deletionNeedsConfirmation = erasing
+        api.halted = erasing
+        if erasing { SyncCenter.shared.suspendReplay(); return }
+        if !isolated { SyncCenter.shared.startMonitoring() }
         startClock()
         // A failed change restored from a previous launch retries by replaying its write here.
-        SyncCenter.shared.replay = { [weak self] intent in await self?.replay(intent) }
+        SyncCenter.shared.replay = { [weak self] intent, mutation in await self?.replay(intent, mutation: mutation) }
         // Every rewatch change queues a word for the server; this sends it.
         RewatchStore.shared.onChange = { [weak self] in self?.flushWatchSessions() }
         // A suspension raised from ANY route (iD14), before the caller's `catch` runs — so no
         // failure it causes is filed as a write to retry (`fileFailure`).
         if !isolated {
+            let suspensionGeneration = accountGeneration
             api.onSuspended = { [weak self] in
-                guard let self, !self.accountSuspended else { return }
+                guard let self, self.accountGeneration == suspensionGeneration,
+                      !self.accountSuspended else { return }
                 self.accountSuspended = true
                 // Every replay would answer 403 until sign-out (and all replay at once if the
                 // ban were lifted, unasked): Sync status holds its rows with Discard only.
@@ -375,10 +397,13 @@ final class AppModel {
             // under `start()`, ~300 ms on the simulator). The skeleton holds until it lands, and
             // a reload that lands first wins.
             let epoch = accountEpoch
+            let owner = accountStorage
             Task { [weak self] in
-                let cached = await Task.detached(priority: .userInitiated) { Self.loadCachedLibrary() }.value
+                guard let owner else { return }
+                let cached = await Task.detached(priority: .userInitiated) { Self.loadCachedLibrary(at: owner.file("library-cache.json")) }.value
                 // A sign-out while the copy decoded: it belongs to the account that just left.
                 guard let self, let cached, self.library.isEmpty, epoch == self.accountEpoch,
+                      AccountLocalStore.shared.matches(owner),
                       !self.erasing else { return }
                 self.library = cached.response.franchises
                 // Provisional only: the stamp, once it has answered, is the session's anchor.
@@ -421,36 +446,27 @@ final class AppModel {
 
     // MARK: - Offline copy
 
-    nonisolated private static let cacheURL: URL = {
-        let dir = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
-        try? FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
-        return dir.appendingPathComponent("library-cache.json")
-    }()
-
     private struct LibraryCache: Codable, Sendable {
         let response: LibraryResponse
         let savedAt: Int64
     }
 
-    nonisolated private static func loadCachedLibrary() -> LibraryCache? {
-        guard let data = try? Data(contentsOf: cacheURL) else { return nil }
+    nonisolated private static func loadCachedLibrary(at url: URL) -> LibraryCache? {
+        guard let data = try? Data(contentsOf: url) else { return nil }
         return try? JSONDecoder().decode(LibraryCache.self, from: data)
     }
 
-    /// Written after every successful load, off the main actor. Atomic, so a launch can never
-    /// read a half-written file.
-    private static func persistLibrary(_ res: LibraryResponse, at ts: Int64) {
+    /// Atomic and serialized with account teardown; no queued writer survives sign-out.
+    private func persistLibrary(_ res: LibraryResponse, at ts: Int64) {
+        guard !isolated, !erasing else { return }
         let cache = LibraryCache(response: res, savedAt: ts)
-        let url = cacheURL
-        Task.detached(priority: .utility) {
-            guard let data = try? JSONEncoder().encode(cache) else { return }
-            try? data.write(to: url, options: .atomic)
-        }
+        guard let data = try? JSONEncoder().encode(cache) else { return }
+        try? AccountLocalStore.shared.write(data, name: "library-cache.json", owner: accountStorage)
     }
 
     /// The copy belongs to the account that fetched it; sign-out removes it.
-    private static func clearCachedLibrary() {
-        try? FileManager.default.removeItem(at: cacheURL)
+    private func clearCachedLibrary() {
+        AccountLocalStore.shared.remove("library-cache.json", owner: accountStorage)
     }
 
     private func startClock() {
@@ -512,7 +528,8 @@ final class AppModel {
             withAnimation(ThemeMotion.uiGentle) { loadError = false }
             loading = false
             lastLoadedAt = .nowMs
-            Self.persistLibrary(res, at: lastLoadedAt)
+            persistLibrary(res, at: lastLoadedAt)
+            scheduleWidgetSnapshot()
             refreshRecommendationsIfNeeded()
             // Off the reload's clock — the pull's spinner never waits on the rewatch history — and
             // ahead of the alerts, whose scheduling can take seconds.
@@ -562,6 +579,8 @@ final class AppModel {
     /// everything (`APIClient.halted`). On success the caller runs `teardown()` BEFORE signing out.
     func prepareForErasure() async {
         guard !isolated else { return }
+        let generation = accountGeneration
+        AccountDeletion.hold(accountID: currentAccountID)
         erasing = true
         SyncCenter.shared.suspendReplay()
         let clock = ContinuousClock()
@@ -570,21 +589,24 @@ final class AppModel {
             !progressLane.isEmpty || !batchChain.isEmpty || !socialLanes.isEmpty
                 || !ratingLanes.isEmpty || !commentsInFlight.isEmpty
         }
-        while writing(), clock.now < deadline {
+        while writing(), clock.now < deadline, generation == accountGeneration {
             try? await Task.sleep(for: .milliseconds(100))
         }
+        guard generation == accountGeneration else { return }
         api.halted = true
     }
 
     /// The deletion did not happen: everything the erasure held back goes now.
     func abortErasure() {
         guard erasing else { return }
+        AccountDeletion.clearHold(accountID: currentAccountID)
+        deletionNeedsConfirmation = false
         erasing = false
         api.halted = false
         if !accountSuspended { SyncCenter.shared.resumeReplay() }
         for (mediaId, write) in progressQueued where progressLane[mediaId] == nil {
             sendProgress(franchiseId: write.franchiseId, mediaId: mediaId, episodes: write.episodes,
-                         command: write.command)
+                         command: write.command, mutation: write.mutation)
         }
         flushSocial()
         flushWatchSessions()
@@ -595,6 +617,8 @@ final class AppModel {
         }
     }
 
+    func holdUnconfirmedErasure() { deletionNeedsConfirmation = true }
+
     /// Full account teardown, run on every sign-out (voluntary or expired). Anything that outlives
     /// the view tree has to be dismantled here — the in-memory library, the live clock, in-flight
     /// requests, and the two ambient layers (pending episode alerts and the airing Live Activity)
@@ -602,11 +626,14 @@ final class AppModel {
     /// the next sign-in opens on a loader, never on someone else's shows.
     func teardown() {
         accountGeneration += 1
+        api.invalidateRequests()
+        deletionNeedsConfirmation = false
         savingProgressFor = []
         batchesInFlight = [:]
+        attemptedBatchMutations = [:]
         batchChain.values.forEach { $0.cancel() }
         batchChain = [:]
-        completedByMark = []
+        completedByMark = [:]
         completionSweepDone = false
         // The next account inherits no "already moved back" memory (review i4).
         UserDefaults.standard.removeObject(forKey: Self.resumedPartsKey)
@@ -621,7 +648,15 @@ final class AppModel {
         rewatchLane?.cancel(); rewatchLane = nil
         RewatchStore.shared.reset()
         SeasonSweepLedger.reset()
-        Self.clearCachedLibrary()
+        clearCachedLibrary()
+        recentSearches = []
+        recentItems = []
+        if !isolated {
+            AccountLocalStore.shared.clearCurrent()
+            LibraryExport.clearTemporaryFiles()
+        }
+        accountStorage = nil
+        currentAccountID = nil
         clockTask?.cancel(); clockTask = nil
         searchTask?.cancel(); searchTask = nil
         trendingTask?.cancel(); trendingTask = nil
@@ -792,11 +827,20 @@ final class AppModel {
     }
 
     private func persistRecentItems() {
-        UserDefaults.standard.set(try? JSONEncoder().encode(recentItems), forKey: AppModel.recentItemsKey)
+        guard !isolated, !erasing, let data = try? JSONEncoder().encode(recentItems) else { return }
+        try? AccountLocalStore.shared.write(data, name: "recent-items.json", owner: accountStorage)
     }
 
     private func persistRecents() {
-        UserDefaults.standard.set(recentSearches, forKey: AppModel.recentsKey)
+        guard !isolated, !erasing, let data = try? JSONEncoder().encode(recentSearches) else { return }
+        try? AccountLocalStore.shared.write(data, name: "recent-searches.json", owner: accountStorage)
+    }
+
+    private func loadRecents() {
+        recentSearches = AccountLocalStore.shared.read("recent-searches.json", owner: accountStorage)
+            .flatMap { try? JSONDecoder().decode([String].self, from: $0) } ?? []
+        recentItems = AccountLocalStore.shared.read("recent-items.json", owner: accountStorage)
+            .flatMap { try? JSONDecoder().decode([FranchiseSummary].self, from: $0) } ?? []
     }
 
     @ObservationIgnored private var recentFragmentsPruned = false
@@ -1511,16 +1555,27 @@ final class AppModel {
     }
 
     /// A user's FORWARD mark watches the show: given the status read BEFORE the write
-    /// (`resumableStatus`), moves the show to Watching unless the write finished the series, and
-    /// puts the move on the receipt — second line, one Undo that restores the progress AND the
-    /// status. Every mark path calls it (review i4: Today's chevron, the long-press, the episode
-    /// list's batches and Schedule's toggle left a Planned or Watched show where it was).
+    /// (`resumableStatus`), moves the show to Watching — or to WATCHED when the write finished the
+    /// series — and puts the move on the receipt: second line, one Undo that restores the progress
+    /// AND the status. Every mark path calls it (review i4: Today's chevron, the long-press, the
+    /// episode list's batches and Schedule's toggle left a Planned or Watched show where it was).
+    ///
+    /// It used to bail when the write finished the series, trusting `settleCompletion` — which only
+    /// moved a WATCHING show. A Planned show finished in one batch (Seven Dials, three episodes,
+    /// "Mark all 3") fell between the two and stayed Planned with a full bar (9 Oct). The server
+    /// keeps the same rule now (`statusAfterWrites`), so the device and the account agree.
     func resume(_ shelvedAs: WatchStatus?, franchiseId: String, mediaId: Int, prevProgress: Int,
                 receipt: inout UndoState) {
-        guard let shelvedAs, franchise(id: franchiseId)?.isWatchedThrough != true else { return }
-        setStatus(franchiseId: franchiseId, status: .watching, haptic: false, present: false)
-        receipt.subtitle = Copy.Toast.movedTo(WatchStatus.watching.displayName)
+        guard let shelvedAs, let f = franchise(id: franchiseId) else { return }
+        let target: WatchStatus = f.isWatchedThrough ? .completed : .watching
+        // `settleCompletion` may already have moved it (inside `applyLocalProgress`); one write.
+        if f.effectiveStatus != target {
+            setStatus(franchiseId: franchiseId, status: target, haptic: false, present: false)
+        }
+        // "Series finished · Moved to Watched" already says the move; do not say it twice.
+        if receipt.customMessage == nil { receipt.subtitle = Copy.Toast.movedTo(target.displayName) }
         receipt.undoAction = { [weak self] in
+            self?.completedByMark.removeValue(forKey: franchiseId)
             self?.setProgress(franchiseId: franchiseId, mediaId: mediaId, episodes: prevProgress, haptic: false)
             self?.setStatus(franchiseId: franchiseId, status: shelvedAs, haptic: false, present: false)
         }
@@ -1584,11 +1639,17 @@ final class AppModel {
     /// `status`: the shelf the caller chose — "Start from Episode 1" is WATCHING whatever the
     /// run's state (iteration 2: a finished 170-episode run landed on Planned and never reached
     /// Up next). Nil derives it from `isReleasing`, the plain add's rule.
-    func addToLibrary(franchiseId: String, title: String, isReleasing: Bool, status chosen: WatchStatus? = nil) {
-        guard !isInLibrary(franchiseId) else { return }
+    func addToLibrary(franchiseId: String, title: String, isReleasing: Bool, status chosen: WatchStatus? = nil,
+                      mutation: MutationStamp? = nil) {
+        guard !isInLibrary(franchiseId) || mutation != nil else { return }
+        let generation = accountGeneration
+        let stamp = mutation ?? MutationStamp.fresh(owner: accountStorage)
+        let owner = accountStorage
         FeedbackCoordinator.fire(.success)
         pendingAdds.insert(franchiseId)
         let status: WatchStatus = chosen ?? (isReleasing ? .watching : .planned)
+        let intent = WriteIntent.subscribe(franchiseId: franchiseId, title: title, status: status.rawValue)
+        let staged = Result { try stageTrackingMutation(command: Copy.Action.add, title: title, intent: intent, mutation: stamp) }
         // `Copy.Status`, never a local spelling: this line used to say "Plan to watch", a string the
         // copy table explicitly bans, in the one toast every first-time user reads.
         undo = UndoState(mediaId: nil, franchiseId: franchiseId, prevProgress: 0,
@@ -1611,9 +1672,15 @@ final class AppModel {
                 // The status the toast promised is the status that is sent. Letting the server
                 // re-derive it from `nil` meant the toast could name one shelf and the show land
                 // on another whenever the two `isReleasing` readings disagreed.
-                _ = try await api.subscribe(franchiseId: franchiseId, status: status)
+                guard generation == accountGeneration else { return }
+                guard try staged.get() else { await reload(); return }
+                guard isolated || stamp != nil else { throw APIError.transport(URLError(.cannotWriteToFile)) }
+                _ = try await api.subscribe(franchiseId: franchiseId, status: status, mutation: stamp)
+                guard generation == accountGeneration else { return }
+                SyncCenter.shared.acknowledgeMutation(stamp, owner: owner)
                 await reload()
             } catch {
+                guard generation == accountGeneration, !error.isCancellation else { return }
                 if let cur = undo, cur.added, cur.franchiseId == franchiseId { undo = nil }
                 pendingAdds.remove(franchiseId)
                 // Membership rolls back (the `pendingAdds` entry is gone) and the failure goes
@@ -1622,41 +1689,58 @@ final class AppModel {
                 // transient toast with no way back.
                 fileFailure(command: Copy.Action.add, title: title,
                                          reason: Copy.Notice.reason(error),
-                                         intent: .subscribe(franchiseId: franchiseId, title: title, status: status.rawValue)) {
+                                         intent: .subscribe(franchiseId: franchiseId, title: title, status: status.rawValue), mutation: stamp,
+                                         retryable: !((error as? APIError)?.isMutationConflict ?? false)) {
                     // The status the add was made with — a Planned add from For you retried as
                     // Watching landed on Today as "N EPISODES BEHIND" (review i5, N11).
-                    self.addToLibrary(franchiseId: franchiseId, title: title, isReleasing: isReleasing, status: status)
+                    self.addToLibrary(franchiseId: franchiseId, title: title, isReleasing: isReleasing, status: status, mutation: stamp)
                 }
                 return
             }
-            pendingAdds.remove(franchiseId)
+            if generation == accountGeneration { pendingAdds.remove(franchiseId) }
         }
     }
 
     /// Move a show to another shelf. `present` draws the "Moved to Watching" toast with an Undo
     /// that puts it back — the change used to be the one write in the app that acknowledged
     /// nothing on screen: from Search or Detail the menu closed and that was all.
-    func setStatus(franchiseId: String, status: WatchStatus, haptic: Bool = true, present: Bool = true) {
+    func setStatus(franchiseId: String, status: WatchStatus, haptic: Bool = true, present: Bool = true,
+                   mutation: MutationStamp? = nil) {
+        if mutation == nil, let existing = library.first(where: { $0.id == franchiseId }),
+           existing.effectiveStatus == status { return }
+        let generation = accountGeneration
+        let stamp = mutation ?? MutationStamp.fresh(owner: accountStorage)
+        let owner = accountStorage
         if haptic { FeedbackCoordinator.fire(.selection) }
         let intent = WriteIntent.status(franchiseId: franchiseId, status: status.rawValue)
+        let staged = Result { try stageTrackingMutation(command: Copy.Toast.movedTo(status.displayName),
+            title: franchise(id: franchiseId)?.title ?? "", intent: intent, mutation: stamp) }
+        // A shelf move changes what Home puts first; the widget follows (debounced).
+        scheduleWidgetSnapshot()
         guard let idx = library.firstIndex(where: { $0.id == franchiseId }) else {
             // Not in the loaded library yet (a pending add). Nothing to roll back, but the failure
             // is still a failure: it was fire-and-forget, the only silent write in the app.
             Task {
                 do {
-                    _ = try await api.setStatus(franchiseId: franchiseId, status: status)
+                    guard generation == accountGeneration else { return }
+                    guard try staged.get() else { await reload(); return }
+                    guard isolated || stamp != nil else { throw APIError.transport(URLError(.cannotWriteToFile)) }
+                    let receipt = try await api.setStatus(franchiseId: franchiseId, status: status, mutation: stamp)
+                    guard generation == accountGeneration else { return }
+                    SyncCenter.shared.acknowledgeMutation(stamp, owner: owner)
+                    if receipt.applied == false, generation == accountGeneration { await reload() }
                 } catch {
-                    guard !Task.isCancelled else { return }
+                    guard generation == accountGeneration, !Task.isCancelled, !error.isCancellation else { return }
                     fileFailure(command: Copy.Toast.movedTo(status.displayName), title: "",
-                                             reason: Copy.Notice.reason(error), intent: intent) {
-                        self.setStatus(franchiseId: franchiseId, status: status, haptic: false, present: false)
+                                             reason: Copy.Notice.reason(error), intent: intent, mutation: stamp,
+                                             retryable: !((error as? APIError)?.isMutationConflict ?? false)) {
+                        self.setStatus(franchiseId: franchiseId, status: status, haptic: false, present: false, mutation: stamp)
                     }
                 }
             }
             return
         }
         let prevStatus = library[idx].effectiveStatus
-        guard prevStatus != status else { return }
         library[idx] = library[idx].withStatus(status)
         let title = library[idx].title
         if present {
@@ -1668,28 +1752,43 @@ final class AppModel {
         }
         Task {
             do {
-                _ = try await api.setStatus(franchiseId: franchiseId, status: status)
+                guard generation == accountGeneration else { return }
+                guard try staged.get() else { await reload(); return }
+                guard isolated || stamp != nil else { throw APIError.transport(URLError(.cannotWriteToFile)) }
+                let receipt = try await api.setStatus(franchiseId: franchiseId, status: status, mutation: stamp)
+                guard generation == accountGeneration else { return }
+                SyncCenter.shared.acknowledgeMutation(stamp, owner: owner)
+                if receipt.applied == false { await reload(); return }
                 await syncAmbient()
                 // A finished series or a change of shelf is a change of taste: the list answers
                 // it (review i5, N5 — finishing a show used to leave the list untouched until the
                 // next reload).
                 refreshRecommendationsIfNeeded()
             } catch {
-                guard !Task.isCancelled else { return }
+                guard generation == accountGeneration, !Task.isCancelled, !error.isCancellation else { return }
                 if let i = library.firstIndex(where: { $0.id == franchiseId }) {
                     library[i] = library[i].withStatus(prevStatus)
                 }
                 if let cur = undo, cur.franchiseId == franchiseId, cur.customMessage != nil { undo = nil }
                 fileFailure(command: Copy.Toast.movedTo(status.displayName), title: title,
-                                         reason: Copy.Notice.reason(error), intent: intent) {
-                    self.setStatus(franchiseId: franchiseId, status: status, haptic: false, present: false)
+                                         reason: Copy.Notice.reason(error), intent: intent, mutation: stamp,
+                                         retryable: !((error as? APIError)?.isMutationConflict ?? false)) {
+                    self.setStatus(franchiseId: franchiseId, status: status, haptic: false, present: false, mutation: stamp)
                 }
             }
         }
     }
 
     /// `haptic: false` for the undo path — performUndo already fired its own impact.
-    func removeFromLibrary(franchiseId: String, haptic: Bool = true) {
+    func removeFromLibrary(franchiseId: String, haptic: Bool = true, mutation: MutationStamp? = nil,
+                           titleOverride: String? = nil) {
+        let generation = accountGeneration
+        let stamp = mutation ?? MutationStamp.fresh(owner: accountStorage)
+        let owner = accountStorage
+        let recordedTitle = titleOverride ?? franchise(id: franchiseId)?.title ?? ""
+        let intent = WriteIntent.unsubscribe(franchiseId: franchiseId, title: recordedTitle)
+        let staged = Result { try stageTrackingMutation(command: Copy.Action.removeFromLibrary,
+            title: franchise(id: franchiseId)?.title ?? "", intent: intent, mutation: stamp) }
         if haptic { FeedbackCoordinator.fire(.commitLight) }
         pendingAdds.remove(franchiseId)
         let idx = library.firstIndex(where: { $0.id == franchiseId })
@@ -1700,18 +1799,25 @@ final class AppModel {
         if let idx { library.remove(at: idx) }
         Task {
             do {
-                _ = try await api.unsubscribe(franchiseId: franchiseId)
+                guard generation == accountGeneration else { return }
+                guard try staged.get() else { await reload(); return }
+                guard isolated || stamp != nil else { throw APIError.transport(URLError(.cannotWriteToFile)) }
+                let receipt = try await api.unsubscribe(franchiseId: franchiseId, mutation: stamp)
+                guard generation == accountGeneration else { return }
+                SyncCenter.shared.acknowledgeMutation(stamp, owner: owner)
+                if receipt.applied == false { await reload(); return }
                 await syncAmbient()
                 refreshRecommendationsIfNeeded()
             } catch {
-                guard !Task.isCancelled else { return }
+                guard generation == accountGeneration, !Task.isCancelled, !error.isCancellation else { return }
                 if let removed, !library.contains(where: { $0.id == franchiseId }) {
                     library.insert(removed, at: min(idx ?? library.count, library.count))
                 }
                 fileFailure(command: Copy.Action.removeFromLibrary, title: removed?.title ?? "",
                                          reason: Copy.Notice.reason(error),
-                                         intent: .unsubscribe(franchiseId: franchiseId, title: removed?.title ?? "")) {
-                    self.removeFromLibrary(franchiseId: franchiseId, haptic: false)
+                                         intent: .unsubscribe(franchiseId: franchiseId, title: recordedTitle), mutation: stamp,
+                                         retryable: !((error as? APIError)?.isMutationConflict ?? false)) {
+                    self.removeFromLibrary(franchiseId: franchiseId, haptic: false, mutation: stamp, titleOverride: recordedTitle)
                 }
             }
         }
@@ -1745,6 +1851,7 @@ final class AppModel {
         let episodes: Int
         let command: String
         let title: String
+        var mutation: MutationStamp? = nil
     }
 
     /// Send a part's progress, serialised per part. Every mark used to spawn a bare `Task`, so
@@ -1757,18 +1864,35 @@ final class AppModel {
     /// in the SyncBanner with a Retry that re-issues exactly this write, from this launch or the
     /// next (`WriteIntent`).
     private func sendProgress(franchiseId: String, mediaId: Int, episodes: Int,
-                              command: String = Copy.Action.markAsWatched) {
+                              command: String = Copy.Action.markAsWatched, mutation: MutationStamp? = nil) {
         markedThisSession.insert(franchiseId)
         let title = franchise(id: franchiseId)?.title ?? ""
-        progressQueued[mediaId] = ProgressWrite(franchiseId: franchiseId, episodes: episodes,
-                                                command: command, title: title)
+        let write = ProgressWrite(franchiseId: franchiseId, episodes: episodes,
+                                                command: command, title: title,
+                                                mutation: mutation ?? MutationStamp.fresh(owner: accountStorage))
+        do {
+            let intent = WriteIntent.progress(franchiseId: franchiseId, mediaId: mediaId, episodes: episodes)
+            guard try stageTrackingMutation(command: command, title: title, intent: intent, mutation: write.mutation) else {
+                Task { await reload() }
+                return
+            }
+        } catch {
+            fileFailure(command: command, title: title, reason: Copy.Notice.reason(error),
+                intent: .progress(franchiseId: franchiseId, mediaId: mediaId, episodes: episodes), mutation: write.mutation) { [weak self] in
+                    await self?.retryProgress(write, mediaId: mediaId)
+                }
+            return
+        }
+        progressQueued[mediaId] = write
         // During an erasure the write waits in the queue, unsent (`abortErasure` sends it).
         guard progressLane[mediaId] == nil, !erasing else { return }
+        let generation = accountGeneration
         progressLane[mediaId] = Task { [weak self] in
-            while self?.erasing == false, let next = self?.progressQueued.removeValue(forKey: mediaId) {
+            while !Task.isCancelled, self?.accountGeneration == generation,
+                  self?.erasing == false, let next = self?.progressQueued.removeValue(forKey: mediaId) {
                 await self?.putProgress(next, mediaId: mediaId)
             }
-            self?.progressLane[mediaId] = nil
+            if self?.accountGeneration == generation { self?.progressLane[mediaId] = nil }
         }
     }
 
@@ -1805,13 +1929,29 @@ final class AppModel {
     }
 
     private func putProgress(_ write: ProgressWrite, mediaId: Int) async {
+        let generation = accountGeneration
+        let owner = accountStorage
+        let failures = isolated ? [] : SyncCenter.shared.progressFailureVersions(mediaIds: [mediaId])
         do {
-            _ = try await api.setProgress(mediaId: mediaId, episodes: write.episodes)
+            guard isolated || write.mutation != nil else { throw APIError.transport(URLError(.cannotWriteToFile)) }
+            let receipt = try await api.setProgress(mediaId: mediaId, episodes: write.episodes, mutation: write.mutation)
+            guard !Task.isCancelled, generation == accountGeneration else { return }
+            if !isolated { SyncCenter.shared.acknowledgeMutation(write.mutation, owner: owner) }
+            if receipt.applied == false {
+                if progressQueued[mediaId] == nil, localProgress[mediaId]?.episodes == write.episodes {
+                    localProgress[mediaId] = nil
+                }
+                if !isolated { SyncCenter.shared.settleFailures(failures) }
+                await reload()
+                return
+            }
             settleLocalProgress(mediaId: mediaId, episodes: write.episodes)
+            if !isolated { SyncCenter.shared.settleFailures(failures) }
         } catch {
             // Teardown cancelled the lane, or a newer target is queued behind this one and will
             // decide the outcome — either way this attempt has nothing to report.
-            guard !Task.isCancelled, progressQueued[mediaId] == nil else { return }
+            guard !Task.isCancelled, generation == accountGeneration,
+                  progressQueued[mediaId] == nil else { return }
             // Refused by an erasure's halt: back in the queue, unsent — `abortErasure` sends it,
             // a completed erasure's teardown drops it.
             if erasing {
@@ -1822,23 +1962,51 @@ final class AppModel {
             // never take this mark, and a Retry would repeat the 404 forever. The next snapshot
             // wins — the local mark retires as if the write had settled.
             if let api = error as? APIError, case .http(404, _) = api {
+                if !isolated { SyncCenter.shared.acknowledgeMutation(write.mutation, owner: owner) }
                 settleLocalProgress(mediaId: mediaId, episodes: write.episodes)
+                if !isolated { SyncCenter.shared.settleFailures(failures) }
                 return
             }
             fileFailure(command: write.command, title: write.title,
                                      reason: Copy.Notice.reason(error),
                                      intent: .progress(franchiseId: write.franchiseId, mediaId: mediaId,
-                                                       episodes: write.episodes)) { [weak self] in
-                await self?.putProgress(write, mediaId: mediaId)
+                                                       episodes: write.episodes), mutation: write.mutation,
+                                     retryable: !((error as? APIError)?.isMutationConflict ?? false)) { [weak self] in
+                await self?.retryProgress(write, mediaId: mediaId)
             }
         }
     }
 
+    /// A Retry defends the last failed intent; it must not become a new older word behind fresh
+    /// work. Fresh work already on this part/show decides the outcome. Otherwise the retry uses
+    /// the same serialized lane as every normal mark, and its failure stays persisted meanwhile.
+    private func retryProgress(_ write: ProgressWrite, mediaId: Int) async {
+        if let lane = progressLane[mediaId] ?? batchLane(containing: mediaId) {
+            await lane.value
+            return
+        }
+        var defended = write
+        if !isolated {
+            // Mark and Undo have different failure keys. Retry of either row defends the newest
+            // failed word for this part, and a row already superseded by success sends nothing.
+            guard let change = SyncCenter.shared.latestProgressChange(mediaId: mediaId),
+                  case .progress(let franchiseId, _, let episodes)? = change.intent else { return }
+            defended = ProgressWrite(franchiseId: franchiseId, episodes: episodes,
+                                     command: write.command, title: write.title, mutation: change.mutation)
+        }
+        // A cold launch may have loaded the older canonical snapshot while preserving this
+        // failure row. Retry defends that persisted intent in the UI as well as on the wire.
+        applyLocalProgress(franchiseId: defended.franchiseId, mediaId: mediaId, episodes: defended.episodes)
+        sendProgress(franchiseId: defended.franchiseId, mediaId: mediaId, episodes: defended.episodes,
+                     command: defended.command, mutation: defended.mutation)
+        if let lane = progressLane[mediaId] { await lane.value }
+    }
+
     /// Re-issue a write restored from a previous launch (`SyncCenter.replay`). Progress replays
-    /// straight to the server — the local value it defends is already on screen if the library
-    /// still carries it; membership and status replays go through the live commands so their
+    /// through the part's lane and restores the defended local value even after a cold canonical
+    /// snapshot; membership and status replays go through the live commands so their
     /// optimistic state, rollback and toasts stay the app's one grammar.
-    func replay(_ intent: WriteIntent) async {
+    func replay(_ intent: WriteIntent, mutation: MutationStamp? = nil) async {
         switch intent {
         case .franchiseProgress(let franchiseId, let parts, let status, let removeMembership):
             // In the show's chain, so a replay and a fresh mark on the same show cannot race.
@@ -1848,26 +2016,26 @@ final class AppModel {
                     let f: Franchise
                     if let cached = self.franchise(id: franchiseId) { f = cached }
                     else { f = try await self.api.franchise(id: franchiseId, country: AppRegion.current) }
-                    try await self.saveProgressBatch(f, parts: parts, status: status, removeMembership: removeMembership)
+                    try await self.saveProgressBatch(f, parts: parts, status: status, removeMembership: removeMembership, mutation: mutation)
                 } catch {
                     self.recordBatchFailure(franchiseId: franchiseId, title: self.franchise(id: franchiseId)?.title ?? "",
-                                            parts: parts, status: status, removeMembership: removeMembership, error: error)
+                                            parts: parts, status: status, removeMembership: removeMembership, error: error, mutation: mutation)
                 }
             }.value
         case .progress(let franchiseId, let mediaId, let episodes):
             let write = ProgressWrite(franchiseId: franchiseId, episodes: episodes,
                                       command: Copy.Action.markAsWatched,
-                                      title: franchise(id: franchiseId)?.title ?? "")
-            await putProgress(write, mediaId: mediaId)
+                                      title: franchise(id: franchiseId)?.title ?? "", mutation: mutation)
+            await retryProgress(write, mediaId: mediaId)
         case .status(let franchiseId, let raw):
             if let status = WatchStatus(rawValue: raw) {
-                setStatus(franchiseId: franchiseId, status: status, haptic: false, present: false)
+                setStatus(franchiseId: franchiseId, status: status, haptic: false, present: false, mutation: mutation)
             }
         case .subscribe(let franchiseId, let title, let raw):
             let status = WatchStatus(rawValue: raw) ?? .planned
-            addToLibrary(franchiseId: franchiseId, title: title, isReleasing: status == .watching)
-        case .unsubscribe(let franchiseId, _):
-            removeFromLibrary(franchiseId: franchiseId, haptic: false)
+            addToLibrary(franchiseId: franchiseId, title: title, isReleasing: status == .watching, status: status, mutation: mutation)
+        case .unsubscribe(let franchiseId, let title):
+            removeFromLibrary(franchiseId: franchiseId, haptic: false, mutation: mutation, titleOverride: title)
         case .comment(let id, let subject, let parentId, let body, let franchiseId, let title):
             await replayComment(id: id, subject: subject, parentId: parentId, body: body,
                                 franchiseId: franchiseId, title: title)
@@ -1875,6 +2043,13 @@ final class AppModel {
     }
 
     // MARK: - Internal mutation helpers
+
+    /// A synchronous journal boundary, shared by plain, batch and first-run tracking writes.
+    func stageTrackingMutation(command: String, title: String, intent: WriteIntent, mutation: MutationStamp?) throws -> Bool {
+        if isolated { return true }
+        guard !accountSuspended else { throw CancellationError() }
+        return try SyncCenter.shared.stage(command: command, title: title, intent: intent, mutation: mutation)
+    }
 
     /// Queue `work` behind every one-call write already asked for this show. The show reads
     /// busy (`savingProgressFor`) from this moment until the last queued write has finished.
@@ -1907,6 +2082,8 @@ final class AppModel {
     /// of its own, so it can never leave a write behind for a later launch to replay against the
     /// real account (the DEBUG regressions did, 23 Sep).
     func fileFailure(command: String, title: String, reason: String, intent: WriteIntent? = nil,
+                     mutation: MutationStamp? = nil,
+                     retryable: Bool = true,
                      retry: @escaping @MainActor () async -> Void) {
         guard !isolated else { isolatedFailures.append(intent); return }
         // Behind the suspension view every write answers 403 until sign-out; a row whose Retry
@@ -1915,7 +2092,14 @@ final class AppModel {
         guard !accountSuspended else { return }
         // Nor is a write an account deletion held back: it is not a failure of the account's.
         guard !erasing else { return }
-        SyncCenter.shared.record(command: command, title: title, reason: reason, intent: intent, retry: retry)
+        SyncCenter.shared.record(command: command, title: title,
+                                 reason: retryable ? reason : "Discard this change and make a fresh update.",
+                                 intent: intent, mutation: mutation, retryable: retryable, retry: retry)
+    }
+
+    func setPendingAdd(_ franchiseId: String, pending: Bool) {
+        if pending { pendingAdds.insert(franchiseId) }
+        else { pendingAdds.remove(franchiseId) }
     }
 
     /// A show drawn into the library ahead of the write that adds it (`markWatched` on a show that
@@ -1937,16 +2121,46 @@ final class AppModel {
     /// The caller has already drawn the result (`markWatched`); this makes it canonical. Waits for
     /// any per-part progress lane of the show first, so the server still ends on the user's last
     /// word.
+    @ObservationIgnored private var attemptedBatchMutations: [String: (intent: WriteIntent, mutation: MutationStamp?)] = [:]
+
+    func prepareBatchMutation(_ f: Franchise, parts: [FranchiseProgressValue], status: WatchStatus?,
+                              removeMembership: Bool = false, mutation: MutationStamp? = nil) throws -> MutationStamp? {
+        var stamp = mutation ?? MutationStamp.fresh(owner: accountStorage)
+        if removeMembership, stamp?.followup == nil { stamp = stamp?.reservingFollowup(owner: accountStorage) }
+        let intent = WriteIntent.franchiseProgress(franchiseId: f.id, parts: parts, status: status, removeMembership: removeMembership)
+        guard try stageTrackingMutation(command: removeMembership ? Copy.Action.undo : Copy.Action.markAsWatched,
+            title: f.title, intent: intent, mutation: stamp) else { throw CancellationError() }
+        return stamp
+    }
+
     func saveProgressBatch(_ f: Franchise, parts: [FranchiseProgressValue], status: WatchStatus?,
-                           removeMembership: Bool = false) async throws {
+                           removeMembership: Bool = false, mutation: MutationStamp? = nil) async throws {
+        let stamp = try prepareBatchMutation(f, parts: parts, status: status,
+                                            removeMembership: removeMembership, mutation: mutation)
+        let intent = WriteIntent.franchiseProgress(franchiseId: f.id, parts: parts, status: status, removeMembership: removeMembership)
+        attemptedBatchMutations[f.id] = (intent, stamp)
+        guard isolated || stamp != nil else { throw APIError.transport(URLError(.cannotWriteToFile)) }
         let generation = accountGeneration
+        let owner = accountStorage
+        let failures = isolated ? [] : SyncCenter.shared.progressFailureVersions(mediaIds: Set(parts.map(\.mediaId)))
         let lanes = f.parts.compactMap { progressLane[$0.mediaId] }
         for lane in lanes { await lane.value }
         guard generation == accountGeneration else { throw CancellationError() }
-        let response = try await api.setFranchiseProgress(franchiseId: f.id, parts: parts, status: status)
+        let response = try await api.setFranchiseProgress(franchiseId: f.id, parts: parts, status: status, mutation: stamp)
         guard generation == accountGeneration else { throw CancellationError() }
-        if removeMembership { _ = try await api.unsubscribe(franchiseId: f.id) }
+        if removeMembership {
+            let receipt = try await api.unsubscribe(franchiseId: f.id, mutation: stamp?.followup)
+            guard generation == accountGeneration else { throw CancellationError() }
+            if receipt.applied == false {
+                if !isolated { SyncCenter.shared.acknowledgeMutation(stamp, owner: owner) }
+                if !isolated { SyncCenter.shared.settleFailures(failures) }
+                await reload()
+                return
+            }
+        }
         guard generation == accountGeneration else { throw CancellationError() }
+        if !isolated { SyncCenter.shared.acknowledgeMutation(stamp, owner: owner) }
+        if !isolated { SyncCenter.shared.settleFailures(failures) }
         // Any library request started before this transaction returned is now stale.
         reloadSeq += 1
         loading = false
@@ -1965,7 +2179,7 @@ final class AppModel {
             library.append(saved)
         }
         if !isolated {
-            Self.persistLibrary(LibraryResponse(franchises: library, prevOpenedAt: prevOpenedAt), at: lastLoadedAt)
+            persistLibrary(LibraryResponse(franchises: library, prevOpenedAt: prevOpenedAt), at: lastLoadedAt)
             Task { await reload() }
         }
     }
@@ -1973,13 +2187,16 @@ final class AppModel {
     /// A one-call write that failed: into Sync status with the exact write as its Retry. A
     /// membership write rolls back (the write rules), so the show it added leaves the library.
     func recordBatchFailure(franchiseId: String, title: String, parts: [FranchiseProgressValue],
-                            status: WatchStatus?, removeMembership: Bool = false, error: Error) {
+                            status: WatchStatus?, removeMembership: Bool = false, error: Error, mutation: MutationStamp? = nil) {
         guard !error.isCancellation else { return }
         let intent = WriteIntent.franchiseProgress(franchiseId: franchiseId, parts: parts,
                                                   status: status, removeMembership: removeMembership)
+        let attempted = attemptedBatchMutations[franchiseId]
+        let stamp = mutation ?? (attempted?.intent == intent ? attempted?.mutation : nil)
         fileFailure(command: removeMembership ? Copy.Action.undo : Copy.Action.markAsWatched,
-                                 title: title, reason: Copy.Notice.reason(error), intent: intent) { [weak self] in
-            await self?.replay(intent)
+                                 title: title, reason: Copy.Notice.reason(error), intent: intent, mutation: stamp,
+                                 retryable: !((error as? APIError)?.isMutationConflict ?? false)) { [weak self] in
+            await self?.replay(intent, mutation: stamp)
         }
     }
 
@@ -1992,37 +2209,41 @@ final class AppModel {
         guard let fi = library.firstIndex(where: { $0.id == franchiseId }) else { return }
         library[fi] = library[fi].withUpdatedProgress(mediaId: mediaId, episodes: episodes)
         settleCompletion(franchiseId: franchiseId)
+        scheduleWidgetSnapshot()
     }
 
-    /// The shows THIS session moved to Watched by marking their last episode — Undo of that
-    /// mark takes the move back too (`unsettleCompletion`).
-    private var completedByMark: Set<String> = []
+    /// The shows THIS session moved to Watched by marking their last episode, with the status each
+    /// was filed under before — Undo of that mark takes the move back too (`unsettleCompletion`).
+    private var completedByMark: [String: WatchStatus] = [:]
     /// The show `settleCompletion` just moved, for the mark that caused it to say so.
     private var finishedByMark: String?
     private var completionSweepDone = false
 
     /// A finished series whose last episode has just been marked is filed under Watched (review
     /// i4: Thrones read "Watching ⌄" in the bar over "COMPLETE · Watched once"), the way AniList,
-    /// MAL and Trakt file it. A status write like any other: it rolls back on failure.
+    /// MAL and Trakt file it — from Watching, and from PLANNED too (9 Oct: a Planned show whose
+    /// every episode was marked in one write stayed Planned). A status write like any other: it
+    /// rolls back on failure.
     private func settleCompletion(franchiseId: String) {
-        guard let f = franchise(id: franchiseId), f.effectiveStatus == .watching, f.isWatchedThrough else { return }
-        completedByMark.insert(franchiseId)
+        guard let f = franchise(id: franchiseId), f.isWatchedThrough,
+              f.effectiveStatus == .watching || f.effectiveStatus == .planned else { return }
+        completedByMark[franchiseId] = f.effectiveStatus
         finishedByMark = franchiseId
         setStatus(franchiseId: franchiseId, status: .completed, haptic: false, present: false)
     }
 
     private func unsettleCompletion(franchiseId: String) {
-        guard completedByMark.remove(franchiseId) != nil,
+        guard let before = completedByMark.removeValue(forKey: franchiseId),
               let f = franchise(id: franchiseId), f.effectiveStatus == .completed, !f.isWatchedThrough else { return }
-        setStatus(franchiseId: franchiseId, status: .watching, haptic: false, present: false)
+        setStatus(franchiseId: franchiseId, status: before, haptic: false, present: false)
     }
 
-    /// Rows the server still files under Watching though every episode is watched and nothing is
-    /// coming (data from before the rule above): moved once per session, quietly.
+    /// Rows the server still files under Watching or Planned though every episode is watched and
+    /// nothing is coming (data from before the rule above): moved once per session, quietly.
     private func settleCompletedSeries() {
         guard !completionSweepDone else { return }
         completionSweepDone = true
-        for f in library where f.effectiveStatus == .watching && f.isWatchedThrough {
+        for f in library where (f.effectiveStatus == .watching || f.effectiveStatus == .planned) && f.isWatchedThrough {
             setStatus(franchiseId: f.id, status: .completed, haptic: false, present: false)
         }
     }
@@ -2035,7 +2256,8 @@ final class AppModel {
     /// a show put back under Watched stays there for that part.
     private func resumeReturningSeries() {
         guard !isolated else { return }
-        var done = Set(UserDefaults.standard.array(forKey: Self.resumedPartsKey) as? [Int] ?? [])
+        var done = Set(AccountLocalStore.shared.read("resumed-parts.json", owner: accountStorage)
+            .flatMap { try? JSONDecoder().decode([Int].self, from: $0) } ?? [])
         var moved: [Franchise] = []
         for f in library where f.effectiveStatus == .completed {
             // Airing now, or a season dropped whole this week (`freshPart`, review i4 — a Netflix
@@ -2051,7 +2273,9 @@ final class AppModel {
             setStatus(franchiseId: f.id, status: .watching, haptic: false, present: false)
         }
         guard !moved.isEmpty else { return }
-        UserDefaults.standard.set(Array(done), forKey: Self.resumedPartsKey)
+        if let data = try? JSONEncoder().encode(Array(done)) {
+            try? AccountLocalStore.shared.write(data, name: "resumed-parts.json", owner: accountStorage)
+        }
         if moved.count == 1, let f = moved.first {
             var receipt = UndoState(mediaId: nil, franchiseId: f.id, prevProgress: 0, title: f.title, episode: 0,
                                     customMessage: Copy.Toast.backOnWatching)

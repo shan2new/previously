@@ -2,7 +2,8 @@ import WidgetKit
 import SwiftUI
 import ActivityKit
 
-// The Previously widget extension: currently just the airing-countdown Live Activity.
+// The Previously widget extension: the Next up widget (NextUpWidget.swift, 9 Oct) and the
+// airing-countdown Live Activity.
 // Design system note: extensions don't bundle the Outfit fonts or Theme — colors are inlined
 // (accent 0xF0A24E, background 0x0B0B0E) and type is the system font, which is conventional
 // for lock-screen surfaces.
@@ -13,6 +14,7 @@ private let backdrop = Color(red: 11 / 255, green: 11 / 255, blue: 14 / 255)
 @main
 struct PreviouslyWidgetBundle: WidgetBundle {
     var body: some Widget {
+        NextUpWidget()
         AiringLiveActivity()
     }
 }
