@@ -1,0 +1,19 @@
+{
+  "recordedAt": "2026-10-06T15:26:50.968454+00:00",
+  "source": "official Xcode27 GUI preparation",
+  "runtimeSourceSHA256": "baaf904adf90bc13809ef9b3c331a800385409a40d18cf1bf1aceaf79c97e6ef",
+  "runtimeFileCount": 199,
+  "generatedReleaseBuildNumber": 14,
+  "version": "1.0",
+  "configuration": "Release",
+  "destination": "Any iOS Device (arm64)",
+  "freeBytesBeforeArchive": 5647196160,
+  "requiredFreeFloorBytes": 2362232012,
+  "existingArchives": [
+    "/Users/shan2new/Library/Developer/Xcode/Archives/2026-10-06/Previously 06-10-26, 7.05\u202fPM.xcarchive"
+  ],
+  "archiveStarted": true,
+  "uploaded": false,
+  "submittedForReview": false,
+  "archiveStartedAt": "2026-10-06T15:27:18.738724+00:00"
+}

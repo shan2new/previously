@@ -1,0 +1,67 @@
+--- docs/qa/2026-10-06/native-live/build13-SignInView.swift	2026-10-06 20:11:25
++++ ios/Sources/Auth/SignInView.swift	2026-10-06 20:16:49
+@@ -17,6 +17,7 @@
+     @Environment(\.accessibilityReduceMotion) private var reduceMotion
+     @Environment(\.dynamicTypeSize) private var typeSize
+     @State private var showClerkAuth = false
++    @State private var clerkAuthView: AuthView?
+     @AppStorage(AccountDeletionNotice.key) private var deletionNotice = ""
+     /// `-devSignInId <clerkId>` launch argument (DEBUG, like `-recapDemo`): pre-fills the field so
+     /// a scripted simulator run can sign in without typing into the device.
+@@ -109,7 +110,7 @@
+     private var action: some View {
+         VStack(spacing: ThemeSpace.x3) {
+             if AppConfig.isClerkConfigured {
+-                Button("Sign in") { showClerkAuth = true }
++                Button("Sign in", action: presentClerkAuth)
+                     .buttonStyle(PrimaryButtonStyle2())
+             } else if devSignInAvailable {
+                 #if DEBUG
+@@ -130,31 +131,38 @@
+             }
+         }
+         .animation(ThemeMotion.pick(ThemeMotion.uiGentle, reduceMotion: reduceMotion), value: auth.lastError)
+-        .sheet(isPresented: $showClerkAuth) {
+-            AuthView()
++        .sheet(isPresented: $showClerkAuth, onDismiss: { clerkAuthView = nil }) {
++            clerkAuthView
+                 .clerkAppIconView {
+                     PreviouslyMark(width: 36, lit: true)
+                         .padding(.bottom, ThemeSpace.x6)
+                         .accessibilityHidden(true)
+                 }
+                 .environment(Clerk.shared)
+-                .onChange(of: Clerk.shared.session != nil) { _, signedIn in
+-                    if signedIn {
+-                        auth.refreshClerkSignInState()
+-                        showClerkAuth = false
+-                    }
+-                }
+         }
+         #if DEBUG
+         // Capture the actual public credential sheet without starting an authentication attempt.
+         .onAppear {
+             if AppConfig.isClerkConfigured,
+                UserDefaults.standard.bool(forKey: "signInCaptureSheet") {
+-                showClerkAuth = true
++                presentClerkAuth()
+             }
+         }
+         #endif
+     }
++
++    private func presentClerkAuth() {
++        guard !showClerkAuth, clerkAuthView == nil else { return }
++        // AuthView initializes observable SDK state. Construct it outside body tracking and
++        // retain it for this presentation so sheet reevaluation cannot repeat that setup.
++        let manager = auth
++        let presented = $showClerkAuth
++        clerkAuthView = AuthView(onAuthComplete: {
++            manager.refreshClerkSignInState()
++            presented.wrappedValue = false
++        })
++        showClerkAuth = true
++    }
+ }
+ 
+ #if DEBUG

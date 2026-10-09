@@ -1,0 +1,84 @@
+{
+  "recordedAt": "2026-10-06T14:25:01.240213+00:00",
+  "stoppedOwnedWorkers": [],
+  "candidatePaths": [
+    {
+      "path": "/Users/shan2new/Projects/previously/ios/build/DerivedData/Build/Products/Release-iphonesimulator",
+      "sizeBytes": 92356608,
+      "birthAt": "2026-10-06T14:22:02.492689+00:00",
+      "createdDuringAttempt": true
+    },
+    {
+      "path": "/Users/shan2new/Projects/previously/ios/build/DerivedData/Build/Intermediates.noindex/EagerLinkingTBDs/Release-iphonesimulator",
+      "sizeBytes": 0,
+      "birthAt": "2026-10-06T14:22:02.492488+00:00",
+      "createdDuringAttempt": true
+    },
+    {
+      "path": "/Users/shan2new/Projects/previously/ios/build/DerivedData/Build/Intermediates.noindex/PhoneNumberKit.build/Release-iphonesimulator",
+      "sizeBytes": 5550080,
+      "birthAt": "2026-10-06T14:22:02.502003+00:00",
+      "createdDuringAttempt": true
+    },
+    {
+      "path": "/Users/shan2new/Projects/previously/ios/build/DerivedData/Build/Intermediates.noindex/Nuke.build/Release-iphonesimulator",
+      "sizeBytes": 21757952,
+      "birthAt": "2026-10-06T14:22:02.504133+00:00",
+      "createdDuringAttempt": true
+    },
+    {
+      "path": "/Users/shan2new/Projects/previously/ios/build/DerivedData/Build/Intermediates.noindex/Previously.build/Release-iphonesimulator",
+      "sizeBytes": 210358272,
+      "birthAt": "2026-10-06T14:22:02.492173+00:00",
+      "createdDuringAttempt": true
+    },
+    {
+      "path": "/Users/shan2new/Projects/previously/ios/build/DerivedData/Build/Intermediates.noindex/Clerk.build/Release-iphonesimulator",
+      "sizeBytes": 268156928,
+      "birthAt": "2026-10-06T14:22:02.495591+00:00",
+      "createdDuringAttempt": true
+    }
+  ],
+  "totalCandidateBytes": 598179840,
+  "runtimeOrSourceDeleted": false,
+  "deletedPaths": [
+    {
+      "path": "/Users/shan2new/Projects/previously/ios/build/DerivedData/Build/Products/Release-iphonesimulator",
+      "sizeBytes": 92356608,
+      "birthAt": "2026-10-06T14:22:02.492689+00:00",
+      "createdDuringAttempt": true
+    },
+    {
+      "path": "/Users/shan2new/Projects/previously/ios/build/DerivedData/Build/Intermediates.noindex/EagerLinkingTBDs/Release-iphonesimulator",
+      "sizeBytes": 0,
+      "birthAt": "2026-10-06T14:22:02.492488+00:00",
+      "createdDuringAttempt": true
+    },
+    {
+      "path": "/Users/shan2new/Projects/previously/ios/build/DerivedData/Build/Intermediates.noindex/PhoneNumberKit.build/Release-iphonesimulator",
+      "sizeBytes": 5550080,
+      "birthAt": "2026-10-06T14:22:02.502003+00:00",
+      "createdDuringAttempt": true
+    },
+    {
+      "path": "/Users/shan2new/Projects/previously/ios/build/DerivedData/Build/Intermediates.noindex/Nuke.build/Release-iphonesimulator",
+      "sizeBytes": 21757952,
+      "birthAt": "2026-10-06T14:22:02.504133+00:00",
+      "createdDuringAttempt": true
+    },
+    {
+      "path": "/Users/shan2new/Projects/previously/ios/build/DerivedData/Build/Intermediates.noindex/Previously.build/Release-iphonesimulator",
+      "sizeBytes": 210358272,
+      "birthAt": "2026-10-06T14:22:02.492173+00:00",
+      "createdDuringAttempt": true
+    },
+    {
+      "path": "/Users/shan2new/Projects/previously/ios/build/DerivedData/Build/Intermediates.noindex/Clerk.build/Release-iphonesimulator",
+      "sizeBytes": 268156928,
+      "birthAt": "2026-10-06T14:22:02.495591+00:00",
+      "createdDuringAttempt": true
+    }
+  ],
+  "cleanupFinishedAt": "2026-10-06T14:25:18.061455+00:00",
+  "finalFreeBytes": 2529914880
+}

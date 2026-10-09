@@ -1,0 +1,42 @@
+{
+  "checkedAt": "2026-10-06T13:50:59.250708+00:00",
+  "fileCount": 118,
+  "totalBytes": 8176406,
+  "changed": [
+    "README.md",
+    "app/experience.tsx",
+    "app/gallery.css",
+    "app/globals.css",
+    "app/layout.tsx",
+    "app/legal-document.tsx",
+    "app/product-tour.tsx",
+    "app/site-chrome.tsx"
+  ],
+  "added": [
+    "public/app/home-current.png",
+    "public/app/library-current.jpg",
+    "public/app/schedule-current.jpg",
+    "public/app/search-current.jpg",
+    "public/brand/native-icon.png"
+  ],
+  "removed": [
+    "public/app/library-preview.webp",
+    "public/app/library.webp",
+    "public/app/schedule-preview.webp",
+    "public/app/schedule.webp",
+    "public/app/search-preview.webp",
+    "public/app/search.webp",
+    "public/app/today-preview.webp",
+    "public/app/today.webp",
+    "public/brand/icon.svg",
+    "public/brand/mark-tight.svg",
+    "public/brand/mark.svg"
+  ],
+  "allPathsWithinLanding": true,
+  "secretAndGeneratedExclusionPassed": true,
+  "legalContentUnchanged": true,
+  "wordmarkPeriodColor": "#F0563F",
+  "nativeIconUnchanged": true,
+  "localBuildRun": false,
+  "sourceManifestSha256": "daa643cdf21e27f9314026d89190c19693f28a935bb733387ffe68cfcf9c928c"
+}

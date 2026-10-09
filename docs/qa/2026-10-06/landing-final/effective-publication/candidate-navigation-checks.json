@@ -1,0 +1,40 @@
+{
+  "checkedAtUTC": "2026-10-06T17:13:47.325Z",
+  "checks": [
+    {
+      "h1": "Privacy Policy.",
+      "path": "/privacy",
+      "expectedPath": "/privacy",
+      "passed": true
+    },
+    {
+      "h1": "Terms of Use.",
+      "path": "/terms",
+      "expectedPath": "/terms",
+      "passed": true
+    },
+    {
+      "h1": "Support.",
+      "path": "/support",
+      "expectedPath": "/support",
+      "passed": true
+    },
+    {
+      "h1": "Account Deletion.",
+      "path": "/delete-account",
+      "expectedPath": "/delete-account",
+      "passed": true
+    }
+  ],
+  "retention": {
+    "hash": "#section-5",
+    "path": "/privacy",
+    "sameMini": true,
+    "scheduledRetention": true,
+    "scrollWidth": 320,
+    "sectionTop": 6335.0078125,
+    "width": 320
+  },
+  "initialLocatorAmbiguity": "Unscoped Support matched header and footer; safely scoped to observed Legal and support navigation. No product change.",
+  "passed": true
+}

@@ -1,0 +1,15 @@
+{
+  "startedAt": "2026-10-06T11:01:33.618576+00:00",
+  "database": "previously_qa_progress_18cb8a9bb6864a24abe1546468a1504e",
+  "host": "127.0.0.1",
+  "databaseCreated": true,
+  "databaseRemoved": true,
+  "productionDatabaseReadOrWritten": false,
+  "dotenvLoaded": false,
+  "nodeVersion": "v24.21.0",
+  "nodeBinary": "/opt/homebrew/opt/node@24/bin/node",
+  "sourceRevision": "19649b3748eac6ca7508f86ad96be9f533406fcb",
+  "testExitCode": 0,
+  "scratchConnectionsBeforeDrop": 0,
+  "finishedAt": "2026-10-06T11:01:36.153528+00:00"
+}

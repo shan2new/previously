@@ -1,0 +1,22 @@
+{
+  "id": "prj_osATa26wuWMoLf7yLOEaXvYuiial",
+  "name": "landing",
+  "accountId": "team_WGVvWCwyPJLQHHMvAUdYU9td",
+  "framework": "vite",
+  "nodeVersion": "24.x",
+  "rootDirectory": "landing",
+  "buildCommand": null,
+  "outputDirectory": null,
+  "installCommand": null,
+  "productionTarget": {
+    "id": "dpl_6nzwjys7thtUHrV4pdV8dU4GqLM8",
+    "url": "landing-7m64oqxdg-shan2news-projects.vercel.app",
+    "readyState": "READY",
+    "alias": [
+      "thepreviously.vercel.app",
+      "landing-ten-theta-55.vercel.app",
+      "landing-shan2news-projects.vercel.app",
+      "landing-git-main-shan2news-projects.vercel.app"
+    ]
+  }
+}

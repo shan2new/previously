@@ -37,19 +37,20 @@ enum FirstRunPhase: Equatable {
 
 enum FirstRun {
     /// The flow was begun on this device and not finished (a quit mid-way).
-    private static let pendingKey = "previously.firstRun.pending"
-
-    static var pending: Bool {
-        get { UserDefaults.standard.bool(forKey: pendingKey) }
+    @MainActor static var pending: Bool {
+        get { AccountLocalStore.shared.read("first-run-pending", owner: AccountLocalStore.shared.current) != nil }
         set {
-            if newValue { UserDefaults.standard.set(true, forKey: pendingKey) }
-            else { UserDefaults.standard.removeObject(forKey: pendingKey) }
+            if newValue {
+                try? AccountLocalStore.shared.write(Data([1]), name: "first-run-pending", owner: AccountLocalStore.shared.current)
+            } else {
+                AccountLocalStore.shared.remove("first-run-pending", owner: AccountLocalStore.shared.current)
+            }
         }
     }
 
     /// What a launch knows before the network answers: a flow in hand resumes; a device that has
     /// the account's audience is an account that has been through this; otherwise ask the server.
-    static var launchPhase: FirstRunPhase {
+    @MainActor static var launchPhase: FirstRunPhase {
         #if DEBUG
         if UserDefaults.standard.bool(forKey: "firstRun") { return .due }
         #endif
@@ -151,13 +152,19 @@ extension AppModel {
     /// One picked show, placed. Drawn now; canonical when the call returns. Returns whether the
     /// server took it.
     @discardableResult
-    func placeFirstRunShow(_ f: Franchise, write: FirstRunWrite) async -> Bool {
+    func placeFirstRunShow(_ f: Franchise, write: FirstRunWrite, mutation: MutationStamp? = nil) async -> Bool {
         guard !isInLibrary(f.id) || pendingAdds.contains(f.id) else { return true }
+        let stamp: MutationStamp?
+        do { stamp = try prepareBatchMutation(f, parts: write.parts, status: write.status, mutation: mutation) }
+        catch {
+            recordBatchFailure(franchiseId: f.id, title: f.title, parts: write.parts, status: write.status, error: error, mutation: mutation)
+            return false
+        }
         insertPending(write.applied(to: f))
         let task = enqueueBatch(f.id) { [weak self] in
             guard let self else { return }
             do {
-                try await self.saveProgressBatch(f, parts: write.parts, status: write.status)
+                try await self.saveProgressBatch(f, parts: write.parts, status: write.status, mutation: stamp)
             } catch {
                 guard !error.isCancellation else { return }
                 self.withdrawPending(f.id)
@@ -167,5 +174,30 @@ extension AppModel {
         }
         await task.value
         return isInLibrary(f.id)
+    }
+
+    /// A picked show's details may be unavailable. It still uses the same stamped, durable
+    /// membership path, and preserves the setup flow's four-at-a-time await semantics.
+    func placeFirstRunBareShow(_ pick: FranchiseSummary, mutation: MutationStamp? = nil) async {
+        let generation = accountEpoch
+        let owner = accountStorage
+        let stamp = mutation ?? MutationStamp.fresh(owner: owner)
+        let status: WatchStatus = pick.isReleasing ? .watching : .planned
+        let intent = WriteIntent.subscribe(franchiseId: pick.id, title: pick.title, status: status.rawValue)
+        do {
+            guard try stageTrackingMutation(command: Copy.Action.add, title: pick.title, intent: intent, mutation: stamp) else { return }
+            guard generation == accountEpoch else { return }
+            setPendingAdd(pick.id, pending: true)
+            _ = try await api.subscribe(franchiseId: pick.id, status: status, mutation: stamp)
+            guard generation == accountEpoch else { return }
+            if !isIsolated { SyncCenter.shared.acknowledgeMutation(stamp, owner: owner) }
+        } catch {
+            guard generation == accountEpoch, !error.isCancellation else { return }
+            fileFailure(command: Copy.Action.add, title: pick.title, reason: Copy.Notice.reason(error),
+                intent: intent, mutation: stamp) { [weak self] in
+                    await self?.placeFirstRunBareShow(pick, mutation: stamp)
+                }
+        }
+        if generation == accountEpoch { setPendingAdd(pick.id, pending: false) }
     }
 }

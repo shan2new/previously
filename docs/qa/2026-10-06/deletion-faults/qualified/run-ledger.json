@@ -1,0 +1,12 @@
+{
+  "startedAt": "2026-10-06T10:38:44.130382+00:00",
+  "database": "previously_qa_deletion_5a7c2b20ed97445e8abebc4ec763e878",
+  "host": "127.0.0.1",
+  "databaseCreated": true,
+  "databaseRemoved": true,
+  "productionDatabaseReadOrWritten": false,
+  "dotenvLoaded": false,
+  "sourceRevision": "19649b3748eac6ca7508f86ad96be9f533406fcb",
+  "testExitCode": 0,
+  "finishedAt": "2026-10-06T10:38:46.034234+00:00"
+}

@@ -1,0 +1,9 @@
+Vercel CLI 62.4.0
+> Assigning alias previously.cognipin.com to landing-8ypdokade-shan2news-projects.vercel.app
+Fetching domain previously.cognipin.com under shan2news-projects
+Creating alias
+Generating a certificate…
+Issuing a certificate for previously.cognipin.com
+> Certificate for previously.cognipin.com (cert_zCC3PMdoeuyFDdR8qsMiRK8N) created [11s]
+Creating alias
+> Success! https://previously.cognipin.com now points to landing-8ypdokade-shan2news-projects.vercel.app [15s]

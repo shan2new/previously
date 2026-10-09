@@ -82,6 +82,7 @@ struct TrailerFullScreen: View {
             dismiss()
         }
         .accessibilityAction(.escape) { dismiss() }
+        .qaTrailerEvidence()
     }
 
     private var dragToClose: some Gesture {

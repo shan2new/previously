@@ -1,0 +1,19 @@
+{
+  "id": "dpl_2BUUc6ZREKY29QVMdaF6zEr4BeGg",
+  "url": "landing-faw02og9j-shan2news-projects.vercel.app",
+  "readyState": "READY",
+  "target": "production",
+  "projectId": "prj_osATa26wuWMoLf7yLOEaXvYuiial",
+  "teamId": null,
+  "createdAt": 1791292125110,
+  "buildingAt": 1791292132179,
+  "ready": 1791292149111,
+  "aliasAssigned": true,
+  "alias": [
+    "landing-shan2news-projects.vercel.app"
+  ],
+  "functions": null,
+  "builds": [],
+  "sourceManifestSha256": "21f9d2ee7b0148574f34aec471818d0b4a3f4833e4b7366ed2aadcbcdf27e36a",
+  "checkedAt": "2026-10-06T13:12:59.649650+00:00"
+}

@@ -1,0 +1,51 @@
+{
+  "runAt": "2026-10-06T11:19:27.423Z",
+  "fixtureVersion": "deletion-recovery-v1",
+  "database": "previously_qa_recovery_bf49413bfa444844ac1504f56e43f127",
+  "boundary": "Real production erasure/identity locks/reconciliation/finishDeletion + actual migrated PostgreSQL and owned FS ledger; route auth via Fastify injection;404 injected at existing ClerkUsersApi seam; no actual Clerk SDK/network or production data.",
+  "rejectedOutbound": 0,
+  "cases": [
+    {
+      "name": "failed database commit preserves requested FS intent and recovery erases account",
+      "status": "passed",
+      "durationMs": 95,
+      "evidence": {
+        "beforeCommitRollback": true,
+        "requestedMarkerSurvived": true,
+        "after": {
+          "users": 0,
+          "progress": 0,
+          "receipts": 0,
+          "cursors": 0
+        },
+        "authAfterRecovery": 401
+      }
+    },
+    {
+      "name": "completed hash-only journal erases a restored account and cannot downgrade",
+      "status": "passed",
+      "durationMs": 99,
+      "evidence": {
+        "restoredRowsErased": true,
+        "completedHashOnly": true,
+        "accountUpsertRejected": true
+      }
+    },
+    {
+      "name": "pending provider cleanup404 completes DB and FS ledgers with no external call",
+      "status": "passed",
+      "durationMs": 107,
+      "evidence": {
+        "injectedClerkUsers404": true,
+        "realFinishDeletion": true,
+        "providerCalls": 1,
+        "completedDBAndFS": true
+      }
+    }
+  ],
+  "summary": {
+    "passed": 3,
+    "failed": 0,
+    "total": 3
+  }
+}

@@ -1,4 +1,4 @@
-import { and, eq, inArray, isNotNull, max, sql } from 'drizzle-orm'
+import { and, eq, inArray, isNotNull, max, or, sql } from 'drizzle-orm'
 import { fetchEnrichmentByIds, type AniListRequestOptions } from '../anilist/client.js'
 import type {
   AniListCharacterEdge,
@@ -9,7 +9,7 @@ import type {
   AniListStaffEdge,
 } from '../anilist/types.js'
 import { db } from '../db/index.js'
-import { franchise, franchiseMember, media, recommendationEdges, subscriptions } from '../db/schema.js'
+import { franchise, franchiseMember, media, recommendationEdges, recommendationTargets, subscriptions } from '../db/schema.js'
 import { getShow, tmdbEnabled, type TmdbRequestOptions } from '../tmdb/client.js'
 import { tmdbArtwork, tmdbFranchiseEnrichment, tmdbRecommendationTargets } from '../tmdb/mapping.js'
 import type { ArtworkGallery, CatalogPerson, FranchiseEnrichment, FranchisePeople, RelatedTitle } from '../types/api.js'
@@ -20,6 +20,7 @@ import { BoundedTaskQueue } from '../util/taskQueue.js'
 import { storedRoots, syncRecommendationEdges, type RecommendationTargetWrite } from './recommendationEdges.js'
 import type { RecommendationEdgeFacts } from './recommendationRank.js'
 import { resolveSeriesRoots, type RootWalkOptions, type RootWalkStart } from './recommendationRoots.js'
+import { consumerFranchiseIds, isExcludedContent } from './consumerContent.js'
 
 const D = 86_400_000
 const REFRESH_AFTER_MS = 7 * D
@@ -30,7 +31,7 @@ const ANILIST_BACKGROUND_INTERVAL_MS = 2_100
 const EMPTY_PEOPLE: FranchisePeople = { creators: [], directors: [], cast: [] }
 
 const queue = new BoundedTaskQueue(2, 48, (key, error) => {
-  console.warn(`catalog enrichment failed (${key}):`, error instanceof Error ? error.message : error)
+  console.warn(`catalog enrichment failed (${key}):`, 'diagnostic details redacted')
 })
 
 function aniListPerson(person: AniListPerson, role: string | null): CatalogPerson | null {
@@ -249,6 +250,7 @@ export function aniListFranchiseEnrichment(
   const adultValues = items.map((item) => item.isAdult).filter((value): value is boolean => value != null)
 
   const related: RelatedTitle[] = rankedAniListRecommendations(items, memberIds)
+    .filter(({ media: candidate }) => !isExcludedContent(candidate))
     .slice(0, ANILIST_RELATED_TITLES)
     .map(({ media: candidate, rating, title }) => ({
       source: 'anilist',
@@ -492,14 +494,14 @@ export async function refreshSubscribedTmdbRecommendations(limit = 200): Promise
     try {
       return await refreshFranchiseEnrichment(id, { force: true, tmdbRequest: { maxRetries: 2, timeoutMs: 10_000 } })
     } catch (error) {
-      console.warn(`TMDB recommendations refresh failed (${id}):`, error instanceof Error ? error.message : error)
+      console.warn(`TMDB recommendations refresh failed (${id}):`, 'diagnostic details redacted')
       return false
     }
   })
   return { checked: due.length, refreshed: results.filter(Boolean).length }
 }
 
-/** Resolve related provider ids to local franchise ids in two batched reads. */
+/** Resolve related ids and omit known excluded local/provider facts in batched reads. */
 export async function resolveRelatedFranchiseIds(items: RelatedTitle[]): Promise<RelatedTitle[]> {
   if (items.length === 0) return items
   const aniIds = [...new Set(items.filter((item) => item.source === 'anilist').map((item) => item.externalId))]
@@ -521,7 +523,21 @@ export async function resolveRelatedFranchiseIds(items: RelatedTitle[]): Promise
   const local = new Map<string, string>()
   for (const row of aniRows) local.set(`anilist:${row.externalId}`, row.franchiseId)
   for (const row of tmdbRows) if (row.externalId != null) local.set(`tmdb:${row.externalId}`, row.franchiseId)
-  return items.map((item) => ({
+  const [allowed, facts] = await Promise.all([
+    consumerFranchiseIds([...new Set(local.values())]),
+    db.select({ source: recommendationTargets.source, externalId: recommendationTargets.externalId,
+      isAdult: recommendationTargets.isAdult, genres: recommendationTargets.genres })
+      .from(recommendationTargets).where(or(
+        aniIds.length ? and(eq(recommendationTargets.source, 'anilist'), inArray(recommendationTargets.externalId, aniIds)) : undefined,
+        tmdbIds.length ? and(eq(recommendationTargets.source, 'tmdb'), inArray(recommendationTargets.externalId, tmdbIds)) : undefined,
+      )),
+  ])
+  const excluded = new Set(facts.filter(isExcludedContent).map((row) => `${row.source}:${row.externalId}`))
+  return items.filter((item) => {
+    const key = `${item.source}:${item.externalId}`
+    const id = local.get(key)
+    return !excluded.has(key) && (!id || allowed.has(id))
+  }).map((item) => ({
     ...item,
     franchiseId: local.get(`${item.source}:${item.externalId}`) ?? null,
   }))

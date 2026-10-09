@@ -75,6 +75,7 @@ beforeEach(() => {
 })
 
 afterEach(() => {
+  warn.mockRestore()
   vi.useRealTimers()
 })
 
@@ -172,7 +173,8 @@ describe('readAudience / resolveAudience', () => {
     // Not a missing table: nothing is assumed about the next request.
     expect(fake.state.reads).toBe(2)
     expect(warn).toHaveBeenCalledOnce()
-    expect(String(warn.mock.calls[0]![0])).toContain('connection terminated')
+    expect(String(warn.mock.calls[0]![0])).toContain('diagnostic details redacted')
+    expect(String(warn.mock.calls[0]![0])).not.toContain('connection terminated')
   })
 })
 

@@ -1,0 +1,211 @@
+{
+  "startedAt": "2026-10-06T15:20:35.624684+00:00",
+  "finishedAt": "2026-10-06T15:20:38.080831+00:00",
+  "status": "approved_scoped_test_input_cleanup_complete",
+  "rootExplicitScopedAuthorization": true,
+  "workspace": "previously-2bd4c895d527",
+  "noActiveBuildTestCompilerAtGuard": true,
+  "exactInventoryMatchedBefore": 33,
+  "packageCountAfter": 4,
+  "removedPackageCount": 29,
+  "removed": [
+    {
+      "path": "/Users/shan2new/Library/Developer/XcodeBuildMCP/workspaces/previously-2bd4c895d527/test-products/test_sim_2026-10-06T10-41-36-802Z_pid75449_965f4d54.xctestproducts",
+      "removed": true,
+      "allocatedBytesApproximateBefore": 254140416
+    },
+    {
+      "path": "/Users/shan2new/Library/Developer/XcodeBuildMCP/workspaces/previously-2bd4c895d527/test-products/test_sim_2026-10-06T11-08-36-151Z_pid92520_06ceea31.xctestproducts",
+      "removed": true,
+      "allocatedBytesApproximateBefore": 255143936
+    },
+    {
+      "path": "/Users/shan2new/Library/Developer/XcodeBuildMCP/workspaces/previously-2bd4c895d527/test-products/test_sim_2026-10-06T11-30-17-899Z_pid6653_5729d870.xctestproducts",
+      "removed": true,
+      "allocatedBytesApproximateBefore": 255156224
+    },
+    {
+      "path": "/Users/shan2new/Library/Developer/XcodeBuildMCP/workspaces/previously-2bd4c895d527/test-products/test_sim_2026-10-06T12-55-05-585Z_pid52843_adfa37dd.xctestproducts",
+      "removed": true,
+      "allocatedBytesApproximateBefore": 258121728
+    },
+    {
+      "path": "/Users/shan2new/Library/Developer/XcodeBuildMCP/workspaces/previously-2bd4c895d527/test-products/test_sim_2026-10-06T12-26-02-107Z_pid36737_4da9a4e0.xctestproducts",
+      "removed": true,
+      "allocatedBytesApproximateBefore": 258088960
+    },
+    {
+      "path": "/Users/shan2new/Library/Developer/XcodeBuildMCP/workspaces/previously-2bd4c895d527/test-products/test_sim_2026-10-06T12-16-16-115Z_pid30648_ede11ca6.xctestproducts",
+      "removed": true,
+      "allocatedBytesApproximateBefore": 256843776
+    },
+    {
+      "path": "/Users/shan2new/Library/Developer/XcodeBuildMCP/workspaces/previously-2bd4c895d527/test-products/test_sim_2026-10-06T12-04-59-036Z_pid23654_167936e7.xctestproducts",
+      "removed": true,
+      "allocatedBytesApproximateBefore": 256749568
+    },
+    {
+      "path": "/Users/shan2new/Library/Developer/XcodeBuildMCP/workspaces/previously-2bd4c895d527/test-products/test_sim_2026-10-06T12-08-33-415Z_pid26205_b3d2a972.xctestproducts",
+      "removed": true,
+      "allocatedBytesApproximateBefore": 256843776
+    },
+    {
+      "path": "/Users/shan2new/Library/Developer/XcodeBuildMCP/workspaces/previously-2bd4c895d527/test-products/test_sim_2026-10-06T12-41-36-700Z_pid45789_bd237796.xctestproducts",
+      "removed": true,
+      "allocatedBytesApproximateBefore": 258187264
+    },
+    {
+      "path": "/Users/shan2new/Library/Developer/XcodeBuildMCP/workspaces/previously-2bd4c895d527/test-products/test_sim_2026-10-06T12-44-02-628Z_pid47260_6de4312c.xctestproducts",
+      "removed": true,
+      "allocatedBytesApproximateBefore": 258220032
+    },
+    {
+      "path": "/Users/shan2new/Library/Developer/XcodeBuildMCP/workspaces/previously-2bd4c895d527/test-products/test_sim_2026-10-06T09-55-52-447Z_pid49505_f2eca116.xctestproducts",
+      "removed": true,
+      "allocatedBytesApproximateBefore": 251867136
+    },
+    {
+      "path": "/Users/shan2new/Library/Developer/XcodeBuildMCP/workspaces/previously-2bd4c895d527/test-products/test_sim_2026-10-06T12-53-07-471Z_pid51849_96c8ebcb.xctestproducts",
+      "removed": true,
+      "allocatedBytesApproximateBefore": 258129920
+    },
+    {
+      "path": "/Users/shan2new/Library/Developer/XcodeBuildMCP/workspaces/previously-2bd4c895d527/test-products/test_sim_2026-10-06T09-36-52-530Z_pid37572_97b484b6.xctestproducts",
+      "removed": true,
+      "allocatedBytesApproximateBefore": 251572224
+    },
+    {
+      "path": "/Users/shan2new/Library/Developer/XcodeBuildMCP/workspaces/previously-2bd4c895d527/test-products/test_sim_2026-10-06T12-59-43-012Z_pid54747_efd6af96.xctestproducts",
+      "removed": true,
+      "allocatedBytesApproximateBefore": 258322432
+    },
+    {
+      "path": "/Users/shan2new/Library/Developer/XcodeBuildMCP/workspaces/previously-2bd4c895d527/test-products/test_sim_2026-10-06T09-47-27-738Z_pid45075_3aaa29f6.xctestproducts",
+      "removed": true,
+      "allocatedBytesApproximateBefore": 251748352
+    },
+    {
+      "path": "/Users/shan2new/Library/Developer/XcodeBuildMCP/workspaces/previously-2bd4c895d527/test-products/test_sim_2026-10-06T12-23-08-556Z_pid35267_d546a420.xctestproducts",
+      "removed": true,
+      "allocatedBytesApproximateBefore": 258064384
+    },
+    {
+      "path": "/Users/shan2new/Library/Developer/XcodeBuildMCP/workspaces/previously-2bd4c895d527/test-products/test_sim_2026-10-06T11-36-09-197Z_pid9561_ff6987a2.xctestproducts",
+      "removed": true,
+      "allocatedBytesApproximateBefore": 255156224
+    },
+    {
+      "path": "/Users/shan2new/Library/Developer/XcodeBuildMCP/workspaces/previously-2bd4c895d527/test-products/test_sim_2026-10-06T11-22-11-071Z_pid2663_7ae05d7d.xctestproducts",
+      "removed": true,
+      "allocatedBytesApproximateBefore": 255156224
+    },
+    {
+      "path": "/Users/shan2new/Library/Developer/XcodeBuildMCP/workspaces/previously-2bd4c895d527/test-products/test_sim_2026-10-06T12-48-54-865Z_pid49586_bfc0ff38.xctestproducts",
+      "removed": true,
+      "allocatedBytesApproximateBefore": 258256896
+    },
+    {
+      "path": "/Users/shan2new/Library/Developer/XcodeBuildMCP/workspaces/previously-2bd4c895d527/test-products/test_sim_2026-10-06T09-41-51-723Z_pid40902_40f9d2b3.xctestproducts",
+      "removed": true,
+      "allocatedBytesApproximateBefore": 251703296
+    },
+    {
+      "path": "/Users/shan2new/Library/Developer/XcodeBuildMCP/workspaces/previously-2bd4c895d527/test-products/test_sim_2026-10-06T12-12-19-615Z_pid28586_121c4d51.xctestproducts",
+      "removed": true,
+      "allocatedBytesApproximateBefore": 256843776
+    },
+    {
+      "path": "/Users/shan2new/Library/Developer/XcodeBuildMCP/workspaces/previously-2bd4c895d527/test-products/test_sim_2026-10-06T09-59-25-412Z_pid51676_4a891759.xctestproducts",
+      "removed": true,
+      "allocatedBytesApproximateBefore": 251867136
+    },
+    {
+      "path": "/Users/shan2new/Library/Developer/XcodeBuildMCP/workspaces/previously-2bd4c895d527/test-products/test_sim_2026-10-06T12-35-52-581Z_pid42642_3199692e.xctestproducts",
+      "removed": true,
+      "allocatedBytesApproximateBefore": 258088960
+    },
+    {
+      "path": "/Users/shan2new/Library/Developer/XcodeBuildMCP/workspaces/previously-2bd4c895d527/test-products/test_sim_2026-10-06T09-52-19-573Z_pid47706_aefeef66.xctestproducts",
+      "removed": true,
+      "allocatedBytesApproximateBefore": 251863040
+    },
+    {
+      "path": "/Users/shan2new/Library/Developer/XcodeBuildMCP/workspaces/previously-2bd4c895d527/test-products/test_sim_2026-10-06T12-46-39-459Z_pid48502_10b54853.xctestproducts",
+      "removed": true,
+      "allocatedBytesApproximateBefore": 258211840
+    },
+    {
+      "path": "/Users/shan2new/Library/Developer/XcodeBuildMCP/workspaces/previously-2bd4c895d527/test-products/test_sim_2026-10-06T11-16-25-837Z_pid97921_f50d618d.xctestproducts",
+      "removed": true,
+      "allocatedBytesApproximateBefore": 255143936
+    },
+    {
+      "path": "/Users/shan2new/Library/Developer/XcodeBuildMCP/workspaces/previously-2bd4c895d527/test-products/test_sim_2026-10-06T11-20-39-838Z_pid1799_0d8203df.xctestproducts",
+      "removed": true,
+      "allocatedBytesApproximateBefore": 255160320
+    },
+    {
+      "path": "/Users/shan2new/Library/Developer/XcodeBuildMCP/workspaces/previously-2bd4c895d527/test-products/test_sim_2026-10-06T10-58-38-177Z_pid86657_7fb9c525.xctestproducts",
+      "removed": true,
+      "allocatedBytesApproximateBefore": 255143936
+    },
+    {
+      "path": "/Users/shan2new/Library/Developer/XcodeBuildMCP/workspaces/previously-2bd4c895d527/test-products/test_sim_2026-10-06T10-53-06-909Z_pid82849_671a6820.xctestproducts",
+      "removed": true,
+      "allocatedBytesApproximateBefore": 255123456
+    }
+  ],
+  "preservedFinalPackageNames": [
+    "test_sim_2026-10-06T13-00-50-790Z_pid55519_de94a76e.xctestproducts",
+    "test_sim_2026-10-06T13-10-43-015Z_pid60577_9571380d.xctestproducts",
+    "test_sim_2026-10-06T13-16-35-076Z_pid63196_34238724.xctestproducts",
+    "test_sim_2026-10-06T13-22-27-478Z_pid66130_538e1c08.xctestproducts"
+  ],
+  "completionMarkersPreserved": true,
+  "allSymlinksInternalNoLinksFollowed": true,
+  "allPackagesQAOnlyWithTestPlaceholderAndLoopback": true,
+  "metadataSHAMatchedBeforeRemoval": true,
+  "resultsLogsCapturesOrCredentialMetadataFound": false,
+  "availableBytesBefore": 1780195328,
+  "availableBytesAfter": 5700194304,
+  "actualAPFSFreeDeltaBytes": 3919998976,
+  "archiveFloorBytes": 2362232012,
+  "afterAboveArchiveFloor": true,
+  "archiveFloorMarginBytes": 3337962292,
+  "qualifiedMetadataEvidenceAndReleaseProductFingerprintsUnchanged": true,
+  "preservationFingerprints": {
+    "/Users/shan2new/Library/Developer/XcodeBuildMCP/workspaces/previously-2bd4c895d527/test-products/test_sim_2026-10-06T13-00-50-790Z_pid55519_de94a76e.xctestproducts/Info.plist": "1be3e0cc22cb82d9b0eae892ed5bddf74128a7885c71d7661e6a266581464046",
+    "/Users/shan2new/Library/Developer/XcodeBuildMCP/workspaces/previously-2bd4c895d527/test-products/test_sim_2026-10-06T13-00-50-790Z_pid55519_de94a76e.xctestproducts/Tests/0/PreviouslyQA.xctestrun": "b94c4a25642275a998e4b29d69ced8452da9f769af55c28e89c9fe42ae3310e1",
+    "/Users/shan2new/Library/Developer/XcodeBuildMCP/workspaces/previously-2bd4c895d527/test-products/test_sim_2026-10-06T13-00-50-790Z_pid55519_de94a76e.xctestproducts/Binaries/0/QA-iphonesimulator/Previously.app/Info.plist": "6de8102aaa344c038b9369d6b4f24ad49073d5f79344e1ebfc7e4e5cd38c236b",
+    "/Users/shan2new/Library/Developer/XcodeBuildMCP/workspaces/previously-2bd4c895d527/test-products/test_sim_2026-10-06T13-00-50-790Z_pid55519_de94a76e.xctestproducts/Binaries/0/QA-iphonesimulator/Previously.app/Previously": "4f91d414b7991fbc3d592bc7d9521edd2456dcd7662b692c08c6e64aff5cff2c",
+    "/Users/shan2new/Library/Developer/XcodeBuildMCP/workspaces/previously-2bd4c895d527/test-products/test_sim_2026-10-06T13-10-43-015Z_pid60577_9571380d.xctestproducts/Info.plist": "1be3e0cc22cb82d9b0eae892ed5bddf74128a7885c71d7661e6a266581464046",
+    "/Users/shan2new/Library/Developer/XcodeBuildMCP/workspaces/previously-2bd4c895d527/test-products/test_sim_2026-10-06T13-10-43-015Z_pid60577_9571380d.xctestproducts/Tests/0/PreviouslyQA.xctestrun": "b94c4a25642275a998e4b29d69ced8452da9f769af55c28e89c9fe42ae3310e1",
+    "/Users/shan2new/Library/Developer/XcodeBuildMCP/workspaces/previously-2bd4c895d527/test-products/test_sim_2026-10-06T13-10-43-015Z_pid60577_9571380d.xctestproducts/Binaries/0/QA-iphonesimulator/Previously.app/Info.plist": "6de8102aaa344c038b9369d6b4f24ad49073d5f79344e1ebfc7e4e5cd38c236b",
+    "/Users/shan2new/Library/Developer/XcodeBuildMCP/workspaces/previously-2bd4c895d527/test-products/test_sim_2026-10-06T13-10-43-015Z_pid60577_9571380d.xctestproducts/Binaries/0/QA-iphonesimulator/Previously.app/Previously": "4f91d414b7991fbc3d592bc7d9521edd2456dcd7662b692c08c6e64aff5cff2c",
+    "/Users/shan2new/Library/Developer/XcodeBuildMCP/workspaces/previously-2bd4c895d527/test-products/test_sim_2026-10-06T13-16-35-076Z_pid63196_34238724.xctestproducts/Info.plist": "1be3e0cc22cb82d9b0eae892ed5bddf74128a7885c71d7661e6a266581464046",
+    "/Users/shan2new/Library/Developer/XcodeBuildMCP/workspaces/previously-2bd4c895d527/test-products/test_sim_2026-10-06T13-16-35-076Z_pid63196_34238724.xctestproducts/Tests/0/PreviouslyQA.xctestrun": "b94c4a25642275a998e4b29d69ced8452da9f769af55c28e89c9fe42ae3310e1",
+    "/Users/shan2new/Library/Developer/XcodeBuildMCP/workspaces/previously-2bd4c895d527/test-products/test_sim_2026-10-06T13-16-35-076Z_pid63196_34238724.xctestproducts/Binaries/0/QA-iphonesimulator/Previously.app/Info.plist": "6de8102aaa344c038b9369d6b4f24ad49073d5f79344e1ebfc7e4e5cd38c236b",
+    "/Users/shan2new/Library/Developer/XcodeBuildMCP/workspaces/previously-2bd4c895d527/test-products/test_sim_2026-10-06T13-16-35-076Z_pid63196_34238724.xctestproducts/Binaries/0/QA-iphonesimulator/Previously.app/Previously": "4f91d414b7991fbc3d592bc7d9521edd2456dcd7662b692c08c6e64aff5cff2c",
+    "/Users/shan2new/Library/Developer/XcodeBuildMCP/workspaces/previously-2bd4c895d527/test-products/test_sim_2026-10-06T13-22-27-478Z_pid66130_538e1c08.xctestproducts/Info.plist": "1be3e0cc22cb82d9b0eae892ed5bddf74128a7885c71d7661e6a266581464046",
+    "/Users/shan2new/Library/Developer/XcodeBuildMCP/workspaces/previously-2bd4c895d527/test-products/test_sim_2026-10-06T13-22-27-478Z_pid66130_538e1c08.xctestproducts/Tests/0/PreviouslyQA.xctestrun": "b94c4a25642275a998e4b29d69ced8452da9f769af55c28e89c9fe42ae3310e1",
+    "/Users/shan2new/Library/Developer/XcodeBuildMCP/workspaces/previously-2bd4c895d527/test-products/test_sim_2026-10-06T13-22-27-478Z_pid66130_538e1c08.xctestproducts/Binaries/0/QA-iphonesimulator/Previously.app/Info.plist": "6de8102aaa344c038b9369d6b4f24ad49073d5f79344e1ebfc7e4e5cd38c236b",
+    "/Users/shan2new/Library/Developer/XcodeBuildMCP/workspaces/previously-2bd4c895d527/test-products/test_sim_2026-10-06T13-22-27-478Z_pid66130_538e1c08.xctestproducts/Binaries/0/QA-iphonesimulator/Previously.app/Previously": "4f91d414b7991fbc3d592bc7d9521edd2456dcd7662b692c08c6e64aff5cff2c",
+    "/Users/shan2new/Projects/previously/ios/Tools/qa/.runs/20261006T130049100512Z/ledger.json": "6c4ef0562a18140de5dd0301a82a7f698d801791809faca7075ca27ad4ecfdd8",
+    "/Users/shan2new/Projects/previously/ios/Tools/qa/.runs/20261006T130049100512Z/directed.json": "fe35f8da4b7388e3bcff5bb4709db1b4c1b1a043dff891bc7d19779d51d9228e",
+    "/Users/shan2new/Projects/previously/ios/Tools/qa/.runs/20261006T130049100512Z/monkey-20261006.json": "26da0b5f174c842780a75ceb027780983fea114714e00f35ad5f0e358267eeaf",
+    "/Users/shan2new/Projects/previously/ios/Tools/qa/.runs/20261006T130049100512Z/monkey-60102620.json": "649dec75203548d76c5c6faec049696d3bcdc3e0791aeb1e1f02f00fca06474c",
+    "/Users/shan2new/Projects/previously/ios/Tools/qa/.runs/20261006T130049100512Z/monkey-38654705664.json": "220eb41b2544d2b58a19a8db2fc36617a33798e06c0684f00b9d47408de5cbf7",
+    "/Users/shan2new/Projects/previously/ios/Tools/qa/.runs/20261006T130049100512Z/directed.xcresult/Info.plist": "489afbd5cdcb1dc95d197783cd5ef1fc6c4db346dcded825852239e22a98f9f9",
+    "/Users/shan2new/Projects/previously/ios/Tools/qa/.runs/20261006T130049100512Z/monkey-60102620.xcresult/Info.plist": "f9a04c63bdd2773585e46361d9004eb33514d4e1b2ffbadb5b901da2a13ed17c",
+    "/Users/shan2new/Projects/previously/ios/Tools/qa/.runs/20261006T130049100512Z/monkey-20261006.xcresult/Info.plist": "a2da76fe637f166921cac7d6dec51fc2c2e1a27f42c3b8b718e6c7b269b4c10d",
+    "/Users/shan2new/Projects/previously/ios/Tools/qa/.runs/20261006T130049100512Z/monkey-38654705664.xcresult/Info.plist": "1d3ae94cb455a8cf63bbfd37c8c294e88a44fca0a3382024d6f4116db8a8d15b",
+    "/Users/shan2new/Projects/previously/ios/build/DerivedData/Build/Products/Release-iphonesimulator/Previously.app/Previously": "8f83b24368b424f561cffae74390f2755cd085f374ddd06b5fb487e512402092",
+    "/Users/shan2new/Projects/previously/ios/build/DerivedData/Build/Products/Release-iphonesimulator/Previously.app/Info.plist": "af281048251ac8948ae6c021be39e3afd430b568ef7f49d554906db8000b73c9",
+    "/Users/shan2new/Projects/previously/ios/build/DerivedData/Build/Products/Release-iphonesimulator/Previously.app/PrivacyInfo.xcprivacy": "1dbd4ccfcf2f16699db8750f0a41bcea77ff60d06c1ba082dd175fdf7e4211a0",
+    "/Users/shan2new/Projects/previously/ios/build/DerivedData/Build/Products/Release-iphonesimulator/Previously.app/PlugIns/PreviouslyWidgets.appex/PreviouslyWidgets": "608323b038274e4a6fbef1b2da58e8a90a68e263d33b55d977b8c8f60ff44dab",
+    "/Users/shan2new/Projects/previously/ios/build/DerivedData/Build/Products/Release-iphonesimulator/Previously.app/PlugIns/PreviouslyWidgets.appex/Info.plist": "c226b5300cfeb06ddbd8586cb05397bff7b6eb3a5ff784094555a3f1d1c57756"
+  },
+  "logsResultBundlesExternalRunsXcresultsCapturesSourcesArchivesOtherProjectsSwapPrebootTouched": false,
+  "metadataAndToolReceiptReferencesPreserved": "docs/qa/2026-10-06/native-live/test-product-cache-inventory/",
+  "actualRecoveryLimit": "Available space can change with concurrent host growth; recheck immediately before archive."
+}

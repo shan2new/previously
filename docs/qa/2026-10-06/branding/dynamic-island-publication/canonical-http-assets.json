@@ -1,0 +1,693 @@
+{
+  "checkedAt": "2026-10-06T14:01:21.408731+00:00",
+  "deploymentId": "dpl_3nWUk4d8w6tw6Kf3v8VL7qTZv9jB",
+  "origin": "https://previously.cognipin.com",
+  "scope": "Anonymous HTTPS static branding candidate; unchanged legal copy and exact unchanged copy compared with prior 9wX public HTML; exact original image hashes, canonical brand metadata and retired assets404; no local build or production auth claim",
+  "draft": true,
+  "effectiveDate": null,
+  "routes": [
+    {
+      "path": "/",
+      "status": 200,
+      "expectedStatus": 200,
+      "finalURL": "https://previously.cognipin.com/",
+      "sha256": "0aec73b5e3230266121532e0b1e947d8776243915b3ed7a900f218440627b3e7",
+      "bytes": 54808,
+      "headers": {
+        "content-type": "text/html; charset=utf-8",
+        "x-content-type-options": "nosniff",
+        "referrer-policy": "strict-origin-when-cross-origin",
+        "permissions-policy": "camera=(), microphone=(), geolocation=()"
+      },
+      "h1": 1,
+      "canonical": [
+        "https://previously.cognipin.com"
+      ],
+      "robots": [
+        "index, follow"
+      ],
+      "draftVisible": false,
+      "effectiveDateVisible": false,
+      "externalScripts": [],
+      "visibleCopyMatchesExpectedSource": true,
+      "legalCopyUnchanged": null,
+      "icons": [
+        {
+          "rel": "icon",
+          "href": "/brand/native-icon.png",
+          "type": "image/png",
+          "sizes": "152x152"
+        },
+        {
+          "rel": "apple-touch-icon",
+          "href": "/brand/native-icon.png",
+          "type": "image/png",
+          "sizes": "152x152"
+        }
+      ],
+      "socialImages": {
+        "og:image": "https://previously.cognipin.com/brand/native-icon.png",
+        "og:image:width": "152",
+        "og:image:height": "152",
+        "og:image:alt": "Previously app icon",
+        "twitter:image": "https://previously.cognipin.com/brand/native-icon.png"
+      },
+      "brandImages": [
+        {
+          "src": "/brand/native-icon.png",
+          "alt": "",
+          "width": "36",
+          "height": "36"
+        },
+        {
+          "src": "/brand/native-icon.png",
+          "alt": "",
+          "width": "36",
+          "height": "36"
+        }
+      ],
+      "tourImages": [
+        {
+          "src": "/app/library-current.jpg",
+          "alt": "Previously on iPhone, with your Returning, Watching and Planned shows together in the Library.",
+          "width": "369",
+          "height": "800"
+        },
+        {
+          "src": "/app/home-current.png",
+          "alt": "Previously Home on iPhone: Black Clover Season 2 Episode 2, Recently aired, and the five app tabs.",
+          "width": "1179",
+          "height": "2556"
+        },
+        {
+          "src": "/app/schedule-current.jpg",
+          "alt": "Previously Schedule on iPhone: the Black Clover premiere, dated episodes and upcoming seasons, with the five app tabs.",
+          "width": "369",
+          "height": "800"
+        },
+        {
+          "src": "/app/library-current.jpg",
+          "alt": "Previously Library on iPhone: Re:ZERO next up, Returning and Watching shelves, and the five app tabs.",
+          "width": "369",
+          "height": "800"
+        },
+        {
+          "src": "/app/search-current.jpg",
+          "alt": "Previously Search on iPhone: anime and TV search, For you, Trending and Genres, and a Trending now poster shelf.",
+          "width": "369",
+          "height": "800"
+        }
+      ],
+      "contactLinked": true
+    },
+    {
+      "path": "/privacy",
+      "status": 200,
+      "expectedStatus": 200,
+      "finalURL": "https://previously.cognipin.com/privacy",
+      "sha256": "f3824d84eadc308f8ebb34d0a457d046f882d205605d1eb3aa7635f81f1ca444",
+      "bytes": 62171,
+      "headers": {
+        "content-type": "text/html; charset=utf-8",
+        "x-content-type-options": "nosniff",
+        "referrer-policy": "strict-origin-when-cross-origin",
+        "permissions-policy": "camera=(), microphone=(), geolocation=()"
+      },
+      "h1": 1,
+      "canonical": [
+        "https://previously.cognipin.com/privacy"
+      ],
+      "robots": [
+        "noindex, follow"
+      ],
+      "draftVisible": true,
+      "effectiveDateVisible": false,
+      "externalScripts": [],
+      "visibleCopyMatchesExpectedSource": true,
+      "legalCopyUnchanged": true,
+      "icons": [
+        {
+          "rel": "icon",
+          "href": "/brand/native-icon.png",
+          "type": "image/png",
+          "sizes": "152x152"
+        },
+        {
+          "rel": "apple-touch-icon",
+          "href": "/brand/native-icon.png",
+          "type": "image/png",
+          "sizes": "152x152"
+        }
+      ],
+      "socialImages": {
+        "og:image": "https://previously.cognipin.com/brand/native-icon.png",
+        "og:image:width": "152",
+        "og:image:height": "152",
+        "og:image:alt": "Previously app icon",
+        "twitter:image": "https://previously.cognipin.com/brand/native-icon.png"
+      },
+      "brandImages": [
+        {
+          "src": "/brand/native-icon.png",
+          "alt": "",
+          "width": "36",
+          "height": "36"
+        },
+        {
+          "src": "/brand/native-icon.png",
+          "alt": "",
+          "width": "36",
+          "height": "36"
+        }
+      ],
+      "tourImages": [],
+      "contactLinked": true
+    },
+    {
+      "path": "/terms",
+      "status": 200,
+      "expectedStatus": 200,
+      "finalURL": "https://previously.cognipin.com/terms",
+      "sha256": "b786dcff961a2ce3e5f888f4741436a94d898eec7ef3f5bd87587055f04ed965",
+      "bytes": 39040,
+      "headers": {
+        "content-type": "text/html; charset=utf-8",
+        "x-content-type-options": "nosniff",
+        "referrer-policy": "strict-origin-when-cross-origin",
+        "permissions-policy": "camera=(), microphone=(), geolocation=()"
+      },
+      "h1": 1,
+      "canonical": [
+        "https://previously.cognipin.com/terms"
+      ],
+      "robots": [
+        "noindex, follow"
+      ],
+      "draftVisible": true,
+      "effectiveDateVisible": false,
+      "externalScripts": [],
+      "visibleCopyMatchesExpectedSource": true,
+      "legalCopyUnchanged": true,
+      "icons": [
+        {
+          "rel": "icon",
+          "href": "/brand/native-icon.png",
+          "type": "image/png",
+          "sizes": "152x152"
+        },
+        {
+          "rel": "apple-touch-icon",
+          "href": "/brand/native-icon.png",
+          "type": "image/png",
+          "sizes": "152x152"
+        }
+      ],
+      "socialImages": {
+        "og:image": "https://previously.cognipin.com/brand/native-icon.png",
+        "og:image:width": "152",
+        "og:image:height": "152",
+        "og:image:alt": "Previously app icon",
+        "twitter:image": "https://previously.cognipin.com/brand/native-icon.png"
+      },
+      "brandImages": [
+        {
+          "src": "/brand/native-icon.png",
+          "alt": "",
+          "width": "36",
+          "height": "36"
+        },
+        {
+          "src": "/brand/native-icon.png",
+          "alt": "",
+          "width": "36",
+          "height": "36"
+        }
+      ],
+      "tourImages": [],
+      "contactLinked": true
+    },
+    {
+      "path": "/support",
+      "status": 200,
+      "expectedStatus": 200,
+      "finalURL": "https://previously.cognipin.com/support",
+      "sha256": "f851c7f30cb87c64d89aedf641602cdfbc0114489b08e799e8888be6630952e2",
+      "bytes": 33377,
+      "headers": {
+        "content-type": "text/html; charset=utf-8",
+        "x-content-type-options": "nosniff",
+        "referrer-policy": "strict-origin-when-cross-origin",
+        "permissions-policy": "camera=(), microphone=(), geolocation=()"
+      },
+      "h1": 1,
+      "canonical": [
+        "https://previously.cognipin.com/support"
+      ],
+      "robots": [
+        "index, follow"
+      ],
+      "draftVisible": false,
+      "effectiveDateVisible": false,
+      "externalScripts": [],
+      "visibleCopyMatchesExpectedSource": true,
+      "legalCopyUnchanged": true,
+      "icons": [
+        {
+          "rel": "icon",
+          "href": "/brand/native-icon.png",
+          "type": "image/png",
+          "sizes": "152x152"
+        },
+        {
+          "rel": "apple-touch-icon",
+          "href": "/brand/native-icon.png",
+          "type": "image/png",
+          "sizes": "152x152"
+        }
+      ],
+      "socialImages": {
+        "og:image": "https://previously.cognipin.com/brand/native-icon.png",
+        "og:image:width": "152",
+        "og:image:height": "152",
+        "og:image:alt": "Previously app icon",
+        "twitter:image": "https://previously.cognipin.com/brand/native-icon.png"
+      },
+      "brandImages": [
+        {
+          "src": "/brand/native-icon.png",
+          "alt": "",
+          "width": "36",
+          "height": "36"
+        },
+        {
+          "src": "/brand/native-icon.png",
+          "alt": "",
+          "width": "36",
+          "height": "36"
+        }
+      ],
+      "tourImages": [],
+      "contactLinked": true
+    },
+    {
+      "path": "/delete-account",
+      "status": 200,
+      "expectedStatus": 200,
+      "finalURL": "https://previously.cognipin.com/delete-account",
+      "sha256": "794028541e1ec820337f9de8461c402cd71bcf294172999999f6cb20975284a2",
+      "bytes": 38209,
+      "headers": {
+        "content-type": "text/html; charset=utf-8",
+        "x-content-type-options": "nosniff",
+        "referrer-policy": "strict-origin-when-cross-origin",
+        "permissions-policy": "camera=(), microphone=(), geolocation=()"
+      },
+      "h1": 1,
+      "canonical": [
+        "https://previously.cognipin.com/delete-account"
+      ],
+      "robots": [
+        "noindex, follow"
+      ],
+      "draftVisible": true,
+      "effectiveDateVisible": false,
+      "externalScripts": [],
+      "visibleCopyMatchesExpectedSource": true,
+      "legalCopyUnchanged": true,
+      "icons": [
+        {
+          "rel": "icon",
+          "href": "/brand/native-icon.png",
+          "type": "image/png",
+          "sizes": "152x152"
+        },
+        {
+          "rel": "apple-touch-icon",
+          "href": "/brand/native-icon.png",
+          "type": "image/png",
+          "sizes": "152x152"
+        }
+      ],
+      "socialImages": {
+        "og:image": "https://previously.cognipin.com/brand/native-icon.png",
+        "og:image:width": "152",
+        "og:image:height": "152",
+        "og:image:alt": "Previously app icon",
+        "twitter:image": "https://previously.cognipin.com/brand/native-icon.png"
+      },
+      "brandImages": [
+        {
+          "src": "/brand/native-icon.png",
+          "alt": "",
+          "width": "36",
+          "height": "36"
+        },
+        {
+          "src": "/brand/native-icon.png",
+          "alt": "",
+          "width": "36",
+          "height": "36"
+        }
+      ],
+      "tourImages": [],
+      "contactLinked": true
+    },
+    {
+      "path": "/robots.txt",
+      "status": 200,
+      "expectedStatus": 200,
+      "finalURL": "https://previously.cognipin.com/robots.txt",
+      "sha256": "b61e89c2221cd818e386ff04b43677f1c91dc419874fb6d2680ffd7002f3fd2b",
+      "bytes": 113,
+      "headers": {
+        "content-type": "text/plain; charset=utf-8",
+        "x-content-type-options": "nosniff",
+        "referrer-policy": "strict-origin-when-cross-origin",
+        "permissions-policy": "camera=(), microphone=(), geolocation=()"
+      },
+      "matchesPreparedBytes": true
+    },
+    {
+      "path": "/sitemap.xml",
+      "status": 200,
+      "expectedStatus": 200,
+      "finalURL": "https://previously.cognipin.com/sitemap.xml",
+      "sha256": "798329451a2f0feb586b3c7a6c596d32935c05e784ef6db66046448bbc17159f",
+      "bytes": 345,
+      "headers": {
+        "content-type": "application/xml",
+        "x-content-type-options": "nosniff",
+        "referrer-policy": "strict-origin-when-cross-origin",
+        "permissions-policy": "camera=(), microphone=(), geolocation=()"
+      },
+      "matchesPreparedBytes": true
+    },
+    {
+      "path": "/__previously_release_missing__",
+      "status": 404,
+      "expectedStatus": 404,
+      "finalURL": "https://previously.cognipin.com/__previously_release_missing__",
+      "sha256": "ec2d63b128e41a24963e582c5924f5a47ede8c9cc78d91228acd49ca3718b2cb",
+      "bytes": 12144,
+      "headers": {
+        "content-type": "text/html; charset=utf-8",
+        "x-content-type-options": "nosniff",
+        "referrer-policy": "strict-origin-when-cross-origin",
+        "permissions-policy": "camera=(), microphone=(), geolocation=()"
+      }
+    }
+  ],
+  "assets": [
+    {
+      "path": "app/home-current.png",
+      "status": 200,
+      "bytes": 4758772,
+      "sha256": "93c8e7114ee30d34af4fe97589d67593fbe9e385947d439e646da6cc26a2c287",
+      "matchesLocalSource": true,
+      "matchesPriorQualifiedAsset": null,
+      "samePublicOrigin": true
+    },
+    {
+      "path": "app/library-current.jpg",
+      "status": 200,
+      "bytes": 75619,
+      "sha256": "9371c72e1c7f05818e908fd94722eaf72d58ca058fe9339fd5d15f8a4e266a02",
+      "matchesLocalSource": true,
+      "matchesPriorQualifiedAsset": null,
+      "samePublicOrigin": true
+    },
+    {
+      "path": "app/schedule-current.jpg",
+      "status": 200,
+      "bytes": 69661,
+      "sha256": "3f2507a2d4e0d138eecca41bd6cb0c81cf49a811237d2ff7e73ec15528b6e484",
+      "matchesLocalSource": true,
+      "matchesPriorQualifiedAsset": null,
+      "samePublicOrigin": true
+    },
+    {
+      "path": "app/search-current.jpg",
+      "status": 200,
+      "bytes": 64530,
+      "sha256": "7b155f19af57e951ef3fdf02178a9b53b9d7a57adc1d41866cff57a5ff41c103",
+      "matchesLocalSource": true,
+      "matchesPriorQualifiedAsset": null,
+      "samePublicOrigin": true
+    },
+    {
+      "path": "app/seasons.webp",
+      "status": 200,
+      "bytes": 806370,
+      "sha256": "ebab6d5916f9e1fb1216e4cb2fed1974ec0243b84ed92c44bfb29c15bd4a9bef",
+      "matchesLocalSource": true,
+      "matchesPriorQualifiedAsset": true,
+      "samePublicOrigin": true
+    },
+    {
+      "path": "brand/native-icon.png",
+      "status": 200,
+      "bytes": 16793,
+      "sha256": "baf5bdeefe3b0496878e8e4faab834ed5106f88c1298e15c5ced36f56f20bbd5",
+      "matchesLocalSource": true,
+      "matchesPriorQualifiedAsset": null,
+      "samePublicOrigin": true
+    },
+    {
+      "path": "fonts/BarlowCondensed-OFL.txt",
+      "status": 200,
+      "bytes": 4377,
+      "sha256": "186d750eb496a4c17a76385f82be6aea2ac1cf2de074a811d63786cf374ea73f",
+      "matchesLocalSource": true,
+      "matchesPriorQualifiedAsset": true,
+      "samePublicOrigin": true
+    },
+    {
+      "path": "fonts/BarlowCondensed-SemiBold.ttf",
+      "status": 200,
+      "bytes": 86636,
+      "sha256": "0d85af813fc3ed87db0c6265515689b2eef5cbaf7aab17922528dfc95a2cd73f",
+      "matchesLocalSource": true,
+      "matchesPriorQualifiedAsset": true,
+      "samePublicOrigin": true
+    },
+    {
+      "path": "fonts/Outfit-Bold.ttf",
+      "status": 200,
+      "bytes": 48340,
+      "sha256": "49dcdf653a004a2575b3de649f5e4c549d774fecddf317812330edd0ad70685a",
+      "matchesLocalSource": true,
+      "matchesPriorQualifiedAsset": true,
+      "samePublicOrigin": true
+    },
+    {
+      "path": "fonts/Outfit-Medium.ttf",
+      "status": 200,
+      "bytes": 47800,
+      "sha256": "9a9f465776e653cd6175661d844555e08684d432518f1d2c621bcb3006598f9c",
+      "matchesLocalSource": true,
+      "matchesPriorQualifiedAsset": true,
+      "samePublicOrigin": true
+    },
+    {
+      "path": "fonts/Outfit-Regular.ttf",
+      "status": 200,
+      "bytes": 47844,
+      "sha256": "6a8c9be856a6b9e09c66615634904616152c9de5e44db343a3ced240479c586a",
+      "matchesLocalSource": true,
+      "matchesPriorQualifiedAsset": true,
+      "samePublicOrigin": true
+    },
+    {
+      "path": "fonts/Outfit-SemiBold.ttf",
+      "status": 200,
+      "bytes": 48456,
+      "sha256": "8900df5726b5a6f23e723594f11d5ea27e695bd85c884f18d88ed080544fe205",
+      "matchesLocalSource": true,
+      "matchesPriorQualifiedAsset": true,
+      "samePublicOrigin": true
+    },
+    {
+      "path": "images/arcane.jpg",
+      "status": 200,
+      "bytes": 65740,
+      "sha256": "d3d1a3cdc7f08f267dc3de167294d39d7f4a726202a3c2f0aee08d1dd30afe06",
+      "matchesLocalSource": true,
+      "matchesPriorQualifiedAsset": true,
+      "samePublicOrigin": true
+    },
+    {
+      "path": "images/attack-on-titan-2x3.jpg",
+      "status": 200,
+      "bytes": 102344,
+      "sha256": "9b83ed1ef55bd185d5a56f75a158ed9049dec0b6d5048a1bbe75b41d455f8614",
+      "matchesLocalSource": true,
+      "matchesPriorQualifiedAsset": true,
+      "samePublicOrigin": true
+    },
+    {
+      "path": "images/bear-wide.jpg",
+      "status": 200,
+      "bytes": 202806,
+      "sha256": "db85967526b3daa935fed2bf78fa595bc9e6104ca8ec931cb1cc0106ce696096",
+      "matchesLocalSource": true,
+      "matchesPriorQualifiedAsset": true,
+      "samePublicOrigin": true
+    },
+    {
+      "path": "images/bear.jpg",
+      "status": 200,
+      "bytes": 87722,
+      "sha256": "2aa0b3e73db52f4d51808d332fb6b48a0de0f46576a95b2c9b5400dc2652102c",
+      "matchesLocalSource": true,
+      "matchesPriorQualifiedAsset": true,
+      "samePublicOrigin": true
+    },
+    {
+      "path": "images/breaking-bad.jpg",
+      "status": 200,
+      "bytes": 164768,
+      "sha256": "4e6864c0b0e6238f0c27bd7fc0584c7029239bbc70b3e5afc77023bdcd8b7da4",
+      "matchesLocalSource": true,
+      "matchesPriorQualifiedAsset": true,
+      "samePublicOrigin": true
+    },
+    {
+      "path": "images/frieren-poster.jpg",
+      "status": 200,
+      "bytes": 80850,
+      "sha256": "4ca9457666437129022e416a9612d808d747b3861897299118f1e65e184c9e39",
+      "matchesLocalSource": true,
+      "matchesPriorQualifiedAsset": true,
+      "samePublicOrigin": true
+    },
+    {
+      "path": "images/frieren-wide.jpg",
+      "status": 200,
+      "bytes": 153189,
+      "sha256": "c8e5c345c4c9529d0fc724e14430e7859a9b1918ad801ad8db8210486b7fa416",
+      "matchesLocalSource": true,
+      "matchesPriorQualifiedAsset": true,
+      "samePublicOrigin": true
+    },
+    {
+      "path": "images/severance-poster.jpg",
+      "status": 200,
+      "bytes": 73646,
+      "sha256": "3b42fc5627b01ffb1bc786485e0b725d95781a26f6e0b17620848b4ce57a84ac",
+      "matchesLocalSource": true,
+      "matchesPriorQualifiedAsset": true,
+      "samePublicOrigin": true
+    },
+    {
+      "path": "images/severance-wide.jpg",
+      "status": 200,
+      "bytes": 75407,
+      "sha256": "7ae04e98d0dd3cbf67e445b08b3de38fab3f56d6334eeb5f64a14fe7b4856027",
+      "matchesLocalSource": true,
+      "matchesPriorQualifiedAsset": true,
+      "samePublicOrigin": true
+    },
+    {
+      "path": "images/severance.jpg",
+      "status": 200,
+      "bytes": 125469,
+      "sha256": "bd2f6d3b50b8b61da24c34c66601b2af98f8c58147ff0c0e272c808674d470e5",
+      "matchesLocalSource": true,
+      "matchesPriorQualifiedAsset": true,
+      "samePublicOrigin": true
+    },
+    {
+      "path": "images/shogun.jpg",
+      "status": 200,
+      "bytes": 131996,
+      "sha256": "423a0fec97f5d7e1794b43d05d3ba250b7996923d7444204653c00832a3c9057",
+      "matchesLocalSource": true,
+      "matchesPriorQualifiedAsset": true,
+      "samePublicOrigin": true
+    },
+    {
+      "path": "images/silo.jpg",
+      "status": 200,
+      "bytes": 45596,
+      "sha256": "77b337b9bce3a0fbd13385bfd140c4b73e5365966697d5f56819fff0bc23498e",
+      "matchesLocalSource": true,
+      "matchesPriorQualifiedAsset": true,
+      "samePublicOrigin": true
+    },
+    {
+      "path": "images/stranger-things.jpg",
+      "status": 200,
+      "bytes": 53345,
+      "sha256": "30ae55afeb2ec9a584691070e1e21557a61e22b26f4645bca77048bdefe817e2",
+      "matchesLocalSource": true,
+      "matchesPriorQualifiedAsset": true,
+      "samePublicOrigin": true
+    },
+    {
+      "path": "images/succession.jpg",
+      "status": 200,
+      "bytes": 102124,
+      "sha256": "6112e1fcd09ce0c5436de30cf650e93960fdea52f94195a446dca1428e9f43ac",
+      "matchesLocalSource": true,
+      "matchesPriorQualifiedAsset": true,
+      "samePublicOrigin": true
+    },
+    {
+      "path": "images/the-last-of-us.jpg",
+      "status": 200,
+      "bytes": 127074,
+      "sha256": "5132d415371e835dc1488c54c5a685a7dee90484a41a7aa1ce6877bf3ddff085",
+      "matchesLocalSource": true,
+      "matchesPriorQualifiedAsset": true,
+      "samePublicOrigin": true
+    }
+  ],
+  "retiredAssets": [
+    {
+      "path": "brand/icon.svg",
+      "status": 404
+    },
+    {
+      "path": "brand/mark.svg",
+      "status": 404
+    },
+    {
+      "path": "brand/mark-tight.svg",
+      "status": 404
+    },
+    {
+      "path": "app/today.webp",
+      "status": 404
+    },
+    {
+      "path": "app/today-preview.webp",
+      "status": 404
+    },
+    {
+      "path": "app/library.webp",
+      "status": 404
+    },
+    {
+      "path": "app/library-preview.webp",
+      "status": 404
+    },
+    {
+      "path": "app/schedule.webp",
+      "status": 404
+    },
+    {
+      "path": "app/schedule-preview.webp",
+      "status": 404
+    },
+    {
+      "path": "app/search.webp",
+      "status": 404
+    },
+    {
+      "path": "app/search-preview.webp",
+      "status": 404
+    }
+  ],
+  "failures": [],
+  "passed": true
+}

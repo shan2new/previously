@@ -1,0 +1,29 @@
+{
+  "verifiedAt": "2026-10-06T16:25:29.717Z",
+  "google": {
+    "tabId": "1825902927",
+    "url": "https://dashboard.clerk.com/apps/app_3FUb7r97UcdmzHsvIHPipn3PbtD/instances/ins_3KJtgHKq296iry2eBmj1IkEQmpQ/user-authentication/sso-connections/builtin/oauth_google",
+    "status": {
+      "clientIDMatches": true,
+      "enableConnectionButtonVisible": true,
+      "redirectMatches": true,
+      "signInChecked": true
+    }
+  },
+  "apple": {
+    "tabId": "1825902930",
+    "url": "https://dashboard.clerk.com/apps/app_3FUb7r97UcdmzHsvIHPipn3PbtD/instances/ins_3KJtgHKq296iry2eBmj1IkEQmpQ/user-authentication/sso-connections/builtin/apple",
+    "status": {
+      "enableConnectionButtonVisible": true,
+      "keyIDMatches": true,
+      "returnURLMatches": true,
+      "servicesIDMatches": true,
+      "signInChecked": false,
+      "teamIDMatches": true
+    }
+  },
+  "privateFieldsExcludedFromProof": true,
+  "saveSubmitted": false,
+  "privateCredentialContentRead": false,
+  "privateFieldReadAfterNoReadDirective": false
+}

@@ -1,0 +1,47 @@
+{
+  "id": "prj_osATa26wuWMoLf7yLOEaXvYuiial",
+  "name": "landing",
+  "accountId": "team_WGVvWCwyPJLQHHMvAUdYU9td",
+  "framework": "nextjs",
+  "nodeVersion": "24.x",
+  "rootDirectory": null,
+  "ssoProtection": {
+    "deploymentType": "all_except_custom_domains"
+  },
+  "targets": {
+    "production": {
+      "id": "dpl_3nWUk4d8w6tw6Kf3v8VL7qTZv9jB",
+      "url": "landing-8mkz8v72u-shan2news-projects.vercel.app",
+      "readyState": "READY",
+      "target": "production"
+    },
+    "preview": {
+      "id": "dpl_F4EmCetodm75MnyzAQzVEy6amRaD",
+      "url": "landing-6r03leoh3-shan2news-projects.vercel.app",
+      "readyState": "READY",
+      "target": null
+    }
+  },
+  "latestDeployments": [
+    {
+      "id": "dpl_3nWUk4d8w6tw6Kf3v8VL7qTZv9jB",
+      "url": "landing-8mkz8v72u-shan2news-projects.vercel.app",
+      "target": "production",
+      "readyState": "READY",
+      "aliasAssigned": 1791295256322,
+      "alias": [
+        "landing-shan2news-projects.vercel.app"
+      ]
+    },
+    {
+      "id": "dpl_9wXk1mXyNzMzXjmTWXTH2iN5KTsM",
+      "url": "landing-9jo84k2v7-shan2news-projects.vercel.app",
+      "target": "production",
+      "readyState": "READY",
+      "aliasAssigned": 1791294825452,
+      "alias": [
+        "landing-shan2news-projects.vercel.app"
+      ]
+    }
+  ]
+}

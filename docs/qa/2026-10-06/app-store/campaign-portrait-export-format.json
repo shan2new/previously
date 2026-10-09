@@ -1,0 +1,84 @@
+{
+  "readOnly": true,
+  "preset": "portrait",
+  "artworkApproval": "separate root visual review",
+  "files": [
+    {
+      "path": "/Users/shan2new/Projects/previously/output/app-store/ready/01-home-hero-1179x2556.png",
+      "dimensions": [
+        1179,
+        2556
+      ],
+      "expectedDimensions": [
+        1179,
+        2556
+      ],
+      "bitDepth": 8,
+      "pngColorType": 2,
+      "mode": "RGB",
+      "alphaChannel": false,
+      "transparencyChunk": false,
+      "decodedBytes": 9043128,
+      "sha256": "011833e7074af8e7fc00e8ce675b33ae57dc34b2f8d678a83bffe4a2b0f82067",
+      "passed": true
+    },
+    {
+      "path": "/Users/shan2new/Projects/previously/output/app-store/ready/02-library-1179x2556.png",
+      "dimensions": [
+        1179,
+        2556
+      ],
+      "expectedDimensions": [
+        1179,
+        2556
+      ],
+      "bitDepth": 8,
+      "pngColorType": 2,
+      "mode": "RGB",
+      "alphaChannel": false,
+      "transparencyChunk": false,
+      "decodedBytes": 9043128,
+      "sha256": "38d26c78cbfecabfaa77c9b13d82a8affa453b851056d181dfba9b5d8d022885",
+      "passed": true
+    },
+    {
+      "path": "/Users/shan2new/Projects/previously/output/app-store/ready/03-schedule-1179x2556.png",
+      "dimensions": [
+        1179,
+        2556
+      ],
+      "expectedDimensions": [
+        1179,
+        2556
+      ],
+      "bitDepth": 8,
+      "pngColorType": 2,
+      "mode": "RGB",
+      "alphaChannel": false,
+      "transparencyChunk": false,
+      "decodedBytes": 9043128,
+      "sha256": "046f06372689d9b337eb9edc93933580a8961d8564c4be74a828f50a5edf4e34",
+      "passed": true
+    },
+    {
+      "path": "/Users/shan2new/Projects/previously/output/app-store/ready/04-discover-1179x2556.png",
+      "dimensions": [
+        1179,
+        2556
+      ],
+      "expectedDimensions": [
+        1179,
+        2556
+      ],
+      "bitDepth": 8,
+      "pngColorType": 2,
+      "mode": "RGB",
+      "alphaChannel": false,
+      "transparencyChunk": false,
+      "decodedBytes": 9043128,
+      "sha256": "59e39082924fc38d4ca35ca5e9b9d59a8c019e522d1e65487b162f210dc3285a",
+      "passed": true
+    }
+  ],
+  "passed": true
+}

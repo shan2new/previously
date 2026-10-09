@@ -485,5 +485,5 @@ extension MediaSource {
     /// to a viewer who sees both kinds. To someone who watches anime alone, "Anime ·" before every
     /// title on a wall of anime is the app reminding them of a choice they made once (`Audience`).
     /// Their own shows keep `kindWord` — a library may hold both.
-    var kindLead: String? { Audience.stored.isSingle ? nil : kindWord }
+    @MainActor var kindLead: String? { Audience.stored.isSingle ? nil : kindWord }
 }

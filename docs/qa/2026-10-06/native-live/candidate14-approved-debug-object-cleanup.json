@@ -1,0 +1,64 @@
+{
+  "startedAt": "2026-10-06T15:14:56.245789+00:00",
+  "finishedAt": "2026-10-06T15:14:56.884560+00:00",
+  "status": "approved_scoped_cache_cleanup_completed",
+  "rootExplicitScopedAuthorization": true,
+  "workspaceMetadataMatched": true,
+  "exactSevenCandidatesMatched": true,
+  "activeCompilerCountAtGuard": 0,
+  "processArgumentsOrEnvironmentInspected": false,
+  "removed": [
+    {
+      "path": "/Users/shan2new/Projects/previously/ios/build/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKit-t.build/Objects-normal",
+      "allocatedBytesBeforeApproximate": 154746880,
+      "removed": true
+    },
+    {
+      "path": "/Users/shan2new/Projects/previously/ios/build/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKitUI-t.build/Objects-normal",
+      "allocatedBytesBeforeApproximate": 266620928,
+      "removed": true
+    },
+    {
+      "path": "/Users/shan2new/Projects/previously/ios/build/DerivedData/Build/Intermediates.noindex/Nuke.build/Debug-iphonesimulator/Nuke-t.build/Objects-normal",
+      "allocatedBytesBeforeApproximate": 27127808,
+      "removed": true
+    },
+    {
+      "path": "/Users/shan2new/Projects/previously/ios/build/DerivedData/Build/Intermediates.noindex/Nuke.build/Debug-iphonesimulator/NukeUI-t.build/Objects-normal",
+      "allocatedBytesBeforeApproximate": 4472832,
+      "removed": true
+    },
+    {
+      "path": "/Users/shan2new/Projects/previously/ios/build/DerivedData/Build/Intermediates.noindex/PhoneNumberKit.build/Debug-iphonesimulator/PhoneNumberKit-t.build/Objects-normal",
+      "allocatedBytesBeforeApproximate": 7843840,
+      "removed": true
+    },
+    {
+      "path": "/Users/shan2new/Projects/previously/ios/build/DerivedData/Build/Intermediates.noindex/Previously.build/Debug-iphonesimulator/Previously.build/Objects-normal",
+      "allocatedBytesBeforeApproximate": 475938816,
+      "removed": true
+    },
+    {
+      "path": "/Users/shan2new/Projects/previously/ios/build/DerivedData/Build/Intermediates.noindex/Previously.build/Debug-iphonesimulator/PreviouslyWidgets.build/Objects-normal",
+      "allocatedBytesBeforeApproximate": 4939776,
+      "removed": true
+    }
+  ],
+  "availableBytesBefore": 842403840,
+  "availableBytesAfter": 1787682816,
+  "actualAPFSFreeDeltaBytes": 945278976,
+  "declaredArchiveFloorBytes": 2200000000,
+  "afterAboveArchiveFloor": false,
+  "afterMarginAboveFloorBytes": -412317184,
+  "releaseProductFingerprintUnchanged": true,
+  "releaseProductSHA256": {
+    "/Users/shan2new/Projects/previously/ios/build/DerivedData/Build/Products/Release-iphonesimulator/Previously.app/Previously": "8f83b24368b424f561cffae74390f2755cd085f374ddd06b5fb487e512402092",
+    "/Users/shan2new/Projects/previously/ios/build/DerivedData/Build/Products/Release-iphonesimulator/Previously.app/Info.plist": "af281048251ac8948ae6c021be39e3afd430b568ef7f49d554906db8000b73c9",
+    "/Users/shan2new/Projects/previously/ios/build/DerivedData/Build/Products/Release-iphonesimulator/Previously.app/PrivacyInfo.xcprivacy": "1dbd4ccfcf2f16699db8750f0a41bcea77ff60d06c1ba082dd175fdf7e4211a0",
+    "/Users/shan2new/Projects/previously/ios/build/DerivedData/Build/Products/Release-iphonesimulator/Previously.app/PlugIns/PreviouslyWidgets.appex/PreviouslyWidgets": "608323b038274e4a6fbef1b2da58e8a90a68e263d33b55d977b8c8f60ff44dab",
+    "/Users/shan2new/Projects/previously/ios/build/DerivedData/Build/Products/Release-iphonesimulator/Previously.app/PlugIns/PreviouslyWidgets.appex/Info.plist": "c226b5300cfeb06ddbd8586cb05397bff7b6eb3a5ff784094555a3f1d1c57756"
+  },
+  "moduleCacheAndIndexesTouched": false,
+  "archivesArchiveIntermediatesRunsXcresultsLogsSourcePackagesSourceCapturesTouched": false,
+  "minimumBuildSpaceWarning": "Do not start archive if below floor; APFS free space can change with concurrent host activity"
+}

@@ -19,6 +19,8 @@ import { applyProviderPreferences, resolveUserPreferences } from '../services/pr
 import { findLocalFranchise } from '../services/recommendations.js'
 import { groupFromSeed } from '../grouping/service.js'
 import { getStarterFranchises, STARTER_MAX } from '../services/starter.js'
+import { ContentExcludedError, consumerAnimeFetcher, consumerFranchiseIds } from '../services/consumerContent.js'
+import { makeAniListFetcher } from '../services/mediaStore.js'
 
 const countrySchema = z.string().regex(/^[a-z]{2}$/i).transform((value) => value.toUpperCase())
 const filterFields = {
@@ -153,14 +155,20 @@ export const franchiseRoutes: FastifyPluginAsync = async (app) => {
       const exactFranchise = intendedTitle
         ? response.franchises.find((item) => normalizedTitle(item.title) === intendedTitle)
         : undefined
+      let exactVisible = exactFranchise != null
       if (exactFranchise?.source === 'tmdb' && (!exactFranchise.upcoming || !exactFranchise.featuredVideo)) {
         try {
           const immediate = await refreshTvUpcomingFact(exactFranchise.id, { maxRetries: 0, timeoutMs: 1_050 })
           // refreshTvUpcomingFact also persists the show-level video from the same TMDB response.
           // Rebuild this one summary so a first exact Search can return that trailer immediately.
           const [refreshed] = await getSummaries([exactFranchise.id])
-          if (refreshed) Object.assign(exactFranchise, refreshed)
-          exactFranchise.upcoming = withReleaseWindow(immediate)
+          if (refreshed) {
+            Object.assign(exactFranchise, refreshed)
+            exactFranchise.upcoming = withReleaseWindow(immediate)
+          } else {
+            exactVisible = false
+            response.franchises = response.franchises.filter((item) => item.id !== exactFranchise.id)
+          }
         } catch (error) {
           // Provider news is enrichment: a short TMDB failure must not turn a useful search result
           // into an error. The background researcher below can still fill it later.
@@ -181,6 +189,10 @@ export const franchiseRoutes: FastifyPluginAsync = async (app) => {
           if (result.updated) {
             const [refreshed] = await getSummaries([exactFranchise.id])
             if (refreshed) Object.assign(exactFranchise, refreshed)
+            else {
+              exactVisible = false
+              response.franchises = response.franchises.filter((item) => item.id !== exactFranchise.id)
+            }
           }
         } catch (error) {
           // A failed metadata fallback must not hide the AniList search result. The queued pass
@@ -191,7 +203,7 @@ export const franchiseRoutes: FastifyPluginAsync = async (app) => {
           )
         }
       }
-      if (exactFranchise) {
+      if (exactFranchise && exactVisible) {
         enqueueFranchiseNewsRefresh(exactFranchise.id, exactFranchise.upcoming)
         enqueueFranchiseEnrichment(exactFranchise.id)
         enqueueAnimeVideoFallback(exactFranchise.id)
@@ -202,7 +214,7 @@ export const franchiseRoutes: FastifyPluginAsync = async (app) => {
         preferences.providerIds,
         query.providerId,
       )
-      if (exactFranchise && country && query.providerId == null) {
+      if (exactFranchise && exactVisible && country && query.providerId == null) {
         try {
           const availability = await getWatchAvailability(exactFranchise.id, country)
           if (availability) exactFranchise.availability = applyProviderPreferences(availability, preferences.providerIds)
@@ -250,14 +262,18 @@ export const franchiseRoutes: FastifyPluginAsync = async (app) => {
       // The database first: a title that already has a show page opens it without the provider
       // round trips (`groupFromSeed` always re-walks AniList, 3–15 s, even for a grouped title).
       const local = await findLocalFranchise(body.data.source, body.data.externalId)
+      if (local && !(await consumerFranchiseIds([local])).has(local)) throw new ContentExcludedError()
       const franchiseId = local ?? (body.data.source === 'anilist'
-        ? (await groupFromSeed(body.data.externalId)).franchiseId
-        : (await ensureTvFranchise(body.data.externalId))?.franchiseId)
+        ? (await groupFromSeed(body.data.externalId, {
+          fetcher: consumerAnimeFetcher(body.data.externalId, makeAniListFetcher()),
+        })).franchiseId
+        : (await ensureTvFranchise(body.data.externalId, { consumerOnly: true }))?.franchiseId)
       if (!franchiseId) return reply.code(422).send({ error: 'title could not be materialized' })
       const [summary] = await getSummaries([franchiseId])
       if (!summary) return reply.code(422).send({ error: 'title could not be materialized' })
       return summary
     } catch (error) {
+      if (error instanceof ContentExcludedError) return reply.code(422).send({ error: error.message, code: error.reason })
       req.log.warn({ event: 'franchise.resolve_failed', request: body.data, error }, 'franchise resolve failed')
       return reply.code(422).send({ error: 'title could not be materialized' })
     }
@@ -299,7 +315,11 @@ export const franchiseRoutes: FastifyPluginAsync = async (app) => {
         const result = await refreshAnimeVideoFallback(id, {
           request: { signal: withTimeout(undefined, 3_200), maxRetries: 0, timeoutMs: 1_050 },
         })
-        if (result.updated) f = await getFranchise(id, req.user!.id, country ?? undefined) ?? f
+        if (result.updated) {
+          const refreshed = await getFranchise(id, req.user!.id, country ?? undefined)
+          if (!refreshed) return reply.code(404).send({ error: 'franchise not found' })
+          f = refreshed
+        }
       } catch (error) {
         req.log.warn(
           { event: 'detail.anime_video_fallback_failed', franchiseId: id, error },

@@ -94,6 +94,7 @@ extension AppModel {
     }
 
     private func loadRecommendations(libraryKey: Int) async {
+        let epoch = accountEpoch
         #if DEBUG
         if UserDefaults.standard.bool(forKey: "forYouDemo") {
             recommendations = RecommendationDemo.items(library: library)
@@ -107,9 +108,10 @@ extension AppModel {
             // Sixteen for a shelf of twelve: hides and adds REFILL it from the rest instead of
             // shrinking it until the next list (review i5, F13).
             let res = try await api.recommendations(limit: 16)
+            guard epoch == accountEpoch, !erasing else { return }
             recommendations = res.items
             recommendationsState = .loaded
-            UserDefaults.standard.removeObject(forKey: Self.unavailableKey)
+            AccountLocalStore.shared.remove("recommendations-unavailable.json", owner: accountStorage)
             // The new list is the next refresh the added tiles were waiting for.
             addedRecommendationKeys = []
             addedRecommendationIds = []
@@ -118,20 +120,23 @@ extension AppModel {
             // A hidden key the server has now excluded no longer needs hiding here (the server
             // has the answer); one it still sends stays hidden until its feedback lands.
             hiddenRecommendationKeys.formIntersection(res.items.map(\.key))
-            var state = Self.loadFeedbackState()
+            var state = loadFeedbackState()
             state.hidden = Array(hiddenRecommendationKeys)
-            Self.saveFeedbackState(state)
+            saveFeedbackState(state)
             flushFeedback()
-            Self.persistRecommendations(res)
+            persistRecommendations(res)
         } catch APIError.http(404, _) {
+            guard epoch == accountEpoch, !erasing else { return }
             // A server that predates the endpoint: no shelf, and no error either — and no
             // skeleton on the next launches either (it flashed four tiles and collapsed on every
             // launch against the 404, review i5, U-N4). Asked again after a day.
             recommendationsState = .unavailable
             recommendations = []
-            UserDefaults.standard.set(Double(Int64.nowMs + 24 * Formatting.H), forKey: Self.unavailableKey)
+            if let data = try? JSONEncoder().encode(Int64.nowMs + 24 * Formatting.H) {
+                try? AccountLocalStore.shared.write(data, name: "recommendations-unavailable.json", owner: accountStorage)
+            }
         } catch {
-            guard !error.isCancellation else { return }
+            guard epoch == accountEpoch, !erasing, !error.isCancellation else { return }
             // The offline copy stays on screen; nothing is raised for a shelf of suggestions.
             if recommendations.isEmpty { recommendationsState = .failed }
         }
@@ -146,25 +151,28 @@ extension AppModel {
     func stagedRecommendation(from ready: [RecommendationItem]) -> RecommendationItem? {
         guard !ready.isEmpty else { return nil }
         let day = Calendar.current.ordinality(of: .day, in: .era, for: Date(timeIntervalSince1970: TimeInterval(now) / 1000)) ?? 0
-        let defaults = UserDefaults.standard
-        if defaults.integer(forKey: Self.stageDayKey) == day,
-           let key = defaults.string(forKey: Self.stageKey),
-           let staged = ready.first(where: { $0.key == key }) {
+        if let data = AccountLocalStore.shared.read("recommendations-stage.json", owner: accountStorage),
+           let saved = try? JSONDecoder().decode(RecommendationStage.self, from: data), saved.day == day,
+           let staged = ready.first(where: { $0.key == saved.key }) {
             return staged
         }
         let pool = Array(ready.prefix(3))
         let pick = pool[day % pool.count]
-        defaults.set(day, forKey: Self.stageDayKey)
-        defaults.set(pick.key, forKey: Self.stageKey)
+        if !isIsolated, !erasing, let data = try? JSONEncoder().encode(RecommendationStage(day: day, key: pick.key)) {
+            try? AccountLocalStore.shared.write(data, name: "recommendations-stage.json", owner: accountStorage)
+        }
         return pick
     }
 
     nonisolated static let stageDayKey = "previously.forYouStageDay"
     nonisolated static let unavailableKey = "previously.recommendationsUnavailableUntil"
+    private struct RecommendationStage: Codable { let day: Int; let key: String }
 
     /// The server answered 404 within the last day: draw no skeleton for a shelf that will not come.
     var recommendationsRecentlyUnavailable: Bool {
-        UserDefaults.standard.double(forKey: Self.unavailableKey) > Double(Int64.nowMs)
+        guard let data = AccountLocalStore.shared.read("recommendations-unavailable.json", owner: accountStorage),
+              let until = try? JSONDecoder().decode(Int64.self, from: data) else { return false }
+        return until > Int64.nowMs
     }
     nonisolated static let stageKey = "previously.forYouStageKey"
 
@@ -204,34 +212,38 @@ extension AppModel {
     /// One pending answer per title — the newest word wins: an undo of a dismissal the server
     /// never received cancels it on the device instead of sending both.
     private func queueFeedback(key: String, kind: String) {
-        var state = Self.loadFeedbackState()
+        var state = loadFeedbackState()
         if kind == "undo", state.pending[key] != nil, state.pending[key] != "undo" {
             state.pending[key] = nil
         } else {
             state.pending[key] = kind
         }
         state.hidden = Array(hiddenRecommendationKeys)
-        Self.saveFeedbackState(state)
+        saveFeedbackState(state)
         flushFeedback()
     }
 
     /// Sends what the server has not had yet; each answer leaves the queue only once it lands.
     func flushFeedback() {
-        guard !isIsolated else { return }
-        let pending = Self.loadFeedbackState().pending
+        guard !isIsolated, !erasing, let owner = accountStorage else { return }
+        let epoch = accountEpoch
+        let pending = loadFeedbackState().pending
         guard !pending.isEmpty else { return }
         Task { [weak self] in
             for (key, kind) in pending {
-                guard let self else { return }
+                guard let self, epoch == self.accountEpoch, !self.erasing,
+                      AccountLocalStore.shared.matches(owner) else { return }
                 do {
                     if kind == "undo" {
                         try await self.api.removeRecommendationFeedback(key: key)
                     } else {
                         try await self.api.recommendationFeedback(key: key, kind: kind)
                     }
-                    var state = Self.loadFeedbackState()
+                    guard epoch == self.accountEpoch, !self.erasing,
+                          AccountLocalStore.shared.matches(owner) else { return }
+                    var state = self.loadFeedbackState()
                     if state.pending[key] == kind { state.pending[key] = nil }
-                    Self.saveFeedbackState(state)
+                    self.saveFeedbackState(state)
                 } catch {
                     // Kept for the next launch or the next successful list.
                 }
@@ -244,20 +256,16 @@ extension AppModel {
         var pending: [String: String] = [:]
     }
 
-    nonisolated private static let feedbackURL: URL = {
-        let dir = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
-        return dir.appendingPathComponent("recommendations-feedback.json")
-    }()
-
-    static func loadFeedbackState() -> FeedbackState {
-        guard let data = try? Data(contentsOf: feedbackURL),
+    func loadFeedbackState() -> FeedbackState {
+        guard let data = AccountLocalStore.shared.read("recommendations-feedback.json", owner: accountStorage),
               let state = try? JSONDecoder().decode(FeedbackState.self, from: data) else { return FeedbackState() }
         return state
     }
 
-    static func saveFeedbackState(_ state: FeedbackState) {
+    func saveFeedbackState(_ state: FeedbackState) {
+        guard !isIsolated, !erasing else { return }
         guard let data = try? JSONEncoder().encode(state) else { return }
-        try? data.write(to: feedbackURL, options: .atomic)
+        try? AccountLocalStore.shared.write(data, name: "recommendations-feedback.json", owner: accountStorage)
     }
 
     /// The franchise a tap opens: the show page the server already has, else one it materialises
@@ -281,36 +289,29 @@ extension AppModel {
 
     // MARK: Offline copy
 
-    nonisolated private static let recommendationsURL: URL = {
-        let dir = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
-        try? FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
-        return dir.appendingPathComponent("recommendations-cache.json")
-    }()
-
     /// The last list this device saw, so Today opens with its shelf, offline included — with the
     /// titles this device has hidden still hidden, and any feedback the server has not had sent.
     func loadCachedRecommendations() {
-        guard recommendations.isEmpty, !isIsolated else { return }
-        hiddenRecommendationKeys.formUnion(Self.loadFeedbackState().hidden)
+        guard recommendations.isEmpty, !isIsolated, !erasing, let owner = accountStorage else { return }
+        let epoch = accountEpoch
+        hiddenRecommendationKeys.formUnion(loadFeedbackState().hidden)
         flushFeedback()
         Task { [weak self] in
-            let url = Self.recommendationsURL
+            let url = owner.file("recommendations-cache.json")
             let cached = await Task.detached(priority: .utility) { () -> RecommendationsResponse? in
                 guard let data = try? Data(contentsOf: url) else { return nil }
                 return try? JSONDecoder().decode(RecommendationsResponse.self, from: data)
             }.value
-            guard let self, let cached, self.recommendations.isEmpty else { return }
+            guard let self, let cached, self.recommendations.isEmpty, epoch == self.accountEpoch,
+                  !self.erasing, AccountLocalStore.shared.matches(owner) else { return }
             self.recommendations = cached.items
             if self.recommendationsState == .idle { self.recommendationsState = .loaded }
         }
     }
 
-    private static func persistRecommendations(_ res: RecommendationsResponse) {
-        let url = recommendationsURL
-        Task.detached(priority: .utility) {
-            guard let data = try? JSONEncoder().encode(res) else { return }
-            try? data.write(to: url, options: .atomic)
-        }
+    private func persistRecommendations(_ res: RecommendationsResponse) {
+        guard !isIsolated, !erasing, let data = try? JSONEncoder().encode(res) else { return }
+        try? AccountLocalStore.shared.write(data, name: "recommendations-cache.json", owner: accountStorage)
     }
 
     /// Sign-out: the list and its copy belong to the account that fetched them.
@@ -326,10 +327,13 @@ extension AppModel {
         addedRecommendationIds = []
         resolvedRecommendationIds = [:]
         resolvingRecommendations = []
-        try? FileManager.default.removeItem(at: Self.recommendationsURL)
-        try? FileManager.default.removeItem(at: Self.feedbackURL)
+        AccountLocalStore.shared.remove("recommendations-cache.json", owner: accountStorage)
+        AccountLocalStore.shared.remove("recommendations-feedback.json", owner: accountStorage)
+        AccountLocalStore.shared.remove("recommendations-stage.json", owner: accountStorage)
+        AccountLocalStore.shared.remove("recommendations-unavailable.json", owner: accountStorage)
         UserDefaults.standard.removeObject(forKey: Self.stageDayKey)
         UserDefaults.standard.removeObject(forKey: Self.stageKey)
+        UserDefaults.standard.removeObject(forKey: Self.unavailableKey)
     }
 }
 

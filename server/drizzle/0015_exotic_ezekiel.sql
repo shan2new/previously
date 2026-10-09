@@ -1,0 +1,1 @@
+ALTER TABLE "account_deletions" ADD COLUMN "apple_revocation" text DEFAULT 'manual_required' NOT NULL;

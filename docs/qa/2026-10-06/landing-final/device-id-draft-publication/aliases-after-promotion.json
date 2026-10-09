@@ -1,0 +1,25 @@
+{
+  "checkedAt": "2026-10-06T13:30:15.611203+00:00",
+  "aliases": [
+    {
+      "uid": "7e7ebb003e06f7cd948ae67e5dab0e847e7300462153382fda3c50ad52f26ae3a081f39fc90fd82e9dd80cca8bceb185eda75f2fc7c3b14c73133219f3939e6d",
+      "alias": "previously.cognipin.com",
+      "deploymentId": "dpl_7LeP7Y1i3y8F48AJbJpwbLTZqLKB",
+      "projectId": "prj_osATa26wuWMoLf7yLOEaXvYuiial",
+      "deployment": {
+        "id": "dpl_7LeP7Y1i3y8F48AJbJpwbLTZqLKB",
+        "url": "landing-95lgrdsxc-shan2news-projects.vercel.app"
+      }
+    },
+    {
+      "uid": "45ba131b2b0d5e4eee6be4a2352e22b451d145bf03dea3ab8d059d4740ca89379f7135c9ce2e6e50da97dff2595220b8726abac8261a1fd706cafa7284825324",
+      "alias": "landing-ten-theta-55.vercel.app",
+      "deploymentId": "dpl_7LeP7Y1i3y8F48AJbJpwbLTZqLKB",
+      "projectId": "prj_osATa26wuWMoLf7yLOEaXvYuiial",
+      "deployment": {
+        "id": "dpl_7LeP7Y1i3y8F48AJbJpwbLTZqLKB",
+        "url": "landing-95lgrdsxc-shan2news-projects.vercel.app"
+      }
+    }
+  ]
+}

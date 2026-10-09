@@ -1,0 +1,18 @@
+{
+  "database": "previously_qa_load_6a609da532424b2db418c1ce7754b584",
+  "users": 500,
+  "franchises": 1200,
+  "media": 3200,
+  "subscriptions": 25100,
+  "progress": 75300,
+  "coldFranchises": 200,
+  "coldMedia": 200,
+  "progressRowsIndependentlyChecked": 74802,
+  "unchangedOrImportedProgressMismatches": 0,
+  "unexpectedProgressRows": 0,
+  "subscriptionOwnershipOrStatusMismatches": 0,
+  "unexpectedSubscriptions": 0,
+  "measuredAt": "2026-10-06T10:33:24.644324+00:00",
+  "readOnlyConnection": true,
+  "boundary": "Recovery snapshot after sustained+burst; excludes498potentialordinarywritekeys checked separately at finalack oracle."
+}

@@ -53,6 +53,9 @@ final class RewatchStore {
         enum Kind: String, Codable, Sendable { case save, delete }
         let kind: Kind
         let version: Int
+        /// Retries and cold-launch replay retain this operation; a changed intent receives a new
+        /// stamp. Optional only so older pending files decode before their first-send upgrade.
+        var mutation: MutationStamp? = nil
     }
 
     private struct SyncState: Codable {
@@ -61,6 +64,9 @@ final class RewatchStore {
         var synced: Set<UUID> = []
         /// Ids the server refused for good (their franchise is gone): kept here, never re-sent.
         var refused: Set<UUID> = []
+        /// A superseded receipt did not accept the local body. Retain the need to read canonical
+        /// history if that read fails or the app closes. Optional for older sync files.
+        var needsCanonicalRead: Bool? = nil
     }
 
     @ObservationIgnored private var sync = SyncState()
@@ -70,17 +76,27 @@ final class RewatchStore {
     /// Called after every local change; the model sends the queue (`AppModel.flushWatchSessions`).
     @ObservationIgnored var onChange: (() -> Void)?
 
-    private let url: URL
-    private let backupURL: URL
-    private let syncURL: URL
+    private let storage: AccountLocalStore
+    private var owner: AccountLocalStore.Snapshot?
 
     init(directory: URL? = nil) {
-        let base = directory ?? FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
-            .appendingPathComponent("Previously", isDirectory: true)
-        url = base.appendingPathComponent("sessions.json")
-        backupURL = base.appendingPathComponent("sessions.backup.json")
-        syncURL = base.appendingPathComponent("sessions-sync.json")
-        load()
+        storage = directory.map { AccountLocalStore(directory: $0) } ?? .shared
+        // An explicitly supplied scratch directory is for regression tests, never a production
+        // fallback. The shared store remains empty until authentication identifies its owner.
+        if directory != nil {
+            owner = storage.activate(accountID: "scratch-rewatch")
+            load()
+        }
+    }
+
+    func activate(owner: AccountLocalStore.Snapshot?) {
+        guard self.owner != owner else { return }
+        self.owner = owner
+        sessions = []
+        sync = SyncState()
+        writeVersion = 0
+        revision &+= 1
+        if storage.matches(owner) { load() }
     }
 
     // MARK: - Queries
@@ -162,28 +178,49 @@ final class RewatchStore {
     func reset() {
         sessions = []
         sync = SyncState()
+        writeVersion = 0
         revision += 1
-        persist()
+        onChange = nil
+        // Remove both generations and the queue. Writing an empty primary would first rotate
+        // the old owner's private history into the backup.
+        for name in ["sessions.json", "sessions.backup.json", "sessions-sync.json"] {
+            storage.remove(name, owner: owner)
+        }
+        owner = nil
     }
 
     // MARK: - Server sync (driven by AppModel+Rewatch)
 
-    var hasPendingWrites: Bool { !sync.pending.isEmpty }
+    var hasPendingWrites: Bool { !sync.pending.isEmpty || needsCanonicalRead }
+    var hasUnsentWrites: Bool { !sync.pending.isEmpty }
+    var needsCanonicalRead: Bool { sync.needsCanonicalRead == true }
 
     /// The oldest unsent word, and the session as it stands now (nil for a delete).
     func nextPendingWrite() -> (id: UUID, write: PendingWrite, session: WatchSession?)? {
-        guard let oldest = sync.pending.min(by: { $0.value.version < $1.value.version }) else { return nil }
-        let id = oldest.key, write = oldest.value
+        guard storage.matches(owner),
+              let oldest = sync.pending.min(by: { $0.value.version < $1.value.version }) else { return nil }
+        let id = oldest.key
+        var write = oldest.value
+        if write.mutation == nil {
+            guard let mutation = MutationStamp.fresh(owner: owner, storage: storage) else { return nil }
+            write.mutation = mutation
+            sync.pending[id] = write
+        }
+        // Persist the exact operation before any HTTP attempt. A failed local write holds the
+        // queue; otherwise a lost server receipt plus process crash would mint a second operation.
+        guard persistSync() else { return nil }
         return (id, write, write.kind == .save ? sessions.first { $0.id == id } : nil)
     }
 
     /// The server took `write`. The word is done unless a newer one replaced it meanwhile.
-    func acknowledge(_ id: UUID, _ write: PendingWrite) {
+    func acknowledge(_ id: UUID, _ write: PendingWrite, applied: Bool = true) {
+        guard storage.matches(owner) else { return }
         if sync.pending[id] == write { sync.pending[id] = nil }
         switch write.kind {
         case .save: sync.synced.insert(id)
         case .delete: sync.synced.remove(id)
         }
+        if !applied { sync.needsCanonicalRead = true }
         persistSync()
     }
 
@@ -211,7 +248,8 @@ final class RewatchStore {
     /// on another device; one it never saw (made before sync, or offline) is queued to go up.
     @discardableResult
     func merge(server: [WatchSession], readAt readRevision: Int) -> Bool {
-        guard readRevision == revision else { return false }
+        guard storage.matches(owner), readRevision == revision else { return false }
+        sync.needsCanonicalRead = nil
         let serverIds = Set(server.map(\.id))
         var merged: [WatchSession] = []
         for remote in server {
@@ -247,7 +285,8 @@ final class RewatchStore {
     private func changed(_ kind: PendingWrite.Kind, _ ids: [UUID]) {
         for id in ids {
             writeVersion += 1
-            sync.pending[id] = PendingWrite(kind: kind, version: writeVersion)
+            sync.pending[id] = PendingWrite(kind: kind, version: writeVersion,
+                                            mutation: MutationStamp.fresh(owner: owner, storage: storage))
         }
         revision += 1
         persist()
@@ -258,51 +297,39 @@ final class RewatchStore {
 
     private func load() {
         sessions = []
-        for candidate in [url, backupURL] {
-            if let data = try? Data(contentsOf: candidate),
+        for name in ["sessions.json", "sessions.backup.json"] {
+            if let data = storage.read(name, owner: owner),
                let decoded = try? JSONDecoder().decode([WatchSession].self, from: data) {
                 sessions = decoded
                 break
             }
         }
-        if let data = try? Data(contentsOf: syncURL), let decoded = try? JSONDecoder().decode(SyncState.self, from: data) {
+        if let data = storage.read("sessions-sync.json", owner: owner), let decoded = try? JSONDecoder().decode(SyncState.self, from: data) {
             sync = decoded
             writeVersion = decoded.pending.values.map(\.version).max() ?? 0
         }
     }
 
     private func persist() {
-        let snapshot = sessions
-        let target = url, backup = backupURL
-        Task.detached(priority: .utility) {
-            do {
-                let dir = target.deletingLastPathComponent()
-                try FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
-                if FileManager.default.fileExists(atPath: target.path) {
-                    _ = try? FileManager.default.removeItem(at: backup)
-                    try? FileManager.default.copyItem(at: target, to: backup)
-                }
-                let data = try JSONEncoder().encode(snapshot)
-                try data.write(to: target, options: .atomic)
-            } catch {
-                // A failed write keeps the previous file (atomic) and the backup; the in-memory
-                // state stays authoritative for this session.
+        guard storage.matches(owner) else { return }
+        do {
+            if let previous = storage.read("sessions.json", owner: owner) {
+                try storage.write(previous, name: "sessions.backup.json", owner: owner)
             }
+            try storage.write(JSONEncoder().encode(sessions), name: "sessions.json", owner: owner)
+        } catch {
+            // Atomic writes retain the previous generation. The current session stays in memory.
         }
         persistSync()
     }
 
-    private func persistSync() {
-        let snapshot = sync
-        let target = syncURL
-        Task.detached(priority: .utility) {
-            do {
-                try FileManager.default.createDirectory(at: target.deletingLastPathComponent(), withIntermediateDirectories: true)
-                try JSONEncoder().encode(snapshot).write(to: target, options: .atomic)
-            } catch {
-                // The queue stays in memory; a relaunch before the next write re-sends at worst.
-            }
-        }
+    @discardableResult
+    private func persistSync() -> Bool {
+        guard storage.matches(owner), let data = try? JSONEncoder().encode(sync) else { return false }
+        do {
+            try storage.write(data, name: "sessions-sync.json", owner: owner)
+            return true
+        } catch { return false }
     }
 }
 
@@ -362,25 +389,5 @@ extension WatchSession {
                   ordinal: w.ordinal, startedAt: w.startedAt, completedAt: w.completedAt, cancelledAt: w.cancelledAt,
                   cancelledAtEpisode: w.cancelledAtEpisode, episodes: w.episodes ?? 0,
                   restoreProgress: w.restoreProgress, restoreStatus: w.restoreStatus)
-    }
-}
-
-// MARK: - Copy helpers
-
-extension WatchSession {
-    /// "Third watch" / "Second watch" / "First watch".
-    var title: String { Copy.Progress.ordinalWatch(ordinal) }
-
-    /// "In progress · Episode 7 next" / "4 Jul – 19 Jul 2026 · 26 episodes" / "Dates unknown".
-    func subtitle(nextEpisode: Int?, now: Int64) -> String {
-        if isActive {
-            if let nextEpisode { return Copy.Progress.inProgress(nextEpisode: nextEpisode) }
-            return "In progress"
-        }
-        if let cancelledAtEpisode {
-            return "Cancelled at \(Copy.episodeInSentence(cancelledAtEpisode))"
-        }
-        return Copy.Progress.sessionSpan(started: startedAt, completed: completedAt == 0 ? nil : completedAt,
-                                         episodes: episodes, now: now)
     }
 }

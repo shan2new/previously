@@ -1,0 +1,18 @@
+{
+  "verifiedAt": "2026-10-06T12:33:40.038095+00:00",
+  "appId": "6818452741",
+  "version": "1.0",
+  "latestVisibleBuild": 12,
+  "latestBuildStatus": "Ready to Submit",
+  "visibleBuilds": [
+    12,
+    11,
+    10,
+    9,
+    8,
+    7
+  ],
+  "nextReleaseBuild": 13,
+  "productionBuildUploaded": false,
+  "screenshot": "testflight-build-ceiling.png"
+}

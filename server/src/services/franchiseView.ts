@@ -32,6 +32,7 @@ import { resolveRelatedFranchiseIds } from './catalogEnrichment.js'
 import { stripHtml } from '../util/text.js'
 import { catalogLinkViews } from './catalogLinks.js'
 import { limitArtwork, rankLogos } from '../util/artwork.js'
+import { consumerFranchiseConditions } from './consumerContent.js'
 
 const D = 86_400_000
 const KIND_ORDER: PartKind[] = ['season', 'movie', 'ova', 'ona', 'special', 'music']
@@ -449,7 +450,7 @@ function buildFranchise(
 
 /** Full franchise detail with parts + (optional) the user's progress and subscription. */
 export async function getFranchise(franchiseId: string, userId?: string, country?: string): Promise<Franchise | null> {
-  const [f] = await db.select().from(franchise).where(eq(franchise.id, franchiseId)).limit(1)
+  const [f] = await db.select().from(franchise).where(and(eq(franchise.id, franchiseId), ...consumerFranchiseConditions())).limit(1)
   if (!f) return null
 
   const members = await db.select().from(franchiseMember).where(eq(franchiseMember.franchiseId, franchiseId))
@@ -482,7 +483,7 @@ export async function getFranchise(franchiseId: string, userId?: string, country
 /** Build a list of FranchiseSummary for the given franchise ids (trending/search). */
 export async function getSummaries(franchiseIds: string[]): Promise<FranchiseSummary[]> {
   if (franchiseIds.length === 0) return []
-  const fr = await db.select().from(franchise).where(inArray(franchise.id, franchiseIds))
+  const fr = await db.select().from(franchise).where(and(inArray(franchise.id, franchiseIds), ...consumerFranchiseConditions()))
   const members = await db.select().from(franchiseMember).where(inArray(franchiseMember.franchiseId, franchiseIds))
   const mediaIds = members.map((m) => m.mediaId)
   const mediaRows = mediaIds.length ? await db.select().from(media).where(inArray(media.id, mediaIds)) : []
@@ -601,7 +602,7 @@ export async function trendingFranchiseIds(limit: number, source?: MediaSource |
     .from(franchise)
     .innerJoin(franchiseMember, eq(franchiseMember.franchiseId, franchise.id))
     .innerJoin(media, eq(media.id, franchiseMember.mediaId))
-    .where(source ? eq(franchise.source, source) : undefined)
+    .where(and(...consumerFranchiseConditions(), source ? eq(franchise.source, source) : undefined))
     .groupBy(franchise.id)
     .orderBy(
       sql`max(${media.trending}) desc nulls last`,
@@ -635,7 +636,7 @@ export async function getFeedFranchises(franchiseIds: string[], userId: string |
   if (ids.length === 0) return { franchises: [], statusById, memberAddedAt, externalIdById }
 
   const [frRows, members, subs] = await Promise.all([
-    db.select().from(franchise).where(inArray(franchise.id, ids)),
+    db.select().from(franchise).where(and(inArray(franchise.id, ids), ...consumerFranchiseConditions())),
     db.select().from(franchiseMember).where(inArray(franchiseMember.franchiseId, ids)),
     userId
       ? db
@@ -673,6 +674,12 @@ export async function getFeedFranchises(franchiseIds: string[], userId: string |
     externalIdById.set(f.id, f.externalId ?? null)
     franchises.push(buildFranchise(f, membersByFranchise.get(id) ?? [], mediaById, watchedById, subById.get(id) ?? null))
   }
+  const related = await resolveRelatedFranchiseIds(franchises.flatMap((item) => item.related))
+  const relatedByKey = new Map(related.map((item) => [`${item.source}:${item.externalId}`, item]))
+  for (const item of franchises) item.related = item.related.flatMap((value) => {
+    const resolved = relatedByKey.get(`${value.source}:${value.externalId}`)
+    return resolved ? [resolved] : []
+  })
   return { franchises, statusById, memberAddedAt, externalIdById }
 }
 
@@ -685,7 +692,7 @@ export async function getLibrary(userId: string, lastOpenedAt: number): Promise<
   const statusById = new Map(subs.map((s) => [s.franchiseId, s.status as WatchStatus]))
 
   // Batch every dependency in a fixed number of queries — no per-subscription round-trips.
-  const frRows = await db.select().from(franchise).where(inArray(franchise.id, franchiseIds))
+  const frRows = await db.select().from(franchise).where(and(inArray(franchise.id, franchiseIds), ...consumerFranchiseConditions()))
   const members = await db.select().from(franchiseMember).where(inArray(franchiseMember.franchiseId, franchiseIds))
   const mediaIds = members.map((m) => m.mediaId)
   const mediaRows = mediaIds.length ? await db.select().from(media).where(inArray(media.id, mediaIds)) : []
@@ -717,7 +724,10 @@ export async function getLibrary(userId: string, lastOpenedAt: number): Promise<
   const links = await catalogLinkViews(out.map((item) => item.id))
   const relatedByKey = new Map(resolvedRelated.map((item) => [`${item.source}:${item.externalId}`, item]))
   for (const item of out) {
-    item.related = item.related.map((related) => relatedByKey.get(`${related.source}:${related.externalId}`) ?? related)
+    item.related = item.related.flatMap((related) => {
+      const resolved = relatedByKey.get(`${related.source}:${related.externalId}`)
+      return resolved ? [resolved] : []
+    })
     item.metadata.sources = links.get(item.id) ?? []
   }
   return out

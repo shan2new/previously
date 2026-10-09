@@ -1,0 +1,12 @@
+{
+  "dispatchedAt": "2026-10-06T13:26:59.726006+00:00",
+  "sourceManifestSHA256": "38b4e8c44c7dc8036801749a9e1bac4dafc9c5ec39e9a25ae63bed19a99d7922",
+  "rootKeys": [
+    "status",
+    "deployment",
+    "message",
+    "next"
+  ],
+  "mode": "production environment, skip domain, remote build",
+  "canonicalHeldOn": "dpl_2BUUc6ZREKY29QVMdaF6zEr4BeGg"
+}

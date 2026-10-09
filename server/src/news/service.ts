@@ -35,7 +35,7 @@ const isNoteworthy = (status: string): boolean => status in STATUS_RANK
 // Detail reads may opportunistically warm missing/stale news, but web-research agents are slow and
 // expensive work. One worker plus a hard queue cap keeps ordinary API traffic from multiplying it.
 const onDemandNews = new BoundedTaskQueue(1, 8, (key, error) => {
-  console.warn(`[news] on-demand refresh failed (${key}):`, error instanceof Error ? error.message : error)
+  console.warn(`[news] on-demand refresh failed (${key}):`, 'diagnostic details redacted')
 })
 const onDemandAttemptedAt = new Map<string, number>()
 
@@ -298,7 +298,7 @@ export async function refreshFranchiseNews(franchiseId: string): Promise<{ check
     try {
       await adoptCatalogueThread(announcementId)
     } catch (err) {
-      console.warn(`[news] adopting the catalogue thread failed for "${f.title}":`, (err as Error).message)
+      console.warn(`[news] adopting the catalogue thread failed for "${f.title}":`, 'diagnostic details redacted')
     }
   }
 
@@ -411,7 +411,7 @@ export async function refreshSubscribedNews(): Promise<{ checked: number; notifi
       if (r.checked) checked++
       notified += r.notified
     } catch (err) {
-      console.warn(`[news] refresh failed for franchise ${id}:`, (err as Error).message)
+      console.warn(`[news] refresh failed for franchise ${id}:`, 'diagnostic details redacted')
     }
   }
   return { checked, notified, skipped: rows.length - due.length }

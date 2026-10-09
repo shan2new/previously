@@ -1,0 +1,56 @@
+{
+  "schemaVersion": 1,
+  "checkedAt": "2026-10-07T05:29:24.604471+00:00",
+  "report": "docs/release/2026-10-07/app-review-spike.md",
+  "localLinksChecked": 98,
+  "missingLocalLinks": [],
+  "independentPolicyReview": "native_qa: no material issues; conditional build reuse, unconfirmed clip acceptance, separate byte/character limits and scope verified",
+  "budgetCheck": "docs/qa/2026-10-07/app-store/review-template-budget-check.json",
+  "responseTemplatesChanged": false,
+  "replySent": false,
+  "notesChangedLive": false,
+  "resubmitted": false,
+  "accountOrRuntimeMutation": false,
+  "newSpend": false,
+  "files": [
+    {
+      "path": "docs/release/2026-10-07/app-review-spike.md",
+      "bytes": 13172,
+      "sha256": "75803412097cc8b0f28ce6932f3f1921b64ca050473f4025d614b61b8ab2f1f6"
+    },
+    {
+      "path": "docs/release/2026-10-07/spike-recording-evidence.md",
+      "bytes": 16332,
+      "sha256": "819e0f93dcdaa9ec02ed461ab8f8833077420e4a4e11e6cb18b8c392524c7a4e"
+    },
+    {
+      "path": "docs/release/2026-10-07/spike-developer-evidence.md",
+      "bytes": 8315,
+      "sha256": "80d82466c344ba4ca620e2e57b45f7d0644b40f92efce0aa65880934ad53f34e"
+    },
+    {
+      "path": "docs/release/2026-10-07/spike-auth-policy-evidence.md",
+      "bytes": 11147,
+      "sha256": "7a42dc38adc6e723f20cbce43cbe7bff31d8039e121437e7da908a63abdec8dc"
+    },
+    {
+      "path": "docs/release/2026-10-07/physical-device-recording-guide.md",
+      "bytes": 11414,
+      "sha256": "bb34d9c2eb45325129aa4b33f99cb6fe0fcc3eb0bab772bc4cc7a8ba7c1ae573"
+    },
+    {
+      "path": "docs/release/2026-10-07/apple-review-response-draft.md",
+      "bytes": 12503,
+      "sha256": "3647e2faae817b99328de69de0dc72dc603389a3cd27b5a4b77cf88ebcdef0aa"
+    }
+  ],
+  "completedAt": "2026-10-07T05:32:54.917461+00:00",
+  "refreshedPdf": {
+    "path": "output/pdf/previously-release-plan.pdf",
+    "sha256": "89d9e55dfdb1290300fba212003320e58e731e7144ba8c4f8e5c615a5ea614ff",
+    "pages": 32,
+    "reviewReceipt": "docs/release/2026-10-05/pdf-review-current.json",
+    "parentPage20Inspection": "tmp/pdfs/spike-root-check-20261007/page-20.png",
+    "parentVisualIssues": []
+  }
+}

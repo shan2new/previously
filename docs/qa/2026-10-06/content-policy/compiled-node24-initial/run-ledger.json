@@ -1,0 +1,23 @@
+{
+  "startedAt": "2026-10-06T12:19:52.693012+00:00",
+  "database": "previously_qa_content_f81dcbd7a14c437f9db6ef7330efe480",
+  "databaseCreated": true,
+  "databaseRemoved": true,
+  "host": "127.0.0.1",
+  "productionDatabaseReadOrWritten": false,
+  "dotenvLoaded": false,
+  "credentialsInherited": false,
+  "productionModule": "server/dist/server.js",
+  "transport": "Fastify inject through production routes/auth; real disposable PostgreSQL",
+  "nodeBinary": "/opt/homebrew/opt/node@24/bin/node",
+  "nodeVersion": "v24.21.0",
+  "ownedOpsRoot": "/private/var/folders/t8/18rddswj5r76q9782g0hlc9m0000gn/T/previously_qa_content_f81dcbd7a14c437f9db6ef7330efe480_ops_1_izmwmp",
+  "ownedHarnessPID": 33480,
+  "testExitCode": 1,
+  "runError": "AssertionError: Missing or insufficient policy evidence",
+  "scratchConnectionsBeforeDrop": 0,
+  "ownedOpsRemoved": true,
+  "sourceChangedDuringRun": [],
+  "finishedAt": "2026-10-06T12:20:19.627949+00:00",
+  "overallExitCode": 1
+}

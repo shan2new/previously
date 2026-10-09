@@ -1,0 +1,21 @@
+{
+  "verifiedAt": "2026-10-06T14:13:51.438139+00:00",
+  "productionInstanceId": "ins_3KJtgHKq296iry2eBmj1IkEQmpQ",
+  "sourceInventoryCount": 6,
+  "realIdentitiesMigrated": 4,
+  "syntheticExcluded": 2,
+  "mappedAccounts": 4,
+  "appliedAt": "2026-10-06T14:09:35.015Z",
+  "migrationStatePrivate": true,
+  "stateMode": "0o600",
+  "identitiesModePassed": true,
+  "applyModePassed": true,
+  "internalUUIDsPreserved": true,
+  "fullOwnedDataPreserved": true,
+  "passwordsAndSessionsTransferred": false,
+  "sourceIdentitiesPurged": false,
+  "qualifiedArtifact": "/Users/shan2new/Infra/previously/releases/20261006T123751Z/server",
+  "compiledMigration": "dist/scripts/migrate-clerk-production.js",
+  "postCutoverRecoveryReceipt": "docs/qa/2026-10-06/operations/post-clerk-cutover-backup-restore.json",
+  "verification": "Stopped source listener; refreshed read-only complete six-profile plan; identities then apply CLI actual API/SQL passed. Private state keeps explicit production mappings. Post-cutover exact restore verifies all four UUID/provider mappings and all20ownedtables."
+}

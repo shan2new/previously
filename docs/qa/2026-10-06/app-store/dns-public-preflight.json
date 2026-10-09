@@ -1,0 +1,36 @@
+{
+  "observedAt": "2026-10-06T11:55:58.466441+00:00",
+  "scope": "Public resolver only; zone inventory still required before mutation",
+  "records": [
+    {
+      "name": "previously.cognipin.com",
+      "CNAME": [],
+      "A": []
+    },
+    {
+      "name": "clerk.previously.cognipin.com",
+      "CNAME": [],
+      "A": []
+    },
+    {
+      "name": "accounts.previously.cognipin.com",
+      "CNAME": [],
+      "A": []
+    },
+    {
+      "name": "clkmail.previously.cognipin.com",
+      "CNAME": [],
+      "A": []
+    },
+    {
+      "name": "clk._domainkey.previously.cognipin.com",
+      "CNAME": [],
+      "A": []
+    },
+    {
+      "name": "clk2._domainkey.previously.cognipin.com",
+      "CNAME": [],
+      "A": []
+    }
+  ]
+}

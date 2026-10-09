@@ -1,0 +1,108 @@
+- banner "App Store Connect":
+  - heading "App Store Connect" [level=1]:
+    - link "App Store Connect":
+      - /url: /
+  - navigation "Global":
+    - list:
+      - link "Apps":
+        - /url: /apps
+      - link "Xcode Cloud":
+        - /url: /teams/ed70022a-b3ca-4ff2-b4ab-1947652610e7/xcode-cloud
+      - link "Trends":
+        - /url: /trends
+      - link "Reports":
+        - /url: /itc/payments_and_financial_reports
+      - link "Business":
+        - /url: /business
+  - button "Shantanu Sinha Shantanu Sinha|11614668096|1 Account name menu":
+    - generic: Shantanu Sinha
+    - generic: Shantanu Sinha|11614668096|1
+- button "Apps menu, Previously., selected":
+  - generic "Previously.":
+    - img "Previously."
+  - generic: Previously.
+- navigation "Apps":
+  - list:
+    - link "Distribution":
+      - /url: /apps/6818452741/distribution
+    - link "Analytics":
+      - /url: /apps/6818452741/analytics
+    - link "TestFlight":
+      - /url: /teams/ed70022a-b3ca-4ff2-b4ab-1947652610e7/apps/6818452741/testflight
+- main:
+  - link "App Review":
+    - /url: /apps/6818452741/distribution/reviewsubmissions
+    - text: App Review
+  - heading "iOS Submission" [level=2]
+  - button "Resubmit to App Review" [disabled]
+  - paragraph:
+    - text: Unresolved Issues
+  - paragraph: Your app version was rejected and no other items submitted can be accepted or approved. You can make edits to your app version below.
+  - heading "Items Submitted (1)" [level=3]
+  - generic: You can review and make edits to your items below, or communicate with Apple. Accepted items won't be available for release until all items with issues are resubmitted and accepted. You can also remove those items and resubmit them later.
+  - table:
+    - rowgroup:
+      - row "Item Type Review Status Action":
+        - columnheader "Item":
+          - generic: Item
+        - columnheader "Type":
+          - generic: Type
+        - columnheader "Review Status":
+          - generic: Review Status
+        - columnheader "Action":
+          - generic: Action
+        - columnheader
+    - rowgroup:
+      - 'row "App Icon iOS App 1.0 1.0 (14) App Version Rejected 2.1.0 Performance: App Completeness Edit Delete"':
+        - cell "App Icon iOS App 1.0 1.0 (14)":
+          - generic "App Icon":
+            - img "App Icon"
+          - paragraph: iOS App 1.0
+          - paragraph:
+            - link "1.0 (14)":
+              - /url: /apps/6818452741/testflight/ios/f7e3b1bc-c75b-465b-b51b-e888d9c48b50/metadata
+          - paragraph
+        - cell "App Version":
+          - generic: App Version
+        - 'cell "Rejected 2.1.0 Performance: App Completeness"':
+          - text: Rejected
+          - paragraph: "2.1.0 Performance: App Completeness"
+        - cell "Edit":
+          - link "Edit":
+            - /url: /apps/6818452741/distribution/ios/version/inflight
+        - cell "Delete":
+          - button "Delete":
+  - heading "Messages (1)" [level=3]
+  - button "AppleToday 9:16 AM":
+    - heading "AppleToday 9:16 AM" [level=6]
+  - button "Shantanu SinhaToday 10:37 AM" [expanded]:
+    - heading "Shantanu SinhaToday 10:37 AM" [level=6]
+  - region "Shantanu SinhaToday 10:37 AM":
+    - generic: "Thank you. Previously. 1.0 (14) is an independent, free entertainment companion. The six requested details follow. 1. Physical-device recording [RECORDING URL PENDING: actual iPhone, latest OS, submitted build 1.0 (14).] The recording will begin with launch and show registration, login, onboarding, tracking and deletion with a separate disposable account. It is not completed yet. This release has no paid features or in-app purchases. Watch history is private; ratings and likes contribute anonymous aggregate numbers. Public comments, replies and chat are disabled. Users cannot publish free-form posts or interact with another named user; reporting/blocking flows are not exposed while comments are off. 2. Purpose and audience Previously. helps individual anime/TV viewers remember their last episode, organize planned/watching/completed/paused/dropped shows, and see what airs next. Related anime seasons/parts form one continuing story. It is not restricted to employees or organizations. The saved age questionnaire reflects mature catalog content. 3. Setup and main features Use the demo email/password saved in App Store Connect's private Sign-In Information. Tap Sign in, enter email, Continue, then password and Continue; this review account needs no mailbox code or MFA. Its synthetic library has Attack on Titan after episode 1, Reacher before episode 1 and completed Death Note. From Home or Library, open a title, mark an episode and use Undo. Schedule shows upcoming episodes; Discover searches anime/TV; Today presents show updates. New users choose viewing interests, select shows and set their place. Profile includes Import your history, Export library and Delete account. Imports preview a public AniList username, MyAnimeList XML/gzip export or TV Time export before applying. [ATTACH AFTER UPLOAD: previously-review-samples.zip (two XML files).] The synthetic samples cover a permitted title and adult-content omissions. 4. Core services and platforms Clerk provides email/password, Google and Sign in with Apple authentication. AniList supplies anime metadata/public-list imports; TMDB supplies TV metadata and country-specific JustWatch availability. Trailers use YouTube's privacy-enhanced IFrame player; viewing links open external providers. Our HTTPS API/PostgreSQL run on a Mac Mini behind Cloudflare; Vercel hosts support/privacy pages. Background editorial research can use Claude Agent SDK with Codex fallback. Paid AI grouping/search correction is disabled. There is no consumer AI chat or payment processor. 5. Regional differences Core tracking/import features do not intentionally vary by region; the interface is English. Country preference changes provider availability and regional ratings. Catalog coverage, schedules, trailers, external services and Apple storefront availability may differ. We do not claim identical content/viewing rights worldwide. External provider subscriptions are separate from Previously. 6. Regulated services and third-party material This is entertainment tracking, with no financial, medical, gambling or regulated professional service. It displays third-party catalog metadata/artwork and embedded trailers; it does not host, download or stream full episodes. Rights remain with their owners; no broadcaster/platform affiliation is claimed. We confirmed the content-rights declaration in App Store Connect. No separate provider agreement or rights document is supplied with this draft; permission is not inferred from free access. Please identify any specific material or documentation needed for review."
+    - separator
+    - list:
+      - button "Continue Draft"
+      - button "Delete Draft"
+  - generic: Date Submitted
+  - generic: Oct 6, 2026 at 10:59 PM
+  - generic: Submission ID
+  - generic: 581db571-26c5-4b46-9ead-f7e73a3c940a
+  - generic: Submitted By
+  - generic: Shantanu Sinha
+  - generic: Last Updated By
+  - generic: Apple
+  - button "Cancel Submission"
+- contentinfo:
+  - list:
+    - link "App Store Connect":
+      - /url: /apps
+  - list:
+    - listitem: Copyright © 2026 Apple Inc. All rights reserved. |
+    - link "Terms of Service":
+      - /url: /WebObjects/iTunesConnect.woa/wa/termsOfService
+    - text: "|"
+    - link "Privacy Policy":
+      - /url: https://www.apple.com/legal/privacy
+    - text: "|"
+    - link "Contact Us":
+      - /url: /contact-us

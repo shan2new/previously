@@ -11,12 +11,22 @@ const mocks = vi.hoisted(() => ({
   upsertUser: vi.fn(),
   getUserByClerkId: vi.fn(),
   isSuspended: vi.fn(),
+  deletionState: vi.fn(),
+  finishDeletion: vi.fn(),
+  reconcileIndependentDeletions: vi.fn(),
 }))
 
 vi.mock('./identity.js', () => ({ resolveIdentity: mocks.resolveIdentity }))
 vi.mock('../services/users.js', () => ({ upsertUser: mocks.upsertUser, getUserByClerkId: mocks.getUserByClerkId }))
 vi.mock('../services/moderation.js', () => ({ isSuspended: mocks.isSuspended }))
 vi.mock('../db/index.js', () => ({ db: {}, sql: {} }))
+vi.mock('../services/deletionLedger.js', () => ({
+  AccountErasedError: class AccountErasedError extends Error {},
+  deletionState: mocks.deletionState,
+  finishDeletion: mocks.finishDeletion,
+  reconcileIndependentDeletions: mocks.reconcileIndependentDeletions,
+  deletionResponse: (row: { completedAt: Date | null; appleRevocation?: string }) => ({ deleted: !!row.completedAt, status: row.completedAt ? 'complete' : 'pending', appleRevocation: row.appleRevocation ?? 'manual_required' }),
+}))
 
 const { authenticate, suspendedMayCall } = await import('./clerk.js')
 const { recordErasure, resetErasures, ERASURE_HOLD_MS } = await import('../services/erasure.js')
@@ -35,6 +45,7 @@ async function app(): Promise<FastifyInstance> {
     scope.get('/me/export', echo)
     scope.post('/me/export', echo)
     scope.get('/me/profile', echo)
+    scope.get('/me/deletion', echo)
     scope.get('/social/episodes/:mediaId/:episode', echo)
   })
   await instance.ready()
@@ -47,6 +58,78 @@ beforeEach(() => {
   mocks.upsertUser.mockReset().mockResolvedValue(USER)
   mocks.getUserByClerkId.mockReset().mockResolvedValue(USER)
   mocks.isSuspended.mockReset().mockResolvedValue(false)
+  mocks.deletionState.mockReset().mockResolvedValue(undefined)
+  mocks.finishDeletion.mockReset().mockResolvedValue(undefined)
+  mocks.reconcileIndependentDeletions.mockReset().mockResolvedValue(undefined)
+})
+
+describe('authenticate — authoritative deletion receipts', () => {
+  it('reconciles a journal-only intent before reading and returning pending without upsert', async () => {
+    const order: string[] = []
+    let receipt: { completedAt: null } | undefined
+    mocks.reconcileIndependentDeletions.mockImplementation(async () => {
+      order.push('reconcile')
+      receipt = { completedAt: null }
+    })
+    mocks.deletionState.mockImplementation(async () => {
+      order.push('state')
+      return receipt
+    })
+    const server = await app()
+    const response = await server.inject({ method: 'GET', url: '/me/deletion', headers: AUTH })
+    expect(response.statusCode).toBe(202)
+    expect(response.json()).toEqual({ deleted: false, status: 'pending', appleRevocation: 'manual_required' })
+    expect(mocks.reconcileIndependentDeletions).toHaveBeenCalledOnce()
+    expect(mocks.deletionState).toHaveBeenCalledWith(USER.clerkId)
+    expect(order).toEqual(['reconcile', 'state'])
+    expect(mocks.upsertUser).not.toHaveBeenCalled()
+    await server.close()
+  })
+
+  it('cannot report active when journal reconciliation fails', async () => {
+    mocks.reconcileIndependentDeletions.mockRejectedValue(new Error('reconciliation unavailable'))
+    const server = await app()
+    const response = await server.inject({ method: 'GET', url: '/me/deletion', headers: AUTH })
+    expect(response.statusCode).toBe(500)
+    expect(response.json()).not.toEqual({ deleted: false, status: 'active' })
+    expect(mocks.deletionState).not.toHaveBeenCalled()
+    expect(mocks.upsertUser).not.toHaveBeenCalled()
+    await server.close()
+  })
+
+  it('authenticates before reading a private deletion journal', async () => {
+    const server = await app()
+    expect((await server.inject({ method: 'GET', url: '/me/deletion' })).statusCode).toBe(401)
+    mocks.resolveIdentity.mockResolvedValue(null)
+    expect((await server.inject({ method: 'GET', url: '/me/deletion', headers: AUTH })).statusCode).toBe(401)
+    expect(mocks.reconcileIndependentDeletions).not.toHaveBeenCalled()
+    expect(mocks.deletionState).not.toHaveBeenCalled()
+    await server.close()
+  })
+
+  it('replays a completed deletion receipt without invoking the route or reusing Apple proof', async () => {
+    recordErasure(USER.clerkId)
+    const receipt = { completedAt: new Date(), appleRevocation: 'revoked' }
+    mocks.deletionState.mockResolvedValue(receipt)
+    mocks.finishDeletion.mockResolvedValue(receipt)
+    const server = await app()
+    const response = await server.inject({ method: 'DELETE', url: '/me', headers: AUTH,
+      payload: { apple: { identityToken: 'synthetic-replayed-jwt', authorizationCode: 'synthetic-used-code' } } })
+    expect(response.json()).toEqual({ deleted: true, status: 'complete', appleRevocation: 'revoked' })
+    expect(response.json()).not.toHaveProperty('user')
+    expect(mocks.upsertUser).not.toHaveBeenCalled()
+    const status = await server.inject({ method: 'GET', url: '/me/deletion', headers: AUTH })
+    expect(status.json()).toEqual(response.json())
+    await server.close()
+  })
+
+  it('accepts a verified Apple identity without an email claim', async () => {
+    mocks.resolveIdentity.mockResolvedValue({ clerkId: USER.clerkId })
+    const server = await app()
+    expect((await server.inject({ method: 'GET', url: '/me/profile', headers: AUTH })).statusCode).toBe(200)
+    expect(mocks.upsertUser).toHaveBeenCalledWith(USER.clerkId, undefined)
+    await server.close()
+  })
 })
 
 describe('authenticate — suspended identities', () => {
@@ -292,7 +375,7 @@ describe('ban cache', async () => {
     const coldLoad = vi.fn(async (): Promise<string[]> => Promise.reject(new Error('db down')))
     const cold = createBanCache(coldLoad, 1_000)
     expect(await cold.has('user_a', 0)).toBe(false)
-    expect(warn).toHaveBeenCalledWith({ event: 'moderation.ban_cache_unavailable', error: 'db down' })
+    expect(warn).toHaveBeenCalledWith({ event: 'moderation.ban_cache_unavailable', error: 'diagnostic details redacted' })
     coldLoad.mockResolvedValue(['user_a'])
     expect(await cold.has('user_a', 1)).toBe(true)
     expect(coldLoad).toHaveBeenCalledTimes(2)

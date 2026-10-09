@@ -1,0 +1,99 @@
+{
+  "checkedAt": "2026-10-06T13:53:24.894Z",
+  "home390": {
+    "documentWidth": 390,
+    "draftState": true,
+    "hero": [
+      {
+        "complete": true,
+        "display": {
+          "bottom": 1090.54736328125,
+          "height": 532.7666625976562,
+          "left": 64.91886138916016,
+          "right": 325.0811233520508,
+          "top": 557.7807006835938,
+          "width": 260.1622619628906,
+          "x": 64.91886138916016,
+          "y": 557.7807006835938
+        },
+        "naturalHeight": 800,
+        "naturalWidth": 369,
+        "src": "https://landing-ten-theta-55.vercel.app/app/library-current.jpg"
+      }
+    ],
+    "width": 390,
+    "wordmarks": [
+      {
+        "box": {
+          "bottom": 52.5,
+          "height": 28,
+          "left": 20,
+          "right": 48,
+          "top": 24.5,
+          "width": 28,
+          "x": 20,
+          "y": 24.5
+        },
+        "dotColor": "rgb(240, 86, 63)",
+        "image": "https://landing-ten-theta-55.vercel.app/brand/native-icon.png"
+      },
+      {
+        "box": {
+          "bottom": 2956.1953125,
+          "height": 29,
+          "left": 20,
+          "right": 49,
+          "top": 2927.1953125,
+          "width": 29,
+          "x": 20,
+          "y": 2927.1953125
+        },
+        "dotColor": "rgb(240, 86, 63)",
+        "image": "https://landing-ten-theta-55.vercel.app/brand/native-icon.png"
+      }
+    ]
+  },
+  "home320": {
+    "documentWidth": 320,
+    "dotColor": "rgb(240, 86, 63)",
+    "headerIcon": "https://landing-ten-theta-55.vercel.app/brand/native-icon.png",
+    "heroLoaded": true,
+    "heroSrc": "https://landing-ten-theta-55.vercel.app/app/library-current.jpg",
+    "width": 320
+  },
+  "privacy390": {
+    "canonical": "https://previously.cognipin.com/privacy",
+    "documentWidth": 390,
+    "draft": true,
+    "headerIcon": "https://landing-ten-theta-55.vercel.app/brand/native-icon.png",
+    "periodColor": "rgb(240, 86, 63)",
+    "width": 390
+  },
+  "privacy320": {
+    "canonical": "https://previously.cognipin.com/privacy",
+    "documentWidth": 320,
+    "draft": true,
+    "headerIcon": "https://landing-ten-theta-55.vercel.app/brand/native-icon.png",
+    "periodColor": "rgb(240, 86, 63)",
+    "width": 320
+  },
+  "homeDialog320": {
+    "box": {
+      "bottom": 749.60546875,
+      "height": 719.2109375,
+      "left": 8,
+      "right": 312,
+      "top": 30.39453125,
+      "width": 304,
+      "x": 8,
+      "y": 30.39453125
+    },
+    "documentWidth": 320,
+    "loaded": true,
+    "src": "https://landing-ten-theta-55.vercel.app/app/home-current.png",
+    "width": 320
+  },
+  "passed": true,
+  "freshLayouts": 5,
+  "scope": "New header/footer icon and wordmark period, revised hero and four gallery captures; unchanged legal copy remains draft"
+}

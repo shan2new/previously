@@ -1,0 +1,152 @@
+{
+  "verifiedAtUTC": "2026-10-06T11:16:12Z",
+  "baseURL": "https://landing-ten-theta-55.vercel.app",
+  "scope": "anonymous public production alias; exact READY deployment dpl_EMPz5q73ktnuHwhEesBQX4ZjBdhN; no native claim",
+  "browser": "Chromium153 cached binary; Python Playwright",
+  "legalDraft": true,
+  "checks": [
+    {
+      "name": "document /",
+      "result": {
+        "status": 200,
+        "canonical": "https://landing-ten-theta-55.vercel.app",
+        "h1": "Your shows.\nRight where\nyou left them."
+      }
+    },
+    {
+      "name": "document /privacy",
+      "result": {
+        "status": 200,
+        "canonical": "https://landing-ten-theta-55.vercel.app/privacy",
+        "h1": "Privacy Policy."
+      }
+    },
+    {
+      "name": "document /terms",
+      "result": {
+        "status": 200,
+        "canonical": "https://landing-ten-theta-55.vercel.app/terms",
+        "h1": "Terms of Use."
+      }
+    },
+    {
+      "name": "document /support",
+      "result": {
+        "status": 200,
+        "canonical": "https://landing-ten-theta-55.vercel.app/support",
+        "h1": "Support."
+      }
+    },
+    {
+      "name": "document /delete-account",
+      "result": {
+        "status": 200,
+        "canonical": "https://landing-ten-theta-55.vercel.app/delete-account",
+        "h1": "Account Deletion."
+      }
+    },
+    {
+      "name": "/robots.txt",
+      "result": {
+        "status": 200
+      }
+    },
+    {
+      "name": "/sitemap.xml",
+      "result": {
+        "status": 200
+      }
+    },
+    {
+      "name": "missing route",
+      "result": {
+        "status": 404
+      }
+    },
+    {
+      "name": "viewport 1440",
+      "result": {
+        "horizontalOverflow": false
+      }
+    },
+    {
+      "name": "tour/dialog/faq 1440",
+      "result": {
+        "tabs": 4,
+        "focusContainment": true,
+        "escapeFocusRestoration": true,
+        "seasonDialog": true,
+        "faqItems": 6
+      }
+    },
+    {
+      "name": "viewport 983",
+      "result": {
+        "horizontalOverflow": false
+      }
+    },
+    {
+      "name": "tour/dialog/faq 983",
+      "result": {
+        "tabs": 4,
+        "focusContainment": true,
+        "escapeFocusRestoration": true,
+        "seasonDialog": true,
+        "faqItems": 6
+      }
+    },
+    {
+      "name": "viewport 390",
+      "result": {
+        "horizontalOverflow": false
+      }
+    },
+    {
+      "name": "tour/dialog/faq 390",
+      "result": {
+        "tabs": 4,
+        "focusContainment": true,
+        "escapeFocusRestoration": true,
+        "seasonDialog": true,
+        "faqItems": 6
+      }
+    },
+    {
+      "name": "viewport 320",
+      "result": {
+        "horizontalOverflow": false
+      }
+    },
+    {
+      "name": "tour/dialog/faq 320",
+      "result": {
+        "tabs": 4,
+        "focusContainment": true,
+        "escapeFocusRestoration": true,
+        "seasonDialog": true,
+        "faqItems": 6
+      }
+    },
+    {
+      "name": "mobile legal pages",
+      "result": {
+        "horizontalOverflow": false
+      }
+    },
+    {
+      "name": "reduced motion and deep link",
+      "result": {
+        "animationName": "none",
+        "selected": "Library"
+      }
+    },
+    {
+      "name": "network and console",
+      "result": {
+        "externalRequests": [],
+        "errors": []
+      }
+    }
+  ],
+  "status": "passed"
+}

@@ -909,6 +909,7 @@ struct OpenedResponse: Codable, Sendable {
 
 struct OKResponse: Codable, Sendable {
     let ok: Bool
+    var applied: Bool? = nil
 }
 
 struct FranchiseProgressResponse: Codable, Sendable {
@@ -916,6 +917,7 @@ struct FranchiseProgressResponse: Codable, Sendable {
     let franchiseId: String
     let status: WatchStatus?
     let progress: [FranchiseProgressValue]
+    var applied: Bool? = nil
 }
 
 struct FranchiseProgressBody: Encodable, Sendable {

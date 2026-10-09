@@ -1,0 +1,45 @@
+{
+  "checkedAtUTC": "2026-10-06T17:15:03.434577+00:00",
+  "aliases": [
+    {
+      "alias": "previously.cognipin.com",
+      "projectId": "prj_osATa26wuWMoLf7yLOEaXvYuiial",
+      "deploymentId": "dpl_EAcNw6zcnWPrMxkg2Nea3AkeNBBM"
+    },
+    {
+      "alias": "landing-git-first-run-onboarding-shan2news-projects.vercel.app",
+      "projectId": "prj_osATa26wuWMoLf7yLOEaXvYuiial",
+      "deploymentId": "dpl_F4EmCetodm75MnyzAQzVEy6amRaD"
+    },
+    {
+      "alias": "landing-git-spike-today-feed-shan2news-projects.vercel.app",
+      "projectId": "prj_osATa26wuWMoLf7yLOEaXvYuiial",
+      "deploymentId": "dpl_Gdqkazovi6gbKX4q5hJXNwrzJxsE"
+    },
+    {
+      "alias": "landing-git-android-port-shan2news-projects.vercel.app",
+      "projectId": "prj_osATa26wuWMoLf7yLOEaXvYuiial",
+      "deploymentId": "dpl_FWkRxYYeimUboyzPPy2ZQGbXqEW1"
+    },
+    {
+      "alias": "thepreviously.vercel.app",
+      "projectId": "prj_osATa26wuWMoLf7yLOEaXvYuiial",
+      "deploymentId": "dpl_EAcNw6zcnWPrMxkg2Nea3AkeNBBM"
+    },
+    {
+      "alias": "landing-shan2news-projects.vercel.app",
+      "projectId": "prj_osATa26wuWMoLf7yLOEaXvYuiial",
+      "deploymentId": "dpl_EAcNw6zcnWPrMxkg2Nea3AkeNBBM"
+    },
+    {
+      "alias": "landing-ten-theta-55.vercel.app",
+      "projectId": "prj_osATa26wuWMoLf7yLOEaXvYuiial",
+      "deploymentId": "dpl_EAcNw6zcnWPrMxkg2Nea3AkeNBBM"
+    },
+    {
+      "alias": "landing-git-main-shan2news-projects.vercel.app",
+      "projectId": "prj_osATa26wuWMoLf7yLOEaXvYuiial",
+      "deploymentId": "dpl_6nzwjys7thtUHrV4pdV8dU4GqLM8"
+    }
+  ]
+}

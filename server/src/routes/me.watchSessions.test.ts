@@ -67,7 +67,7 @@ describe('PUT /me/watch-sessions/:id', () => {
     const server = await app()
     const res = await server.inject({ method: 'PUT', url: `/me/watch-sessions/${SESSION}`, payload: rewatch })
     expect(res.statusCode).toBe(204)
-    expect(mocks.putWatchSession).toHaveBeenCalledWith(CALLER, SESSION, rewatch)
+    expect(mocks.putWatchSession).toHaveBeenCalledWith(CALLER, SESSION, rewatch, { user: { id: CALLER, clerkId: 'user_test' }, stamp: null })
     await server.close()
   })
 
@@ -87,7 +87,7 @@ describe('PUT /me/watch-sessions/:id', () => {
       episodes: 24,
       restoreProgress: null,
       restoreStatus: null,
-    })
+    }, { user: { id: CALLER, clerkId: 'user_test' }, stamp: null })
     await server.close()
   })
 
@@ -133,7 +133,7 @@ describe('DELETE /me/watch-sessions/:id', () => {
       expect(res.statusCode).toBe(204)
     }
     expect(mocks.deleteWatchSession).toHaveBeenCalledTimes(2)
-    expect(mocks.deleteWatchSession).toHaveBeenCalledWith(CALLER, SESSION)
+    expect(mocks.deleteWatchSession).toHaveBeenCalledWith(CALLER, SESSION, { user: { id: CALLER, clerkId: 'user_test' }, stamp: null })
     expect((await server.inject({ method: 'DELETE', url: '/me/watch-sessions/42' })).statusCode).toBe(400)
     await server.close()
   })

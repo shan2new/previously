@@ -1,0 +1,161 @@
+{
+  "checkedAt": "2026-10-06T14:46:21.176459+00:00",
+  "readOnly": true,
+  "noRestartOrMutationPerformed": true,
+  "secretValuesAndIdentifiersExported": false,
+  "installedJobs": [
+    {
+      "label": "com.shan.previously",
+      "plistPath": "/Users/shan2new/Library/LaunchAgents/com.shan.previously.plist",
+      "plistSHA256": "fe9518627dccd320fa399e58a708fa9ef8b11ce812636f15454d2aa40f4dd1e3",
+      "permissions": "0o600",
+      "plistLintPassed": true,
+      "loaded": true,
+      "launchStatus": {
+        "state": "running",
+        "runs": "2",
+        "last exit code": "0"
+      },
+      "compiledNodeRuntime": "/opt/homebrew/opt/node@24/bin/node",
+      "scriptPath": "/Users/shan2new/Infra/previously/releases/20261006T123751Z/server/ops/run-server.mjs",
+      "artifactDirectory": "/Users/shan2new/Infra/previously/releases/20261006T123751Z/server",
+      "runAtLoad": true,
+      "keepAlive": true,
+      "startInterval": null,
+      "calendar": null,
+      "standardOutDiscarded": true,
+      "standardErrorDiscarded": true
+    },
+    {
+      "label": "com.shan.previously.backup",
+      "plistPath": "/Users/shan2new/Library/LaunchAgents/com.shan.previously.backup.plist",
+      "plistSHA256": "e98b23ce2c485f7a5d90a9c7302f658e6b86bdc3a8574bac50efefae15d07276",
+      "permissions": "0o600",
+      "plistLintPassed": true,
+      "loaded": true,
+      "launchStatus": {
+        "state": "not running",
+        "runs": "1",
+        "last exit code": "0"
+      },
+      "compiledNodeRuntime": "/opt/homebrew/opt/node@24/bin/node",
+      "scriptPath": "/Users/shan2new/Infra/previously/releases/20261006T123751Z/server/ops/backup.mjs",
+      "artifactDirectory": "/Users/shan2new/Infra/previously/releases/20261006T123751Z/server",
+      "runAtLoad": false,
+      "keepAlive": false,
+      "startInterval": null,
+      "calendar": {
+        "Hour": 3,
+        "Minute": 15
+      },
+      "standardOutDiscarded": true,
+      "standardErrorDiscarded": true
+    },
+    {
+      "label": "com.shan.previously.ops",
+      "plistPath": "/Users/shan2new/Library/LaunchAgents/com.shan.previously.ops.plist",
+      "plistSHA256": "c2ca25576dccdd815e51692fb09b36ad98ca341b70df1ec1ec6cc501e5321c9a",
+      "permissions": "0o600",
+      "plistLintPassed": true,
+      "loaded": true,
+      "launchStatus": {
+        "state": "not running",
+        "runs": "2",
+        "last exit code": "0"
+      },
+      "compiledNodeRuntime": "/opt/homebrew/opt/node@24/bin/node",
+      "scriptPath": "/Users/shan2new/Infra/previously/releases/20261006T123751Z/server/ops/collect.mjs",
+      "artifactDirectory": "/Users/shan2new/Infra/previously/releases/20261006T123751Z/server",
+      "runAtLoad": true,
+      "keepAlive": false,
+      "startInterval": 3600,
+      "calendar": null,
+      "standardOutDiscarded": true,
+      "standardErrorDiscarded": true
+    }
+  ],
+  "statusReadback": {
+    "exists": true,
+    "path": "/Users/shan2new/Infra/previously/status.json",
+    "permissions": "0o600",
+    "measuredAt": "2026-10-06T14:28:59.408Z",
+    "ageSeconds": 1041.768,
+    "healthy": true,
+    "publicReady": true,
+    "freeDiskBytes": 4408225792,
+    "pendingDeletionCount": 0,
+    "missingPendingIdentityCount": 0,
+    "backup": {
+      "createdAt": "2026-10-06T14:13:04.959Z",
+      "bytes": 12146297,
+      "sha256": "822a8af82f40c27976c249d3f2e5a5795fcd8e412a9d4ada452446a7c9dbba73",
+      "ageHours": 0.2651247222222222
+    },
+    "reason": null
+  },
+  "backupReadback": {
+    "completedManifestCount": 4,
+    "latest": {
+      "manifestPath": "/Users/shan2new/Infra/previously/backups/previously-20261006T141301793Z-757b258b5af7.manifest.json",
+      "manifestPermissions": "0o600",
+      "createdAt": "2026-10-06T14:13:04.959Z",
+      "bytes": 12146297,
+      "tocEntries": 190,
+      "sha256": "822a8af82f40c27976c249d3f2e5a5795fcd8e412a9d4ada452446a7c9dbba73",
+      "dumpExists": true,
+      "dumpPermissions": "0o600",
+      "dumpBytesMatch": true,
+      "actualDumpSHA256MatchesManifest": true,
+      "restoreNotExecutedByThisReadOnlyAudit": true
+    },
+    "backupJobRunsObserved": "1",
+    "actualCalendarTriggerVerified": false,
+    "limitation": "One successful backup job invocation observed; launchctl does not establish manual versus calendar trigger. Scheduled03:15 occurrence has not been independently observed."
+  },
+  "managedLogsReadback": {
+    "segmentCount": 2,
+    "totalBytes": 778,
+    "recordsChecked": 13,
+    "jsonParseFailures": 0,
+    "recordsWithUnexpectedKeys": 0,
+    "nonprivateSegmentCount": 0,
+    "segments": [
+      {
+        "bytes": 355,
+        "permissions": "0o600",
+        "modifiedAt": "2026-10-06T14:28:01.658364+00:00"
+      },
+      {
+        "bytes": 423,
+        "permissions": "0o600",
+        "modifiedAt": "2026-10-06T14:30:17.361616+00:00"
+      }
+    ],
+    "payloadsAndRequestIdentifiersExported": false,
+    "scope": "Schema/private-file readback only; no claim of observing rotation rollover yet."
+  },
+  "publicReadiness": {
+    "url": "https://anime.cognipin.com/ready",
+    "ok": false,
+    "errorType": "HTTPError",
+    "httpStatus": 403,
+    "client": "Python urllib default User-Agent"
+  },
+  "readinessProbes": [
+    {
+      "checkedAt": "2026-10-06T14:47:04.971Z",
+      "url": "https://anime.cognipin.com/ready",
+      "httpStatus": 200,
+      "ok": true,
+      "client": "Node24 fetch (production collector client family)"
+    },
+    {
+      "checkedAt": "2026-10-06T14:47:04.974Z",
+      "url": "http://127.0.0.1:8787/ready",
+      "httpStatus": 200,
+      "ok": true,
+      "client": "Node24 fetch (production collector client family)"
+    }
+  ],
+  "publicReadinessDefaultPythonLimitation": "Python urllib default User-Agent receives HTTP403 while Node24 collector-family public probe and loopback return200/oktrue. This distinguishes client filtering from backend readiness and does not prove native client reachability."
+}

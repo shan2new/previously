@@ -105,6 +105,7 @@ struct AppTabBar: View {
         }
         .buttonStyle(FeedIconPressStyle())
         .accessibilityLabel(tab.label)
+        .qaIdentifier("qa.tab.\(tab == .today ? "feed" : String(describing: tab))")
         .accessibilityAddTraits(on ? [.isSelected] : [])
         // The bar keeps its size at every text size, as the system's does; at the accessibility
         // sizes a long press shows the tab large (the system bar's large content viewer).

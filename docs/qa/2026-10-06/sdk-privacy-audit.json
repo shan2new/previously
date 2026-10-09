@@ -1,0 +1,374 @@
+{
+  "checkedAt": "2026-10-06T13:21:47.311923+00:00",
+  "scope": "Resolved SDK source and resource manifests used by sealed native QA, plus actual signed Release archives13 and14. Authentication, consumer readiness and review submission are separate checks.",
+  "packageResolution": {
+    "originHash": "e6155bcb55384e0fcde0a157fe2ab6f9ec771195d96ecdac0026f000177a4685",
+    "pins": [
+      {
+        "identity": "clerk-ios",
+        "kind": "remoteSourceControl",
+        "location": "https://github.com/clerk/clerk-ios",
+        "state": {
+          "revision": "55b70c27ae525b4f49c9bd08e69d8bec35352593",
+          "version": "1.5.8"
+        }
+      },
+      {
+        "identity": "nuke",
+        "kind": "remoteSourceControl",
+        "location": "https://github.com/kean/Nuke",
+        "state": {
+          "revision": "30f7a7e72e0607d304fbf69c799474bd5fb6d1ce",
+          "version": "13.2.0"
+        }
+      },
+      {
+        "identity": "phonenumberkit",
+        "kind": "remoteSourceControl",
+        "location": "https://github.com/PhoneNumberKit/PhoneNumberKit",
+        "state": {
+          "revision": "faf1703e6fc71c699e911ff0e306c58ad7c756c0",
+          "version": "5.0.11"
+        }
+      }
+    ],
+    "version": 3
+  },
+  "packageResolutionSHA256": "9531884c399bb5e2b8ba9350a0608fec5fb8d10f5bdea6fc7c152ea3b184b158",
+  "sourceManifests": [
+    {
+      "packageRelativePath": "PhoneNumberKit/Sources/PhoneNumberKit/Resources/PrivacyInfo.xcprivacy",
+      "sha256": "561040f7a52952f75d02d4b6758382ff48c563d6f25c84a09f1a655f6dc60ff8",
+      "declared": {
+        "NSPrivacyTracking": false,
+        "NSPrivacyTrackingDomains": [],
+        "NSPrivacyCollectedDataTypes": [],
+        "NSPrivacyAccessedAPITypes": []
+      }
+    },
+    {
+      "packageRelativePath": "clerk-ios/Sources/ClerkKit/Resources/PrivacyInfo.xcprivacy",
+      "sha256": "13a72c8448476d8369a0e9a279464f20913f528022cd7ebfff31baa4d4f840ba",
+      "declared": {
+        "NSPrivacyAccessedAPITypes": [
+          {
+            "NSPrivacyAccessedAPIType": "NSPrivacyAccessedAPICategoryUserDefaults",
+            "NSPrivacyAccessedAPITypeReasons": [
+              "CA92.1"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "packageRelativePath": "clerk-ios/Sources/ClerkKitUI/Resources/PrivacyInfo.xcprivacy",
+      "sha256": "13a72c8448476d8369a0e9a279464f20913f528022cd7ebfff31baa4d4f840ba",
+      "declared": {
+        "NSPrivacyAccessedAPITypes": [
+          {
+            "NSPrivacyAccessedAPIType": "NSPrivacyAccessedAPICategoryUserDefaults",
+            "NSPrivacyAccessedAPITypeReasons": [
+              "CA92.1"
+            ]
+          }
+        ]
+      }
+    }
+  ],
+  "clerk": {
+    "version": "1.5.8",
+    "telemetryEnabledDefault": true,
+    "productionInstanceRejectsTelemetry": true,
+    "productionInstanceInferredFromPublicKeyPrefix": "pk_live_",
+    "unconditionalAuthenticationMetadata": [
+      "identifierForVendor via x-native-device-id",
+      "device type/model",
+      "OS version",
+      "app version",
+      "bundle ID",
+      "sandbox flag"
+    ],
+    "signedInRequestAlsoIncludesClientIdentity": true,
+    "deviceIDPrivacyDisclosureNeeded": true,
+    "noObservedAdvertisingIDOrTrackingCollection": true,
+    "noObservedProductionPerformanceOrCrashCollector": true,
+    "sources": [
+      "Sources/ClerkKit/Configuration/ClerkOptions.swift",
+      "Sources/ClerkKit/Telemetry/TelemetryCollector.swift",
+      "Sources/ClerkKit/Dependencies/DependencyContainer.swift",
+      "Sources/ClerkKit/Utils/DeviceHelper.swift",
+      "Sources/ClerkKit/Networking/Middleware/ClerkHeaderRequestMiddleware.swift"
+    ],
+    "sourceRevision": "55b70c27ae525b4f49c9bd08e69d8bec35352593",
+    "lineReferences": {
+      "DeviceHelper.swift": "17-19",
+      "ClerkHeaderRequestMiddleware.swift": "49-60",
+      "ClerkOptions.swift": "149",
+      "TelemetryCollector.swift": "119-126",
+      "DependencyContainer.swift": "260"
+    }
+  },
+  "archive13Inventory": {
+    "status": "verified",
+    "actualInventoryKey": "actualArchive13",
+    "count": 4,
+    "archiveBuild": 13,
+    "matchesApprovedAppManifestHash": true,
+    "uploadedViaOfficialXcode": true,
+    "organizerPrivacyReport": "UI action available but Save panel Export/NewFolder disabled; no PDF artifact claimed"
+  },
+  "actualArchive13": {
+    "archivePath": "/Users/shan2new/Library/Developer/Xcode/Archives/2026-10-06/Previously 06-10-26, 7.05\u202fPM.xcarchive",
+    "verifiedAt": "2026-10-06T13:37:52.039581+00:00",
+    "build": "13",
+    "appManifestMatchesApprovedShippingHash": true,
+    "privacyManifestInventory": [
+      {
+        "bundleRelativePath": "Clerk_ClerkKit.bundle/PrivacyInfo.xcprivacy",
+        "sha256": "13a72c8448476d8369a0e9a279464f20913f528022cd7ebfff31baa4d4f840ba",
+        "manifest": {
+          "NSPrivacyAccessedAPITypes": [
+            {
+              "NSPrivacyAccessedAPIType": "NSPrivacyAccessedAPICategoryUserDefaults",
+              "NSPrivacyAccessedAPITypeReasons": [
+                "CA92.1"
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "bundleRelativePath": "Clerk_ClerkKitUI.bundle/PrivacyInfo.xcprivacy",
+        "sha256": "13a72c8448476d8369a0e9a279464f20913f528022cd7ebfff31baa4d4f840ba",
+        "manifest": {
+          "NSPrivacyAccessedAPITypes": [
+            {
+              "NSPrivacyAccessedAPIType": "NSPrivacyAccessedAPICategoryUserDefaults",
+              "NSPrivacyAccessedAPITypeReasons": [
+                "CA92.1"
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "bundleRelativePath": "PhoneNumberKit_PhoneNumberKit.bundle/PrivacyInfo.xcprivacy",
+        "sha256": "561040f7a52952f75d02d4b6758382ff48c563d6f25c84a09f1a655f6dc60ff8",
+        "manifest": {
+          "NSPrivacyTracking": false,
+          "NSPrivacyTrackingDomains": [],
+          "NSPrivacyCollectedDataTypes": [],
+          "NSPrivacyAccessedAPITypes": []
+        }
+      },
+      {
+        "bundleRelativePath": "PrivacyInfo.xcprivacy",
+        "sha256": "1dbd4ccfcf2f16699db8750f0a41bcea77ff60d06c1ba082dd175fdf7e4211a0",
+        "manifest": {
+          "NSPrivacyTracking": false,
+          "NSPrivacyTrackingDomains": [],
+          "NSPrivacyCollectedDataTypes": [
+            {
+              "NSPrivacyCollectedDataType": "NSPrivacyCollectedDataTypeDeviceID",
+              "NSPrivacyCollectedDataTypeLinked": true,
+              "NSPrivacyCollectedDataTypeTracking": false,
+              "NSPrivacyCollectedDataTypePurposes": [
+                "NSPrivacyCollectedDataTypePurposeAppFunctionality"
+              ]
+            },
+            {
+              "NSPrivacyCollectedDataType": "NSPrivacyCollectedDataTypeEmailAddress",
+              "NSPrivacyCollectedDataTypeLinked": true,
+              "NSPrivacyCollectedDataTypeTracking": false,
+              "NSPrivacyCollectedDataTypePurposes": [
+                "NSPrivacyCollectedDataTypePurposeAppFunctionality"
+              ]
+            },
+            {
+              "NSPrivacyCollectedDataType": "NSPrivacyCollectedDataTypeUserID",
+              "NSPrivacyCollectedDataTypeLinked": true,
+              "NSPrivacyCollectedDataTypeTracking": false,
+              "NSPrivacyCollectedDataTypePurposes": [
+                "NSPrivacyCollectedDataTypePurposeAppFunctionality",
+                "NSPrivacyCollectedDataTypePurposeProductPersonalization",
+                "NSPrivacyCollectedDataTypePurposeAnalytics"
+              ]
+            },
+            {
+              "NSPrivacyCollectedDataType": "NSPrivacyCollectedDataTypeName",
+              "NSPrivacyCollectedDataTypeLinked": true,
+              "NSPrivacyCollectedDataTypeTracking": false,
+              "NSPrivacyCollectedDataTypePurposes": [
+                "NSPrivacyCollectedDataTypePurposeAppFunctionality"
+              ]
+            },
+            {
+              "NSPrivacyCollectedDataType": "NSPrivacyCollectedDataTypeOtherUserContent",
+              "NSPrivacyCollectedDataTypeLinked": true,
+              "NSPrivacyCollectedDataTypeTracking": false,
+              "NSPrivacyCollectedDataTypePurposes": [
+                "NSPrivacyCollectedDataTypePurposeAppFunctionality",
+                "NSPrivacyCollectedDataTypePurposeProductPersonalization",
+                "NSPrivacyCollectedDataTypePurposeAnalytics"
+              ]
+            },
+            {
+              "NSPrivacyCollectedDataType": "NSPrivacyCollectedDataTypeProductInteraction",
+              "NSPrivacyCollectedDataTypeLinked": true,
+              "NSPrivacyCollectedDataTypeTracking": false,
+              "NSPrivacyCollectedDataTypePurposes": [
+                "NSPrivacyCollectedDataTypePurposeAppFunctionality",
+                "NSPrivacyCollectedDataTypePurposeProductPersonalization",
+                "NSPrivacyCollectedDataTypePurposeAnalytics"
+              ]
+            }
+          ],
+          "NSPrivacyAccessedAPITypes": [
+            {
+              "NSPrivacyAccessedAPIType": "NSPrivacyAccessedAPICategoryUserDefaults",
+              "NSPrivacyAccessedAPITypeReasons": [
+                "CA92.1"
+              ]
+            }
+          ]
+        }
+      }
+    ],
+    "organizerPrivacyReport": "UI action available but Save panel Export/NewFolder disabled; no PDF artifact claimed",
+    "noDeviceIdentifierValuesCaptured": true
+  },
+  "archive14Inventory": {
+    "status": "verified",
+    "actualInventoryKey": "actualArchive14",
+    "count": 4,
+    "archiveBuild": 14,
+    "matchesApprovedAppManifestHash": true,
+    "allManifestHashesMatchArchive13": true,
+    "uploadedViaOfficialXcode": true,
+    "organizerPrivacyReport": "No new Organizer privacy PDF export attempted or claimed."
+  },
+  "actualArchive14": {
+    "archivePath": "/Users/shan2new/Library/Developer/Xcode/Archives/2026-10-06/Previously 06-10-26, 8.59\u202fPM.xcarchive",
+    "verifiedAt": "2026-10-06T15:30:13.914841+00:00",
+    "build": "14",
+    "appManifestMatchesApprovedShippingHash": true,
+    "privacyManifestInventory": [
+      {
+        "bundleRelativePath": "Clerk_ClerkKit.bundle/PrivacyInfo.xcprivacy",
+        "sha256": "13a72c8448476d8369a0e9a279464f20913f528022cd7ebfff31baa4d4f840ba",
+        "manifest": {
+          "NSPrivacyAccessedAPITypes": [
+            {
+              "NSPrivacyAccessedAPIType": "NSPrivacyAccessedAPICategoryUserDefaults",
+              "NSPrivacyAccessedAPITypeReasons": [
+                "CA92.1"
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "bundleRelativePath": "Clerk_ClerkKitUI.bundle/PrivacyInfo.xcprivacy",
+        "sha256": "13a72c8448476d8369a0e9a279464f20913f528022cd7ebfff31baa4d4f840ba",
+        "manifest": {
+          "NSPrivacyAccessedAPITypes": [
+            {
+              "NSPrivacyAccessedAPIType": "NSPrivacyAccessedAPICategoryUserDefaults",
+              "NSPrivacyAccessedAPITypeReasons": [
+                "CA92.1"
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "bundleRelativePath": "PhoneNumberKit_PhoneNumberKit.bundle/PrivacyInfo.xcprivacy",
+        "sha256": "561040f7a52952f75d02d4b6758382ff48c563d6f25c84a09f1a655f6dc60ff8",
+        "manifest": {
+          "NSPrivacyTracking": false,
+          "NSPrivacyTrackingDomains": [],
+          "NSPrivacyCollectedDataTypes": [],
+          "NSPrivacyAccessedAPITypes": []
+        }
+      },
+      {
+        "bundleRelativePath": "PrivacyInfo.xcprivacy",
+        "sha256": "1dbd4ccfcf2f16699db8750f0a41bcea77ff60d06c1ba082dd175fdf7e4211a0",
+        "manifest": {
+          "NSPrivacyTracking": false,
+          "NSPrivacyTrackingDomains": [],
+          "NSPrivacyCollectedDataTypes": [
+            {
+              "NSPrivacyCollectedDataType": "NSPrivacyCollectedDataTypeDeviceID",
+              "NSPrivacyCollectedDataTypeLinked": true,
+              "NSPrivacyCollectedDataTypeTracking": false,
+              "NSPrivacyCollectedDataTypePurposes": [
+                "NSPrivacyCollectedDataTypePurposeAppFunctionality"
+              ]
+            },
+            {
+              "NSPrivacyCollectedDataType": "NSPrivacyCollectedDataTypeEmailAddress",
+              "NSPrivacyCollectedDataTypeLinked": true,
+              "NSPrivacyCollectedDataTypeTracking": false,
+              "NSPrivacyCollectedDataTypePurposes": [
+                "NSPrivacyCollectedDataTypePurposeAppFunctionality"
+              ]
+            },
+            {
+              "NSPrivacyCollectedDataType": "NSPrivacyCollectedDataTypeUserID",
+              "NSPrivacyCollectedDataTypeLinked": true,
+              "NSPrivacyCollectedDataTypeTracking": false,
+              "NSPrivacyCollectedDataTypePurposes": [
+                "NSPrivacyCollectedDataTypePurposeAppFunctionality",
+                "NSPrivacyCollectedDataTypePurposeProductPersonalization",
+                "NSPrivacyCollectedDataTypePurposeAnalytics"
+              ]
+            },
+            {
+              "NSPrivacyCollectedDataType": "NSPrivacyCollectedDataTypeName",
+              "NSPrivacyCollectedDataTypeLinked": true,
+              "NSPrivacyCollectedDataTypeTracking": false,
+              "NSPrivacyCollectedDataTypePurposes": [
+                "NSPrivacyCollectedDataTypePurposeAppFunctionality"
+              ]
+            },
+            {
+              "NSPrivacyCollectedDataType": "NSPrivacyCollectedDataTypeOtherUserContent",
+              "NSPrivacyCollectedDataTypeLinked": true,
+              "NSPrivacyCollectedDataTypeTracking": false,
+              "NSPrivacyCollectedDataTypePurposes": [
+                "NSPrivacyCollectedDataTypePurposeAppFunctionality",
+                "NSPrivacyCollectedDataTypePurposeProductPersonalization",
+                "NSPrivacyCollectedDataTypePurposeAnalytics"
+              ]
+            },
+            {
+              "NSPrivacyCollectedDataType": "NSPrivacyCollectedDataTypeProductInteraction",
+              "NSPrivacyCollectedDataTypeLinked": true,
+              "NSPrivacyCollectedDataTypeTracking": false,
+              "NSPrivacyCollectedDataTypePurposes": [
+                "NSPrivacyCollectedDataTypePurposeAppFunctionality",
+                "NSPrivacyCollectedDataTypePurposeProductPersonalization",
+                "NSPrivacyCollectedDataTypePurposeAnalytics"
+              ]
+            }
+          ],
+          "NSPrivacyAccessedAPITypes": [
+            {
+              "NSPrivacyAccessedAPIType": "NSPrivacyAccessedAPICategoryUserDefaults",
+              "NSPrivacyAccessedAPITypeReasons": [
+                "CA92.1"
+              ]
+            }
+          ]
+        }
+      }
+    ],
+    "noDeviceIdentifierValuesCaptured": true,
+    "evidence": [
+      "docs/qa/2026-10-06/archive14/privacy-manifest-inventory.json",
+      "docs/qa/2026-10-06/archive14/independent-verification.json",
+      "docs/qa/2026-10-06/archive14/upload-receipt.json"
+    ]
+  }
+}

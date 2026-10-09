@@ -1,0 +1,1 @@
+Initial anonymous browser smoke stopped at an immediate lazy-image complete/naturalWidth assertion after its tab became visible. All33 public asset SHA256 checks passed independently. The smoke was rerun with a bounded15second wait for actual image loading; no product source, artifact or selectors changed. This is preserved as a harness timing failure, not a completed UI receipt.

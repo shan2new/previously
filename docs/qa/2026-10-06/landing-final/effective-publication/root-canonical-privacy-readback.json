@@ -1,0 +1,12 @@
+{
+  "observedAtUTC": "2026-10-06T17:16:16.494517+00:00",
+  "readOnly": true,
+  "url": "https://previously.cognipin.com/privacy",
+  "status": 200,
+  "effectiveDateVisible": true,
+  "historicalLogDecisionAbsent": true,
+  "sourceDraftBannerAbsent": true,
+  "eightDayRecordBoundVisible": true,
+  "sameMiniHardwareLossLimitVisible": true,
+  "readbackScope": "Rendered HTML text nodes excluding script/style, whitespace normalized"
+}

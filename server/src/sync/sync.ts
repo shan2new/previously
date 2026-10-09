@@ -167,7 +167,7 @@ export async function refreshAiringTv(): Promise<number> {
     try {
       return (await refreshTvShow(id, externalId)).refreshed
     } catch (err) {
-      console.warn(`refreshAiringTv: failed for franchise ${id}:`, (err as Error).message)
+      console.warn(`refreshAiringTv: failed for franchise ${id}:`, 'diagnostic details redacted')
       return false
     }
   })
@@ -211,7 +211,7 @@ export async function seedTrending(count = env.TRENDING_SEED_COUNT): Promise<{ f
         .where(eq(franchiseMember.franchiseId, outcome.franchiseId))
       for (const mem of members) alreadyGrouped.add(mem.mediaId)
     } catch (err) {
-      console.warn(`seedTrending: failed to group media ${m.id}:`, (err as Error).message)
+      console.warn(`seedTrending: failed to group media ${m.id}:`, 'diagnostic details redacted')
     }
   }
   return { fetched: trending.length, grouped }
@@ -232,7 +232,7 @@ export async function seedTrendingTv(count = 40): Promise<{ fetched: number; cre
       const outcome = await ensureTvFranchise(r.id)
       if (outcome?.created) created++
     } catch (err) {
-      console.warn(`seedTrendingTv: failed for show ${r.id}:`, (err as Error).message)
+      console.warn(`seedTrendingTv: failed for show ${r.id}:`, 'diagnostic details redacted')
     }
   }
   return { fetched: keep.length, created }
@@ -260,7 +260,7 @@ export async function attachNewSeasons(): Promise<number> {
         const outcome = await groupFromSeed(members[0].mediaId)
         attached += outcome.attached
       } catch (err) {
-        console.warn(`attachNewSeasons: failed to regroup franchise ${franchiseId}:`, (err as Error).message)
+        console.warn(`attachNewSeasons: failed to regroup franchise ${franchiseId}:`, 'diagnostic details redacted')
       }
     }
   }

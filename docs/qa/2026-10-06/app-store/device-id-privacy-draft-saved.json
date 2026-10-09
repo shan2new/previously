@@ -1,0 +1,28 @@
+{
+  "checkedAt": "2026-10-06T13:24:02.590746+00:00",
+  "appId": "6818452741",
+  "draftSaved": true,
+  "privacyPublished": false,
+  "collectedCategories": [
+    "Email Address",
+    "Name",
+    "User ID",
+    "Device ID",
+    "Other User Content",
+    "Product Interaction"
+  ],
+  "deviceID": {
+    "purposes": [
+      "App Functionality"
+    ],
+    "linked": true,
+    "tracking": false,
+    "source": "docs/qa/2026-10-06/sdk-privacy-audit.json"
+  },
+  "existingFivePurposesPreserved": true,
+  "evidence": "device-id-privacy-draft-saved.png",
+  "finalArchiveInspection": "verified actual archive13 inventory",
+  "landingExplicitDeviceIdCopyPublication": "docs/qa/2026-10-06/landing-final/device-id-draft-publication/qualification-receipt.json",
+  "landingExplicitDeviceIdCopyPublishedVerified": true,
+  "finalArchiveEvidence": "docs/qa/2026-10-06/sdk-privacy-audit.json"
+}

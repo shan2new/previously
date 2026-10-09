@@ -835,7 +835,7 @@ extension Franchise {
                          images: images,
                          artwork: artwork,
                          themes: themes.isEmpty ? fetched.themes : themes,
-                         featuredVideo: featuredVideo,
+                         featuredVideo: fetched.featuredVideo ?? featuredVideo,
                          videos: videos.isEmpty ? fetched.videos : videos,
                          audience: fetched.audience,
                          people: (people?.isEmpty ?? true) ? fetched.people : people,

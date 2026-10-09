@@ -1,0 +1,96 @@
+[
+  {
+    "at": "2026-10-06T10:06:45.924Z",
+    "phase": "startup",
+    "rss": 421412864,
+    "heapTotal": 253739008,
+    "heapUsed": 143127416,
+    "external": 19033032,
+    "arrayBuffers": 9743007,
+    "intervalMs": 15.116833000000042,
+    "cpuPercentOfOneCore": 114.55441758204216,
+    "eventLoopUtilization": 0.9994002232769421,
+    "eventLoopDelayP95Ms": 0.000511,
+    "eventLoopDelayMaxMs": 0,
+    "pgActivity": [
+      {
+        "state": "idle",
+        "wait_event_type": "Client",
+        "wait_event": "ClientRead",
+        "connections": 1
+      }
+    ]
+  },
+  {
+    "at": "2026-10-06T10:06:50.925Z",
+    "phase": "sustained",
+    "rss": 514441216,
+    "heapTotal": 244383744,
+    "heapUsed": 84613072,
+    "external": 12200215,
+    "arrayBuffers": 8058979,
+    "intervalMs": 5005.572708,
+    "cpuPercentOfOneCore": 33.5070150378485,
+    "eventLoopUtilization": 0.2781338544116848,
+    "eventLoopDelayP95Ms": 21.413887,
+    "eventLoopDelayMaxMs": 22.167551,
+    "pgActivity": [
+      {
+        "state": "active",
+        "wait_event_type": null,
+        "wait_event": null,
+        "connections": 1
+      },
+      {
+        "state": "idle",
+        "wait_event_type": "Client",
+        "wait_event": "ClientRead",
+        "connections": 9
+      }
+    ]
+  },
+  {
+    "at": "2026-10-06T10:06:55.926Z",
+    "phase": "recovery",
+    "rss": 517177344,
+    "heapTotal": 324403200,
+    "heapUsed": 204270320,
+    "external": 12025913,
+    "arrayBuffers": 7884677,
+    "intervalMs": 5001.525041999999,
+    "cpuPercentOfOneCore": 28.282913473814016,
+    "eventLoopUtilization": 0.24181006451067158,
+    "eventLoopDelayP95Ms": 21.397503,
+    "eventLoopDelayMaxMs": 24.100863,
+    "pgActivity": [
+      {
+        "state": "idle",
+        "wait_event_type": "Client",
+        "wait_event": "ClientRead",
+        "connections": 10
+      }
+    ]
+  },
+  {
+    "at": "2026-10-06T10:06:56.648Z",
+    "phase": "recovery",
+    "rss": 517210112,
+    "heapTotal": 324403200,
+    "heapUsed": 240423488,
+    "external": 17242524,
+    "arrayBuffers": 13101288,
+    "intervalMs": 722.1150420000013,
+    "cpuPercentOfOneCore": 12.333076424130192,
+    "eventLoopUtilization": 0.14016336944506072,
+    "eventLoopDelayP95Ms": 21.266431,
+    "eventLoopDelayMaxMs": 21.381119,
+    "pgActivity": [
+      {
+        "state": "idle",
+        "wait_event_type": "Client",
+        "wait_event": "ClientRead",
+        "connections": 10
+      }
+    ]
+  }
+]

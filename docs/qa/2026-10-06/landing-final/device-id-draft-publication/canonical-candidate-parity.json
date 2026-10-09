@@ -1,0 +1,11 @@
+{
+  "checkedAt": "2026-10-06T13:30:17.874304+00:00",
+  "deploymentId": "dpl_7LeP7Y1i3y8F48AJbJpwbLTZqLKB",
+  "routesMatchingExactBytes": 8,
+  "assetsMatchingExactBytes": 33,
+  "canonicalAliasMatchesCandidate": true,
+  "sourceStillMatchesUpload": true,
+  "projectAndSSOUnchanged": true,
+  "hobbyPlanUnchanged": true,
+  "passed": true
+}

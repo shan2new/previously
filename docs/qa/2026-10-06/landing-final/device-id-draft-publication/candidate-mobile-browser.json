@@ -1,0 +1,47 @@
+{
+  "checkedAt": "2026-10-06T13:29:11.862Z",
+  "deploymentId": "dpl_7LeP7Y1i3y8F48AJbJpwbLTZqLKB",
+  "scope": "Two newly executed CUA privacy paragraph layouts; prior six legal and 19 Home checks separately scoped reuse",
+  "layouts": [
+    {
+      "canonical": "https://previously.cognipin.com/privacy",
+      "clerkParagraph": "Clerk receives information needed for sign-in, authentication, session management and account security. This includes account information, a vendor device identifier, session and device tokens, device model, operating-system and app information, and technical connection information.",
+      "contactLinked": true,
+      "documentWidth": 390,
+      "draftVisible": true,
+      "externalScripts": [],
+      "h1": "Privacy Policy.",
+      "h1Count": 1,
+      "origin": "https://landing-ten-theta-55.vercel.app",
+      "paragraphBounds": "{\"bottom\":510.953125,\"height\":207.15625,\"left\":36,\"right\":374,\"top\":303.796875,\"width\":338,\"x\":36,\"y\":303.796875}",
+      "path": "/privacy",
+      "robots": "noindex, follow",
+      "scrollY": 3447.5,
+      "sectionY": 55.03125,
+      "width": 390
+    },
+    {
+      "canonical": "https://previously.cognipin.com/privacy",
+      "clerkParagraph": "Clerk receives information needed for sign-in, authentication, session management and account security. This includes account information, a vendor device identifier, session and device tokens, device model, operating-system and app information, and technical connection information.",
+      "contactLinked": true,
+      "documentWidth": 320,
+      "draftVisible": true,
+      "externalScripts": [],
+      "h1": "Privacy Policy.",
+      "h1Count": 1,
+      "origin": "https://landing-ten-theta-55.vercel.app",
+      "paragraphBounds": "{\"bottom\":570.0703125,\"height\":266.34375,\"left\":36,\"right\":304,\"top\":303.7265625,\"width\":268,\"x\":36,\"y\":303.7265625}",
+      "path": "/privacy",
+      "robots": "noindex, follow",
+      "scrollY": 4032,
+      "sectionY": 54.9609375,
+      "width": 320
+    }
+  ],
+  "console": [],
+  "screenshots": [
+    "candidate-privacy-providers-390.png",
+    "candidate-privacy-providers-320.png"
+  ],
+  "passed": true
+}

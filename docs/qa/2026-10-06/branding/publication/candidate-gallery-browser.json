@@ -1,0 +1,130 @@
+{
+  "checkedAt": "2026-10-06T13:52:59.420Z",
+  "viewport": 390,
+  "imagesAndDialogLayout": [
+    {
+      "caption": "New episodes and the stories you follow, together on Home.",
+      "dialog": true,
+      "dialogBox": {
+        "bottom": 836,
+        "height": 828,
+        "left": 8,
+        "right": 382,
+        "top": 8,
+        "width": 374,
+        "x": 8,
+        "y": 8
+      },
+      "documentWidth": 390,
+      "image": {
+        "complete": true,
+        "naturalHeight": 2556,
+        "naturalWidth": 1179,
+        "src": "https://landing-ten-theta-55.vercel.app/app/home-current.png"
+      },
+      "label": "Home on iPhone",
+      "position": "fixed",
+      "viewport": 390,
+      "feature": "Home"
+    },
+    {
+      "caption": "A sample schedule with upcoming episodes and returning shows.",
+      "dialog": true,
+      "dialogBox": {
+        "bottom": 836,
+        "height": 828,
+        "left": 8,
+        "right": 382,
+        "top": 8,
+        "width": 374,
+        "x": 8,
+        "y": 8
+      },
+      "documentWidth": 390,
+      "image": {
+        "complete": true,
+        "naturalHeight": 800,
+        "naturalWidth": 369,
+        "src": "https://landing-ten-theta-55.vercel.app/app/schedule-current.jpg"
+      },
+      "label": "Schedule on iPhone",
+      "position": "fixed",
+      "viewport": 390,
+      "feature": "Schedule"
+    },
+    {
+      "caption": "A sample library, with your next episode and returning shows.",
+      "dialog": true,
+      "dialogBox": {
+        "bottom": 836,
+        "height": 828,
+        "left": 8,
+        "right": 382,
+        "top": 8,
+        "width": 374,
+        "x": 8,
+        "y": 8
+      },
+      "documentWidth": 390,
+      "image": {
+        "complete": true,
+        "naturalHeight": 800,
+        "naturalWidth": 369,
+        "src": "https://landing-ten-theta-55.vercel.app/app/library-current.jpg"
+      },
+      "label": "Library on iPhone",
+      "position": "fixed",
+      "viewport": 390,
+      "feature": "Library"
+    },
+    {
+      "caption": "Find a new show and add it to your library.",
+      "dialog": true,
+      "dialogBox": {
+        "bottom": 836,
+        "height": 828,
+        "left": 8,
+        "right": 382,
+        "top": 8,
+        "width": 374,
+        "x": 8,
+        "y": 8
+      },
+      "documentWidth": 390,
+      "image": {
+        "complete": true,
+        "naturalHeight": 800,
+        "naturalWidth": 369,
+        "src": "https://landing-ten-theta-55.vercel.app/app/search-current.jpg"
+      },
+      "label": "Search on iPhone",
+      "position": "fixed",
+      "viewport": 390,
+      "feature": "Search"
+    }
+  ],
+  "earlyFocusSamplingWasBeforeCloseAnimation": true,
+  "settledFocus": [
+    {
+      "feature": "Home",
+      "closed": true,
+      "activeLabel": "Enlarge Home screenshot"
+    },
+    {
+      "feature": "Schedule",
+      "closed": true,
+      "activeLabel": "Enlarge Schedule screenshot"
+    },
+    {
+      "feature": "Library",
+      "closed": true,
+      "activeLabel": "Enlarge Library screenshot"
+    },
+    {
+      "feature": "Search",
+      "closed": true,
+      "activeLabel": "Enlarge Search screenshot"
+    }
+  ],
+  "passed": true
+}

@@ -1,0 +1,84 @@
+{
+  "aliases": [
+    {
+      "uid": "7e7ebb003e06f7cd948ae67e5dab0e847e7300462153382fda3c50ad52f26ae3a081f39fc90fd82e9dd80cca8bceb185eda75f2fc7c3b14c73133219f3939e6d",
+      "alias": "previously.cognipin.com",
+      "projectId": "prj_osATa26wuWMoLf7yLOEaXvYuiial",
+      "deploymentId": "dpl_3nWUk4d8w6tw6Kf3v8VL7qTZv9jB",
+      "deployment": {
+        "id": "dpl_3nWUk4d8w6tw6Kf3v8VL7qTZv9jB",
+        "url": "landing-8mkz8v72u-shan2news-projects.vercel.app"
+      }
+    },
+    {
+      "uid": "5f2fccd3079108021bf81e238f197e03860c558c2f61e58b47e936903d24eb5bab4d30a4cb5695e13eb9ce836dd55535b826491accdf831cc73059c9f47035cb",
+      "alias": "landing-git-first-run-onboarding-shan2news-projects.vercel.app",
+      "projectId": "prj_osATa26wuWMoLf7yLOEaXvYuiial",
+      "deploymentId": "dpl_F4EmCetodm75MnyzAQzVEy6amRaD",
+      "deployment": {
+        "id": "dpl_F4EmCetodm75MnyzAQzVEy6amRaD",
+        "url": "landing-6r03leoh3-shan2news-projects.vercel.app"
+      }
+    },
+    {
+      "uid": "3c23f7e39df23a7c01e05b37e18b6ffc187f8c0c540720182f83d095e9375e065275bfd8a8b812120d5b1abcae7e0e151c9139ff5d3997459dd8df113e6cb1a8",
+      "alias": "landing-git-spike-today-feed-shan2news-projects.vercel.app",
+      "projectId": "prj_osATa26wuWMoLf7yLOEaXvYuiial",
+      "deploymentId": "dpl_Gdqkazovi6gbKX4q5hJXNwrzJxsE",
+      "deployment": {
+        "id": "dpl_Gdqkazovi6gbKX4q5hJXNwrzJxsE",
+        "url": "landing-rkezr34m1-shan2news-projects.vercel.app"
+      }
+    },
+    {
+      "uid": "e02ba30ba7c8c0c00930be5f77a883d4cb426b8263cedcbd2227201f28c5dc6f3317f359c5468e022765984b49968dbf6cf8e327a6b20058b6b2daf54589d000",
+      "alias": "landing-git-android-port-shan2news-projects.vercel.app",
+      "projectId": "prj_osATa26wuWMoLf7yLOEaXvYuiial",
+      "deploymentId": "dpl_FWkRxYYeimUboyzPPy2ZQGbXqEW1",
+      "deployment": {
+        "id": "dpl_FWkRxYYeimUboyzPPy2ZQGbXqEW1",
+        "url": "landing-9h4qv3q8s-shan2news-projects.vercel.app"
+      }
+    },
+    {
+      "uid": "aa395dd1391590b4fdf83bf9a1d6e648e0029933a73e9c7506bdd5cca0616162ceba0cea3ed95037a5002c8a16da1a71ce7fd5909b863338a6b97120e270497e",
+      "alias": "thepreviously.vercel.app",
+      "projectId": "prj_osATa26wuWMoLf7yLOEaXvYuiial",
+      "deploymentId": "dpl_3nWUk4d8w6tw6Kf3v8VL7qTZv9jB",
+      "deployment": {
+        "id": "dpl_3nWUk4d8w6tw6Kf3v8VL7qTZv9jB",
+        "url": "landing-8mkz8v72u-shan2news-projects.vercel.app"
+      }
+    },
+    {
+      "uid": "6a0f8a323455463c91567cba5aa7742e0b7c0e3618af65c2182f3d398c300c663d93e975e4c644f910d55bddc5c0dc52de44f940d7f988a2f1c2f56f5cd0b6cb",
+      "alias": "landing-shan2news-projects.vercel.app",
+      "projectId": "prj_osATa26wuWMoLf7yLOEaXvYuiial",
+      "deploymentId": "dpl_3nWUk4d8w6tw6Kf3v8VL7qTZv9jB",
+      "deployment": {
+        "id": "dpl_3nWUk4d8w6tw6Kf3v8VL7qTZv9jB",
+        "url": "landing-8mkz8v72u-shan2news-projects.vercel.app"
+      }
+    },
+    {
+      "uid": "45ba131b2b0d5e4eee6be4a2352e22b451d145bf03dea3ab8d059d4740ca89379f7135c9ce2e6e50da97dff2595220b8726abac8261a1fd706cafa7284825324",
+      "alias": "landing-ten-theta-55.vercel.app",
+      "projectId": "prj_osATa26wuWMoLf7yLOEaXvYuiial",
+      "deploymentId": "dpl_3nWUk4d8w6tw6Kf3v8VL7qTZv9jB",
+      "deployment": {
+        "id": "dpl_3nWUk4d8w6tw6Kf3v8VL7qTZv9jB",
+        "url": "landing-8mkz8v72u-shan2news-projects.vercel.app"
+      }
+    },
+    {
+      "uid": "59d21c117becfdf1d75f7746e1d6a9b173b3f44c5f767bda0551c9022a7c271d5008fa6a3b19a34eb68ab75fdd2af1e5349a33b35a8b4e057626c514db0313db",
+      "alias": "landing-git-main-shan2news-projects.vercel.app",
+      "projectId": "prj_osATa26wuWMoLf7yLOEaXvYuiial",
+      "deploymentId": "dpl_6nzwjys7thtUHrV4pdV8dU4GqLM8",
+      "deployment": {
+        "id": "dpl_6nzwjys7thtUHrV4pdV8dU4GqLM8",
+        "url": "landing-7m64oqxdg-shan2news-projects.vercel.app"
+      }
+    }
+  ]
+}

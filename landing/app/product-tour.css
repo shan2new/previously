@@ -26,6 +26,8 @@
   font-size: 14px;
 }
 .native-tour-tabs {
+  display: flex;
+  flex-direction: column;
   gap: 0;
 }
 .native-tour-navigation[data-slot='tabs-list'] {

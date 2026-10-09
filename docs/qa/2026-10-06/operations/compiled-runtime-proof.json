@@ -1,0 +1,15 @@
+{
+  "verifiedOn": "2026-10-06",
+  "runtime": "Node v24.21.0",
+  "checksPassed": 22,
+  "checksFailed": 0,
+  "defaultBackendEntry": "dist/index.js",
+  "tsxLoaderRequiredAtRuntime": false,
+  "compiledEntryValidatedBeforeCandidatePreparation": true,
+  "actualCompiledJavaScriptIncludedInBackupFingerprint": true,
+  "backendShutdownDeadlineSeconds": 30,
+  "wrapperKillDeadlineSeconds": 35,
+  "launchdExitTimeOutSeconds": 40,
+  "jobField": "static allowlisted name only",
+  "jobsInstalledByQualification": false
+}

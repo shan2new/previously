@@ -1,0 +1,146 @@
+[
+  {
+    "id": "S01",
+    "title": "Apple App Review Guidelines",
+    "url": "https://developer.apple.com/app-store/review/guidelines/",
+    "note": "Completeness, account access, login, UGC and privacy."
+  },
+  {
+    "id": "S02",
+    "title": "Apple upcoming requirements",
+    "url": "https://developer.apple.com/news/upcoming-requirements/",
+    "note": "Recheck upload SDK and age-rating requirements at submission."
+  },
+  {
+    "id": "S03",
+    "title": "Apple account deletion",
+    "url": "https://developer.apple.com/support/offering-account-deletion-in-your-app/",
+    "note": "Account deletion initiated in app; full lifecycle matters."
+  },
+  {
+    "id": "S04",
+    "title": "Apple App Privacy details",
+    "url": "https://developer.apple.com/app-store/app-privacy-details/",
+    "note": "Disclose actual identity, usage and diagnostics behavior."
+  },
+  {
+    "id": "S05",
+    "title": "Apple SDK requirements",
+    "url": "https://developer.apple.com/support/third-party-SDK-requirements/",
+    "note": "Applicable privacy manifests and signatures."
+  },
+  {
+    "id": "S06",
+    "title": "Apple Developer Program",
+    "url": "https://developer.apple.com/programs/",
+    "note": "Existing membership is paid; no new recurring spend assumed."
+  },
+  {
+    "id": "S07",
+    "title": "Apple screenshot specifications",
+    "url": "https://developer.apple.com/help/app-store-connect/reference/app-information/screenshot-specifications/",
+    "note": "Use current iPhone screenshot slots and shipping behavior."
+  },
+  {
+    "id": "S08",
+    "title": "Apple EU trader requirements",
+    "url": "https://developer.apple.com/help/app-store-connect/manage-compliance-information/manage-european-union-digital-services-act-trader-requirements/",
+    "note": "Owner supplies truthful status and applicable verification."
+  },
+  {
+    "id": "S09",
+    "title": "Apple regional ratings / RCN",
+    "url": "https://developer.apple.com/help/app-store-connect/reference/app-information/app-information/",
+    "note": "Broader Korea RCN criteria; actual availability remains unverified."
+  },
+  {
+    "id": "S10",
+    "title": "Vercel Hobby",
+    "url": "https://vercel.com/docs/plans/hobby",
+    "note": "Existing free personal/non-commercial hosting; review before commercial change."
+  },
+  {
+    "id": "S11",
+    "title": "Clerk pricing",
+    "url": "https://clerk.com/pricing",
+    "note": "Verify actual production plan and quota; no trial or paid add-on."
+  },
+  {
+    "id": "S12",
+    "title": "Next.js static exports",
+    "url": "https://nextjs.org/docs/app/guides/static-exports",
+    "note": "Official Next static HTML/CSS/JS export used for landing."
+  },
+  {
+    "id": "S13",
+    "title": "Next.js on Vercel",
+    "url": "https://vercel.com/docs/frameworks/full-stack/nextjs",
+    "note": "Framework output detection; avoid explicit out override."
+  },
+  {
+    "id": "S14",
+    "title": "Apple XCUIAutomation",
+    "url": "https://developer.apple.com/documentation/xcuiautomation",
+    "note": "Local free native UI automation framework."
+  },
+  {
+    "id": "S15",
+    "title": "AniList API terms",
+    "url": "https://docs.anilist.co/guide/terms-of-use",
+    "note": "Record for later commercial review; no outreach in validation."
+  },
+  {
+    "id": "S16",
+    "title": "TMDB API FAQ",
+    "url": "https://developer.themoviedb.org/docs/faq",
+    "note": "Non-commercial API use and attribution reference."
+  },
+  {
+    "id": "S17",
+    "title": "YouTube privacy-enhanced embeds",
+    "url": "https://support.google.com/youtube/answer/171780",
+    "note": "Non-personalized embed behavior; ads may still appear."
+  },
+  {
+    "id": "S18",
+    "title": "Apple sign-in deletion / TN3194",
+    "url": "https://developer.apple.com/documentation/technotes/tn3194-handling-account-deletions-and-revoking-tokens-for-sign-in-with-apple",
+    "note": "Revoke tokens; manual fallback when credentials are absent."
+  },
+  {
+    "id": "S19",
+    "title": "Apple usage analytics",
+    "url": "https://developer.apple.com/help/app-store-connect-analytics/engagement/app-usage",
+    "note": "Opt-in usage data and active-device definitions."
+  },
+  {
+    "id": "S20",
+    "title": "Apple privacy and tracking",
+    "url": "https://developer.apple.com/app-store/user-privacy-and-data-use/",
+    "note": "Actual tracking behavior determines ATT disclosures."
+  },
+  {
+    "id": "S21",
+    "title": "Apple custom product pages",
+    "url": "https://developer.apple.com/app-store/custom-product-pages/",
+    "note": "Audience-specific store pages and acquisition measurement."
+  },
+  {
+    "id": "S22",
+    "title": "Apple product page optimization",
+    "url": "https://developer.apple.com/help/app-store-connect/create-product-page-optimization-tests/overview-of-product-page-optimization/",
+    "note": "Experiment only when counts support an inference."
+  },
+  {
+    "id": "S23",
+    "title": "Clerk migration overview",
+    "url": "https://clerk.com/docs/guides/development/migrating/overview",
+    "note": "Development identities need a safe production migration."
+  },
+  {
+    "id": "S24",
+    "title": "Clerk production environments",
+    "url": "https://clerk.com/docs/guides/development/managing-environments",
+    "note": "Live production configuration differs from development."
+  }
+]

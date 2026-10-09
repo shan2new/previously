@@ -197,6 +197,32 @@ describe('mergeAnimeVideoFallback', () => {
 })
 
 describe('refreshAnimeVideoFallback', () => {
+  it.each([{ adult: true }, { genres: [{ id: 1, name: 'Hentai' }] }])('declines excluded twin artwork and videos before season reads', async (facts) => {
+    h.selectRows.push(
+      [{ source: 'anilist', title: 'Safe anime', primaryMediaId: 1, genres: ['Drama'], enrichment: deep, artwork: null }],
+      [{ id: 1, titleEnglish: 'Safe anime', format: 'TV', year: 2024, sequence: 1, videos: [] }],
+    )
+    h.getShow.mockResolvedValue({ ...show, ...facts, poster_path: '/blocked-adult.jpg', backdrop_path: '/blocked-adult-wide.jpg' })
+    expect(await refreshAnimeVideoFallback('franchise-id', { force: true })).toMatchObject({ checked: true, matched: false, videos: 0 })
+    expect(h.getSeason).not.toHaveBeenCalled()
+    expect(h.writes).toHaveLength(1)
+    expect(h.writes[0]).not.toHaveProperty('cover')
+    expect(h.writes[0]).not.toHaveProperty('banner')
+    expect(h.writes[0]).not.toHaveProperty('artwork')
+  })
+
+  it('declines excluded movie twin art without promoting it to a safe anime', async () => {
+    h.selectRows.push(
+      [{ source: 'anilist', title: 'Safe film', primaryMediaId: 1, genres: ['Drama'], enrichment: deep, artwork: null }],
+      [{ id: 1, titleEnglish: 'Safe film', format: 'MOVIE', year: 2024, sequence: 1, videos: [] }],
+    )
+    h.resolveTarget.mockResolvedValue({ mediaType: 'movie', externalId: 99 })
+    h.getMovie.mockResolvedValue({ id: 99, title: 'Excluded twin', adult: true, poster_path: '/blocked-adult.jpg' })
+    expect(await refreshAnimeVideoFallback('franchise-id', { force: true })).toMatchObject({ checked: true, matched: false, videos: 0 })
+    expect(h.writes).toHaveLength(1)
+    expect(h.writes[0]).not.toHaveProperty('cover')
+  })
+
   it('stores show and latest-season trailers on the existing AniList franchise', async () => {
     h.selectRows.push(
       [{

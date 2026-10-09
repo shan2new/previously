@@ -1,0 +1,14 @@
+{
+  "passed": true,
+  "priorManifestSHA256": "21f9d2ee7b0148574f34aec471818d0b4a3f4833e4b7366ed2aadcbcdf27e36a",
+  "sourceManifestSHA256": "38b4e8c44c7dc8036801749a9e1bac4dafc9c5ec39e9a25ae63bed19a99d7922",
+  "changed": [
+    "lib/legal-content.ts"
+  ],
+  "added": [],
+  "removed": [],
+  "fileCount": 124,
+  "totalSize": 11573306,
+  "secretsAndGeneratedExcluded": true,
+  "rollbackDeploymentId": "dpl_2BUUc6ZREKY29QVMdaF6zEr4BeGg"
+}

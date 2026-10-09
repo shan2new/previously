@@ -1,0 +1,93 @@
+{
+  "schema": "xcodebuildmcp.output.capture-result",
+  "schemaVersion": "2",
+  "didError": false,
+  "error": null,
+  "data": {
+    "summary": {
+      "status": "SUCCEEDED"
+    },
+    "artifacts": {
+      "simulatorId": "F3AD17A6-813D-4C7E-8263-6383F952302C"
+    },
+    "capture": {
+      "type": "runtime-snapshot",
+      "rs": "1",
+      "screenHash": "0bgeco1",
+      "seq": 1,
+      "count": 245,
+      "targets": [
+        "e34|tap|button|Mark episode 2 as watched||",
+        "e38|tap|button|Continue watching, Attack on Titan, Season 1 · Episode 2||",
+        "e43|tap|button|Up next, See all||",
+        "e52|tap|button|Mark episode 1 as watched||",
+        "e61|tap|button|Previously., scroll to top||",
+        "e104|tap|button|Watching, See all||",
+        "e110|tap|button|Attack on Titan, 88 episodes left||",
+        "e111|tap|button|Reacher, 32 episodes left||",
+        "e117|tap|button|Bookmark, Saved, Chevron Forward||",
+        "e123|tap|button|Speaker Slash, Muted shows, Chevron Forward||",
+        "e130|tap|button|Tv, What you watch, Anime and TV, Chevron Forward|Anime and TV|",
+        "e137|tap|button|Clock Arrow Circlepath, Import your history, Chevron Forward||",
+        "e143|tap|button|Bell, Notifications, Not set, Chevron Forward|Not set|",
+        "e154|tap|button|Share, Export library, Chevron Forward||",
+        "e59|tap|button|Profile||",
+        "e73|tap|tab|Home|1|",
+        "e74|tap|tab|Schedule|0|",
+        "e75|tap|tab|Feed|0|",
+        "e76|tap|tab|Library|0|",
+        "e77|tap|tab|Discover|0|",
+        "e92|tap|button|Done||",
+        "e152|tap|switch|Haptics|1|",
+        "e153|tap|switch||1|",
+        "e214|tap|button|Back||",
+        "e230|tap|button|Choose the file||",
+        "e217|tap|button|Close||"
+      ],
+      "scroll": [
+        "e21|swipe|scroll-view|||",
+        "e47|swipe|scroll-view|||",
+        "e97|swipe|scroll-view|||",
+        "e108|swipe|scroll-view|||",
+        "e220|swipe|scroll-view|||"
+      ],
+      "text": [
+        "e100|text|text|S||",
+        "e101|text|text|[private email]||",
+        "e102|text|text|38 episodes · 2 watching · 1 watched||",
+        "e60|text|text|S||",
+        "e105|text|text|Watching||",
+        "e223|text|text|On myanimelist.net, open your profile menu and choose Export.||",
+        "e224|text|text|Export your anime list. It downloads as a file ending in .xml.gz.||",
+        "e112|text|text|Attack on Titan, 88 episodes left||",
+        "e113|text|text|Reacher, 32 episodes left||",
+        "e114|text|text|Attack on Titan, 88 episodes left||",
+        "e115|text|text|Reacher, 32 episodes left||",
+        "e225|text|text|Choose that file here.||",
+        "e119|text|text|Saved||",
+        "e125|text|text|Muted shows||",
+        "e30|text|text|CONTINUE WATCHING||",
+        "e132|text|text|What you watch||",
+        "e133|text|text|Anime and TV||",
+        "e139|text|text|Import your history||",
+        "e31|text|text|Season 1 · Episode 2||",
+        "e145|text|text|Notifications||",
+        "e146|text|text|Not set||",
+        "e35|text|text|Mark as watched||",
+        "e151|text|text|Haptics||",
+        "e44|text|text|Up next||",
+        "e156|text|text|Export library||",
+        "e160|text|text|Up to date · Checked 5 min ago||",
+        "e162|text|text|Up to date · Checked 5 min ago||"
+      ],
+      "udid": "F3AD17A6-813D-4C7E-8263-6383F952302C"
+    }
+  },
+  "nextSteps": [
+    "Refresh after layout changes: xcodebuildmcp ui-automation snapshot-ui --simulator-id F3AD17A6-813D-4C7E-8263-6383F952302C",
+    "Wait for UI to settle: xcodebuildmcp ui-automation wait-for-ui --simulator-id F3AD17A6-813D-4C7E-8263-6383F952302C --predicate settled",
+    "Batch visible switch toggles: xcodebuildmcp ui-automation batch --json '{\"simulatorId\":\"F3AD17A6-813D-4C7E-8263-6383F952302C\",\"steps\":[{\"action\":\"tap\",\"elementRef\":\"e152\"},{\"action\":\"tap\",\"elementRef\":\"e153\"}]}'",
+    "Tap an elementRef: xcodebuildmcp ui-automation tap --simulator-id F3AD17A6-813D-4C7E-8263-6383F952302C --element-ref e34",
+    "Scroll visible content: xcodebuildmcp ui-automation swipe --simulator-id F3AD17A6-813D-4C7E-8263-6383F952302C --within-element-ref e47 --direction up --distance 0.5"
+  ]
+}

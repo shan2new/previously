@@ -24,6 +24,7 @@ import {
   tmdbVideos,
 } from './mapping.js'
 import type { TmdbSeason } from './types.js'
+import { ContentExcludedError, consumerFranchiseIds, isExcludedContent } from '../services/consumerContent.js'
 
 /**
  * One-show, one-request refresh for the exact-search path. Unlike refreshTvShow this intentionally
@@ -115,7 +116,7 @@ async function fetchSeasonMetadata(
  */
 export async function ensureTvFranchise(
   showId: number,
-  opts: { hydrateEpisodes?: boolean; request?: TmdbRequestOptions } = {},
+  opts: { hydrateEpisodes?: boolean; request?: TmdbRequestOptions; consumerOnly?: boolean } = {},
 ): Promise<GroupOutcome | null> {
   const [existing] = await db
     .select({ id: franchise.id })
@@ -123,6 +124,7 @@ export async function ensureTvFranchise(
     .where(and(eq(franchise.source, 'tmdb'), eq(franchise.externalId, showId)))
     .limit(1)
   if (existing) {
+    if (opts.consumerOnly && !(await consumerFranchiseIds([existing.id])).has(existing.id)) throw new ContentExcludedError()
     await upsertCatalogLink({
       franchiseId: existing.id,
       provider: 'tmdb',
@@ -135,7 +137,9 @@ export async function ensureTvFranchise(
   }
 
   const show = await getShow(showId, { ...opts.request, enrichment: opts.hydrateEpisodes !== false })
-  if (!show || includedSeasons(show).length === 0) return null
+  if (!show) return null
+  if (opts.consumerOnly && isExcludedContent({ adult: show.adult, genres: show.genres?.map((genre) => genre.name) })) throw new ContentExcludedError()
+  if (includedSeasons(show).length === 0) return null
   // Source boundary, enforced at the one place that CREATES a TMDB franchise rather than in each
   // caller. Checked against the full show payload (authoritative) and before the per-season
   // episode fetches, so a suppressed show costs one request instead of N.
@@ -156,7 +160,7 @@ export async function ensureTvFranchise(
     })
   } catch (err) {
     // Season id outside the offset-safe range — skip the show rather than corrupt the keyspace.
-    console.warn(`ensureTvFranchise: skipping show ${showId}:`, (err as Error).message)
+    console.warn(`ensureTvFranchise: skipping show ${showId}:`, 'diagnostic details redacted')
     return null
   }
   await upsertMediaRows(rows, { setLastAired: true })
@@ -228,7 +232,7 @@ export async function refreshTvShow(
       return tmdbSeasonToMediaRow(show, s, now, metadata?.episodes ?? [], metadata?.videos ?? [])
     })
   } catch (err) {
-    console.warn(`refreshTvShow: skipping show ${showId}:`, (err as Error).message)
+    console.warn(`refreshTvShow: skipping show ${showId}:`, 'diagnostic details redacted')
     return { refreshed: false, attached: 0 }
   }
   await upsertMediaRows(rows, { setLastAired: true })

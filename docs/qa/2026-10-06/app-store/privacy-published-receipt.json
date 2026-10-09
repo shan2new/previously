@@ -1,0 +1,28 @@
+{
+  "schemaVersion": 1,
+  "recordedAt": "2026-10-06T15:29:06.395390+00:00",
+  "appId": "6818452741",
+  "version": "1.0",
+  "ownerAuthorization": "Yes \u2014 publish the privacy answers",
+  "publishedVerified": true,
+  "persistedAfterReloadVerified": true,
+  "visibleStatus": "Published 4 minutes ago by Shantanu Sinha",
+  "categoryCount": 6,
+  "categories": [
+    "Name",
+    "Email Address",
+    "User ID",
+    "Device ID",
+    "Other User Content",
+    "Product Interaction"
+  ],
+  "linkedToIdentity": true,
+  "crossAppTracking": false,
+  "privacyPolicyUrl": "https://previously.cognipin.com/privacy",
+  "userPrivacyChoicesUrl": "https://previously.cognipin.com/delete-account",
+  "evidence": [
+    "docs/qa/2026-10-06/app-store/privacy-publication-confirmation-visible.jpg",
+    "docs/qa/2026-10-06/app-store/privacy-published-visible.jpg"
+  ],
+  "scope": "App Store privacy label published; this does not make the draft website privacy policy effective or qualify account deletion."
+}

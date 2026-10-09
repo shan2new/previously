@@ -1,0 +1,60 @@
+{
+  "verifiedAt": "2026-10-06T11:41:18.461538+00:00",
+  "appId": "6818452741",
+  "draftSaved": true,
+  "published": false,
+  "privacyPolicyURL": "https://thepreviously.vercel.app/privacy",
+  "userPrivacyChoicesURL": "https://thepreviously.vercel.app/delete-account",
+  "dataTypes": [
+    {
+      "data": "Name",
+      "linkedToUser": true,
+      "usedForTracking": false,
+      "purposes": [
+        "App Functionality"
+      ]
+    },
+    {
+      "data": "Email Address",
+      "linkedToUser": true,
+      "usedForTracking": false,
+      "purposes": [
+        "App Functionality"
+      ]
+    },
+    {
+      "data": "Other User Content",
+      "linkedToUser": true,
+      "usedForTracking": false,
+      "purposes": [
+        "App Functionality",
+        "Product Personalization",
+        "Analytics"
+      ]
+    },
+    {
+      "data": "User ID",
+      "linkedToUser": true,
+      "usedForTracking": false,
+      "purposes": [
+        "App Functionality",
+        "Product Personalization",
+        "Analytics"
+      ]
+    },
+    {
+      "data": "Product Interaction",
+      "linkedToUser": true,
+      "usedForTracking": false,
+      "purposes": [
+        "App Functionality",
+        "Product Personalization",
+        "Analytics"
+      ]
+    }
+  ],
+  "screenshot": "docs/qa/2026-10-06/app-store/privacy-draft-preview.png",
+  "screenshotSha256": "6a00c067ac787c1487de7e0b7fbe522264cf15f6cf8dd63ac5c1d35b75b2a99c",
+  "finalArchiveVerified": false,
+  "note": "All five category setups and no-tracking choices saved in ASC. Publish remains pending alignment with actual production configuration and final binary; public landing policy remains visibly draft."
+}

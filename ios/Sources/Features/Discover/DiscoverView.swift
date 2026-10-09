@@ -164,6 +164,7 @@ struct DiscoverView: View {
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .animation(ThemeMotion.pick(ThemeMotion.uiGentle, reduceMotion: reduceMotion), value: query.isEmpty)
                 }
+                .qaIdentifier("qa.scroll.search")
                 .scrollIndicators(.hidden)
                 .scrollDismissesKeyboard(.interactively)
                 .laneClearance(appModel)
@@ -836,6 +837,7 @@ struct DiscoverView: View {
                 .buttonStyle(.plain)
                 .accessibilityElement(children: .combine)
                 .accessibilityHint(Copy.Accessibility.opensTheShowHint)
+                .qaIdentifier("qa.search.result.\(item.id)")
                 addControl(item, placement: .pill)
             }
             .padding(.horizontal, ThemeMetrics.gutter)

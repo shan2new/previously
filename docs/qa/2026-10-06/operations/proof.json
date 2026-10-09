@@ -1,0 +1,13 @@
+{
+  "verifiedOn": "2026-10-06",
+  "runtime": "/opt/homebrew/opt/node@24/bin/node",
+  "nodeVersion": "v24.21.0",
+  "command": "node --test server/ops/*.test.mjs",
+  "checksPassed": 21,
+  "checksFailed": 0,
+  "postgresScope": "uniquely owned temporary fixture and restore databases only; all removed",
+  "jobsInstalled": false,
+  "productionDataChanged": false,
+  "notificationsSent": false,
+  "productionQualificationStillRequired": ["real migrated database backup and isolated restore", "private production environment and trusted ledger initialization", "immutable artifact and reviewed launchd installation", "live public readiness, production auth/deletion, logs and snapshots"]
+}

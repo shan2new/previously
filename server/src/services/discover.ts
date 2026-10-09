@@ -20,6 +20,7 @@ import type {
   WatchStatus,
 } from '../types/api.js'
 import { getSummaries } from './franchiseView.js'
+import { consumerFranchiseConditions } from './consumerContent.js'
 
 // Discover's genre browse (brief §17, server spec §10.2). IO: reads the catalogue and the viewer's
 // subscriptions; writes nothing.
@@ -48,10 +49,7 @@ const genresArray = sql`(case when jsonb_typeof(${franchise.genres}) = 'array' t
 
 /** The non-genre half of the qualifying rule (the member join is the caller's). */
 export function baseConditions(source: MediaSource | null): SQL[] {
-  const conditions = [
-    sql`(${franchise.enrichment} -> 'isAdult') is distinct from 'true'::jsonb`,
-    sql`not (${genresArray} @> '["Hentai"]'::jsonb)`,
-  ]
+  const conditions = consumerFranchiseConditions()
   if (source) conditions.push(sql`${franchise.source} = ${source}`)
   return conditions
 }
@@ -160,7 +158,7 @@ async function genreCatalogue(source: MediaSource | null): Promise<GenreCatalogu
       return value
     } catch (error) {
       if (cached) {
-        console.warn(`discover genres refresh failed (${key}), serving stale:`, error instanceof Error ? error.message : error)
+        console.warn(`discover genres refresh failed (${key}), serving stale:`, 'diagnostic details redacted')
         return cached.value
       }
       throw error

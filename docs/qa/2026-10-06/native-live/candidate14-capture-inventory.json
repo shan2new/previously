@@ -1,0 +1,86 @@
+{
+  "capturedAt": "2026-10-06T15:14:28.744993+00:00",
+  "candidate": 14,
+  "runtimeSourceSHA256": "baaf904adf90bc13809ef9b3c331a800385409a40d18cf1bf1aceaf79c97e6ef",
+  "configuration": "Release",
+  "api": "https://anime.cognipin.com",
+  "identityScope": "Ordinary production review account; synthetic samples only",
+  "qaFixtureUsed": false,
+  "method": "CUA native Device Hub Screenshot control; task-owned Desktop exports moved to evidence folder",
+  "captureScope": "Raw iOS viewports; these files omit hardware cutout. CUA window images visibly showed real Dynamic Island. Existing approved campaign artwork is separate.",
+  "visuallyInspected": true,
+  "captures": [
+    {
+      "name": "home",
+      "path": "/Users/shan2new/Projects/previously/docs/qa/2026-10-06/native-live/captures/home.png",
+      "pixelSize": [
+        1179,
+        2556
+      ],
+      "SHA256": "e7862565d5a29727413e9e284bc515d01c9859ea70e4f8e9f85ce7a173fb8cad",
+      "bytes": 3942737,
+      "containsPrivateCredentials": false,
+      "hardwareCutoutIncluded": false
+    },
+    {
+      "name": "schedule",
+      "path": "/Users/shan2new/Projects/previously/docs/qa/2026-10-06/native-live/captures/schedule.png",
+      "pixelSize": [
+        1179,
+        2556
+      ],
+      "SHA256": "26a2aceaacbecdf1b7b8cef721873e44d596f6755ace9d4304dfa414224f12e1",
+      "bytes": 113203,
+      "containsPrivateCredentials": false,
+      "hardwareCutoutIncluded": false
+    },
+    {
+      "name": "feed",
+      "path": "/Users/shan2new/Projects/previously/docs/qa/2026-10-06/native-live/captures/feed.png",
+      "pixelSize": [
+        1179,
+        2556
+      ],
+      "SHA256": "2d53684ce525f8f5adbc9ce6fe92a03b9df1e6cc1ba53f53b3a66d0eec7ca4a1",
+      "bytes": 922166,
+      "containsPrivateCredentials": false,
+      "hardwareCutoutIncluded": false
+    },
+    {
+      "name": "library",
+      "path": "/Users/shan2new/Projects/previously/docs/qa/2026-10-06/native-live/captures/library.png",
+      "pixelSize": [
+        1179,
+        2556
+      ],
+      "SHA256": "986965c2362236e05a7730cd31a8cd71bc006b33a0097076d756fc2dbcf5720c",
+      "bytes": 1722049,
+      "containsPrivateCredentials": false,
+      "hardwareCutoutIncluded": false
+    },
+    {
+      "name": "discover",
+      "path": "/Users/shan2new/Projects/previously/docs/qa/2026-10-06/native-live/captures/discover.png",
+      "pixelSize": [
+        1179,
+        2556
+      ],
+      "SHA256": "8374258758517c7f02538c121965436050d4d0a26c1dd27ca7a4faa9259cd0c3",
+      "bytes": 2463249,
+      "containsPrivateCredentials": false,
+      "hardwareCutoutIncluded": false
+    },
+    {
+      "name": "ordinary-file-picker-presented",
+      "path": "/Users/shan2new/Projects/previously/docs/qa/2026-10-06/native-live/captures/ordinary-file-picker-presented.png",
+      "pixelSize": [
+        1179,
+        2556
+      ],
+      "SHA256": "81d7ead586d54e3e9dff4d821b1da9930926942c3278ed331f071ffa5116952b",
+      "bytes": 343973,
+      "containsPrivateCredentials": false,
+      "hardwareCutoutIncluded": false
+    }
+  ]
+}

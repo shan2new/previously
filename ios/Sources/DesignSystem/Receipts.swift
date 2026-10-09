@@ -112,6 +112,7 @@ struct ReceiptLine: View {
                     // Inline, the line is exactly the caption it stands in for — the Undo keeps
                     // its 44-pt target as a hit shape past the line instead of growing the row.
                     Button(Copy.Action.undo) { appModel.undoTapped(undo) }
+                        .qaIdentifier("qa.undo")
                         .buttonStyle(.plain)
                         .type(ThemeType.metadataEmphasis)
                         .foregroundStyle(ThemeColor.interactive)
@@ -181,6 +182,7 @@ struct ReceiptLane: View {
             Spacer(minLength: ThemeSpace.x2)
             if case .undo = item {
                 Button(Copy.Action.undo, action: onUndo)
+                    .qaIdentifier("qa.undo")
                     .buttonStyle(.plain)
                     .type(ThemeType.metadataEmphasis)
                     .foregroundStyle(ThemeColor.interactive)

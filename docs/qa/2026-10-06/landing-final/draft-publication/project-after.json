@@ -1,0 +1,14 @@
+{
+  "checkedAt": "2026-10-06T13:16:32.991268+00:00",
+  "id": "prj_osATa26wuWMoLf7yLOEaXvYuiial",
+  "accountId": "team_WGVvWCwyPJLQHHMvAUdYU9td",
+  "framework": "nextjs",
+  "nodeVersion": "24.x",
+  "rootDirectory": null,
+  "outputDirectory": null,
+  "ssoProtection": {
+    "deploymentType": "all_except_custom_domains"
+  },
+  "plan": "hobby",
+  "billingStatus": "active"
+}

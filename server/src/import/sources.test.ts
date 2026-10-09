@@ -25,6 +25,28 @@ describe('history source identity and failures', () => {
     m.searchMedia.mockResolvedValue([1, 2].map(id => ({ id, format: 'TV', title: { english: 'Show' } })))
     expect(await findAnimeByTitle('Show')).toBeNull()
   })
+  it.each([{ isAdult: true }, { genres: ['Hentai'] }])('reports a known excluded exact anime match as a policy skip', async (facts) => {
+    m.searchMedia.mockResolvedValue([{ id: 1, format: 'TV', title: { english: 'Show' }, ...facts }])
+    await expect(findAnimeByTitle('Show')).rejects.toMatchObject({ reason: 'adult_content' })
+  })
+  it('keeps policy information when reading AniList source entries', async () => {
+    m.gql.mockResolvedValue({ MediaListCollection: { hasNextChunk: false, lists: [{ isCustomList: false, entries: [
+      { mediaId: 1, status: 'COMPLETED', progress: 12, media: { isAdult: true, title: { english: 'Excluded' } } },
+      { mediaId: 2, status: 'PLANNING', progress: 0, media: { genres: ['Ecchi'], title: { english: 'Allowed' } } },
+    ] }] } })
+    const list = await fetchAniListEntries('name')
+    expect(list[0]).toMatchObject({ mediaId: 1, contentExcluded: true })
+    expect(list[1]).not.toHaveProperty('contentExcluded')
+    expect(m.gql.mock.calls[0]?.[0]).toContain('isAdult genres')
+  })
+  it('preserves source counts when MAL rows map to excluded catalogue facts', async () => {
+    m.gql.mockResolvedValue({ Page: { media: [{ id: 100, idMal: 1, genres: ['Hentai'] }] } })
+    const result = await mapMalRows([{ malId: 1, status: 'Completed', watched: 12, title: 'Excluded' }])
+    expect(result.entries).toHaveLength(1)
+    expect(result.entries[0]).toMatchObject({ mediaId: 100, contentExcluded: true })
+    expect(result.unmatched).toEqual([])
+    expect(m.gql.mock.calls[0]?.[0]).toContain('isAdult genres')
+  })
   it('paginates AniList, ignores custom duplicates and preserves rewatches', async () => {
     const e = { mediaId: 1, status: 'REPEATING', progress: 3, media: { title: { english: 'A' } } }
     m.gql.mockResolvedValueOnce({ MediaListCollection: { hasNextChunk: true, lists: [{ isCustomList: true, entries: [{ ...e, mediaId: 99 }] }, { isCustomList: false, entries: [e] }] } })

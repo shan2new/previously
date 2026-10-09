@@ -1,0 +1,243 @@
+{
+  "checkedAt": "2026-10-06T15:18:47.281904+00:00",
+  "status": "read_only_inventory_complete",
+  "workspaceKey": "previously-2bd4c895d527",
+  "root": "/Users/shan2new/Library/Developer/XcodeBuildMCP/workspaces/previously-2bd4c895d527/test-products",
+  "officialLogicalBytes": 8434112381,
+  "packageCount": 33,
+  "allocatedBytesApproximateTotal": 8448208896,
+  "preservedFinalPackages": [
+    "test_sim_2026-10-06T13-00-50-790Z_pid55519_de94a76e.xctestproducts",
+    "test_sim_2026-10-06T13-10-43-015Z_pid60577_9571380d.xctestproducts",
+    "test_sim_2026-10-06T13-16-35-076Z_pid63196_34238724.xctestproducts",
+    "test_sim_2026-10-06T13-22-27-478Z_pid66130_538e1c08.xctestproducts"
+  ],
+  "finalLedger": "/Users/shan2new/Projects/previously/ios/Tools/qa/.runs/20261006T130049100512Z/ledger.json",
+  "finalLedgerSHA256": "6c4ef0562a18140de5dd0301a82a7f698d801791809faca7075ca27ad4ecfdd8",
+  "finalQualificationStatus": "passed",
+  "cleanupCandidateCount": 29,
+  "cleanupCandidateAllocatedBytesApproximate": 7414919168,
+  "preservedFinalAllocatedBytesApproximate": 1033289728,
+  "packages": [
+    {
+      "name": "test_sim_2026-10-06T09-36-52-530Z_pid37572_97b484b6.xctestproducts",
+      "allocatedBytesApproximate": 251572224,
+      "cleanupCandidate": true,
+      "preserveReasons": []
+    },
+    {
+      "name": "test_sim_2026-10-06T09-41-51-723Z_pid40902_40f9d2b3.xctestproducts",
+      "allocatedBytesApproximate": 251703296,
+      "cleanupCandidate": true,
+      "preserveReasons": []
+    },
+    {
+      "name": "test_sim_2026-10-06T09-47-27-738Z_pid45075_3aaa29f6.xctestproducts",
+      "allocatedBytesApproximate": 251748352,
+      "cleanupCandidate": true,
+      "preserveReasons": []
+    },
+    {
+      "name": "test_sim_2026-10-06T09-52-19-573Z_pid47706_aefeef66.xctestproducts",
+      "allocatedBytesApproximate": 251863040,
+      "cleanupCandidate": true,
+      "preserveReasons": []
+    },
+    {
+      "name": "test_sim_2026-10-06T09-55-52-447Z_pid49505_f2eca116.xctestproducts",
+      "allocatedBytesApproximate": 251867136,
+      "cleanupCandidate": true,
+      "preserveReasons": []
+    },
+    {
+      "name": "test_sim_2026-10-06T09-59-25-412Z_pid51676_4a891759.xctestproducts",
+      "allocatedBytesApproximate": 251867136,
+      "cleanupCandidate": true,
+      "preserveReasons": []
+    },
+    {
+      "name": "test_sim_2026-10-06T10-41-36-802Z_pid75449_965f4d54.xctestproducts",
+      "allocatedBytesApproximate": 254140416,
+      "cleanupCandidate": true,
+      "preserveReasons": []
+    },
+    {
+      "name": "test_sim_2026-10-06T10-53-06-909Z_pid82849_671a6820.xctestproducts",
+      "allocatedBytesApproximate": 255123456,
+      "cleanupCandidate": true,
+      "preserveReasons": []
+    },
+    {
+      "name": "test_sim_2026-10-06T10-58-38-177Z_pid86657_7fb9c525.xctestproducts",
+      "allocatedBytesApproximate": 255143936,
+      "cleanupCandidate": true,
+      "preserveReasons": []
+    },
+    {
+      "name": "test_sim_2026-10-06T11-08-36-151Z_pid92520_06ceea31.xctestproducts",
+      "allocatedBytesApproximate": 255143936,
+      "cleanupCandidate": true,
+      "preserveReasons": []
+    },
+    {
+      "name": "test_sim_2026-10-06T11-16-25-837Z_pid97921_f50d618d.xctestproducts",
+      "allocatedBytesApproximate": 255143936,
+      "cleanupCandidate": true,
+      "preserveReasons": []
+    },
+    {
+      "name": "test_sim_2026-10-06T11-20-39-838Z_pid1799_0d8203df.xctestproducts",
+      "allocatedBytesApproximate": 255160320,
+      "cleanupCandidate": true,
+      "preserveReasons": []
+    },
+    {
+      "name": "test_sim_2026-10-06T11-22-11-071Z_pid2663_7ae05d7d.xctestproducts",
+      "allocatedBytesApproximate": 255156224,
+      "cleanupCandidate": true,
+      "preserveReasons": []
+    },
+    {
+      "name": "test_sim_2026-10-06T11-30-17-899Z_pid6653_5729d870.xctestproducts",
+      "allocatedBytesApproximate": 255156224,
+      "cleanupCandidate": true,
+      "preserveReasons": []
+    },
+    {
+      "name": "test_sim_2026-10-06T11-36-09-197Z_pid9561_ff6987a2.xctestproducts",
+      "allocatedBytesApproximate": 255156224,
+      "cleanupCandidate": true,
+      "preserveReasons": []
+    },
+    {
+      "name": "test_sim_2026-10-06T12-04-59-036Z_pid23654_167936e7.xctestproducts",
+      "allocatedBytesApproximate": 256749568,
+      "cleanupCandidate": true,
+      "preserveReasons": []
+    },
+    {
+      "name": "test_sim_2026-10-06T12-08-33-415Z_pid26205_b3d2a972.xctestproducts",
+      "allocatedBytesApproximate": 256843776,
+      "cleanupCandidate": true,
+      "preserveReasons": []
+    },
+    {
+      "name": "test_sim_2026-10-06T12-12-19-615Z_pid28586_121c4d51.xctestproducts",
+      "allocatedBytesApproximate": 256843776,
+      "cleanupCandidate": true,
+      "preserveReasons": []
+    },
+    {
+      "name": "test_sim_2026-10-06T12-16-16-115Z_pid30648_ede11ca6.xctestproducts",
+      "allocatedBytesApproximate": 256843776,
+      "cleanupCandidate": true,
+      "preserveReasons": []
+    },
+    {
+      "name": "test_sim_2026-10-06T12-23-08-556Z_pid35267_d546a420.xctestproducts",
+      "allocatedBytesApproximate": 258064384,
+      "cleanupCandidate": true,
+      "preserveReasons": []
+    },
+    {
+      "name": "test_sim_2026-10-06T12-26-02-107Z_pid36737_4da9a4e0.xctestproducts",
+      "allocatedBytesApproximate": 258088960,
+      "cleanupCandidate": true,
+      "preserveReasons": []
+    },
+    {
+      "name": "test_sim_2026-10-06T12-35-52-581Z_pid42642_3199692e.xctestproducts",
+      "allocatedBytesApproximate": 258088960,
+      "cleanupCandidate": true,
+      "preserveReasons": []
+    },
+    {
+      "name": "test_sim_2026-10-06T12-41-36-700Z_pid45789_bd237796.xctestproducts",
+      "allocatedBytesApproximate": 258187264,
+      "cleanupCandidate": true,
+      "preserveReasons": []
+    },
+    {
+      "name": "test_sim_2026-10-06T12-44-02-628Z_pid47260_6de4312c.xctestproducts",
+      "allocatedBytesApproximate": 258220032,
+      "cleanupCandidate": true,
+      "preserveReasons": []
+    },
+    {
+      "name": "test_sim_2026-10-06T12-46-39-459Z_pid48502_10b54853.xctestproducts",
+      "allocatedBytesApproximate": 258211840,
+      "cleanupCandidate": true,
+      "preserveReasons": []
+    },
+    {
+      "name": "test_sim_2026-10-06T12-48-54-865Z_pid49586_bfc0ff38.xctestproducts",
+      "allocatedBytesApproximate": 258256896,
+      "cleanupCandidate": true,
+      "preserveReasons": []
+    },
+    {
+      "name": "test_sim_2026-10-06T12-53-07-471Z_pid51849_96c8ebcb.xctestproducts",
+      "allocatedBytesApproximate": 258129920,
+      "cleanupCandidate": true,
+      "preserveReasons": []
+    },
+    {
+      "name": "test_sim_2026-10-06T12-55-05-585Z_pid52843_adfa37dd.xctestproducts",
+      "allocatedBytesApproximate": 258121728,
+      "cleanupCandidate": true,
+      "preserveReasons": []
+    },
+    {
+      "name": "test_sim_2026-10-06T12-59-43-012Z_pid54747_efd6af96.xctestproducts",
+      "allocatedBytesApproximate": 258322432,
+      "cleanupCandidate": true,
+      "preserveReasons": []
+    },
+    {
+      "name": "test_sim_2026-10-06T13-00-50-790Z_pid55519_de94a76e.xctestproducts",
+      "allocatedBytesApproximate": 258322432,
+      "cleanupCandidate": false,
+      "preserveReasons": [
+        "final_sealed_qualification_input_preserved"
+      ]
+    },
+    {
+      "name": "test_sim_2026-10-06T13-10-43-015Z_pid60577_9571380d.xctestproducts",
+      "allocatedBytesApproximate": 258322432,
+      "cleanupCandidate": false,
+      "preserveReasons": [
+        "final_sealed_qualification_input_preserved"
+      ]
+    },
+    {
+      "name": "test_sim_2026-10-06T13-16-35-076Z_pid63196_34238724.xctestproducts",
+      "allocatedBytesApproximate": 258322432,
+      "cleanupCandidate": false,
+      "preserveReasons": [
+        "final_sealed_qualification_input_preserved"
+      ]
+    },
+    {
+      "name": "test_sim_2026-10-06T13-22-27-478Z_pid66130_538e1c08.xctestproducts",
+      "allocatedBytesApproximate": 258322432,
+      "cleanupCandidate": false,
+      "preserveReasons": [
+        "final_sealed_qualification_input_preserved"
+      ]
+    }
+  ],
+  "resultsCapturesOrLogsFoundInsidePackageCount": 0,
+  "possiblePrivateCredentialMetadataPackageCount": 0,
+  "metadataCredentialCheckBoundary": "Parsed Info.plist/xctestrun configuration metadata; compiled QA executables are compiler inputs, not a general forensic secret scan",
+  "allSymlinksInternal": true,
+  "officialReportScanWarningsExplained": "Tool skipped the expected internal Tests/0/QA-iphonesimulator symlink; this inventory resolves it inside each package without following external links",
+  "deletions": 0,
+  "preserve": [
+    "The four final sealed packages and their completion markers",
+    "All .runs/xcresults/results/captures/source/archives",
+    "The entire workspace logs and result-bundles directories",
+    "All other workspace/project storage",
+    "Swap and Preboot"
+  ],
+  "measurementLimit": "Allocated-byte sums may double-count shared APFS extents. Actual available space from APFS/df after any separately authorized deletion is authoritative."
+}

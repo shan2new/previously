@@ -26,6 +26,7 @@ import type {
 } from '../types/api.js'
 import { resolveAnimeTmdbTarget } from './animeTmdbMatch.js'
 import { getCatalogLink, upsertCatalogLink } from './catalogLinks.js'
+import { consumerFranchiseIds } from './consumerContent.js'
 import { BoundedTaskQueue } from '../util/taskQueue.js'
 export { pickAnimeTmdbCandidate as pickAnimeWatchTarget } from './animeTmdbMatch.js'
 export type { AnimeTmdbCandidate as WatchTargetCandidate } from './animeTmdbMatch.js'
@@ -49,7 +50,7 @@ interface CacheEntry {
 const cache = new Map<string, CacheEntry>()
 const inFlight = new Map<string, Promise<WatchAvailability | null>>()
 const refreshQueue = new BoundedTaskQueue(3, 100, (key, error) => {
-  console.warn(`availability refresh failed (${key}):`, error instanceof Error ? error.message : error)
+  console.warn(`availability refresh failed (${key}):`, 'diagnostic details redacted')
 })
 
 function emptyAvailability(country: string, status: WatchAvailabilityStatus): WatchAvailability {
@@ -242,9 +243,9 @@ function fromSnapshot(row: typeof watchAvailabilitySnapshots.$inferSelect): Watc
  * display metadata, while the separate route keeps a cold TMDB lookup off the detail critical path.
  */
 export async function getWatchAvailability(franchiseId: string, country: string): Promise<WatchAvailability | null> {
+  if (!(await consumerFranchiseIds([franchiseId])).has(franchiseId)) return null
   if (!tmdbEnabled()) {
-    const [exists] = await db.select({ id: franchise.id }).from(franchise).where(eq(franchise.id, franchiseId)).limit(1)
-    return exists ? emptyAvailability(country, 'disabled') : null
+    return emptyAvailability(country, 'disabled')
   }
   const key = `${franchiseId}:${country}`
   const hit = cache.get(key)
@@ -272,7 +273,7 @@ export async function getWatchAvailability(franchiseId: string, country: string)
       if (value) {
         remember(key, value)
         void persist(franchiseId, value).catch((error) => {
-          console.warn(`availability snapshot write failed (${key}):`, error instanceof Error ? error.message : error)
+          console.warn(`availability snapshot write failed (${key}):`, 'diagnostic details redacted')
         })
       }
       return value
@@ -292,16 +293,19 @@ export async function getAvailabilityPreviews(
 ): Promise<Map<string, WatchAvailability>> {
   const out = new Map<string, WatchAvailability>()
   if (franchiseIds.length === 0) return out
+  const allowed = await consumerFranchiseIds(franchiseIds)
+  const visibleIds = franchiseIds.filter((id) => allowed.has(id))
+  if (visibleIds.length === 0) return out
   const rows = await db
     .select()
     .from(watchAvailabilitySnapshots)
     .where(and(
-      inArray(watchAvailabilitySnapshots.franchiseId, franchiseIds),
+      inArray(watchAvailabilitySnapshots.franchiseId, visibleIds),
       eq(watchAvailabilitySnapshots.country, country),
     ))
   const now = Date.now()
   const byId = new Map(rows.map((row) => [row.franchiseId, row]))
-  for (const franchiseId of franchiseIds) {
+  for (const franchiseId of visibleIds) {
     const row = byId.get(franchiseId)
     if (row) out.set(franchiseId, fromSnapshot(row))
     if (!row || row.expiresAt.getTime() <= now) {
@@ -357,7 +361,7 @@ export async function refreshPreferredAvailability(limit = 100): Promise<{ check
       } catch (error) {
         console.warn(
           `availability warm failed (${row.franchiseId}:${row.country}):`,
-          error instanceof Error ? error.message : error,
+          'diagnostic details redacted',
         )
       }
     }

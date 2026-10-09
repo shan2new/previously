@@ -1,0 +1,17 @@
+{
+  "verifiedAt": "2026-10-07T05:16:35.692346+00:00",
+  "pdfSHA256": "28bba668ddcf6d2a106030a0c2f457297eeaa1d925d6ea51d938f2d9e2f80549",
+  "sourceVisualReceipt": "docs/release/2026-10-05/pdf-review-current.json",
+  "rootInitialPagesInspected": [
+    20,
+    21
+  ],
+  "rootFinalPagesInspected": [
+    21,
+    31
+  ],
+  "crowdedW4ProofFixedVerified": true,
+  "finalVisibleReviewStatus": "Rejected; saved reply remains unsent",
+  "physicalRecordingClaimed": false,
+  "rootVisualIssues": []
+}

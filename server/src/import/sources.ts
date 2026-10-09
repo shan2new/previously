@@ -4,6 +4,7 @@ import type { TmdbSearchResult } from '../tmdb/types.js'
 import { mapWithConcurrency } from '../util/concurrency.js'
 import { createPacer } from '../util/pacer.js'
 import { fromAniListStatus, fromMalStatus, normalizeTitle, type AnimeEntry, type TvShow } from './plan.js'
+import { ContentExcludedError, isExcludedContent } from '../services/consumerContent.js'
 
 // History import's upstream reads (IO; nothing is written here).
 export const paceImportAniList = createPacer(3_000)
@@ -18,7 +19,7 @@ export class ImportSourceError extends Error {
 const LIST_QUERY = `query ($name: String, $chunk: Int) {
   MediaListCollection(userName: $name, type: ANIME, chunk: $chunk, perChunk: 500, forceSingleCompletedList: true) {
     hasNextChunk
-    lists { isCustomList entries { mediaId status progress media { title { english romaji } } } }
+    lists { isCustomList entries { mediaId status progress media { isAdult genres title { english romaji } } } }
   }
 }`
 
@@ -27,7 +28,7 @@ interface ListChunk {
     hasNextChunk: boolean
     lists: {
       isCustomList: boolean
-      entries: { mediaId: number; status: string; progress: number | null; media: { title: { english: string | null; romaji: string | null } | null } | null }[]
+      entries: { mediaId: number; status: string; progress: number | null; media: { isAdult?: boolean | null; genres?: string[] | null; title: { english: string | null; romaji: string | null } | null } | null }[]
     }[]
   } | null
 }
@@ -63,6 +64,7 @@ export async function fetchAniListEntries(username: string): Promise<AnimeEntry[
           finished: mapped.finished,
           progress: Math.max(0, Math.floor(entry.progress ?? 0)),
           title: entry.media?.title?.english ?? entry.media?.title?.romaji ?? null,
+          ...(entry.media && isExcludedContent(entry.media) ? { contentExcluded: true } : {}),
         })
       }
     }
@@ -79,7 +81,7 @@ export interface MalRow {
 }
 
 const MAL_QUERY = `query ($ids: [Int], $page: Int) {
-  Page(page: $page, perPage: 50) { media(idMal_in: $ids, type: ANIME) { id idMal } }
+  Page(page: $page, perPage: 50) { media(idMal_in: $ids, type: ANIME) { id idMal isAdult genres } }
 }`
 
 /**
@@ -92,16 +94,20 @@ export async function mapMalRows(rows: MalRow[]): Promise<{ entries: AnimeEntry[
   for (const row of rows) if (Number.isInteger(row.malId) && row.malId > 0 && !byMal.has(row.malId)) byMal.set(row.malId, row)
   const ids = [...byMal.keys()]
   const anilistOf = new Map<number, number>()
+  const excluded = new Set<number>()
   for (let i = 0; i < ids.length; i += 50) {
     const chunk = ids.slice(i, i + 50)
-    let data: { Page: { media: { id: number; idMal: number | null }[] } }
+    let data: { Page: { media: { id: number; idMal: number | null; isAdult?: boolean | null; genres?: string[] | null }[] } }
     try {
       await paceImportAniList()
       data = await gql(MAL_QUERY, { ids: chunk, page: 1 }, { maxRetries: 3, timeoutMs: 15_000 })
     } catch {
       throw new ImportSourceError('unavailable')
     }
-    for (const media of data.Page.media) if (media.idMal != null) anilistOf.set(media.idMal, media.id)
+    for (const media of data.Page.media) if (media.idMal != null) {
+      anilistOf.set(media.idMal, media.id)
+      if (isExcludedContent(media)) excluded.add(media.id)
+    }
   }
   const entries: AnimeEntry[] = []
   const unmatched: string[] = []
@@ -118,6 +124,7 @@ export async function mapMalRows(rows: MalRow[]): Promise<{ entries: AnimeEntry[
       finished: mapped.finished,
       progress: Math.max(0, Math.floor(Number.isFinite(row.watched) ? row.watched : 0)),
       title: row.title?.trim() || null,
+      ...(excluded.has(mediaId) ? { contentExcluded: true } : {}),
     })
   }
   return { entries, unmatched }
@@ -166,8 +173,11 @@ export async function findAnimeByTitle(title: string): Promise<number | null> {
     const tv = results.filter((m) => m.format === 'TV' || m.format === 'TV_SHORT' || m.format === 'ONA')
     const exact = tv.filter((m) =>
       [m.title?.english, m.title?.romaji, ...(m.synonyms ?? [])].some((t) => t && normalizeTitle(t) === wanted))
-    return exact.length === 1 ? exact[0]!.id : null
-  } catch {
+    if (exact.length !== 1) return null
+    if (isExcludedContent(exact[0]!)) throw new ContentExcludedError()
+    return exact[0]!.id
+  } catch (error) {
+    if (error instanceof ContentExcludedError) throw error
     throw new ImportSourceError('unavailable')
   }
 }

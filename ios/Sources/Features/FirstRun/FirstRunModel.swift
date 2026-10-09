@@ -400,40 +400,66 @@ final class FirstRunModel {
         // The one haptic of the run: the shows are added (the board comes alive on it).
         FeedbackCoordinator.fire(.success)
         let now = appModel.now
+        let epoch = appModel.accountEpoch
         // Import has already placed these shows. A default placement from an earlier tap must
         // not turn Completed back into Planned when the viewer proceeds to the lineup.
         let owned = Set(appModel.library.map(\.id))
         let work = picks.filter { !owned.contains($0.id) }.map { pick in (pick, details[pick.id]) }
         // Drawn first, all of them, so the lineup (and Home beneath it) is whole before any
         // call returns.
-        var writes: [(Franchise, FirstRunWrite)] = []
-        var bare: [FranchiseSummary] = []
+        var writes: [(Franchise, FirstRunWrite, MutationStamp?)] = []
+        var bare: [(FranchiseSummary, MutationStamp?)] = []
         for (pick, show) in work {
             if let show {
                 let write = FirstRunWrite(show, placement: placements[show.id], now: now)
-                appModel.insertPending(write.applied(to: show))
-                writes.append((show, write))
+                do {
+                    let stamp = try appModel.prepareBatchMutation(show, parts: write.parts, status: write.status)
+                    appModel.insertPending(write.applied(to: show))
+                    writes.append((show, write, stamp))
+                } catch {
+                    appModel.recordBatchFailure(franchiseId: show.id, title: show.title,
+                        parts: write.parts, status: write.status, error: error)
+                }
             } else {
-                bare.append(pick)
+                let stamp = MutationStamp.fresh(owner: appModel.accountStorage)
+                let status: WatchStatus = pick.isReleasing ? .watching : .planned
+                let intent = WriteIntent.subscribe(franchiseId: pick.id, title: pick.title, status: status.rawValue)
+                do {
+                    if try appModel.stageTrackingMutation(command: Copy.Action.add, title: pick.title, intent: intent, mutation: stamp) {
+                        bare.append((pick, stamp))
+                    }
+                } catch {
+                    appModel.fileFailure(command: Copy.Action.add, title: pick.title,
+                        reason: Copy.Notice.reason(error), intent: intent, mutation: stamp) { [appModel] in
+                            await appModel.placeFirstRunBareShow(pick, mutation: stamp)
+                        }
+                }
             }
         }
         // Four at a time: a long list of picks is not twenty requests at once.
-        var jobs: [@MainActor () async -> Void] = writes.map { show, write in
-            { [appModel] in _ = await appModel.placeFirstRunShow(show, write: write) }
+        var jobs: [@MainActor () async -> Void] = writes.map { show, write, stamp in
+            { [appModel] in
+                guard epoch == appModel.accountEpoch else { return }
+                _ = await appModel.placeFirstRunShow(show, write: write, mutation: stamp)
+            }
         }
         // A pick whose details never arrived: followed by the plain add's rule.
-        jobs += bare.map { pick in
-            { [api] in _ = try? await api.subscribe(franchiseId: pick.id, status: pick.isReleasing ? .watching : .planned) }
+        jobs += bare.map { pick, stamp in
+            { [appModel] in
+                guard epoch == appModel.accountEpoch else { return }
+                await appModel.placeFirstRunBareShow(pick, mutation: stamp)
+            }
         }
         Task { @MainActor [weak self] in
             var next = 0
-            while next < jobs.count {
+            while next < jobs.count, epoch == self?.appModel.accountEpoch {
                 let batch = jobs[next..<min(next + 4, jobs.count)].map { job in Task { @MainActor in await job() } }
                 for task in batch { await task.value }
                 next += 4
             }
-            guard let self else { return }
+            guard let self, epoch == self.appModel.accountEpoch else { return }
             await self.appModel.reload()
+            guard epoch == self.appModel.accountEpoch else { return }
             self.committing = false
             self.committed = true
         }

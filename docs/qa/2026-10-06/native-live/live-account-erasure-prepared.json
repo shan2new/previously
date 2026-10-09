@@ -1,0 +1,47 @@
+{
+  "preparedAt": "2026-10-06T15:04:31.033123+00:00",
+  "status": "prepared_not_executed",
+  "label": "Previously Erasure QA \u2014 release 1.0 \u2014 2026-10-06",
+  "purpose": "release_account_erasure_qualification",
+  "privateFiles": [
+    {
+      "path": "/Users/shan2new/.config/previously/release/live-erasure-qa.py",
+      "mode": "0o600",
+      "sha256": "a9739f324c9d165dbd48812209792bb3cc62d3e2947c625fa8d1535dd7d71cc6"
+    },
+    {
+      "path": "/Users/shan2new/.config/previously/release/live-erasure-qa-guards.py",
+      "mode": "0o600",
+      "sha256": "63552ea8858cfb56c63a0fa3df3234e76cc1c03f01b83cc864c2d59fa2ed4e45"
+    },
+    {
+      "path": "/Users/shan2new/.config/previously/release/live-erasure-qa-state.json",
+      "mode": "0o600",
+      "sha256": null
+    }
+  ],
+  "protectedAccountCount": 5,
+  "ordinaryDeviceTrustRequired": true,
+  "staticSyntaxPassed": true,
+  "helperGuardPassed": 8,
+  "helperGuardTotal": 8,
+  "helperGuardScope": "Pure synthetic inputs; no real private reads by guard tests; no provider calls or credential generation",
+  "providerReadCalls": 0,
+  "providerMutations": 0,
+  "credentialsCreated": false,
+  "providerAccountProvisioned": false,
+  "consumerLoginVerified": false,
+  "syntheticLibraryAdded": false,
+  "consumerDeletionExecuted": false,
+  "providerAbsenceVerified": false,
+  "appTombstoneVerified": false,
+  "restartSafeOutcomeVerified": false,
+  "protectedViewingDataEqualityVerified": false,
+  "appBackendRuntimeOrProviderSettingsChanged": false,
+  "credentialsTokensProviderIDsInternalIDsOrIdentityHashesExported": false,
+  "plan": "docs/qa/2026-10-06/native-live/live-account-erasure-plan.md",
+  "limitations": [
+    "Live preflight/provisioning/normal sign-in/deletion/restart verification remain pending",
+    "This prepared helper does not qualify linked Apple revocation or repeat native qualification"
+  ]
+}

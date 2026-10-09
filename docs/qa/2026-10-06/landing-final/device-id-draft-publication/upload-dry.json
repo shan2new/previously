@@ -1,0 +1,919 @@
+{
+  "framework": {
+    "name": "Next.js",
+    "slug": "nextjs"
+  },
+  "basePath": "/Users/shan2new/Projects/previously/landing",
+  "fileCount": 124,
+  "totalSize": 11573306,
+  "ignoredCount": 12,
+  "ignored": [
+    ".DS_Store",
+    ".gitignore",
+    ".next",
+    ".openai",
+    ".vercel",
+    ".vinext",
+    ".wrangler",
+    "dist",
+    "docs",
+    "node_modules",
+    "out",
+    "tsconfig.tsbuildinfo"
+  ],
+  "directories": [
+    {
+      "path": "public",
+      "fileCount": 33,
+      "size": 11065500
+    },
+    {
+      "path": "components",
+      "fileCount": 60,
+      "size": 235185
+    },
+    {
+      "path": "package-lock.json",
+      "fileCount": 1,
+      "size": 174754
+    },
+    {
+      "path": "app",
+      "fileCount": 15,
+      "size": 58385
+    },
+    {
+      "path": "lib",
+      "fileCount": 3,
+      "size": 24779
+    },
+    {
+      "path": "README.md",
+      "fileCount": 1,
+      "size": 8862
+    },
+    {
+      "path": ".oxlintrc.json",
+      "fileCount": 1,
+      "size": 1370
+    },
+    {
+      "path": "package.json",
+      "fileCount": 1,
+      "size": 1240
+    },
+    {
+      "path": "tsconfig.json",
+      "fileCount": 1,
+      "size": 663
+    },
+    {
+      "path": "hooks",
+      "fileCount": 1,
+      "size": 585
+    },
+    {
+      "path": "components.json",
+      "fileCount": 1,
+      "size": 516
+    },
+    {
+      "path": "vercel.json",
+      "fileCount": 1,
+      "size": 441
+    },
+    {
+      "path": "next.config.ts",
+      "fileCount": 1,
+      "size": 309
+    },
+    {
+      "path": "next-env.d.ts",
+      "fileCount": 1,
+      "size": 288
+    },
+    {
+      "path": ".oxfmtrc.json",
+      "fileCount": 1,
+      "size": 260
+    },
+    {
+      "path": ".vercelignore",
+      "fileCount": 1,
+      "size": 106
+    },
+    {
+      "path": "postcss.config.mjs",
+      "fileCount": 1,
+      "size": 63
+    }
+  ],
+  "largestFiles": [
+    {
+      "path": "public/app/search.webp",
+      "size": 2253064,
+      "mode": 33188,
+      "sha": "1a03b3693ae454c9ae67365b7f71c51d7b4fad83"
+    },
+    {
+      "path": "public/app/today.webp",
+      "size": 2070154,
+      "mode": 33188,
+      "sha": "74808311108bfb85a41705a474a2d2135bd96262"
+    },
+    {
+      "path": "public/app/schedule.webp",
+      "size": 1732346,
+      "mode": 33188,
+      "sha": "86be82904eda490221415bb6304ce470e046f23b"
+    },
+    {
+      "path": "public/app/library.webp",
+      "size": 1711570,
+      "mode": 33188,
+      "sha": "b36bc34221d4cf9f611cb3d5689317a90e5f8ff3"
+    },
+    {
+      "path": "public/app/seasons.webp",
+      "size": 806370,
+      "mode": 33188,
+      "sha": "550a7c03bc64861b4404706051fa5ed66ae46e82"
+    },
+    {
+      "path": "public/app/search-preview.webp",
+      "size": 204816,
+      "mode": 33188,
+      "sha": "9e7692078060c86fc4275a27a12da5663161cc29"
+    },
+    {
+      "path": "public/images/bear-wide.jpg",
+      "size": 202806,
+      "mode": 33188,
+      "sha": "a9863d2ccd96dc9ed73e039f2bca2a015bb9d3f2"
+    },
+    {
+      "path": "package-lock.json",
+      "size": 174754,
+      "mode": 33188,
+      "sha": "798a79ff8c82ddc7b013a05c25190b0b5b1b59fa"
+    },
+    {
+      "path": "public/images/breaking-bad.jpg",
+      "size": 164768,
+      "mode": 33188,
+      "sha": "64a1f04800341e7ab46335491780271a7f773b86"
+    },
+    {
+      "path": "public/images/frieren-wide.jpg",
+      "size": 153189,
+      "mode": 33188,
+      "sha": "bf6e58b591f840626770d5f4ed18215abd85a82d"
+    }
+  ],
+  "files": [
+    {
+      "path": ".oxfmtrc.json",
+      "size": 260,
+      "mode": 33188,
+      "sha": "cd1cbef2593fb5726ac52f8db4fe2f5938ab0928"
+    },
+    {
+      "path": ".oxlintrc.json",
+      "size": 1370,
+      "mode": 33188,
+      "sha": "736a0052ab0422f00395073ebae543a017b2a83f"
+    },
+    {
+      "path": ".vercelignore",
+      "size": 106,
+      "mode": 33188,
+      "sha": "e7c7f2ab8d3f79ffb08b18f9d70e1a8a9cd02ece"
+    },
+    {
+      "path": "app/delete-account/page.tsx",
+      "size": 208,
+      "mode": 33188,
+      "sha": "740af0d80cd653558e402a4a367dfbbc0e71beaa"
+    },
+    {
+      "path": "app/experience.tsx",
+      "size": 4001,
+      "mode": 33188,
+      "sha": "c5db187f046bfea3c7eebfd6ec6254b29812c4a9"
+    },
+    {
+      "path": "app/gallery.css",
+      "size": 9019,
+      "mode": 33188,
+      "sha": "77c305b3634ffe0fb0663d1184dd265b5c96abff"
+    },
+    {
+      "path": "app/globals.css",
+      "size": 14418,
+      "mode": 33188,
+      "sha": "40e5488a7669e7fcb7fb9ba17aef92e619d42810"
+    },
+    {
+      "path": "app/layout.tsx",
+      "size": 1662,
+      "mode": 33188,
+      "sha": "418ace643fdcd492e2fc7179c9ae9baeac648e7a"
+    },
+    {
+      "path": "app/legal-document.tsx",
+      "size": 7617,
+      "mode": 33188,
+      "sha": "4e96d3060b8a4a290b797b4c930d33764ee3b551"
+    },
+    {
+      "path": "app/page.tsx",
+      "size": 2342,
+      "mode": 33188,
+      "sha": "d358940177576b78615ff9d3ac9ddd40568f41d9"
+    },
+    {
+      "path": "app/privacy/page.tsx",
+      "size": 194,
+      "mode": 33188,
+      "sha": "04cc545ac76c56b086f40347347a533737bf5bd5"
+    },
+    {
+      "path": "app/product-tour.css",
+      "size": 8100,
+      "mode": 33188,
+      "sha": "587a4b4a2bacfcd5065a91c158e3972b74486f55"
+    },
+    {
+      "path": "app/product-tour.tsx",
+      "size": 7919,
+      "mode": 33188,
+      "sha": "5ffae4a1fd865d3437a000e1e7c13e4fed49c568"
+    },
+    {
+      "path": "app/robots.ts",
+      "size": 292,
+      "mode": 33188,
+      "sha": "8d721d11451facaee49a4b01529ed18c0c4042a3"
+    },
+    {
+      "path": "app/site-chrome.tsx",
+      "size": 1584,
+      "mode": 33188,
+      "sha": "72dc9859b6fb1d649956731c3f4626fbfdb2ef13"
+    },
+    {
+      "path": "app/sitemap.ts",
+      "size": 645,
+      "mode": 33188,
+      "sha": "b3ecd09f129ff5fe050e66fa5110c261803dd1c3"
+    },
+    {
+      "path": "app/support/page.tsx",
+      "size": 194,
+      "mode": 33188,
+      "sha": "56dee21bfe6dc573c94f919ed82f4e87d6da0598"
+    },
+    {
+      "path": "app/terms/page.tsx",
+      "size": 190,
+      "mode": 33188,
+      "sha": "3c52710310ba473696101284ac7f9d834e719ef0"
+    },
+    {
+      "path": "components.json",
+      "size": 516,
+      "mode": 33188,
+      "sha": "577af703bacf304e5c0cc5d5a7d331202b415b0a"
+    },
+    {
+      "path": "components/ui/accordion.tsx",
+      "size": 2664,
+      "mode": 33188,
+      "sha": "fcad5e1a927c063fe92e764f3b151062026478b0"
+    },
+    {
+      "path": "components/ui/alert-dialog.tsx",
+      "size": 5301,
+      "mode": 33188,
+      "sha": "3614879c23a187a8cf85083d6db037a4f1f9c0a9"
+    },
+    {
+      "path": "components/ui/alert.tsx",
+      "size": 2060,
+      "mode": 33188,
+      "sha": "28b1b686eedfacad819bb468da724c462d6f495b"
+    },
+    {
+      "path": "components/ui/aspect-ratio.tsx",
+      "size": 406,
+      "mode": 33188,
+      "sha": "7a1661d43dc339e35bb25504c88d7547b05ea8ba"
+    },
+    {
+      "path": "components/ui/attachment.tsx",
+      "size": 6132,
+      "mode": 33188,
+      "sha": "de8f27535f2015f9b14b32c36ad524d894aed175"
+    },
+    {
+      "path": "components/ui/avatar.tsx",
+      "size": 3056,
+      "mode": 33188,
+      "sha": "b2399ba87042646a1936b082e7be0fc27b9bdae5"
+    },
+    {
+      "path": "components/ui/badge.tsx",
+      "size": 1934,
+      "mode": 33188,
+      "sha": "c3a38482f47f0659d4e261b422e1709b189c5d45"
+    },
+    {
+      "path": "components/ui/breadcrumb.tsx",
+      "size": 2602,
+      "mode": 33188,
+      "sha": "b5b9fc25aa60a9416655b6ddfe54246048a912ad"
+    },
+    {
+      "path": "components/ui/bubble.tsx",
+      "size": 4828,
+      "mode": 33188,
+      "sha": "6361979975e89c9ba68c883d4b0e52156e4e5460"
+    },
+    {
+      "path": "components/ui/button-group.tsx",
+      "size": 2494,
+      "mode": 33188,
+      "sha": "623d74a214c17bfcf3a887a4f47aa9c7092cd7fa"
+    },
+    {
+      "path": "components/ui/button.tsx",
+      "size": 3247,
+      "mode": 33188,
+      "sha": "e35428aca3c188cee990e51d6ea8857fb84ce70b"
+    },
+    {
+      "path": "components/ui/calendar.tsx",
+      "size": 8503,
+      "mode": 33188,
+      "sha": "2b7b0c4e2661859cd1d05df56e73d5260e7d5a88"
+    },
+    {
+      "path": "components/ui/card.tsx",
+      "size": 2645,
+      "mode": 33188,
+      "sha": "c0a721216e67dd408f95744118e8d5bf0c77a681"
+    },
+    {
+      "path": "components/ui/carousel.tsx",
+      "size": 5727,
+      "mode": 33188,
+      "sha": "41d7230cb25c99dfa42f9c152c3f5d84dc1b9d9d"
+    },
+    {
+      "path": "components/ui/chart.tsx",
+      "size": 10581,
+      "mode": 33188,
+      "sha": "893a601d2f659c2de897f752b1422bd3394da5ba"
+    },
+    {
+      "path": "components/ui/checkbox.tsx",
+      "size": 1538,
+      "mode": 33188,
+      "sha": "5380380fd2be10f8a2a3a44cdef4325c98205ba2"
+    },
+    {
+      "path": "components/ui/collapsible.tsx",
+      "size": 664,
+      "mode": 33188,
+      "sha": "817e63fac3571381db716ac6627678a2953de2ec"
+    },
+    {
+      "path": "components/ui/combobox.tsx",
+      "size": 9135,
+      "mode": 33188,
+      "sha": "76466a6fcdaf70e9536ee814a67a76aedb138074"
+    },
+    {
+      "path": "components/ui/command.tsx",
+      "size": 5029,
+      "mode": 33188,
+      "sha": "a9bc587eeaf4a25ca92683b3ec1bbe2c3efef5ea"
+    },
+    {
+      "path": "components/ui/context-menu.tsx",
+      "size": 8166,
+      "mode": 33188,
+      "sha": "a14aa4b0800ac6d86db02f6297c664ce8a4b8962"
+    },
+    {
+      "path": "components/ui/dialog.tsx",
+      "size": 4087,
+      "mode": 33188,
+      "sha": "fa4cd2721385a0231b5128d88043df46b1cf0b7a"
+    },
+    {
+      "path": "components/ui/direction.tsx",
+      "size": 105,
+      "mode": 33188,
+      "sha": "b92c8ea2fc1e29bd4cc7b07e7bf69b951afaa504"
+    },
+    {
+      "path": "components/ui/drawer.tsx",
+      "size": 11396,
+      "mode": 33188,
+      "sha": "45471299b4f4c52344746ece501f8ea6fa4efc6b"
+    },
+    {
+      "path": "components/ui/dropdown-menu.tsx",
+      "size": 8809,
+      "mode": 33188,
+      "sha": "f43618cec7919183278d5ea94860bad5e326dff5"
+    },
+    {
+      "path": "components/ui/empty.tsx",
+      "size": 2415,
+      "mode": 33188,
+      "sha": "a68da44f75ff65cb543b1e454a8ea3eaa665acb9"
+    },
+    {
+      "path": "components/ui/field.tsx",
+      "size": 6303,
+      "mode": 33188,
+      "sha": "848eac1d37a4cc7aa7362bc21cf6977ffcecd44c"
+    },
+    {
+      "path": "components/ui/hover-card.tsx",
+      "size": 1863,
+      "mode": 33188,
+      "sha": "3e9a6318772be265ca3f285b94e3e5c30a7ef3dd"
+    },
+    {
+      "path": "components/ui/input-group.tsx",
+      "size": 5289,
+      "mode": 33188,
+      "sha": "a8f0470306effc70a0c8bb90d7dca54c90aabf51"
+    },
+    {
+      "path": "components/ui/input-otp.tsx",
+      "size": 2558,
+      "mode": 33188,
+      "sha": "24ff4179bf636f080c1624cfb6a1433d09162fc5"
+    },
+    {
+      "path": "components/ui/input.tsx",
+      "size": 1046,
+      "mode": 33188,
+      "sha": "714cbfc0564f0bf93336f6b36ee35a6f20d8ae9a"
+    },
+    {
+      "path": "components/ui/item.tsx",
+      "size": 4888,
+      "mode": 33188,
+      "sha": "154eae4d8c7a300c45d91ea5a276946567304640"
+    },
+    {
+      "path": "components/ui/kbd.tsx",
+      "size": 842,
+      "mode": 33188,
+      "sha": "a8468f9d9ee41febb3f57d297ab8cc6cd52cec8c"
+    },
+    {
+      "path": "components/ui/label.tsx",
+      "size": 524,
+      "mode": 33188,
+      "sha": "339a7b7896c7863ee8c8a220a32746361e36781b"
+    },
+    {
+      "path": "components/ui/marker.tsx",
+      "size": 1962,
+      "mode": 33188,
+      "sha": "3130e4ab55c06b426f41b1ed972c839ae9dc4b1b"
+    },
+    {
+      "path": "components/ui/menubar.tsx",
+      "size": 8315,
+      "mode": 33188,
+      "sha": "2ac64b86e7ee76337180537df148bdbd5f66b210"
+    },
+    {
+      "path": "components/ui/message-scroller.tsx",
+      "size": 4070,
+      "mode": 33188,
+      "sha": "c4666c9ac3b16085f13812b09ae7d57bbc016ac9"
+    },
+    {
+      "path": "components/ui/message.tsx",
+      "size": 2246,
+      "mode": 33188,
+      "sha": "ce0395b5564101228ea2e768f99d64663d825a40"
+    },
+    {
+      "path": "components/ui/native-select.tsx",
+      "size": 2133,
+      "mode": 33188,
+      "sha": "b0c582db435b32cb7b1b9d07ceb309f2235bc981"
+    },
+    {
+      "path": "components/ui/navigation-menu.tsx",
+      "size": 7436,
+      "mode": 33188,
+      "sha": "60389a0c814cb8df91a869e6cd1409814b8a366d"
+    },
+    {
+      "path": "components/ui/pagination.tsx",
+      "size": 2928,
+      "mode": 33188,
+      "sha": "e38845d697d528a1067a9defcb17c918196f103e"
+    },
+    {
+      "path": "components/ui/popover.tsx",
+      "size": 2586,
+      "mode": 33188,
+      "sha": "aba0025db626f54b8826d88c9ae40abdee89f021"
+    },
+    {
+      "path": "components/ui/progress.tsx",
+      "size": 1751,
+      "mode": 33188,
+      "sha": "6330518fa535a332f54ced93e6b535c8449d95e0"
+    },
+    {
+      "path": "components/ui/radio-group.tsx",
+      "size": 1843,
+      "mode": 33188,
+      "sha": "7f77e47106fdf225211e9b0468f30f9c15e02bf5"
+    },
+    {
+      "path": "components/ui/resizable.tsx",
+      "size": 1681,
+      "mode": 33188,
+      "sha": "0cc7552e2e0921216fc7e95868389d8db8dd50f7"
+    },
+    {
+      "path": "components/ui/scroll-area.tsx",
+      "size": 1632,
+      "mode": 33188,
+      "sha": "8765c0f7c75836f52c3f07bed1ea3591e5cb4d4d"
+    },
+    {
+      "path": "components/ui/select.tsx",
+      "size": 6700,
+      "mode": 33188,
+      "sha": "38cd6ea36908750217a6b89aae70755a426f5c88"
+    },
+    {
+      "path": "components/ui/separator.tsx",
+      "size": 551,
+      "mode": 33188,
+      "sha": "9d4299988dbc16be779557c1a72bd7879be75ff2"
+    },
+    {
+      "path": "components/ui/sheet.tsx",
+      "size": 4446,
+      "mode": 33188,
+      "sha": "ff0c2edff4bae2773d5eaa7d52142a3030ec768e"
+    },
+    {
+      "path": "components/ui/sidebar.tsx",
+      "size": 21779,
+      "mode": 33188,
+      "sha": "81bdd9ae49068cf1e690d93b136f719f9f32e51a"
+    },
+    {
+      "path": "components/ui/skeleton.tsx",
+      "size": 278,
+      "mode": 33188,
+      "sha": "6ca0dbc0afc5cf5705e433bba23d9701e8ee8192"
+    },
+    {
+      "path": "components/ui/slider.tsx",
+      "size": 1879,
+      "mode": 33188,
+      "sha": "ea442ae902e68e033fa7dff13d700e7353c7c6f1"
+    },
+    {
+      "path": "components/ui/spinner.tsx",
+      "size": 360,
+      "mode": 33188,
+      "sha": "dcf181f819f34372c852905ff6edd91769fa6752"
+    },
+    {
+      "path": "components/ui/switch.tsx",
+      "size": 1818,
+      "mode": 33188,
+      "sha": "3a0ec3ca3627755abf4c4aefd3723b25c43c81e7"
+    },
+    {
+      "path": "components/ui/table.tsx",
+      "size": 2418,
+      "mode": 33188,
+      "sha": "2c78a8455e5508feccb512e6f94a3c73466ad0c5"
+    },
+    {
+      "path": "components/ui/tabs.tsx",
+      "size": 3510,
+      "mode": 33188,
+      "sha": "d20529e2ca6ac6b127209b9087505405283589ba"
+    },
+    {
+      "path": "components/ui/textarea.tsx",
+      "size": 847,
+      "mode": 33188,
+      "sha": "1e06fadb8a3821d9284382dc0a5d464c36329a0c"
+    },
+    {
+      "path": "components/ui/toast.tsx",
+      "size": 7353,
+      "mode": 33188,
+      "sha": "b09d97d45917c51413983dbf6031bb833f20b178"
+    },
+    {
+      "path": "components/ui/toggle-group.tsx",
+      "size": 3201,
+      "mode": 33188,
+      "sha": "877764554492020504d9176e49a0c663d22a02fc"
+    },
+    {
+      "path": "components/ui/toggle.tsx",
+      "size": 1770,
+      "mode": 33188,
+      "sha": "6c3657b8b82e0b1bd1ac57b26331d11d4cb8ad90"
+    },
+    {
+      "path": "components/ui/tooltip.tsx",
+      "size": 2855,
+      "mode": 33188,
+      "sha": "7f999be43cb3db66bb57f1dc4a088a27eed740b1"
+    },
+    {
+      "path": "hooks/use-mobile.ts",
+      "size": 585,
+      "mode": 33188,
+      "sha": "202bb2ea86fe276409a5f485440755cddc0a9347"
+    },
+    {
+      "path": "lib/legal-content.ts",
+      "size": 23997,
+      "mode": 33188,
+      "sha": "3e979fd2f56910d027247157ee49a892a1c68d27"
+    },
+    {
+      "path": "lib/site-config.ts",
+      "size": 613,
+      "mode": 33188,
+      "sha": "077aceecd46fe8446f441a53818bb26955a2a5b4"
+    },
+    {
+      "path": "lib/utils.ts",
+      "size": 169,
+      "mode": 33188,
+      "sha": "c90970573af77a6d09641e5b319dff2f8075aafe"
+    },
+    {
+      "path": "next-env.d.ts",
+      "size": 288,
+      "mode": 33188,
+      "sha": "915946e261450f4fb6aab2ca862c8b440b748240"
+    },
+    {
+      "path": "next.config.ts",
+      "size": 309,
+      "mode": 33188,
+      "sha": "3eec1c29c21138bcbba1fe480a19e6f81e0d3aaa"
+    },
+    {
+      "path": "package-lock.json",
+      "size": 174754,
+      "mode": 33188,
+      "sha": "798a79ff8c82ddc7b013a05c25190b0b5b1b59fa"
+    },
+    {
+      "path": "package.json",
+      "size": 1240,
+      "mode": 33188,
+      "sha": "907d40fb00054e647950413d52055f1705f12baf"
+    },
+    {
+      "path": "postcss.config.mjs",
+      "size": 63,
+      "mode": 33188,
+      "sha": "259df1cf342ab6f73f56eb099a1803acb86061cb"
+    },
+    {
+      "path": "public/app/library-preview.webp",
+      "size": 138866,
+      "mode": 33188,
+      "sha": "f2d1df3ed07f20940106595ab2b9939ab2c167c1"
+    },
+    {
+      "path": "public/app/library.webp",
+      "size": 1711570,
+      "mode": 33188,
+      "sha": "b36bc34221d4cf9f611cb3d5689317a90e5f8ff3"
+    },
+    {
+      "path": "public/app/schedule-preview.webp",
+      "size": 132010,
+      "mode": 33188,
+      "sha": "4ae0577d7fc9a6d7ac70817ba63d42fc0fa16294"
+    },
+    {
+      "path": "public/app/schedule.webp",
+      "size": 1732346,
+      "mode": 33188,
+      "sha": "86be82904eda490221415bb6304ce470e046f23b"
+    },
+    {
+      "path": "public/app/search-preview.webp",
+      "size": 204816,
+      "mode": 33188,
+      "sha": "9e7692078060c86fc4275a27a12da5663161cc29"
+    },
+    {
+      "path": "public/app/search.webp",
+      "size": 2253064,
+      "mode": 33188,
+      "sha": "1a03b3693ae454c9ae67365b7f71c51d7b4fad83"
+    },
+    {
+      "path": "public/app/seasons.webp",
+      "size": 806370,
+      "mode": 33188,
+      "sha": "550a7c03bc64861b4404706051fa5ed66ae46e82"
+    },
+    {
+      "path": "public/app/today-preview.webp",
+      "size": 138564,
+      "mode": 33188,
+      "sha": "ce6b7656352cb81bcb79fdf300bf6f83d2edbac3"
+    },
+    {
+      "path": "public/app/today.webp",
+      "size": 2070154,
+      "mode": 33188,
+      "sha": "74808311108bfb85a41705a474a2d2135bd96262"
+    },
+    {
+      "path": "public/brand/icon.svg",
+      "size": 993,
+      "mode": 33188,
+      "sha": "cc9832960b8b7e1efc45e5d52cd527b2f6b9fc60"
+    },
+    {
+      "path": "public/brand/mark-tight.svg",
+      "size": 609,
+      "mode": 33188,
+      "sha": "9d5554607baa84b311aa0d4607b4bc92146589c3"
+    },
+    {
+      "path": "public/brand/mark.svg",
+      "size": 609,
+      "mode": 33188,
+      "sha": "1cb8de32ef521c198f80da3be1fe27f02b0c1f5d"
+    },
+    {
+      "path": "public/fonts/BarlowCondensed-OFL.txt",
+      "size": 4377,
+      "mode": 33188,
+      "sha": "d0dbf6e88cdad08b4270220f0c92fbd7c9fc1c6b"
+    },
+    {
+      "path": "public/fonts/BarlowCondensed-SemiBold.ttf",
+      "size": 86636,
+      "mode": 33188,
+      "sha": "9bd81d0ffcab0c2da785f5181f8ef93aea3c21a5"
+    },
+    {
+      "path": "public/fonts/Outfit-Bold.ttf",
+      "size": 48340,
+      "mode": 33188,
+      "sha": "7f80cab803c7eafec1d4deb10ba9a9699a9af552"
+    },
+    {
+      "path": "public/fonts/Outfit-Medium.ttf",
+      "size": 47800,
+      "mode": 33188,
+      "sha": "9e9a094b61389254add0df9536fe962a9d668926"
+    },
+    {
+      "path": "public/fonts/Outfit-Regular.ttf",
+      "size": 47844,
+      "mode": 33188,
+      "sha": "3024f9b4f58fd6769d8634b6352a423b5cf73647"
+    },
+    {
+      "path": "public/fonts/Outfit-SemiBold.ttf",
+      "size": 48456,
+      "mode": 33188,
+      "sha": "7b4dd31fa1c9ada8f879b12f2fff5663115734d2"
+    },
+    {
+      "path": "public/images/arcane.jpg",
+      "size": 65740,
+      "mode": 33188,
+      "sha": "ba71a81be223f546f2bf3b3bc840bb3bd8ecc779"
+    },
+    {
+      "path": "public/images/attack-on-titan-2x3.jpg",
+      "size": 102344,
+      "mode": 33188,
+      "sha": "a8e42170eff9b5dc1922b1c897fbaf0fba7951c7"
+    },
+    {
+      "path": "public/images/bear-wide.jpg",
+      "size": 202806,
+      "mode": 33188,
+      "sha": "a9863d2ccd96dc9ed73e039f2bca2a015bb9d3f2"
+    },
+    {
+      "path": "public/images/bear.jpg",
+      "size": 87722,
+      "mode": 33188,
+      "sha": "8f5a7d1b86db4ec9a26491729214cb5408a8f3b2"
+    },
+    {
+      "path": "public/images/breaking-bad.jpg",
+      "size": 164768,
+      "mode": 33188,
+      "sha": "64a1f04800341e7ab46335491780271a7f773b86"
+    },
+    {
+      "path": "public/images/frieren-poster.jpg",
+      "size": 80850,
+      "mode": 33188,
+      "sha": "ff4329c7dd0ce8ce809bcaa452c77a146d7d93e0"
+    },
+    {
+      "path": "public/images/frieren-wide.jpg",
+      "size": 153189,
+      "mode": 33188,
+      "sha": "bf6e58b591f840626770d5f4ed18215abd85a82d"
+    },
+    {
+      "path": "public/images/severance-poster.jpg",
+      "size": 73646,
+      "mode": 33188,
+      "sha": "1342429e0f359899cfb4a097bb5a6850f24865e9"
+    },
+    {
+      "path": "public/images/severance-wide.jpg",
+      "size": 75407,
+      "mode": 33188,
+      "sha": "cc39524f64f0018954592ec2d3f7721723ba353e"
+    },
+    {
+      "path": "public/images/severance.jpg",
+      "size": 125469,
+      "mode": 33188,
+      "sha": "284eb5508de713ba40a311dab86f09578ba564ee"
+    },
+    {
+      "path": "public/images/shogun.jpg",
+      "size": 131996,
+      "mode": 33188,
+      "sha": "6ba01a8bf81590ae91a69c56bc201978e86067b1"
+    },
+    {
+      "path": "public/images/silo.jpg",
+      "size": 45596,
+      "mode": 33188,
+      "sha": "c8ae349a413c63ccc45f5fbb720abacff55911a7"
+    },
+    {
+      "path": "public/images/stranger-things.jpg",
+      "size": 53345,
+      "mode": 33188,
+      "sha": "9ad31e9220f18ce5ad18e49f49860562e0f6043b"
+    },
+    {
+      "path": "public/images/succession.jpg",
+      "size": 102124,
+      "mode": 33188,
+      "sha": "246158e8c545c0332adea23fba1a3b98a7ac84aa"
+    },
+    {
+      "path": "public/images/the-last-of-us.jpg",
+      "size": 127074,
+      "mode": 33188,
+      "sha": "12f23c7990dfdea91fac0652e818f4f10caec55f"
+    },
+    {
+      "path": "README.md",
+      "size": 8862,
+      "mode": 33188,
+      "sha": "f203a04151d44edc63f346b8c74516cee972965f"
+    },
+    {
+      "path": "tsconfig.json",
+      "size": 663,
+      "mode": 33188,
+      "sha": "f05cfd7b4c9c23caecb54802c4b4af25f45b5761"
+    },
+    {
+      "path": "vercel.json",
+      "size": 441,
+      "mode": 33188,
+      "sha": "7aaf70a2d1d66df68dc28bbab1e32067bb449d06"
+    }
+  ]
+}

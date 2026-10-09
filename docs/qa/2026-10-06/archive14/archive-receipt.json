@@ -1,0 +1,64 @@
+{
+  "recordedAt": "2026-10-06T15:30:13.914841+00:00",
+  "source": "official Xcode27.0 Product Archive GUI plus actual filesystem/code-signature verification",
+  "status": "uploaded",
+  "build": 14,
+  "version": "1.0",
+  "archivePath": "/Users/shan2new/Library/Developer/Xcode/Archives/2026-10-06/Previously 06-10-26, 8.59\u202fPM.xcarchive",
+  "platform": [
+    "iPhoneOS"
+  ],
+  "architectures": [
+    "arm64"
+  ],
+  "sdk": "iphoneos27.0",
+  "minimumOSVersion": "18.0",
+  "productionBundle": "com.cognipin.previously",
+  "liveClerkPublicKeyMatchesPreparedConfiguration": true,
+  "apiBaseURL": "https://anime.cognipin.com",
+  "privacyPolicyURL": "https://previously.cognipin.com/privacy",
+  "termsURL": "https://previously.cognipin.com/terms",
+  "signatureVerifyPassed": true,
+  "widgetBuild": 14,
+  "uidDeviceFamily": [
+    1
+  ],
+  "runtimeSourceSHA256": "baaf904adf90bc13809ef9b3c331a800385409a40d18cf1bf1aceaf79c97e6ef",
+  "runtimeFileCount": 199,
+  "knownQAFixtureMarkersAbsent": true,
+  "binarySHA256": "37799ab9b8d101f4f4e9d1a0ec9e0e280bc664d15a9253392cf2458febb1a20d",
+  "assetsSHA256": "a24f3275938269c2060578ff9b355a65d6764eb202b58180dcb8862a100f874b",
+  "privacyManifestInventoryPath": "/Users/shan2new/Projects/previously/docs/qa/2026-10-06/archive14/privacy-manifest-inventory.json",
+  "appPrivacyManifestSHA256": "1dbd4ccfcf2f16699db8750f0a41bcea77ff60d06c1ba082dd175fdf7e4211a0",
+  "qualifiedSimulatorReceiptPath": "/Users/shan2new/Projects/previously/docs/qa/2026-10-06/native-live/candidate14-production-native.json",
+  "actualSignedArchive13Unchanged": true,
+  "freeBytesAfterArchive": 3890200576,
+  "uploadStatus": "passed",
+  "submittedForReview": false,
+  "appAppleEntitlementPresent": true,
+  "developmentTaskEntitlementFalse": false,
+  "allFourPrivacyManifestsUnchangedVsArchive13": true,
+  "bundledAppIconPNGsUnchangedVsArchive13": true,
+  "bundledAppIconPNGs": [
+    {
+      "filename": "AppIcon60x60@2x.png",
+      "sha256": "885d3ed037e3237ad198d7d95604d95e8abb05b0e740b733afe1e429fd092f88",
+      "unchangedVsArchive13": true
+    },
+    {
+      "filename": "AppIcon76x76@2x~ipad.png",
+      "sha256": "7b75aa76748466beae2aa20bf58a399803bccc5e8424fd74a73086fec57145d8",
+      "unchangedVsArchive13": true
+    }
+  ],
+  "uploadStartedAt": "2026-10-06T15:31:04.744155+00:00",
+  "archiveSigningPhase": "Xcode local archive development signing; Organizer applies distribution signing for upload",
+  "archiveGetTaskAllowMatchesArchive13": true,
+  "uploadObservedCompleteAt": "2026-10-06T15:33:23.846872+00:00",
+  "uploadVerifiedVia": "Official Organizer success sheet plus persistent Uploaded to Apple and Submission Status Uploaded with Build Number14",
+  "uploadReceiptText": "App upload complete: Previously 1.0 (14) uploaded",
+  "organizerStatusText": "Uploaded to Apple; Submission Status Uploaded; Build Number14",
+  "appStoreProcessingStatus": "awaiting separate ASC verification",
+  "independentVerificationPassed": true,
+  "freeBytesAfterUpload": 3995516928
+}

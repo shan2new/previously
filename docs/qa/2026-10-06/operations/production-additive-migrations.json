@@ -1,0 +1,32 @@
+{
+  "at": "2026-10-06T10:59:54.814Z",
+  "runtime": "v24.21.0",
+  "migrations": {
+    "count": 15,
+    "latest": "1791283329443"
+  },
+  "dataUnchanged": true,
+  "tables": {
+    "users": {
+      "rows": 16,
+      "sha256": "4b12fdd7cc6e8bcc82c88e36f798e7bd53bca2f49efb65e4c3a03e303a4cd36b"
+    },
+    "subscriptions": {
+      "rows": 109,
+      "sha256": "ac47c0bf2c82cf2c7dded1b1cae9e8bb4a639b9236daa0d04d2197c765b67e6e"
+    },
+    "progress": {
+      "rows": 370,
+      "sha256": "0e4edc4ea3e29baee852efe1db041297eed7843e0b9e99ea03ac90ddbe0d498d"
+    },
+    "watch_sessions": {
+      "rows": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  },
+  "backup": "~/Infra/previously/backups/previously-20261006T105955103Z-a79366be96f7.dump",
+  "serviceRestarted": false,
+  "initialTaskBackupRetired": true,
+  "backupManifest": "~/Infra/previously/backups/previously-20261006T105955103Z-a79366be96f7.manifest.json",
+  "retirementReason": "Task-owned pre-migration copy removed after verified restore of rolling backup containing unchanged user data and additive schema; rolling backups follow seven-day retention."
+}

@@ -1,0 +1,22 @@
+{
+  "recordedAt": "2026-10-06T15:33:23.846872+00:00",
+  "source": "official Xcode27.0 Organizer UI",
+  "archivePath": "/Users/shan2new/Library/Developer/Xcode/Archives/2026-10-06/Previously 06-10-26, 8.59\u202fPM.xcarchive",
+  "app": "Previously",
+  "version": "1.0",
+  "build": 14,
+  "successSheetTitle": "App upload complete:",
+  "successSheetText": "Previously 1.0 (14) uploaded",
+  "persistentArchiveStatus": "Uploaded to Apple",
+  "submissionStatus": "Uploaded",
+  "organizerUploadLocalLabel": "Today at 9:02PM",
+  "timeZone": "Asia/Kolkata",
+  "reviewSubmission": false,
+  "appStoreProcessingVerified": true,
+  "uploadVerifiedVia": "Official Organizer success sheet plus persistent Uploaded to Apple and Submission Status Uploaded with Build Number14",
+  "archiveVerificationReceiptPath": "/Users/shan2new/Projects/previously/docs/qa/2026-10-06/archive14/archive-receipt.json",
+  "independentVerificationReceiptPath": "/Users/shan2new/Projects/previously/docs/qa/2026-10-06/archive14/independent-verification.json",
+  "exportLimitation": "No IPA/privacy PDF export attempted; upload verified through official Organizer UI",
+  "processingVerifiedAt": "2026-10-06T15:38:54.006449+00:00",
+  "processingEvidence": "docs/qa/2026-10-06/app-store/build14-selected-receipt.json"
+}

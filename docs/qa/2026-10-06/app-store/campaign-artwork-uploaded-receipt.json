@@ -1,0 +1,66 @@
+{
+  "schemaVersion": 1,
+  "verifiedAtUTC": "2026-10-06T14:48:26.878092+00:00",
+  "appId": "6818452741",
+  "version": "1.0",
+  "locale": "English (U.S.)",
+  "site": "https://appstoreconnect.apple.com/apps/6818452741/distribution/ios/version/inflight",
+  "uploadMethod": "Chrome supported filechooser API after explicit owner temporary-file-access approval and owner setting enablement",
+  "uploadedOnlyPreparedPublicImages": true,
+  "files": [
+    {
+      "path": "output/app-store/ready/01-home-hero-1179x2556.png",
+      "bytes": 4226135,
+      "sha256": "011833e7074af8e7fc00e8ce675b33ae57dc34b2f8d678a83bffe4a2b0f82067"
+    },
+    {
+      "path": "output/app-store/ready/02-library-1179x2556.png",
+      "bytes": 3631213,
+      "sha256": "38d26c78cbfecabfaa77c9b13d82a8affa453b851056d181dfba9b5d8d022885"
+    },
+    {
+      "path": "output/app-store/ready/03-schedule-1179x2556.png",
+      "bytes": 3444584,
+      "sha256": "046f06372689d9b337eb9edc93933580a8961d8564c4be74a828f50a5edf4e34"
+    },
+    {
+      "path": "output/app-store/ready/04-discover-1179x2556.png",
+      "bytes": 3346808,
+      "sha256": "59e39082924fc38d4ca35ca5e9b9d59a8c019e522d1e65487b162f210dc3285a"
+    },
+    {
+      "path": "output/app-store/ready/05-campaign-header-5244x2950.png",
+      "bytes": 13296686,
+      "sha256": "a5b82787da8312617a31622b95f81504b7fcd8072dee96acca5d711e65da74f7"
+    }
+  ],
+  "portraitSlot": "iPhone with Dynamic Island (medium display)",
+  "portraitDimensions": [
+    1179,
+    2556
+  ],
+  "portraitOrder": [
+    "Home",
+    "Library",
+    "Schedule",
+    "Discover"
+  ],
+  "portraitCountAfterReload": 4,
+  "headerDimensions": [
+    5244,
+    2950
+  ],
+  "headerCountAfterReload": 1,
+  "appPreviewCount": 0,
+  "savedAndReloadedVerified": true,
+  "saveButtonDisabledAfterReload": true,
+  "saveBehavior": "Asset attachments persist automatically; Save was disabled. Both 4/10 screenshots and 1/1 header survived reload.",
+  "screenshots": [
+    "docs/qa/2026-10-06/app-store/campaign-portraits-saved-visible.jpg",
+    "docs/qa/2026-10-06/app-store/campaign-header-saved-visible.jpg"
+  ],
+  "visibleBrandPeriodAndDynamicIslandVerified": true,
+  "storeState": "Prepare for Submission",
+  "submittedForReviewVerified": false,
+  "permissionRestoration": "Owner asked to disable Allow access to file URLs again; confirmation pending. Agent cannot open Chrome internal settings."
+}

@@ -1,0 +1,136 @@
+{
+  "status": "google_production_ready_clerk_enabled_native_signin_pending",
+  "projectId": "anime-tracker-shan2new",
+  "existingProject": true,
+  "previousOAuthConfiguration": "none",
+  "appName": "Previously",
+  "audience": "External",
+  "productionClerkInstance": "ins_3KJtgHKq296iry2eBmj1IkEQmpQ",
+  "authorizedRedirectUri": "https://clerk.previously.cognipin.com/v1/oauth_callback",
+  "clerkDefaultScopesVerified": [
+    "openid",
+    "https://www.googleapis.com/auth/userinfo.email",
+    "https://www.googleapis.com/auth/userinfo.profile"
+  ],
+  "gmailMailboxScopes": false,
+  "billingChanges": false,
+  "clientCreated": true,
+  "clerkConnectionEnabled": true,
+  "publishingStatus": "In production",
+  "productionSignInVerified": false,
+  "approvalScreenshot": "google-oauth-policy-approval.png",
+  "sources": [
+    "https://clerk.com/docs/guides/configure/auth-strategies/social-connections/google",
+    "https://support.google.com/cloud/answer/15549945?hl=en",
+    "https://support.google.com/cloud/answer/13463073?hl=en"
+  ],
+  "policyAccepted": true,
+  "clientName": "Previously production \u2014 Clerk",
+  "clientId": "704925514314-2ad2cqjnl76i8fk6pcgj24lhkjp6j8k3.apps.googleusercontent.com",
+  "authorizedJavascriptOrigins": [
+    "https://previously.cognipin.com"
+  ],
+  "brandingSaved": true,
+  "brandingUrls": {
+    "home": "https://previously.cognipin.com",
+    "privacy": "https://previously.cognipin.com/privacy",
+    "terms": "https://previously.cognipin.com/terms"
+  },
+  "authorizedDomains": [
+    "cognipin.com"
+  ],
+  "logoUploaded": false,
+  "googleConsentScopesConfigured": [
+    "openid",
+    "https://www.googleapis.com/auth/userinfo.email",
+    "https://www.googleapis.com/auth/userinfo.profile"
+  ],
+  "sensitiveScopes": [],
+  "restrictedScopes": [],
+  "replacementSecretStoredPrivately": true,
+  "originalSecretRetirement": "disabled_and_deleted_verified_after_reload",
+  "proofs": [
+    "google-policy-accepted-created-visible.jpg",
+    "google-client-ready-visible.png",
+    "google-branding-saved-visible.png",
+    "google-production-audience-visible.png",
+    "google-identity-scopes-saved-visible.png",
+    "google-verification-not-required-visible.png",
+    "google-original-secret-retirement-approval-visible.png",
+    "clerk-cli-applications-manage-offline-approval.png",
+    "clerk-access-only-plan.json",
+    "clerk-access-only-consent-visible.png"
+  ],
+  "scopeVerificationRequired": false,
+  "brandingVerificationStatus": "Your branding is not being shown to users",
+  "brandingVerified": false,
+  "verifiedAt": "2026-10-06T15:48:55.918232+00:00",
+  "clerkConfigurationPath": {
+    "officialCli": "clerk@3.4.0",
+    "api": "Clerk Platform API",
+    "endpoint": "/v1/platform/applications/app_3FUb7r97UcdmzHsvIHPipn3PbtD/instances/ins_3KJtgHKq296iry2eBmj1IkEQmpQ/config",
+    "schemaEndpoint": "/v1/platform/applications/app_3FUb7r97UcdmzHsvIHPipn3PbtD/instances/ins_3KJtgHKq296iry2eBmj1IkEQmpQ/config/schema",
+    "requestedScopes": [
+      "applications:manage"
+    ],
+    "displayedManagementPermission": "Manage applications",
+    "displayedDuration": null,
+    "updatedDurationApprovalPending": false,
+    "allowClicked": true,
+    "providerPatchPerformed": false,
+    "revocationPlan": "Documented OAuth revoke endpoint and local token/verifier/code/URL removal; JWT may remain valid until actual expiry. No refresh requested.",
+    "offlineAccessRequested": false,
+    "accessOnlyConsentRootReviewPending": false,
+    "priorManagementPermissionOwnerApproved": true,
+    "accessOnlyPlan": "clerk-access-only-plan.json",
+    "actualReturnedScopes": [
+      "applications:manage",
+      "offline_access"
+    ],
+    "unexpectedRefreshRevokedHTTP": 200,
+    "actualJWTExpiryUTC": "2026-10-07T15:46:21Z",
+    "managementUseReady": false,
+    "configSchemaFetched": false,
+    "state": "local_credentials_removed_platform_claims_denied",
+    "refreshRevocationHTTP": 200,
+    "accessRevocationHTTP": 400,
+    "accessRevocationError": "unsupported_token_type",
+    "immediateJWTInvalidationClaimed": false,
+    "localTokenVerifierCodeURLRemoved": true,
+    "managementRequest": "GET exact Previously production config/schema",
+    "managementHTTP": 401,
+    "managementErrorCode": "platform_oauth_access_token_missing_claims",
+    "providerMutationPerformed": false,
+    "additionalScopesOrRegrantPerformed": false,
+    "completedAt": "2026-10-06T15:48:55.917398+00:00"
+  },
+  "ownerCredentialHandoff": {
+    "state": "owner_saved_credentials_stored_connection_activated",
+    "publicClientIDFilled": true,
+    "clientSecretEmpty": null,
+    "tabId": "1825902927",
+    "url": "https://dashboard.clerk.com/apps/app_3FUb7r97UcdmzHsvIHPipn3PbtD/instances/ins_3KJtgHKq296iry2eBmj1IkEQmpQ/user-authentication/sso-connections/builtin/oauth_google",
+    "receipt": "clerk-provider-owner-handoff.json",
+    "proof": "clerk-google-owner-restored-visible.png",
+    "privateUIEntryPerformed": false,
+    "finalEnableSubmitted": true,
+    "privateFieldCurrentValueUnread": true,
+    "ownerCredentialSaveCompletedObserved": true,
+    "completedPublicReceipt": "clerk-provider-activation-public-readback.json"
+  },
+  "clerkConnectionEnabledProof": "clerk-provider-activation-public-readback.json",
+  "enabledFrontendReadback": "provider-frontend-readback.json",
+  "enabledVerifiedAtUTC": "2026-10-06T17:00:53.448553+00:00",
+  "originalSecretRetirementDetails": {
+    "completedAt": "2026-10-06T17:24:20.507Z",
+    "approvalSource": "Owner action-time response call_7dd9f755f0094a34836f96d8443025fd item 0",
+    "ownerConfirmedReplacementBinding": true,
+    "retiredMaskedSuffix": "q34Z",
+    "originalPresentAfterReload": false,
+    "replacementMaskedSuffix": "_XQl",
+    "replacementStatusAfterReload": "Enabled",
+    "verifiedAfterReload": true,
+    "receipt": "docs/qa/2026-10-06/app-store/google-original-secret-retirement.json",
+    "proof": "docs/qa/2026-10-06/app-store/google-original-secret-retired-visible.png"
+  }
+}

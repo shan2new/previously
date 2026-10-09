@@ -4,6 +4,7 @@ import { isSuspended } from '../services/moderation.js'
 import { getUserByClerkId, upsertUser, type AppUser } from '../services/users.js'
 import { authConfigFromEnv } from './authConfig.js'
 import { resolveIdentity } from './identity.js'
+import { AccountErasedError, deletionResponse, deletionState, finishDeletion, reconcileIndependentDeletions } from '../services/deletionLedger.js'
 
 declare module 'fastify' {
   interface FastifyRequest {
@@ -54,16 +55,38 @@ export async function authenticate(req: FastifyRequest, reply: FastifyReply): Pr
   if (!token) return reply.code(401).send({ error: 'missing bearer token' })
   const id = await resolveIdentity(token, authConfigFromEnv())
   if (!id) return reply.code(401).send({ error: 'invalid token' })
+  const statusRequest = req.method === 'GET' && req.routeOptions.url === '/me/deletion'
+  const deleteRequest = req.method === 'DELETE' && req.routeOptions.url === '/me'
+  async function erasedResponse() {
+    let row = await deletionState(id!.clerkId)
+    if (row && deleteRequest) row = await finishDeletion(id!.clerkId, req.log) ?? row
+    if (row && (statusRequest || deleteRequest)) {
+      return reply.code(row.completedAt ? 200 : 202).send(deletionResponse(row))
+    }
+    return reply.code(401).send({ error: 'account deleted' })
+  }
+  if (statusRequest) {
+    // A durable intent can outlive an erasure transaction that rolled back. Reconcile it before
+    // claiming the account is active; failure remains an unknown outcome for the client's hold.
+    await reconcileIndependentDeletions()
+    const row = await deletionState(id.clerkId)
+    return row ? reply.code(row.completedAt ? 200 : 202).send(deletionResponse(row))
+      : reply.send({ deleted: false, status: 'active' })
+  }
   const suspended = await isSuspended(id.clerkId)
   if (suspended && !suspendedMayCall(req.method, req.routeOptions.url)) {
     return reply.code(403).send({ error: 'account_suspended' })
   }
-  if (wasErased(id.clerkId)) return reply.code(401).send({ error: 'account deleted' })
+  if (wasErased(id.clerkId)) return erasedResponse()
   if (suspended && req.method === 'GET') {
     const existing = await getUserByClerkId(id.clerkId)
     if (!existing) return reply.code(404).send({ error: 'account not found' })
     req.user = existing
     return
   }
-  req.user = await upsertUser(id.clerkId, id.email)
+  try { req.user = await upsertUser(id.clerkId, id.email) }
+  catch (error) {
+    if (error instanceof AccountErasedError) return erasedResponse()
+    throw error
+  }
 }

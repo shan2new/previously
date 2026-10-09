@@ -1,0 +1,26 @@
+{
+  "schema": "xcodebuildmcp.output.launch-result",
+  "schemaVersion": "2",
+  "didError": false,
+  "error": null,
+  "data": {
+    "summary": {
+      "status": "SUCCEEDED"
+    },
+    "artifacts": {
+      "simulatorId": "F3AD17A6-813D-4C7E-8263-6383F952302C",
+      "bundleId": "com.cognipin.previously",
+      "processId": 5409,
+      "runtimeLogPath": "/Users/shan2new/Library/Developer/XcodeBuildMCP/workspaces/previously-2bd4c895d527/logs/com.cognipin.previously_2026-10-06T14-38-34-922Z_helperpid5400_ownerpid5364_dc79ddba.log",
+      "osLogPath": "/Users/shan2new/Library/Developer/XcodeBuildMCP/workspaces/previously-2bd4c895d527/logs/com.cognipin.previously_oslog_2026-10-06T14-38-37-540Z_helperpid5446_ownerpid5364_869b665e.log"
+    },
+    "diagnostics": {
+      "warnings": [],
+      "errors": []
+    }
+  },
+  "nextSteps": [
+    "Open Simulator app to see it: xcodebuildmcp simulator open",
+    "Stop app in simulator: xcodebuildmcp simulator stop --simulator-id F3AD17A6-813D-4C7E-8263-6383F952302C --bundle-id com.cognipin.previously"
+  ]
+}

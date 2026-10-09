@@ -1,0 +1,10 @@
+{
+  "checkedAtUTC": "2026-10-06T17:14:42.066Z",
+  "hash": "#section-5",
+  "path": "/privacy",
+  "scrollWidth": 320,
+  "sectionTop": 54.8828125,
+  "width": 320,
+  "passed": true,
+  "note": "Measured after the normal smooth-scroll animation settled; immediate intermediate position was not final state."
+}

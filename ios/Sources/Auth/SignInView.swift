@@ -17,6 +17,8 @@ struct SignInView: View {
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @Environment(\.dynamicTypeSize) private var typeSize
     @State private var showClerkAuth = false
+    @State private var clerkAuthView: AuthView?
+    @AppStorage(AccountDeletionNotice.key) private var deletionNotice = ""
     /// `-devSignInId <clerkId>` launch argument (DEBUG, like `-recapDemo`): pre-fills the field so
     /// a scripted simulator run can sign in without typing into the device.
     @State private var devId = UserDefaults.standard.string(forKey: "devSignInId") ?? "demo-user"
@@ -38,6 +40,12 @@ struct SignInView: View {
             if !holding {
                 VStack(spacing: 0) {
                     Spacer(minLength: 0)
+                    if !deletionNotice.isEmpty {
+                        Text(deletionNotice).type(ThemeType.caption)
+                            .multilineTextAlignment(.center)
+                            .padding(.bottom, ThemeSpace.x4)
+                            .accessibilityIdentifier("account.deletion.notice")
+                    }
                     action
                 }
                 .padding(.horizontal, ThemeSpace.x6)
@@ -102,7 +110,7 @@ struct SignInView: View {
     private var action: some View {
         VStack(spacing: ThemeSpace.x3) {
             if AppConfig.isClerkConfigured {
-                Button("Sign in") { showClerkAuth = true }
+                Button("Sign in", action: presentClerkAuth)
                     .buttonStyle(PrimaryButtonStyle2())
             } else if devSignInAvailable {
                 #if DEBUG
@@ -123,30 +131,37 @@ struct SignInView: View {
             }
         }
         .animation(ThemeMotion.pick(ThemeMotion.uiGentle, reduceMotion: reduceMotion), value: auth.lastError)
-        .sheet(isPresented: $showClerkAuth) {
-            AuthView()
+        .sheet(isPresented: $showClerkAuth, onDismiss: { clerkAuthView = nil }) {
+            clerkAuthView
                 .clerkAppIconView {
                     PreviouslyMark(width: 36, lit: true)
                         .padding(.bottom, ThemeSpace.x6)
                         .accessibilityHidden(true)
                 }
                 .environment(Clerk.shared)
-                .onChange(of: Clerk.shared.session != nil) { _, signedIn in
-                    if signedIn {
-                        auth.refreshClerkSignInState()
-                        showClerkAuth = false
-                    }
-                }
         }
         #if DEBUG
         // Capture the actual public credential sheet without starting an authentication attempt.
         .onAppear {
             if AppConfig.isClerkConfigured,
                UserDefaults.standard.bool(forKey: "signInCaptureSheet") {
-                showClerkAuth = true
+                presentClerkAuth()
             }
         }
         #endif
+    }
+
+    private func presentClerkAuth() {
+        guard !showClerkAuth, clerkAuthView == nil else { return }
+        // AuthView initializes observable SDK state. Construct it outside body tracking and
+        // retain it for this presentation so sheet reevaluation cannot repeat that setup.
+        let manager = auth
+        let presented = $showClerkAuth
+        clerkAuthView = AuthView(onAuthComplete: {
+            manager.refreshClerkSignInState()
+            presented.wrappedValue = false
+        })
+        showClerkAuth = true
     }
 }
 
@@ -168,6 +183,7 @@ private struct DevSignInCard: View {
                 .foregroundStyle(ThemeColor.textSecondary)
                 .fixedSize(horizontal: false, vertical: true)
             TextField("dev user id", text: $devId)
+                .qaIdentifier("qa.signin.dev.field")
                 .textInputAutocapitalization(.never)
                 .autocorrectionDisabled()
                 .type(ThemeType.body)
@@ -183,6 +199,7 @@ private struct DevSignInCard: View {
                     .strokeBorder(ThemeColor.stroke, lineWidth: 1))
                 .padding(.top, ThemeSpace.x1)
             Button("Continue", action: onContinue)
+                .qaIdentifier("qa.signin.dev.submit")
                 .buttonStyle(PrimaryButtonStyle2())
                 .padding(.top, ThemeSpace.x1)
         }

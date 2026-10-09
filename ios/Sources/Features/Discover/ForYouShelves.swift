@@ -60,7 +60,7 @@ struct ForYouGroup: Identifiable {
 
 extension RecommendationItem {
     /// "Anime · 2019 · Action · Fantasy" — what it is, when, two genres.
-    var factsLine: String {
+    @MainActor var factsLine: String {
         var bits = [source.kindLead].compactMap { $0 }
         if let year { bits.append(String(year)) }
         bits += genres.prefix(2)
@@ -69,7 +69,7 @@ extension RecommendationItem {
 
     /// The tile's one fact — as short as the Library card's ("Anime · 2019"): the two genres wrapped
     /// the grey line to a second row, so For you's cards stood taller than the Library's.
-    var tileFacts: String { [source.kindLead, year.map(String.init)].compactMap { $0 }.joined(separator: " \u{00B7} ") }
+    @MainActor var tileFacts: String { [source.kindLead, year.map(String.init)].compactMap { $0 }.joined(separator: " \u{00B7} ") }
 
     var posterURL: String? { stub?.tilePoster.url ?? images?.portrait }
 }

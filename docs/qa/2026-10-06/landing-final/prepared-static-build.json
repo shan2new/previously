@@ -1,0 +1,113 @@
+{
+  "checkedAt": "2026-10-06T12:37:33.722600+00:00",
+  "scope": "Local prepared copy and static-export verification; not deployed or effective policy",
+  "qualifiedLocalBuild": true,
+  "node": "24.21.0",
+  "next": "16.3.8",
+  "canonicalOrigin": "https://previously.cognipin.com",
+  "draft": true,
+  "effectiveDate": null,
+  "checks": {
+    "lint": "pass",
+    "typescript": "pass",
+    "nextStaticBuild": "pass",
+    "htmlMetadataAndCopy": "pass",
+    "robotsSitemap": "pass"
+  },
+  "pages": [
+    {
+      "path": "/",
+      "h1": 1,
+      "canonical": [
+        "https://previously.cognipin.com"
+      ],
+      "robots": [
+        "index, follow"
+      ],
+      "draftVisible": false,
+      "effectiveDateVisible": false,
+      "operatorContactLinked": true,
+      "externalScripts": [],
+      "sha256": "60a6cb9d1c4ad6aa3bd9a6cc1f87980cf2048a06c3d47990dec039314495a010"
+    },
+    {
+      "path": "/privacy",
+      "h1": 1,
+      "canonical": [
+        "https://previously.cognipin.com/privacy"
+      ],
+      "robots": [
+        "noindex, follow"
+      ],
+      "draftVisible": true,
+      "effectiveDateVisible": false,
+      "operatorContactLinked": true,
+      "externalScripts": [],
+      "sha256": "e5cb11ec7c704068227f008d61c31a57fb31ccce753a728e5395c1f9c5e6e3e9"
+    },
+    {
+      "path": "/terms",
+      "h1": 1,
+      "canonical": [
+        "https://previously.cognipin.com/terms"
+      ],
+      "robots": [
+        "noindex, follow"
+      ],
+      "draftVisible": true,
+      "effectiveDateVisible": false,
+      "operatorContactLinked": true,
+      "externalScripts": [],
+      "sha256": "e3a100b46c252f276de60e41c60e3fc56e3a8bf9dde5970434d671edce7425bb"
+    },
+    {
+      "path": "/support",
+      "h1": 1,
+      "canonical": [
+        "https://previously.cognipin.com/support"
+      ],
+      "robots": [
+        "index, follow"
+      ],
+      "draftVisible": false,
+      "effectiveDateVisible": false,
+      "operatorContactLinked": true,
+      "externalScripts": [],
+      "sha256": "d1907d84c9063c966d59b2f1e4d1c309422daf9615b1af96c530af4020ccd7fb"
+    },
+    {
+      "path": "/delete-account",
+      "h1": 1,
+      "canonical": [
+        "https://previously.cognipin.com/delete-account"
+      ],
+      "robots": [
+        "noindex, follow"
+      ],
+      "draftVisible": true,
+      "effectiveDateVisible": false,
+      "operatorContactLinked": true,
+      "externalScripts": [],
+      "sha256": "84a2360a0069812f457a32fd78b6b6b0eb694a664f6137a9302942541b0662f1"
+    }
+  ],
+  "sourceSha256": {
+    "lib/legal-content.ts": "f347668070e7f65a6b921ad32d37fad708a3ba243f99750d1edf59f53e86d9c6",
+    "lib/site-config.ts": "cc8bff421690b6b4540fe768360270509820ee4bb0212b141edf16b420529d08",
+    "app/legal-document.tsx": "71945f494397425d1c205fc588d086b663cfe54afec6d3fae3227b34ed8a2ec4",
+    "app/layout.tsx": "87563fc0254d8665d4d7305b3f85d0e05a011c5b1471a4957f99ba06f1b6b227",
+    "app/robots.ts": "86f5b149750d791d17f6d630a9d13a0044c885a9150b9c39444156ff7ee9ae09",
+    "app/sitemap.ts": "dde86d0e4cc8d0ab27398abf47027c5bdbb0581369057408d0ea40e9fbd9ff11",
+    "package.json": "143282cf1f1870afdf0b45a5321074820693f6e9266bb352af0c4a2332e4a075",
+    "package-lock.json": "f53946053156f3efa06d8b7f7c55cc6fbf44f9a6838d49a296afd7c1b1365198",
+    "next.config.ts": "9dc0b8454c68dae1ace984916f55aa1cc7ffddc2f21149f2bb32a7e78f867d49",
+    "vercel.json": "feea30e74521edab9e755be68d43de656656ae3201a1b0f7ce19b977fa63db8c"
+  },
+  "initialCheckCorrection": "Next normalizes the home canonical URL to the bare HTTPS origin; initial inspection expected a trailing slash. Assertion expectation corrected; no source change.",
+  "publicationPending": [
+    "root production behavior/retention verification",
+    "historic manual backup treatment",
+    "actual effective date and draft=false",
+    "final deployment and public browser/HTTP verification"
+  ]
+}

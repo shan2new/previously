@@ -39,7 +39,13 @@ final class TrailerPlayback: Identifiable {
     /// The controls are on the picture.
     private(set) var chromeVisible = false
     /// The full screen holds the player (its surface owns the web view).
-    var presenting = false
+    var presenting = false {
+        didSet {
+            #if PREVIOUSLY_QA
+            publishQAEvidence()
+            #endif
+        }
+    }
     /// A scrub in progress: the time the finger is on (the controls stay while it lasts).
     private(set) var scrubbing: Double?
 
@@ -47,6 +53,16 @@ final class TrailerPlayback: Identifiable {
     @ObservationIgnored private let bridge: Bridge
     @ObservationIgnored private var hideTask: Task<Void, Never>?
     @ObservationIgnored private var destroyed = false
+    #if PREVIOUSLY_QA
+    @ObservationIgnored private let qaInstance = UUID().uuidString
+    @ObservationIgnored private var qaEmbedHost = ""
+    @ObservationIgnored private var qaProviderState = -1
+    @ObservationIgnored private var qaProviderTime: Double = 0
+    @ObservationIgnored private var qaProviderDuration: Double = 0
+    @ObservationIgnored private var qaProviderMuted: Bool?
+    @ObservationIgnored private var qaProviderError: Int?
+    @ObservationIgnored private var qaProviderReports = 0
+    #endif
 
     /// Seconds of play before the picture replaces the still.
     private static let revealAfter: Double = 0.4
@@ -62,6 +78,8 @@ final class TrailerPlayback: Identifiable {
         let bridge = Bridge()
         self.bridge = bridge
         let config = WKWebViewConfiguration()
+        // Trailer browsing does not keep provider cookies or website data between players.
+        config.websiteDataStore = .nonPersistent()
         config.allowsInlineMediaPlayback = true
         config.mediaTypesRequiringUserActionForPlayback = []
         config.allowsPictureInPictureMediaPlayback = false
@@ -74,8 +92,15 @@ final class TrailerPlayback: Identifiable {
         view.scrollView.backgroundColor = .clear
         // Every touch is SwiftUI's: the post's gestures, the controls, the full screen's taps.
         view.isUserInteractionEnabled = false
+        // The native controls provide the accessible player. Hide WebKit's offscreen provider
+        // controls at the UIKit boundary too; SwiftUI's representable wrapper is not sufficient.
+        view.isAccessibilityElement = false
+        view.accessibilityElementsHidden = true
         self.webView = view
         bridge.playback = self
+        #if PREVIOUSLY_QA
+        publishQAEvidence()
+        #endif
         if let id = video.youtubeID {
             view.loadHTMLString(Self.page(videoId: id, start: start, muted: muted), baseURL: Self.origin)
         } else {
@@ -187,6 +212,9 @@ final class TrailerPlayback: Identifiable {
     func destroy() {
         guard !destroyed else { return }
         destroyed = true
+        #if PREVIOUSLY_QA
+        publishQAEvidence()
+        #endif
         hideTask?.cancel()
         webView.configuration.userContentController.removeScriptMessageHandler(forName: Self.channel)
         webView.stopLoading()
@@ -203,10 +231,20 @@ final class TrailerPlayback: Identifiable {
 
     fileprivate func received(_ body: [String: Any]) {
         guard let kind = body["t"] as? String else { return }
+        #if PREVIOUSLY_QA
+        defer { publishQAEvidence() }
+        #endif
         switch kind {
         case "ready":
             if let d = (body["d"] as? NSNumber)?.doubleValue, d > 0 { duration = d }
+            #if PREVIOUSLY_QA
+            if let raw = body["h"] as? String { qaEmbedHost = URL(string: raw)?.host ?? "" }
+            qaProviderDuration = duration
+            #endif
         case "state":
+            #if PREVIOUSLY_QA
+            qaProviderState = body["s"] as? Int ?? -1
+            #endif
             // YouTube's states: 1 playing, 2 paused, 3 buffering, 0 ended, 5 cued, -1 unstarted.
             switch body["s"] as? Int {
             case 1:
@@ -227,15 +265,57 @@ final class TrailerPlayback: Identifiable {
         case "time":
             let c = (body["c"] as? NSNumber)?.doubleValue ?? current
             let d = (body["d"] as? NSNumber)?.doubleValue ?? 0
+            #if PREVIOUSLY_QA
+            qaProviderReports += 1
+            if c.isFinite { qaProviderTime = c }
+            if d.isFinite, d > 0 { qaProviderDuration = d }
+            qaProviderMuted = body["m"] as? Bool
+            if let state = body["s"] as? Int { qaProviderState = state }
+            #endif
             if d > 0, abs(d - duration) > 0.5 { duration = d }
             if scrubbing == nil { current = c }
             if !moving, phase == .playing || phase == .buffering, c >= Self.revealAfter { moving = true }
         case "error":
+            #if PREVIOUSLY_QA
+            qaProviderError = body["c"] as? Int
+            #endif
             phase = .failed
         default:
             break
         }
     }
+
+    #if PREVIOUSLY_QA
+    /// Read-only diagnostics are published from real IFrame API callbacks, rather than the
+    /// optimistic state the native controls draw before a provider acknowledges a command.
+    private func publishQAEvidence() {
+        struct Snapshot: Encodable {
+            let instance: String
+            let key: String
+            let host: String
+            let persistent: Bool
+            let providerState: Int
+            let current: Double
+            let duration: Double
+            let muted: Bool?
+            let moving: Bool
+            let presenting: Bool
+            let destroyed: Bool
+            let error: Int?
+            let providerReports: Int
+        }
+        let snapshot = Snapshot(instance: qaInstance, key: key, host: qaEmbedHost,
+            persistent: webView.configuration.websiteDataStore.isPersistent,
+            providerState: qaProviderState, current: qaProviderTime, duration: qaProviderDuration,
+            muted: qaProviderMuted, moving: moving, presenting: presenting, destroyed: destroyed,
+            error: qaProviderError, providerReports: qaProviderReports)
+        let encoder = JSONEncoder()
+        encoder.outputFormatting = [.sortedKeys]
+        if let data = try? encoder.encode(snapshot), let value = String(data: data, encoding: .utf8) {
+            TrailerPlaybackQAEvidence.shared.publish(value)
+        }
+    }
+    #endif
 
     /// WebKit keeps its message handlers strongly; the bridge keeps the playback weakly, so a
     /// playback that is let go is not kept alive by its own page.
@@ -263,23 +343,34 @@ final class TrailerPlayback: Identifiable {
     private static func page(videoId: String, start: Double, muted: Bool) -> String {
         let id = videoId.filter { $0.isLetter || $0.isNumber || $0 == "-" || $0 == "_" }
         let from = max(0, Int(start))
+        #if PREVIOUSLY_QA
+        let qaTimeFields = ",m:player.isMuted(),s:player.getPlayerState()"
+        let qaReadyFields = ",h:e.target.getIframe().src"
+        let tickerCondition = "player&&player.getPlayerState"
+        #else
+        let qaTimeFields = ""
+        let qaReadyFields = ""
+        let tickerCondition = "player&&player.getPlayerState&&player.getPlayerState()===1"
+        #endif
         return """
         <!doctype html><html><head><meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
         <style>html,body{margin:0;padding:0;background:#000;height:100%;overflow:hidden}#p{position:absolute;left:0;top:-100%;width:100%;height:300%;border:0}</style></head>
-        <body><div id="p"></div>
+        <body><iframe id="p" width="100%" height="100%" title="YouTube trailer"
+          src="https://www.youtube-nocookie.com/embed/\(id)?enablejsapi=1&amp;autoplay=1&amp;mute=1&amp;playsinline=1&amp;controls=0&amp;rel=0&amp;iv_load_policy=3&amp;disablekb=1&amp;fs=0&amp;modestbranding=1&amp;cc_load_policy=0&amp;start=\(from)&amp;origin=https%3A%2F%2Fpreviously.local"
+          allow="autoplay; encrypted-media"></iframe>
         <script>
         var player;
         function post(m){try{window.webkit.messageHandlers.\(channel).postMessage(m)}catch(e){}}
-        function tick(){if(!player||!player.getCurrentTime)return;post({t:'time',c:player.getCurrentTime(),d:player.getDuration()});}
+        function tick(){if(!player||!player.getCurrentTime)return;post({t:'time',c:player.getCurrentTime(),d:player.getDuration()\(qaTimeFields)});}
         function onYouTubeIframeAPIReady(){
-          player=new YT.Player('p',{width:'100%',height:'100%',videoId:'\(id)',
-            playerVars:{autoplay:1,mute:1,playsinline:1,controls:0,rel:0,iv_load_policy:3,disablekb:1,fs:0,modestbranding:1,cc_load_policy:0,start:\(from),origin:'https://previously.local'},
+          // Bind the existing privacy-enhanced iframe; creating one here uses youtube.com.
+          player=new YT.Player('p',{
             events:{
-              onReady:function(e){\(muted ? "e.target.mute();" : "e.target.unMute();e.target.setVolume(100);")e.target.playVideo();post({t:'ready',d:e.target.getDuration()});},
+              onReady:function(e){\(muted ? "e.target.mute();" : "e.target.unMute();e.target.setVolume(100);")e.target.playVideo();post({t:'ready',d:e.target.getDuration()\(qaReadyFields)});},
               onStateChange:function(e){post({t:'state',s:e.data});tick();},
               onError:function(e){post({t:'error',c:e.data});}
             }});
-          setInterval(function(){if(player&&player.getPlayerState&&player.getPlayerState()===1){tick();}},250);
+          setInterval(function(){if(\(tickerCondition)){tick();}},250);
         }
         function cmd(n,a){if(!player||!player.playVideo)return;
           if(n==='play'){player.playVideo();}
@@ -293,6 +384,37 @@ final class TrailerPlayback: Identifiable {
         <script src="https://www.youtube.com/iframe_api"></script>
         </body></html>
         """
+    }
+}
+
+#if PREVIOUSLY_QA
+@MainActor
+@Observable
+final class TrailerPlaybackQAEvidence {
+    static let shared = TrailerPlaybackQAEvidence()
+    private(set) var value = "{}"
+    private init() {}
+    fileprivate func publish(_ value: String) { self.value = value }
+}
+#endif
+
+extension View {
+    /// The modal's picture intentionally hides WebKit from accessibility. QA reads the provider
+    /// report beside the native controls; production keeps its existing accessibility tree.
+    @MainActor @ViewBuilder
+    func qaTrailerEvidence() -> some View {
+        #if PREVIOUSLY_QA
+        overlay(alignment: .topLeading) {
+            Text("QA trailer provider")
+                .accessibilityIdentifier("qa.trailer.state")
+                .accessibilityValue(TrailerPlaybackQAEvidence.shared.value)
+                .frame(width: 1, height: 1)
+                .opacity(0.01)
+                .allowsHitTesting(false)
+        }
+        #else
+        self
+        #endif
     }
 }
 

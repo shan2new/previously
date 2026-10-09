@@ -58,37 +58,23 @@ struct ImportPreview: Decodable, Sendable {
     let byStatus: [String: Int]
     let unmatched: Unmatched
     let sample: [FranchiseSummary]
+    /// Deliberately omitted titles; older servers do not send this field.
+    let skipped: ImportSkipped?
 
     var total: Int { ready + toFetch }
+    var adultSkipped: Int { skipped?.adultCount ?? 0 }
     /// An anime list counts ENTRIES, and this app keeps a series' seasons as one show: the two
     /// numbers differ, and the sheet never calls an entry a show.
     var countsEntries: Bool { source != "tvtime" }
-}
-
-struct ImportProgress: Codable, Sendable, Equatable {
-    let id: String
-    let state: String
-    /// Shows in the library from this import so far.
-    let shows: Int
-    /// Still to fetch, in the list's unit.
-    let remaining: Int
-    let failed: Int
-
-    var isDone: Bool { state == "done" }
-
-    /// The import as it stands when nobody is working on it any more: what was still to come
-    /// did not.
-    var abandoned: ImportProgress {
-        ImportProgress(id: id, state: "done", shows: shows, remaining: 0, failed: failed + remaining)
-    }
 }
 
 extension AppModel {
     static let importProgressKey = "previously.import.progress"
 
     func resumeImport() {
+        guard !isIsolated, !erasing else { return }
         if importProgress == nil,
-           let data = UserDefaults.standard.data(forKey: Self.importProgressKey),
+           let data = AccountLocalStore.shared.read("import-progress.json", owner: accountStorage),
            let saved = try? JSONDecoder().decode(ImportProgress.self, from: data) {
             importProgress = saved
         }

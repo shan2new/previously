@@ -1,0 +1,369 @@
+{
+  "runAt": "2026-10-06T10:43:57.457Z",
+  "fixtureVersion": "progress-faults-v2-ordered-intents",
+  "boundary": "Real production HTTP routes/dev issuer/auth/services + real PostgreSQL migrations; synthetic accounts; loopback-only proxy; fresh scratch database; no provider calls or native-client execution.",
+  "database": "previously_qa_progress_aeda57870b054cb18d573e8da22de1c1",
+  "cases": [
+    {
+      "name": "normal absolute PUT is bounded by canonical media count",
+      "status": "passed",
+      "durationMs": 16,
+      "evidence": {
+        "response": {
+          "ok": true
+        },
+        "canonicalEpisodes": 12,
+        "note": "Legacy route returns ok only; client cannot infer the clamp from its receipt."
+      }
+    },
+    {
+      "name": "same absolute progress PUT replayed twice has one final state",
+      "status": "passed",
+      "durationMs": 16,
+      "evidence": {
+        "mediaId": 310000001,
+        "episodes": 5,
+        "requests": 3,
+        "persistedRowsForMedia": 1
+      }
+    },
+    {
+      "name": "lost single-part receipt after commit followed by two retries",
+      "status": "passed",
+      "durationMs": 15,
+      "evidence": {
+        "lostReceipt": true,
+        "upstreamStatus": 200,
+        "canonicalEpisodesAfterLoss": 6,
+        "retries": 2
+      }
+    },
+    {
+      "name": "single-part failure before commit changes nothing and retry succeeds",
+      "status": "passed",
+      "durationMs": 10,
+      "evidence": {
+        "failureStatus": 500,
+        "beforeCommitEpisodes": 2,
+        "retryEpisodes": 7
+      }
+    },
+    {
+      "name": "compound second-part failure rolls back progress and subscription then retries",
+      "status": "passed",
+      "durationMs": 13,
+      "evidence": {
+        "rollbackVerified": true,
+        "retryResponse": {
+          "ok": true,
+          "franchiseId": "10000000-0000-4000-8000-000000000001",
+          "status": "completed",
+          "progress": [
+            {
+              "mediaId": 310000001,
+              "episodes": 8
+            },
+            {
+              "mediaId": 310000002,
+              "episodes": 9
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "lost compound receipt after commit followed by two retries",
+      "status": "passed",
+      "durationMs": 17,
+      "evidence": {
+        "lostReceipt": true,
+        "upstreamStatus": 200,
+        "counts": {
+          "progress": 2,
+          "subscriptions": 1
+        }
+      }
+    },
+    {
+      "name": "invalid compound part cannot partially commit valid part or status",
+      "status": "passed",
+      "durationMs": 6,
+      "evidence": {
+        "response": {
+          "error": "media 310000099 is not a unique member of this franchise"
+        },
+        "unchanged": true
+      }
+    },
+    {
+      "name": "two authenticated accounts write independent progress and status",
+      "status": "passed",
+      "durationMs": 8,
+      "evidence": {
+        "accountA": [
+          {
+            "mediaId": 310000001,
+            "episodes": 2
+          },
+          {
+            "mediaId": 310000002,
+            "episodes": 3
+          }
+        ],
+        "accountB": [
+          {
+            "mediaId": 310000001,
+            "episodes": 10
+          }
+        ],
+        "foreignUserFieldRejected": true
+      }
+    },
+    {
+      "name": "lost watch-session receipt and replay preserve one client-generated id",
+      "status": "passed",
+      "durationMs": 15,
+      "evidence": {
+        "requests": 3,
+        "persistedRows": 1,
+        "sessionId": "20000000-0000-4000-8000-000000000001"
+      }
+    },
+    {
+      "name": "another account cannot read replace or delete a watch-session id",
+      "status": "passed",
+      "durationMs": 13,
+      "evidence": {
+        "foreignWriteStatus": 404,
+        "foreignDeleteNoop": true,
+        "foreignReadEmpty": true
+      }
+    },
+    {
+      "name": "lost deletion receipt leaves a tombstone that rejects delayed session replay",
+      "status": "passed",
+      "durationMs": 15,
+      "evidence": {
+        "deletedSessionReplay": 410,
+        "liveSessions": 0,
+        "tombstonePreserved": true
+      }
+    },
+    {
+      "name": "stale single-part retry must not overwrite a newer acknowledged intent",
+      "status": "passed",
+      "durationMs": 19,
+      "evidence": {
+        "canonicalEpisodes": 7
+      }
+    },
+    {
+      "name": "stale compound retry must not overwrite newer progress and status",
+      "status": "passed",
+      "durationMs": 23,
+      "evidence": {
+        "progress": [
+          {
+            "mediaId": 310000001,
+            "episodes": 0
+          },
+          {
+            "mediaId": 310000002,
+            "episodes": 0
+          }
+        ],
+        "status": "planned"
+      }
+    },
+    {
+      "name": "stale watch-session retry must not overwrite a newer completed session",
+      "status": "passed",
+      "durationMs": 15,
+      "evidence": {
+        "completedAt": 1790100000000
+      }
+    },
+    {
+      "name": "stamped failed transaction rolls back receipt and cursor then same intent retries",
+      "status": "passed",
+      "durationMs": 13,
+      "evidence": {
+        "rollback": {
+          "operations": 0,
+          "cursors": 0
+        },
+        "retry": {
+          "ok": true,
+          "applied": true,
+          "franchiseId": "10000000-0000-4000-8000-000000000001",
+          "status": "completed",
+          "progress": [
+            {
+              "mediaId": 310000001,
+              "episodes": 8
+            },
+            {
+              "mediaId": 310000002,
+              "episodes": 9
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "never committed older part intent cannot overwrite newer commit",
+      "status": "passed",
+      "durationMs": 13
+    },
+    {
+      "name": "replayed compound returns current canonical state and preserves new reset",
+      "status": "passed",
+      "durationMs": 15,
+      "evidence": {
+        "ok": true,
+        "applied": false,
+        "franchiseId": "10000000-0000-4000-8000-000000000001",
+        "status": "planned",
+        "progress": [
+          {
+            "mediaId": 310000001,
+            "episodes": 0
+          },
+          {
+            "mediaId": 310000002,
+            "episodes": 0
+          }
+        ]
+      }
+    },
+    {
+      "name": "older compound supersedes atomically after one newer part, but independent older part applies",
+      "status": "passed",
+      "durationMs": 14
+    },
+    {
+      "name": "concurrent replay applies exactly once and intentional newer decrease still applies",
+      "status": "passed",
+      "durationMs": 33,
+      "evidence": {
+        "appliedOnce": true,
+        "replayCount": 5,
+        "intentionalDecrease": 1
+      }
+    },
+    {
+      "name": "operation payload or writer changes conflict and sequence reuse conflicts",
+      "status": "passed",
+      "durationMs": 13
+    },
+    {
+      "name": "partial malformed and unsafe stamps reject without effects",
+      "status": "passed",
+      "durationMs": 6
+    },
+    {
+      "name": "unsubscribe blocks old subscribe status and progress even after explicit fresh rejoin",
+      "status": "passed",
+      "durationMs": 34,
+      "evidence": {
+        "persistentUnsubscribeBarrier": true,
+        "independentWriterArrivalOrdering": true
+      }
+    },
+    {
+      "name": "never committed old progress remains blocked after newer unsubscribe and re-subscribe",
+      "status": "passed",
+      "durationMs": 19
+    },
+    {
+      "name": "delete never-created session consumes id before delayed PUT, across writer ids",
+      "status": "passed",
+      "durationMs": 14
+    },
+    {
+      "name": "operation identities are scoped to account and session ownership cannot be bypassed",
+      "status": "passed",
+      "durationMs": 19
+    },
+    {
+      "name": "never committed old compound cannot overwrite new reset or status",
+      "status": "passed",
+      "durationMs": 21
+    },
+    {
+      "name": "lost compound receipt does not suppress its separately ordered Undo unsubscribe",
+      "status": "passed",
+      "durationMs": 17
+    },
+    {
+      "name": "mutation transaction rechecks durable erasure after earlier authentication",
+      "status": "passed",
+      "durationMs": 9,
+      "evidence": {
+        "simulatedPreviouslyAuthenticatedUser": true,
+        "durableDeletionRecheck": 401,
+        "remaining": {
+          "progress": 0,
+          "receipts": 0,
+          "cursors": 0
+        }
+      }
+    }
+  ],
+  "faults": [
+    {
+      "method": "PUT",
+      "path": "/me/progress",
+      "upstreamStatus": 200,
+      "mode": "drop_after_upstream_response"
+    },
+    {
+      "method": "PUT",
+      "path": "/me/franchises/10000000-0000-4000-8000-000000000001/progress",
+      "upstreamStatus": 200,
+      "mode": "drop_after_upstream_response"
+    },
+    {
+      "method": "PUT",
+      "path": "/me/watch-sessions/20000000-0000-4000-8000-000000000001",
+      "upstreamStatus": 204,
+      "mode": "drop_after_upstream_response"
+    },
+    {
+      "method": "DELETE",
+      "path": "/me/watch-sessions/20000000-0000-4000-8000-000000000001",
+      "upstreamStatus": 204,
+      "mode": "drop_after_upstream_response"
+    },
+    {
+      "method": "PUT",
+      "path": "/me/progress",
+      "upstreamStatus": 200,
+      "mode": "drop_after_upstream_response"
+    },
+    {
+      "method": "PUT",
+      "path": "/me/franchises/10000000-0000-4000-8000-000000000001/progress",
+      "upstreamStatus": 200,
+      "mode": "drop_after_upstream_response"
+    },
+    {
+      "method": "PUT",
+      "path": "/me/watch-sessions/20000000-0000-4000-8000-000000000001",
+      "upstreamStatus": 204,
+      "mode": "drop_after_upstream_response"
+    },
+    {
+      "method": "PUT",
+      "path": "/me/franchises/10000000-0000-4000-8000-000000000001/progress",
+      "upstreamStatus": 200,
+      "mode": "drop_after_upstream_response"
+    }
+  ],
+  "summary": {
+    "passed": 28,
+    "failed": 0,
+    "skipped": 0,
+    "total": 28
+  }
+}

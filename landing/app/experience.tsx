@@ -90,15 +90,18 @@ export function Experience() {
             href="#experience-library"
             aria-label="Explore Library in the iPhone app tour"
           >
-            <Image
-              unoptimized
-              src="/app/library-preview.webp"
-              width={1179}
-              height={2556}
-              alt="Previously on iPhone, with your Returning, Watching and Planned shows together in the Library."
-              loading="eager"
-              fetchPriority="high"
-            />
+            <span className="hero-handset-screen">
+              <Image
+                unoptimized
+                src="/app/library-current.jpg"
+                width={369}
+                height={800}
+                alt="Previously on iPhone, with your Returning, Watching and Planned shows together in the Library."
+                loading="eager"
+                fetchPriority="high"
+              />
+              <span className="hero-dynamic-island" aria-hidden="true" />
+            </span>
             <span className="hero-product-caption">
               Inside your Library <ArrowUpRight size={14} />
             </span>

@@ -1,0 +1,15 @@
+{
+  "startedAt": "2026-10-06T10:50:35.000259+00:00",
+  "database": "previously_qa_recovery_22a8a3a09ae545dd81a45fdece9f016a",
+  "host": "127.0.0.1",
+  "databaseCreated": true,
+  "databaseRemoved": true,
+  "productionDatabaseReadOrWritten": false,
+  "dotenvLoaded": false,
+  "ownedOpsRoot": "/private/var/folders/t8/18rddswj5r76q9782g0hlc9m0000gn/T/previously_qa_recovery_ops_g6wj4pau",
+  "ownedOpsRemoved": true,
+  "sourceRevision": "19649b3748eac6ca7508f86ad96be9f533406fcb",
+  "testExitCode": 0,
+  "overallExitCode": 0,
+  "finishedAt": "2026-10-06T10:50:36.887256+00:00"
+}

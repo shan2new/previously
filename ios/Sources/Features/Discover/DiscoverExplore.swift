@@ -281,6 +281,7 @@ struct DiscoverExplore: View {
         .buttonStyle(.plain)
         .accessibilityLabel(searchPrompt)
         .accessibilityAddTraits(.isSearchField)
+        .qaIdentifier("qa.search.open")
     }
 
     // MARK: The pager
@@ -334,6 +335,7 @@ struct DiscoverExplore: View {
             .scrollPosition(position(s))
             .safeAreaPadding(.top, insets.top + insetNudge)
             .safeAreaPadding(.bottom, insets.bottom)
+            .qaIdentifier("qa.scroll.discover")
             .scrollIndicators(.hidden)
             .tabBarContentMargin()
             .laneClearance(appModel)

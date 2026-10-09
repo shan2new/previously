@@ -1,0 +1,22 @@
+{
+  "id": "dpl_2BUUc6ZREKY29QVMdaF6zEr4BeGg",
+  "url": "landing-faw02og9j-shan2news-projects.vercel.app",
+  "readyState": "READY",
+  "target": "production",
+  "projectId": "prj_osATa26wuWMoLf7yLOEaXvYuiial",
+  "inspectorUrl": null,
+  "startedAt": "2026-10-06T13:08:41.634825+00:00",
+  "finishedAt": "2026-10-06T13:08:46.118509+00:00",
+  "exitCode": 0,
+  "cliVersion": "62.4.0",
+  "sourceManifestSha256": "21f9d2ee7b0148574f34aec471818d0b4a3f4833e4b7366ed2aadcbcdf27e36a",
+  "canonicalOrigin": "https://previously.cognipin.com",
+  "buildLocation": "remote Vercel",
+  "localBuildRun": false,
+  "automaticPromotionSkipped": true,
+  "rollbackId": "dpl_EMPz5q73ktnuHwhEesBQX4ZjBdhN",
+  "draft": true,
+  "effectiveDate": null,
+  "newPlanProjectOrDns": false,
+  "receiptCorrection": "CLI JSON shape nested deployment metadata; matched exact new candidate from project API by sourceManifestSha256, not redeployed."
+}

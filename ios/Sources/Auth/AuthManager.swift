@@ -1,6 +1,7 @@
 import Foundation
 import Observation
 import ClerkKit
+import AuthenticationServices
 
 // Centralizes authentication state and token vending.
 //
@@ -21,6 +22,8 @@ final class AuthManager: TokenProvider {
     private(set) var mode: Mode
     /// True once we have a usable identity (a Clerk session, or a dev id).
     private(set) var isSignedIn: Bool = false
+    /// Stable owner of account-local storage. Session renewal leaves this identity unchanged.
+    private(set) var accountID: String?
     /// Surfaced to the UI for inline error display.
     var lastError: String?
 
@@ -43,6 +46,43 @@ final class AuthManager: TokenProvider {
     /// user the wrong screen for a beat, or for good.
     private(set) var bootstrapped = false
     private var sessionWatch: Task<Void, Never>?
+    @ObservationIgnored private var acceptedSessionSignOuts: Set<String> = []
+    @ObservationIgnored private var authenticationEpoch = 0
+    @ObservationIgnored private var clerkSessionID: String?
+    @ObservationIgnored private var appleRevocationObserver: NSObjectProtocol?
+
+    /// Includes linked Apple grants even when this session was created with Google or email.
+    var linkedAppleUserIDs: Set<String> {
+        guard mode == .clerk else { return [] }
+        return Set((Clerk.shared.user?.externalAccounts ?? []).filter {
+            $0.provider == "apple" || $0.provider == "oauth_apple"
+        }.map(\.providerUserId).filter { !$0.isEmpty })
+    }
+
+    private func observeAppleRevocation() {
+        guard appleRevocationObserver == nil else { return }
+        appleRevocationObserver = NotificationCenter.default.addObserver(
+            forName: ASAuthorizationAppleIDProvider.credentialRevokedNotification, object: nil, queue: .main
+        ) { [weak self] _ in
+            Task { @MainActor in
+                guard let self, self.isSignedIn else { return }
+                let owner = self.accountID
+                let epoch = self.authenticationEpoch
+                let users = self.linkedAppleUserIDs
+                for user in users {
+                    let state = try? await ASAuthorizationAppleIDProvider().credentialState(forUserID: user)
+                    guard self.authenticationEpoch == epoch, self.accountID == owner else { return }
+                    if state == .revoked || state == .notFound {
+                        // Target only the captured Clerk session. A late Apple callback from A
+                        // must never end B's sign-in or clear B's local library.
+                        _ = await self.signOutCurrentOwner(forceLocal: true,
+                            error: "Your Apple sign-in was disconnected. Sign in again to continue.")
+                        return
+                    }
+                }
+            }
+        }
+    }
 
     /// Derive initial sign-in state. Clerk.configure() is called earlier in PreviouslyApp.init().
     ///
@@ -52,6 +92,7 @@ final class AuthManager: TokenProvider {
     /// load, read, then follow every session change it reports for the life of the app.
     func bootstrap() async {
         if AppConfig.isClerkConfigured {
+            observeAppleRevocation()
             let deadline = Date().addingTimeInterval(3)
             while !Clerk.shared.isLoaded, Date() < deadline {
                 try? await Task.sleep(for: .milliseconds(80))
@@ -68,31 +109,76 @@ final class AuthManager: TokenProvider {
             // Dev mode: signed in iff we already have a remembered dev id.
             if case let .dev(clerkId) = mode {
                 isSignedIn = !clerkId.isEmpty
+                accountID = isSignedIn ? clerkId : nil
+                authenticationEpoch += 1
             }
             bootstrapped = true
         }
+        if !isSignedIn, !AppConfig.isClerkConfigured || Clerk.shared.isLoaded { clearSignedOutCaches() }
     }
 
     /// Re-derive signed-in state from the current Clerk session.
     func refreshClerkSignInState() {
-        isSignedIn = Clerk.shared.session != nil
+        let previouslySignedIn = isSignedIn
+        let session = Clerk.shared.session
+        let owner = session?.user?.id ?? session?.publicUserData?.userId ?? Clerk.shared.user?.id
+        if let session, AccountDeletion.wasAccepted(accountID: owner) {
+            // A provider sign-out can fail after confirmed deletion. Its cached SDK session may
+            // still restore, but it can never reopen ordinary account requests on this device.
+            if isSignedIn || accountID != nil || clerkSessionID != session.id { authenticationEpoch += 1 }
+            clerkSessionID = session.id
+            isSignedIn = false
+            accountID = nil
+            lastError = nil
+            clearSignedOutCaches()
+            if acceptedSessionSignOuts.insert(session.id).inserted {
+                Task {
+                    // Target only this erased session, so a newly signed-in account survives a
+                    // late completion. Never block the sign-in screen on provider reachability.
+                    try? await Clerk.shared.auth.signOut(sessionId: session.id)
+                }
+            }
+            return
+        }
+        let nextSignedIn = session != nil
+        let nextOwner = nextSignedIn ? owner : nil
+        if isSignedIn != nextSignedIn || accountID != nextOwner || clerkSessionID != session?.id {
+            authenticationEpoch += 1
+        }
+        clerkSessionID = session?.id
+        isSignedIn = nextSignedIn
+        accountID = nextOwner
         // A fresh session answers whatever the last one failed at.
-        if isSignedIn { lastError = nil }
+        if isSignedIn {
+            lastError = nil
+            if !previouslySignedIn { UserDefaults.standard.removeObject(forKey: AccountDeletionNotice.key) }
+        } else if previouslySignedIn || Clerk.shared.isLoaded {
+            clearSignedOutCaches()
+        }
+    }
+
+    private func clearSignedOutCaches() {
+        AccountLocalStore.shared.clearCurrent()
+        LibraryExport.clearTemporaryFiles()
     }
 
     // MARK: - Dev bypass
 
     /// Sign in using a `dev:<clerkId>` bearer for local DEV_AUTH_BYPASS testing.
     func signInDev(clerkId: String) {
+        let previouslySignedIn = isSignedIn
         let trimmed = clerkId.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmed.isEmpty else {
             lastError = "Enter a dev user id."
             return
         }
         UserDefaults.standard.set(trimmed, forKey: devIdDefaultsKey)
+        authenticationEpoch += 1
         mode = .dev(clerkId: trimmed)
+        accountID = trimmed
         isSignedIn = true
         lastError = nil
+        if !previouslySignedIn { UserDefaults.standard.removeObject(forKey: AccountDeletionNotice.key) }
     }
 
     /// `false` when the session is still standing afterwards — Clerk could not end it (no
@@ -100,16 +186,47 @@ final class AuthManager: TokenProvider {
     /// Profile sheet sat there signed in with nothing to explain why.
     @discardableResult
     func signOut() async -> Bool {
+        await signOutCurrentOwner(forceLocal: false, error: nil)
+    }
+
+    /// The SDK can finish an old sign-out after another account has signed in. Target the
+    /// captured session and only complete local state changes while that owner is still current.
+    @discardableResult
+    private func signOutCurrentOwner(forceLocal: Bool, error: String?) async -> Bool {
+        let epoch = authenticationEpoch
+        let owner = accountID
+        let sessionID = clerkSessionID
+        if mode == .clerk, Clerk.shared.session?.id != sessionID {
+            // The SDK has advanced before its change event reached our observed state. Reconcile
+            // that boundary; an action from the previous screen cannot sign out this new session.
+            refreshClerkSignInState()
+            return !isSignedIn
+        }
         lastError = nil
         switch mode {
         case .clerk:
-            do { try await Clerk.shared.auth.signOut() } catch {}
+            if let sessionID { try? await Clerk.shared.auth.signOut(sessionId: sessionID) }
+            guard authenticationEpoch == epoch, accountID == owner else { return !isSignedIn }
             refreshClerkSignInState()
+            // A new session for the same account is also a new authentication boundary.
+            let actualSessionID = Clerk.shared.session?.id
+            if forceLocal, (actualSessionID == nil || actualSessionID == sessionID),
+               (accountID == owner || !isSignedIn) {
+                authenticationEpoch += 1
+                isSignedIn = false
+                accountID = nil
+                lastError = error
+                clearSignedOutCaches()
+            }
             return !isSignedIn
         case .dev:
             UserDefaults.standard.removeObject(forKey: devIdDefaultsKey)
+            authenticationEpoch += 1
             mode = AppConfig.isClerkConfigured ? .clerk : .dev(clerkId: "")
             isSignedIn = false
+            accountID = nil
+            lastError = error
+            clearSignedOutCaches()
             return true
         }
     }
@@ -119,9 +236,7 @@ final class AuthManager: TokenProvider {
     /// connection dropped) must not leave the app signed in to an account that no longer exists.
     /// No `lastError` — nothing went wrong.
     func accountErased() async {
-        _ = await signOut()
-        isSignedIn = false
-        lastError = nil
+        _ = await signOutCurrentOwner(forceLocal: true, error: nil)
     }
 
     /// The backend rejected our credentials with a **401 that survived a forced token refresh**.
@@ -133,12 +248,13 @@ final class AuthManager: TokenProvider {
     /// `APIError.isSessionEnding` is the only predicate a caller may branch on.
     func sessionExpired() {
         guard isSignedIn else { return }
+        let epoch = authenticationEpoch
+        let owner = accountID
         Task {
-            await signOut()
+            guard authenticationEpoch == epoch, accountID == owner else { return }
             // A Clerk sign-out that failed locally must not leave us "signed in" against a server
             // that disagrees; the next sign-in re-authenticates either way.
-            isSignedIn = false
-            lastError = APIError.unauthorized.errorDescription
+            _ = await signOutCurrentOwner(forceLocal: true, error: APIError.unauthorized.errorDescription)
         }
     }
 
@@ -240,6 +356,8 @@ final class AuthManager: TokenProvider {
     }
 
     // MARK: - TokenProvider
+
+    nonisolated func sessionIdentity() async -> String? { await accountID }
 
     // Token vending is async: Clerk session tokens are fetched on demand, dev tokens are derived
     // from the stored clerk id. The whole call runs on the main actor (Clerk is @MainActor).

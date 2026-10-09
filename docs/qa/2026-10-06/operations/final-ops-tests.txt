@@ -1,0 +1,32 @@
+✔ candidate plists are valid, LTS pinned, reversible and remain uninstalled (105.751667ms)
+✔ precommit intent survives an absent database refresh (140.759458ms)
+✔ completion cannot be downgraded or restore raw ID by delayed request (136.458667ms)
+✔ concurrent requests retain every identity (1778.99875ms)
+✔ missing or corrupted authoritative current ledger fails closed (59.696041ms)
+✔ immutable markers restore a tombstone after an older empty valid snapshot (244.76525ms)
+✔ private snapshot and marker permissions (28.432291ms)
+✔ unchanged ledger reads retain stable records and a matching checksum (102.869875ms)
+▶ real PostgreSQL backup, deletion-safe restore, isolated cleanup and collection
+  ✔ custom dump has a checked SHA, TOC and private permissions (1.351417ms)
+  ✔ newer independent tombstone sweeps a deleted identity from the older backup (4797.638417ms)
+  ✔ missing live ledger and altered dump fail before any scratch database survives (41.242ms)
+  ✔ hourly snapshot authenticates only to loopback and excludes individual data (110.827125ms)
+  ✔ seven-pair retention prunes only owned backups (37.2325ms)
+  ✔ non-cascading ownership fails closed and still drops scratch database (939.768708ms)
+✔ real PostgreSQL backup, deletion-safe restore, isolated cleanup and collection (7837.618209ms)
+✔ sanitized logs exclude identities, query strings, tokens and free text (2.298375ms)
+✔ metrics and usage snapshots retain only aggregate fields (0.295875ms)
+✔ rotation enforces segment and age limits without deleting foreign files (108.506291ms)
+✔ 30-day aggregate pruning only removes owned expired files (7.586792ms)
+✔ a stopped backend does not suspend backup, log or snapshot expiry (56.173875ms)
+{"event":"ops.server_started","heapLimitMiB":256}
+✔ production wrapper applies heap budget, sanitizes both streams and drains SIGTERM (112.965041ms)
+✔ compiled JavaScript bytes participate in the actual artifact fingerprint (23.466ms)
+ℹ tests 22
+ℹ suites 0
+ℹ pass 22
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 7960.562167

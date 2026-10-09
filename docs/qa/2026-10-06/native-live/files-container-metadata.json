@@ -1,0 +1,40 @@
+[
+  {
+    "identifier": "com.apple.DocumentsApp",
+    "path": "/Users/shan2new/Library/Developer/CoreSimulator/Devices/F3AD17A6-813D-4C7E-8263-6383F952302C/data/Containers/Data/Application/2FF37602-DB24-495B-B677-E4A8CEA474A2",
+    "children": [
+      "Library",
+      "Documents",
+      "tmp",
+      "SystemData"
+    ]
+  },
+  {
+    "identifier": "com.cognipin.previously",
+    "path": "/Users/shan2new/Library/Developer/CoreSimulator/Devices/F3AD17A6-813D-4C7E-8263-6383F952302C/data/Containers/Data/Application/2C0E2F77-0401-43C6-B293-706ABABB95D7",
+    "children": [
+      "Library",
+      "Documents",
+      "tmp",
+      "SystemData"
+    ]
+  },
+  {
+    "identifier": "com.apple.mobilesafari",
+    "path": "/Users/shan2new/Library/Developer/CoreSimulator/Devices/F3AD17A6-813D-4C7E-8263-6383F952302C/data/Containers/Data/Application/2F0AAA48-5C93-45E8-9983-93F7D68D0968",
+    "children": [
+      "Library",
+      "Documents",
+      "tmp",
+      "SystemData"
+    ]
+  },
+  {
+    "identifier": "group.com.apple.FileProvider.LocalStorage",
+    "path": "/Users/shan2new/Library/Developer/CoreSimulator/Devices/F3AD17A6-813D-4C7E-8263-6383F952302C/data/Containers/Shared/AppGroup/27CD8B35-7202-4283-9478-3D61E690FFBC",
+    "children": [
+      "Library",
+      "File Provider Storage"
+    ]
+  }
+]

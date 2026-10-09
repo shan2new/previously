@@ -1,0 +1,8 @@
+{
+  "baselineDeploymentId": "dpl_2BUUc6ZREKY29QVMdaF6zEr4BeGg",
+  "baselineEvidence": "docs/qa/2026-10-06/landing-final/draft-publication/canonical-privacy.html",
+  "sourceFile": "landing/lib/legal-content.ts",
+  "oldParagraph": "Clerk receives information needed for sign-in, authentication, session management and account security, including the account information supplied during sign-in and technical connection information.",
+  "newParagraph": "Clerk receives information needed for sign-in, authentication, session management and account security. This includes account information, a vendor device identifier, session and device tokens, device model, operating-system and app information, and technical connection information.",
+  "onlyExpectedVisibleCopyChange": "privacy services section Clerk paragraph"
+}

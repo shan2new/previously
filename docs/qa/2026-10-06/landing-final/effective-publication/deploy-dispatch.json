@@ -1,0 +1,35 @@
+{
+  "status": "ok",
+  "deployment": {
+    "id": "dpl_EAcNw6zcnWPrMxkg2Nea3AkeNBBM",
+    "url": "https://landing-mky50bk66-shan2news-projects.vercel.app",
+    "productionUrl": null,
+    "inspectorUrl": "https://vercel.com/shan2news-projects/landing/EAcNw6zcnWPrMxkg2Nea3AkeNBBM",
+    "readyState": "INITIALIZING",
+    "target": "production",
+    "deploymentApiUrl": "https://api.vercel.com/v13/deployments/dpl_EAcNw6zcnWPrMxkg2Nea3AkeNBBM",
+    "buildMachine": {
+      "machine": "basic",
+      "selectionType": "fixed",
+      "selectionSource": "plan-default"
+    },
+    "deploymentProtection": [
+      "vercel_authentication"
+    ]
+  },
+  "message": "Deployment landing-mky50bk66-shan2news-projects.vercel.app ready.",
+  "next": [
+    {
+      "command": "vercel curl https://landing-mky50bk66-shan2news-projects.vercel.app",
+      "when": "Verify deployment, including when Deployment Protection is enabled"
+    },
+    {
+      "command": "vercel inspect landing-mky50bk66-shan2news-projects.vercel.app --scope shan2news-projects",
+      "when": "Inspect deployment"
+    },
+    {
+      "command": "vercel deploy --prod --scope shan2news-projects",
+      "when": "Promote to production"
+    }
+  ]
+}

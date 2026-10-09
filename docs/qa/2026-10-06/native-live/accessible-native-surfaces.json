@@ -1,0 +1,105 @@
+{
+  "recordedAt": "2026-10-06T16:37:19.073697+00:00",
+  "scope": "Actual accessible native surfaces and ordinary Files recheck; no release-status or runtime source changes",
+  "cachedXcodeBuildMCPVersion": "2.7.0",
+  "sessionShowDefaults": {
+    "transport": "Official MCP stdio tools/call",
+    "successful": true,
+    "activeProfile": "(default)",
+    "defaultsUnset": true
+  },
+  "inventoryCommands": [
+    "device list --output json",
+    "simulator-management list --output json"
+  ],
+  "deviceListCount": 8,
+  "allListedDeviceIDsAlsoInSimulatorInventory": true,
+  "availableConnectedPhysicalPhones": 0,
+  "physicalDeviceFinding": "The sole connected device-list item is the known booted Previously QA iPhone 14 Pro simulator; expanded Device Hub labels every available sidebar entry Simulator.",
+  "bootedSurface": {
+    "name": "Previously QA iPhone 14 Pro",
+    "runtime": "iOS27.0",
+    "kind": "simulator"
+  },
+  "registeredRuntimeImages": [
+    {
+      "identifier": "com.apple.CoreSimulator.SimRuntime.watchOS-27-0",
+      "build": "24R362",
+      "architectures": [
+        "arm64"
+      ]
+    },
+    {
+      "identifier": "com.apple.CoreSimulator.SimRuntime.iOS-27-0",
+      "build": "24A434",
+      "architectures": [
+        "arm64"
+      ]
+    }
+  ],
+  "standaloneRuntimeBundleCount": 0,
+  "accessibleIOS18Runtime": false,
+  "runtimeFinding": "Official inventory has only iOS27 surfaces; installed CoreSimulator image registry contains only iOS27.0 and watchOS27.0, with no standalone bundles. iOS18 runtime behavior remains unverified.",
+  "filesRecheck": {
+    "configuration": "Release",
+    "version": "1.0",
+    "build": 14,
+    "accountScope": "Dedicated App Review account, synthetic library only",
+    "qaFixtureUsed": false,
+    "freshCUADeviceHubObservationSucceeded": true,
+    "ordinaryNavigation": [
+      "Home",
+      "Profile",
+      "Import your history",
+      "MyAnimeList",
+      "Choose the file"
+    ],
+    "systemFilesPickerVisiblyPresented": true,
+    "pickerState": "Recents / No Recents / Search / Browse",
+    "systemFilesAXTargetsExposed": false,
+    "compactWindowCoordinateInput": "noWindowsAvailable",
+    "distinctSupportedSurface": "Show in Device Hub expanded to official Device Hub management window; sidebar confirmed Simulator labels",
+    "expandedWindowCoordinateInput": "noWindowsAvailable",
+    "exposedRaiseSecondaryActionUsed": true,
+    "officialKeyboardAlternative": {
+      "keys": [
+        "Tab",
+        "Escape"
+      ],
+      "toolAccepted": true,
+      "refreshedSnapshotSettleFailed": true,
+      "visibleFocusOrDismissalObserved": false,
+      "blindKeySequencesAttempted": false
+    },
+    "fileSelected": false,
+    "partialPreviewRendered": false,
+    "allSkippedPreviewRendered": false,
+    "importApplied": false,
+    "exportUIReached": false,
+    "saveToFilesPassed": false,
+    "limitation": "Current supported host coordinate input reports noWindowsAvailable, Files system controls are absent from AX, and accepted keyboard input showed no usable focus. Ordinary Files selection/import/export remains unqualified.",
+    "restoration": "Official XcodeBuildMCP simulator stop and launch-app of the existing production bundle; no sign-out/auth mutation",
+    "homeRestored": true,
+    "homeVerifiedBy": "Fresh official rs/1 runtime snapshot plus CUA screenshot",
+    "restoredHomeScreenHash": "0zxkaz4",
+    "restoredHomeState": {
+      "selectedTab": "Home",
+      "attackOnTitanNext": "Season1Episode2",
+      "reacherNext": "Season1Episode1"
+    },
+    "libraryMutationPerformed": false,
+    "authSettingChanged": false,
+    "deletionPerformed": false,
+    "sourceConfigurationOrInstallChanged": false
+  },
+  "claimsExcluded": [
+    "Physical iPhone/TestFlight qualification",
+    "iOS18 runtime qualification",
+    "VoiceOver qualification",
+    "successful Files import/export"
+  ],
+  "newPackageInstallation": false,
+  "rawXcodebuildXcrunSimctlUsed": false,
+  "rootStatusPDFReceiptModified": false,
+  "privacy": "No credential, token, email, provider identity or viewing-data dump is stored in this receipt."
+}

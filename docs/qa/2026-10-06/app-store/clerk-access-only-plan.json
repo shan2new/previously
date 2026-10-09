@@ -1,0 +1,92 @@
+{
+  "preparedAt": "2026-10-06T15:42:16.470174+00:00",
+  "state": "local_credentials_removed_platform_claims_denied",
+  "officialPublicClientId": "x7Fzlnxuu5I6UUa4",
+  "issuer": "https://clerk.clerk.com",
+  "requestedScopes": [
+    "applications:manage"
+  ],
+  "offlineAccessRequested": false,
+  "loopbackOnly": true,
+  "pkceMethod": "S256",
+  "privateSourceSha256": "af22b9a1edee5455276eee71708a5dd4020417439921f5198f59a1bdc13d37c3",
+  "privateCustodyDirectory": "/Users/shan2new/.config/previously/release/clerk-access-only-session",
+  "directoryMode": "0700",
+  "fileMode": "0600",
+  "browserSessionExtraction": false,
+  "providerMutationsPerformed": false,
+  "allowClicked": true,
+  "managementUseConditions": [
+    "Exact requested management scope or explicitly recorded RFC6749 section5.1 omission inference",
+    "Actual future expiry at most 24 hours plus 60 seconds clock tolerance; JWT exp required for JWT; response/claim expiries agree within 60 seconds",
+    "No unresolved unexpected refresh token; unexpected refresh immediately revoked before management use",
+    "Exact production Previously config/schema resource only; redirects refused"
+  ],
+  "revocationSemantics": "Use documented public /oauth/token/revoke after configuration; opaque access can be revoked, JWT may remain usable until actual exp. Never claim immediate JWT invalidation. Delete local token, verifier, callback code and authorize URL. Retain only cleanup custody if unexpected refresh revocation fails.",
+  "sources": [
+    "https://github.com/clerk/cli/blob/main/packages/cli-core/src/commands/auth/login.ts",
+    "https://github.com/clerk/cli/blob/main/packages/cli-core/src/lib/environment.ts",
+    "https://github.com/clerk/cli/blob/main/packages/cli-core/src/lib/token-exchange.ts",
+    "https://github.com/clerk/cli/blob/main/packages/cli-core/src/lib/plapi.ts",
+    "https://github.com/clerk/cli/blob/main/packages/cli-core/src/lib/credential-store.ts",
+    "https://clerk.com/docs/guides/configure/auth-strategies/oauth/how-clerk-implements-oauth",
+    "https://www.rfc-editor.org/rfc/rfc6749#section-5.1",
+    "https://clerk.clerk.com/.well-known/oauth-authorization-server"
+  ],
+  "consentScreenshot": "clerk-access-only-consent-visible.png",
+  "displayedManagementPermission": "Manage applications",
+  "persistentDurationClauseShown": false,
+  "actualReturnedScopes": [
+    "applications:manage",
+    "offline_access"
+  ],
+  "unexpectedRefreshTokenReceived": true,
+  "unexpectedRefreshRevokedHTTP": 200,
+  "accessRevocationHTTP": 400,
+  "accessRevocationError": "unsupported_token_type",
+  "actualJWTExpiryUTC": "2026-10-07T15:46:21Z",
+  "providerConfigurationPerformed": false,
+  "managementUseReady": false,
+  "configSchemaFetched": false,
+  "tokenResponseTransport": "standard_Node_fetch_documented_OAuth_token_endpoint",
+  "pythonTransportHTTP": 403,
+  "responseScreenshot": "clerk-access-only-response-visible.png",
+  "verifiedAt": "2026-10-06T15:51:02.594737+00:00",
+  "refreshRevocationHTTP": 200,
+  "immediateJWTInvalidationClaimed": false,
+  "localTokenVerifierCodeURLRemoved": true,
+  "managementRequest": "GET exact Previously production config/schema",
+  "managementHTTP": 401,
+  "managementErrorCode": "platform_oauth_access_token_missing_claims",
+  "providerMutationPerformed": false,
+  "additionalScopesOrRegrantPerformed": false,
+  "completedAt": "2026-10-06T15:48:55.917398+00:00",
+  "missingClaimNames": [
+    "org_id"
+  ],
+  "actualWorkspace": "Personal workspace",
+  "existingOrganizationMembershipsVisible": 0,
+  "workspaceChanged": false,
+  "newWorkspaceCreated": false,
+  "equivalentRegrantPerformed": false,
+  "workspaceProof": "clerk-personal-workspace-visible.png",
+  "officialSourceFollowup": {
+    "checkedAt": "2026-10-06T15:54:08.110181+00:00",
+    "boundedReadOnly": true,
+    "supportedPersonalUserConfigFallbackFound": false,
+    "knownPersonalWorkspaceOrgIDBugConfirmed": false,
+    "explicitPersonalWorkspaceProhibitionDocumented": false,
+    "conclusion": "Actual supported OAuth config/schema path remains blocked by required org_id. Official public sources do not establish whether this is a personal-workspace limitation or issuer defect. No permission, workspace, or authorization change performed.",
+    "sources": [
+      "https://clerk.com/docs/cli",
+      "https://clerk.com/docs/reference/platform-api",
+      "https://clerk.com/docs/guides/dashboard/overview",
+      "https://clerk.com/docs/guides/development/errors/platform-api",
+      "https://github.com/clerk/cli/blob/main/packages/cli-core/src/lib/plapi.ts",
+      "https://github.com/clerk/cli/blob/main/packages/cli-core/src/commands/auth/login.ts",
+      "https://github.com/clerk/cli/blob/main/packages/cli-core/src/lib/plapi.test.ts",
+      "https://github.com/clerk/openapi-specs/blob/main/platform/beta.yml"
+    ],
+    "scopeOfIssueRead": "100 most recent official CLI issues/pull requests, not an exhaustive historical bug search"
+  }
+}

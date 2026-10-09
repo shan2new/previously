@@ -1,0 +1,57 @@
+{
+  "checkedAtUTC": "2026-10-06T17:15:41.337852+00:00",
+  "candidateOrigin": "https://landing-ten-theta-55.vercel.app",
+  "canonicalOrigin": "https://previously.cognipin.com",
+  "routeCount": 8,
+  "routes": [
+    {
+      "path": "/",
+      "candidateSHA256": "a3a954cc324efa3f60133b783a394af430e9c4f519db3c5752765029a6da039b",
+      "canonicalSHA256": "a3a954cc324efa3f60133b783a394af430e9c4f519db3c5752765029a6da039b",
+      "matches": true
+    },
+    {
+      "path": "/privacy",
+      "candidateSHA256": "a69914c280309210f43acaf0d7bfe89c26f15156f81a8822d892a47601b6e463",
+      "canonicalSHA256": "a69914c280309210f43acaf0d7bfe89c26f15156f81a8822d892a47601b6e463",
+      "matches": true
+    },
+    {
+      "path": "/terms",
+      "candidateSHA256": "60617937760fb69bf9c012d40a250aafe70d9df135675e24a2faefa2fe157225",
+      "canonicalSHA256": "60617937760fb69bf9c012d40a250aafe70d9df135675e24a2faefa2fe157225",
+      "matches": true
+    },
+    {
+      "path": "/support",
+      "candidateSHA256": "517e4324d293e6228cf66f2d391dc2fafd3465df22a6cae69d7426483c6b725d",
+      "canonicalSHA256": "517e4324d293e6228cf66f2d391dc2fafd3465df22a6cae69d7426483c6b725d",
+      "matches": true
+    },
+    {
+      "path": "/delete-account",
+      "candidateSHA256": "154e42b04d1b260f75b51e393958fb61e837b44f71b9af7be8a510af66ad942e",
+      "canonicalSHA256": "154e42b04d1b260f75b51e393958fb61e837b44f71b9af7be8a510af66ad942e",
+      "matches": true
+    },
+    {
+      "path": "/robots.txt",
+      "candidateSHA256": "b61e89c2221cd818e386ff04b43677f1c91dc419874fb6d2680ffd7002f3fd2b",
+      "canonicalSHA256": "b61e89c2221cd818e386ff04b43677f1c91dc419874fb6d2680ffd7002f3fd2b",
+      "matches": true
+    },
+    {
+      "path": "/sitemap.xml",
+      "candidateSHA256": "d8a75148cde413ea2db37129a587db9ebcaf1c8450a02229b3097ec166f46e67",
+      "canonicalSHA256": "d8a75148cde413ea2db37129a587db9ebcaf1c8450a02229b3097ec166f46e67",
+      "matches": true
+    },
+    {
+      "path": "/missing-release-qualification",
+      "candidateSHA256": "0591a0ec537d5d26724aa3f1e1fc17d0ba8225c8dc47d0c163118bd21115d795",
+      "canonicalSHA256": "0591a0ec537d5d26724aa3f1e1fc17d0ba8225c8dc47d0c163118bd21115d795",
+      "matches": true
+    }
+  ],
+  "passed": true
+}

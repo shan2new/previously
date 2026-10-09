@@ -1,0 +1,78 @@
+{
+  "recordedAt": "2026-10-06T16:09:33.507911+00:00",
+  "candidate": 14,
+  "configuration": "Release",
+  "runtime": "iOS27 iPhone14Pro simulator",
+  "runtimeSourceSHA256": "baaf904adf90bc13809ef9b3c331a800385409a40d18cf1bf1aceaf79c97e6ef",
+  "qaFixtureUsed": false,
+  "initialVisiblePromptOwner": "Disposable erasure QA account, not App Review account",
+  "initialVisibleChallenge": "Ordinary new-device Device Trust after disposable password",
+  "disposableAttemptClosedUnderRootAuthorization": true,
+  "disposableProviderAccountChanged": false,
+  "reviewerCredentialsSource": "Existing owner-only0600 release state; no values exported",
+  "firstFreshReviewerAttempt": {
+    "startedFromSignedOutWelcome": true,
+    "reviewerIdentityDistinctFromDisposable": true,
+    "nativeSteps": [
+      "Sign in",
+      "Enter permanent reviewer email",
+      "Continue",
+      "Enter password",
+      "Enter existing reviewer password",
+      "Continue",
+      "Authenticated Home with synthetic review library"
+    ],
+    "passwordFirstActuallyObserved": true,
+    "useAnotherMethodNeeded": false,
+    "firstFactorEmailCodeRequested": false,
+    "secondOTPChallengeObserved": false,
+    "OTPEntered": false,
+    "passwordLoginPassed": true,
+    "syntheticAttackOnTitanSeason1Episode2Restored": true,
+    "syntheticReacherSeason1Episode1Restored": true
+  },
+  "coldFreshRepeatPassed": true,
+  "globalAuthenticationChanged": false,
+  "perUserSecurityFlagsChanged": false,
+  "newAccountsCreated": false,
+  "credentialsChanged": false,
+  "credentialValuesOrScreenshotsExported": false,
+  "clipboardCleared": true,
+  "status": "PASS: two fresh reviewer password sign-ins, including cold sign-out/relaunch retry, required no email OTP; app left on reviewer Home",
+  "lastCheckedAt": "2026-10-06T16:12:33.627716+00:00",
+  "coldRetry": {
+    "ordinarySignOutConfirmed": true,
+    "officialStopAndLaunchReceipts": [
+      "review-recheck-stop.json",
+      "review-recheck-launch-app.json"
+    ],
+    "startedFromColdSignedOutWelcome": true,
+    "newAuthenticationAttempt": true,
+    "reviewerIdentityDistinctFromDisposable": true,
+    "passwordFirstActuallyObserved": true,
+    "useAnotherMethodNeeded": false,
+    "firstFactorEmailCodeRequested": false,
+    "secondOTPChallengeObserved": false,
+    "OTPEntered": false,
+    "passwordLoginPassed": true,
+    "syntheticAttackOnTitanSeason1Episode2Restored": true,
+    "syntheticReacherSeason1Episode1Restored": true
+  },
+  "appLeftOnReviewerHome": true,
+  "safeHomeProof": {
+    "path": "/Users/shan2new/Projects/previously/docs/qa/2026-10-06/native-live/captures/reviewer-cold-password-home.jpg",
+    "sha256": "cf710bf53ec2515a9bdd594082bd646b2f2a0523ccb47f04294d7dd4eea67236",
+    "source": "Official XcodeBuildMCP ui-automation screenshot",
+    "width": 369,
+    "height": 800,
+    "format": "image/jpeg",
+    "label": "Actual simulator application viewport; no physical-device or hardware-frame claim"
+  },
+  "mailboxAccessRequiredForTestedReviewerLogin": false,
+  "noGlobalOrPerUserAuthMutation": true,
+  "scopeLimits": [
+    "Actual Release14 production iOS27 iPhone14Pro simulator",
+    "No physical-device/TestFlight behavioral claim",
+    "No actual iOS18/WAN/VoiceOver claim"
+  ]
+}

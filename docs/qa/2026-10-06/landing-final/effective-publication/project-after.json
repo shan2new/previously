@@ -1,0 +1,10 @@
+{
+  "id": "prj_osATa26wuWMoLf7yLOEaXvYuiial",
+  "accountId": "team_WGVvWCwyPJLQHHMvAUdYU9td",
+  "name": "landing",
+  "framework": "nextjs",
+  "nodeVersion": "24.x",
+  "ssoProtection": {
+    "deploymentType": "all_except_custom_domains"
+  }
+}

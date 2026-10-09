@@ -92,7 +92,7 @@ export async function groupKnownComponent(
     validateGrouping(result, input)
   } catch (err) {
     if (grouper instanceof DeterministicGrouper) throw err // nothing left to fall back to
-    console.warn(`grouping LLM failed for seed ${seedId}; using deterministic fallback:`, err)
+    console.warn(`grouping LLM failed for seed ${seedId}; using deterministic fallback`)
     result = await new DeterministicGrouper().group(input)
   }
   decoratePartOrder(result, input)

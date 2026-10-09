@@ -35,6 +35,8 @@ import {
   type RankTarget,
 } from './recommendationRank.js'
 import { applyFranchiseSeries, franchisesOfMedia, loadFranchiseSeries, type FranchiseSeries } from './recommendationRoots.js'
+import { ContentExcludedError, consumerFranchiseConditions, consumerFranchiseIds, consumerAnimeFetcher } from './consumerContent.js'
+import { makeAniListFetcher } from './mediaStore.js'
 
 // The loader around the pure ranker (recommendationRank.ts): everything personal is read LIVE on
 // every request — what the user owns right now, their progress and their feedback — and never
@@ -49,7 +51,7 @@ const ANILIST_BACKGROUND_INTERVAL_MS = 2_100
 // grouping one takes 2–10 AniList round trips (3–15 s), far too slow for the tap itself. Bounded
 // in width and depth like Search's warming queue: excess work is dropped, never accumulated.
 const materialiser = new BoundedTaskQueue(1, 24, (key, error) => {
-  console.warn(`recommendation materialisation failed (${key}):`, error instanceof Error ? error.message : error)
+  console.warn(`recommendation materialisation failed (${key}):`, 'diagnostic details redacted')
 })
 
 export interface LoadedRankInput {
@@ -72,7 +74,7 @@ export async function loadRankInput(userId: string, now = Date.now()): Promise<L
     })
     .from(subscriptions)
     .innerJoin(franchise, eq(franchise.id, subscriptions.franchiseId))
-    .where(eq(subscriptions.userId, userId))
+    .where(and(eq(subscriptions.userId, userId), ...consumerFranchiseConditions()))
     .orderBy(asc(subscriptions.createdAt), asc(subscriptions.franchiseId))
   const feedback = await db
     .select({ key: recommendationFeedback.key, kind: recommendationFeedback.kind })
@@ -283,7 +285,7 @@ async function present(
 ): Promise<RecommendationItem[]> {
   const franchiseIds = [...new Set(ranked.map((item) => item.franchiseId).filter((id): id is string => id != null))]
   const summaries = new Map((await getSummaries(franchiseIds)).map((summary) => [summary.id, summary]))
-  return ranked.map((item): RecommendationItem => {
+  return ranked.filter((item) => !item.franchiseId || summaries.has(item.franchiseId)).map((item): RecommendationItem => {
     const summary = item.franchiseId ? summaries.get(item.franchiseId) : undefined
     const facts = item.franchiseId ? series.get(item.franchiseId) : undefined
     return {
@@ -374,10 +376,16 @@ export async function findLocalFranchise(source: MediaSource, externalId: number
  */
 export async function materialiseRecommendation(source: MediaSource, externalId: number): Promise<string | null> {
   const local = await findLocalFranchise(source, externalId)
-  if (local) return local
-  if (source === 'anilist') return (await groupFromSeed(externalId, { model: env.OPENROUTER_MODEL_BULK })).franchiseId
+  if (local) {
+    if (!(await consumerFranchiseIds([local])).has(local)) throw new ContentExcludedError()
+    return local
+  }
+  if (source === 'anilist') return (await groupFromSeed(externalId, {
+    model: env.OPENROUTER_MODEL_BULK,
+    fetcher: consumerAnimeFetcher(externalId, makeAniListFetcher()),
+  })).franchiseId
   if (!tmdbEnabled()) return null
-  return (await ensureTvFranchise(externalId))?.franchiseId ?? null
+  return (await ensureTvFranchise(externalId, { consumerOnly: true }))?.franchiseId ?? null
 }
 
 /**
@@ -426,7 +434,7 @@ export async function materialiseTopRecommendations(options: { perUser?: number;
       try {
         lists.push((await getRecommendations(userId, perUser, { now: day, materialise: false })).items)
       } catch (error) {
-        console.warn(`recommendations for ${userId} failed:`, error instanceof Error ? error.message : error)
+        console.warn('[recommendations] refresh failed')
       }
     }
   }
@@ -451,7 +459,7 @@ export async function materialiseTopRecommendations(options: { perUser?: number;
       if (await materialiseRecommendation(item.source, item.externalId)) materialised++
     } catch (error) {
       failed++
-      console.warn(`recommendation materialisation failed (${item.key}):`, error instanceof Error ? error.message : error)
+      console.warn(`recommendation materialisation failed (${item.key}):`, 'diagnostic details redacted')
     }
   }
   return { users: people.length, due: due.length, materialised, failed }

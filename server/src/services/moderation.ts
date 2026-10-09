@@ -70,7 +70,7 @@ export function createBanCache(load: () => Promise<Iterable<string>>, ttlMs: num
       try {
         return (await refresh(nowMs)).has(clerkId)
       } catch (error) {
-        const message = error instanceof Error ? error.message : String(error)
+        const message = 'diagnostic details redacted'
         if (!banned) {
           // Nothing cached: nothing is kept either, so the very next check retries the load.
           console.warn({ event: 'moderation.ban_cache_unavailable', error: message })

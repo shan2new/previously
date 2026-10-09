@@ -21,11 +21,15 @@ struct LibraryExport: Transferable {
     /// The device's copy of the library in `format` — the CSV itself, and the JSON the file falls
     /// back to when the server has no export route.
     let local: Data
+    let owner: AccountLocalStore.Snapshot?
+    let isScratch: Bool
 
     @MainActor
     init(appModel: AppModel, format: Format) {
         self.format = format
         self.api = appModel.isIsolated ? nil : appModel.api
+        self.owner = appModel.accountStorage
+        self.isScratch = appModel.isIsolated
         // Only the format this row shares: the body that builds the row runs again on every change
         // the sheet observes, and both encodings walk the whole library.
         switch format {
@@ -40,7 +44,7 @@ struct LibraryExport: Transferable {
         }
         .exportingCondition { $0.format == .json }
         FileRepresentation(exportedContentType: .commaSeparatedText) { export in
-            try export.write(name: "previously-library.csv", data: export.local)
+            try await export.write(name: "previously-library.csv", data: export.local)
         }
         .exportingCondition { $0.format == .csv }
     }
@@ -73,7 +77,8 @@ struct LibraryExport: Transferable {
     /// server — falls back to the device's library: any other failure is REPORTED, because a
     /// library-only file handed over in place of "everything in your account" would be a quieter
     /// version of the claim the row makes.
-    private func accountFile() async throws -> SentTransferredFile {
+    @MainActor private func accountFile() async throws -> SentTransferredFile {
+        guard isScratch || AccountLocalStore.shared.matches(owner) else { throw CancellationError() }
         guard let api else { return try write(name: "previously-library.json", data: local) }
         do {
             let file = try await api.accountExportFile()
@@ -104,19 +109,14 @@ struct LibraryExport: Transferable {
         return "previously-export-\(day).json"
     }
 
-    private func write(name: String, data: Data) throws -> SentTransferredFile {
-        SentTransferredFile(try Self.temporaryFile(name: name, data: data))
+    @MainActor private func write(name: String, data: Data) throws -> SentTransferredFile {
+        SentTransferredFile(try AccountExportStore.write(name: name, data: data, owner: owner, isScratch: isScratch))
     }
 
-    static func temporaryFile(name: String, data: Data) throws -> URL {
-        // A folder of its own per export, so two shares in one session never race on one path and
-        // the server's dated name survives intact.
-        let dir = FileManager.default.temporaryDirectory
-            .appendingPathComponent("export-\(UUID().uuidString)", isDirectory: true)
-        try FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
-        let url = dir.appendingPathComponent(name)
-        try data.write(to: url, options: .atomic)
-        return url
+    /// Removes only app-managed share staging files. Copies saved by the user outside this
+    /// sandbox remain theirs. Legacy staging folders had no owner and are never reused.
+    @MainActor static func clearTemporaryFiles() {
+        AccountExportStore.clearTemporaryFiles()
     }
 
     private static func makeJSON(_ library: [Franchise]) -> Data {

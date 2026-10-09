@@ -1,0 +1,18 @@
+{
+  "priorUpload": "docs/qa/2026-10-06/landing-release/vercel-production/upload-dry-final.json",
+  "newUpload": "docs/qa/2026-10-06/landing-final/draft-publication/upload-dry.json",
+  "changed": [
+    "README.md",
+    "app/legal-document.tsx",
+    "lib/legal-content.ts",
+    "lib/site-config.ts",
+    "package-lock.json",
+    "package.json",
+    "vercel.json"
+  ],
+  "added": [],
+  "removed": [],
+  "priorPublicAssetsUnchanged": 33,
+  "priorBrowserReceipt": "docs/qa/2026-10-06/landing-release/vercel-production/public-browser/browser-report.json",
+  "reusedScope": "Prior tour/dialog/FAQ/focus/reduced-motion behavior for unchanged app/component/style files; new legal mobile and metadata checks are separate."
+}

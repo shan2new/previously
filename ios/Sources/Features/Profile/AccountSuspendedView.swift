@@ -20,6 +20,7 @@ struct AccountSuspendedView: View {
 
     @State private var confirmSignOut = false
     @State private var confirmDelete = false
+    @State private var confirmAppleManualDeletion = false
     @State private var signingOut = false
     @State private var deleting = false
     @State private var signOutFailed = false
@@ -64,6 +65,12 @@ struct AccountSuspendedView: View {
             Button(Copy.Action.done, role: .cancel) { deleteFailure = nil }
         } message: {
             Text(deleteFailure ?? "")
+        }
+        .alert("Apple sign-in couldn’t be disconnected", isPresented: $confirmAppleManualDeletion) {
+            Button(Copy.Confirm.cancel, role: .cancel) {}
+            Button(Copy.Account.deleteConfirm, role: .destructive) { performDelete(allowManualAppleRevocation: true) }
+        } message: {
+            Text("You can still delete your Previously account and tracking data. " + AccountDeletionNotice.appleManualInstructions)
         }
         .alert(Copy.Account.signOutFailedTitle, isPresented: $signOutFailed) {
             Button(Copy.Action.done, role: .cancel) { signOutFailed = false }
@@ -154,16 +161,39 @@ struct AccountSuspendedView: View {
         }
     }
 
-    private func performDelete() {
+    private func performDelete(allowManualAppleRevocation: Bool = false) {
         FeedbackCoordinator.fire(.destructive)
         withAnimation(ThemeMotion.pick(ThemeMotion.uiGentle, reduceMotion: reduceMotion)) {
             deleting = true
         }
+        let deletionOwner = appModel.currentAccountID
+        let deletionEpoch = appModel.accountEpoch
         Task {
+            var apple: AppleDeletionAuthorization.Proof?
+            if !allowManualAppleRevocation, !auth.linkedAppleUserIDs.isEmpty {
+                do { apple = try await AppleDeletionAuthorization.request(expectedUserIDs: auth.linkedAppleUserIDs) }
+                catch {
+                    guard deletionOwner == auth.accountID, deletionEpoch == appModel.accountEpoch else { return }
+                    deleting = false
+                    if (error as? AppleDeletionAuthorization.Failure) != .cancelled {
+                        confirmAppleManualDeletion = true
+                    }
+                    return
+                }
+            }
+            guard deletionOwner == auth.accountID, deletionEpoch == appModel.accountEpoch else { return }
             // Profile's erasure: nothing the app sends may reach the server after the DELETE.
             await appModel.prepareForErasure()
+            guard deletionOwner == auth.accountID, deletionEpoch == appModel.accountEpoch else { return }
             do {
-                try await AccountDeletion.deleteAccount(token: auth.currentToken)
+                let status = try await AccountDeletion.deleteAccount(apple: apple, token: {
+                    guard deletionOwner == auth.accountID, deletionEpoch == appModel.accountEpoch else { return nil }
+                    let token = await auth.currentToken()
+                    return deletionOwner == auth.accountID && deletionEpoch == appModel.accountEpoch ? token : nil
+                })
+                guard deletionOwner == auth.accountID, deletionEpoch == appModel.accountEpoch else { return }
+                AccountDeletion.markAccepted(accountID: appModel.currentAccountID)
+                AccountDeletionNotice.record(status)
                 // The account is gone; the session goes with it, and so does Profile's memory of
                 // its counts. The model is wiped FIRST, so the wipe never depends on Clerk's
                 // sign-out succeeding. The wipe lowers `accountSuspended`; it is raised again at
@@ -175,9 +205,12 @@ struct AccountSuspendedView: View {
                 await auth.accountErased()
                 deleting = false
             } catch {
+                guard deletionOwner == auth.accountID, deletionEpoch == appModel.accountEpoch else { return }
                 // Not deleted: the account is still suspended, so nothing held back is sent
                 // (`flushSocial` and SyncCenter stay quiet behind the suspension).
-                appModel.abortErasure()
+                if (error as? AccountDeletion.Failure) == .unreachable {
+                    appModel.holdUnconfirmedErasure()
+                } else { appModel.abortErasure() }
                 deleting = false
                 deleteFailure = (error as? LocalizedError)?.errorDescription
                     ?? AccountDeletion.Failure.refused.errorDescription

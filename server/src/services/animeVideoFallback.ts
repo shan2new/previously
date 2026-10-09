@@ -19,6 +19,7 @@ import {
   type AnimeTmdbTarget,
 } from './animeTmdbMatch.js'
 import { getCatalogLink, upsertCatalogLink } from './catalogLinks.js'
+import { isExcludedContent } from './consumerContent.js'
 
 const D = 86_400_000
 const VIDEO_TTL_MS = 7 * D
@@ -28,7 +29,7 @@ const ANIME_TMDB_METADATA_VERSION = 1
 const TV_FORMATS = new Set(['TV', 'TV_SHORT', 'ONA'])
 
 const queue = new BoundedTaskQueue(2, 48, (key, error) => {
-  console.warn(`anime video fallback failed (${key}):`, error instanceof Error ? error.message : error)
+  console.warn(`anime video fallback failed (${key}):`, 'diagnostic details redacted')
 })
 
 interface AnimeIdentityPart {
@@ -304,7 +305,7 @@ export async function refreshAnimeVideoFallback(
   let partMappings: AnimePartSeasonMatch[] = []
   if (target?.mediaType === 'movie') {
     const movie = await getMovie(target.externalId, options.request)
-    if (movie) {
+    if (movie && !isExcludedContent({ adult: movie.adult, genres: movie.genres?.map((genre) => genre.name) })) {
       rawVideos = movie.videos?.results ?? []
       fallbackArtwork = tmdbMovieArtwork(movie)
     } else {
@@ -312,7 +313,7 @@ export async function refreshAnimeVideoFallback(
     }
   } else if (target) {
     const show = await getShow(target.externalId, { ...options.request, enrichment: true })
-    if (show) {
+    if (show && !isExcludedContent({ adult: show.adult, genres: show.genres.map((genre) => genre.name) })) {
       fallbackEnrichment = tmdbFranchiseEnrichment(show)
       fallbackArtwork = tmdbArtwork(show)
       partMappings = matchAnimePartsToTmdbSeasons(parts, show.seasons ?? [])
@@ -439,7 +440,7 @@ export async function refreshSubscribedAnimeVideoFallback(
       consecutiveFailures = 0
     } catch (error) {
       consecutiveFailures++
-      console.warn(`anime video fallback failed (${row.id}):`, error instanceof Error ? error.message : error)
+      console.warn(`anime video fallback failed (${row.id}):`, 'diagnostic details redacted')
       if (consecutiveFailures >= 3) break
     }
     await new Promise((resolve) => setTimeout(resolve, BACKGROUND_INTERVAL_MS))
@@ -493,7 +494,7 @@ export async function refreshAnimeMetadataFallback(
       consecutiveFailures = 0
     } catch (error) {
       consecutiveFailures++
-      console.warn(`anime metadata fallback failed (${row.id}):`, error instanceof Error ? error.message : error)
+      console.warn(`anime metadata fallback failed (${row.id}):`, 'diagnostic details redacted')
       if (consecutiveFailures >= 3) break
     }
     await new Promise((resolve) => setTimeout(resolve, BACKGROUND_INTERVAL_MS))

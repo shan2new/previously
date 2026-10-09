@@ -1,0 +1,27 @@
+{
+  "readOnly": true,
+  "preset": "header",
+  "artworkApproval": "separate root visual review",
+  "files": [
+    {
+      "path": "/Users/shan2new/Projects/previously/output/app-store/ready/05-campaign-header-5244x2950.png",
+      "dimensions": [
+        5244,
+        2950
+      ],
+      "expectedDimensions": [
+        5244,
+        2950
+      ],
+      "bitDepth": 8,
+      "pngColorType": 2,
+      "mode": "RGB",
+      "alphaChannel": false,
+      "transparencyChunk": false,
+      "decodedBytes": 46412350,
+      "sha256": "a5b82787da8312617a31622b95f81504b7fcd8072dee96acca5d711e65da74f7",
+      "passed": true
+    }
+  ],
+  "passed": true
+}

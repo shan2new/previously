@@ -1,0 +1,39 @@
+{
+  "checkedAt": "2026-10-06T14:50:23.410957+00:00",
+  "appPath": "/Users/shan2new/Projects/previously/ios/build/DerivedData/Build/Products/Release-iphonesimulator/Previously.app",
+  "configuration": "Release",
+  "publicConfigurationChecks": {
+    "CFBundleIdentifier": true,
+    "CFBundleShortVersionString": true,
+    "CFBundleVersion": true,
+    "MinimumOSVersion": true,
+    "UIDeviceFamily": true,
+    "APIBaseURL": true,
+    "PrivacyPolicyURL": true,
+    "TermsURL": true,
+    "ClerkPublishableKey": true
+  },
+  "publicConfiguration": {
+    "CFBundleIdentifier": "com.cognipin.previously",
+    "CFBundleShortVersionString": "1.0",
+    "CFBundleVersion": "14",
+    "MinimumOSVersion": "18.0",
+    "UIDeviceFamily": [
+      1
+    ],
+    "APIBaseURL": "https://anime.cognipin.com",
+    "PrivacyPolicyURL": "https://previously.cognipin.com/privacy",
+    "TermsURL": "https://previously.cognipin.com/terms"
+  },
+  "platform": "iphonesimulator",
+  "runtimeSourceSHA256": "baaf904adf90bc13809ef9b3c331a800385409a40d18cf1bf1aceaf79c97e6ef",
+  "fileCount": 199,
+  "appManifestSHA256": "1dbd4ccfcf2f16699db8750f0a41bcea77ff60d06c1ba082dd175fdf7e4211a0",
+  "appBinarySHA256": "8f83b24368b424f561cffae74390f2755cd085f374ddd06b5fb487e512402092",
+  "knownQAFixtureMarkersAbsent": true,
+  "signatureVerifyPassed": true,
+  "actualSignedArchive13BinaryUnchanged": true,
+  "freeBytes": 3675193344,
+  "nativeUIStarted": false,
+  "productionLoginVerified": false
+}

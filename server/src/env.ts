@@ -17,11 +17,21 @@ const schema = z.object({
   APP_ENV: z.enum(['development', 'test', 'production']).default('development'),
 
   PORT: z.coerce.number().default(8787),
+  HOST: z.string().min(1).default('127.0.0.1'),
   CORS_ORIGIN: z.string().default('*'),
   DATABASE_URL: z.string().default('postgres://localhost:5432/previously'),
+  // Private operational endpoints stay unavailable without an independently generated token.
+  OBSERVABILITY_TOKEN: z.string().optional(),
 
   CLERK_JWT_KEY: z.string().optional(),
   CLERK_SECRET_KEY: z.string().optional(),
+  // Exact verified JWT issuer from the configured production instance's Frontend API origin.
+  CLERK_EXPECTED_ISSUER: z.string().optional(),
+  // Native fresh Apple deletion proof. Private p8 stays outside the deployed artifact.
+  APPLE_CLIENT_ID: z.literal('com.cognipin.previously').default('com.cognipin.previously'),
+  APPLE_TEAM_ID: z.string().optional(),
+  APPLE_KEY_ID: z.string().optional(),
+  APPLE_PRIVATE_KEY_PATH: z.string().optional(),
   // Accept `Authorization: Bearer dev:<clerkId>`. Read ONLY by auth/authConfig.ts, which refuses
   // it outright when APP_ENV=production. Never branch on this anywhere else.
   DEV_AUTH_BYPASS: envBool(false),

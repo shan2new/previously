@@ -1,0 +1,10 @@
+{
+  "checkedOn": "2026-10-06",
+  "nativeClientIdMatches": true,
+  "teamIdMatches": true,
+  "keyIdMatches": true,
+  "privateKeyPathMatches": true,
+  "privateKeyRegularFile": true,
+  "privateKeyMode0600": true,
+  "scope": "Private production configuration and custody only; actual Apple sign-in/token exchange/revocation not inferred."
+}

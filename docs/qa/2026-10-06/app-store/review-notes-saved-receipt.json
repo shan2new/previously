@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "recordedAt": "2026-10-06T15:31:03.159523+00:00",
+  "appId": "6818452741",
+  "version": "1.0",
+  "notesSavedVerified": true,
+  "persistedAfterReloadVerified": true,
+  "notesSha256": "8b0842568518f8665925d4a6c32de8531fe0afa90ec5720599d8a77fb8607c26",
+  "notesCharacterCount": 1848,
+  "reviewCredentialFieldsRemainEmpty": true,
+  "passwordInstructionsQualificationBuild": 14,
+  "selectedBuildAtSave": 13,
+  "evidence": [
+    "docs/qa/2026-10-06/app-store/review-notes-saved-visible.jpg",
+    "docs/qa/2026-10-06/native-live/candidate14-production-native.json"
+  ],
+  "scope": "Only public review instructions are saved. Does not transmit credentials, select14 or submit for review."
+}

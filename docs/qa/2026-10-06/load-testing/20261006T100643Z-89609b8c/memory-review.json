@@ -1,0 +1,16 @@
+{
+  "criteria": {
+    "maxRSSMiB": 512,
+    "maxHeapUsedMiB": 256,
+    "recoveryMedianOverSteadyAllowanceMiB": 32,
+    "lastFourMinuteRecoveryRSSSlopeMiBPerMinute": 2
+  },
+  "qualifiedDuration": false,
+  "passed": false,
+  "maxRSSMiB": 493.25,
+  "maxHeapUsedMiB": 229.28570556640625,
+  "lastMinuteSustainedMedianRSSMiB": 490.609375,
+  "lastMinuteRecoveryMedianRSSMiB": 493.25,
+  "lastFourMinuteRecoveryRSSSlopeMiBPerMinute": 2.596953166285272,
+  "meaning": "Observed plateau/recovery within23minutes, not proof of unlimited uptime."
+}

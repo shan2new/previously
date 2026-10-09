@@ -1,0 +1,2361 @@
+{
+  "quickHarnessOnly": true,
+  "calibrationOnly": true,
+  "qualifiedDuration": false,
+  "planningPeakRPS": 15,
+  "testedSustainedMultiplier": 5,
+  "averagePlanningRequestsPerDay": 4000,
+  "averagePlanningRPS": 0.046296296296296294,
+  "rateModel": "Fixed absolute dispatch times; open loop; maximum 300 in flight; drops if send lag exceeds 500ms; no retries. Achieved RPS uses actual phase elapsed time including drain.",
+  "mix": "Core 95% reads and 5% absolute progress PUTs per deterministic 100 request cycle; additional cold searches and two imports reported separately.",
+  "byteAccounting": "wireBytes counts encoded HTTP response bodies, excluding headers and framing; jsonBytes counts decoded response bodies. Legacy bytes is an alias for jsonBytes. Gzip decoding and JSON validation are included in latency.",
+  "timeoutMs": 5000,
+  "fixtures": {
+    "userCount": 500,
+    "franchiseCount": 1000,
+    "partsPerFranchise": 3,
+    "subscriptionsPerUser": 50,
+    "subscriptionCount": 25000,
+    "progressRows": 75000,
+    "providerLatencyMs": 20,
+    "announcementCount": 1000,
+    "observationCount": 1000,
+    "evidenceCount": 1000,
+    "storedNewsNoteWords": 150
+  },
+  "responseShapes": {
+    "library": {
+      "keys": [
+        "franchises",
+        "prevOpenedAt"
+      ],
+      "franchises": 50
+    },
+    "detail": {
+      "keys": [
+        "id",
+        "source",
+        "title",
+        "cover",
+        "banner",
+        "images",
+        "artwork",
+        "synopsis",
+        "genres",
+        "isReleasing",
+        "partCounts",
+        "parts",
+        "subscription",
+        "upcoming",
+        "year",
+        "studios",
+        "themes",
+        "featuredVideo",
+        "videos",
+        "audience",
+        "people",
+        "related",
+        "continueWatching",
+        "metadata"
+      ],
+      "parts": 3
+    },
+    "warm-search": {
+      "keys": [
+        "franchises",
+        "sources"
+      ],
+      "franchises": 10
+    },
+    "feed": {
+      "keys": [
+        "tab",
+        "generatedAt",
+        "prevOpenedAt",
+        "capabilities",
+        "franchises",
+        "posts",
+        "trending"
+      ],
+      "franchises": 50,
+      "posts": 50
+    },
+    "notifications": {
+      "keys": [
+        "items",
+        "unread",
+        "nextCursor"
+      ],
+      "items": 0
+    },
+    "watch-sessions": {
+      "keys": [
+        "sessions"
+      ],
+      "sessions": 0
+    },
+    "progress-write": {
+      "keys": [
+        "ok",
+        "applied"
+      ]
+    },
+    "import-preview": {
+      "keys": [
+        "id",
+        "state"
+      ]
+    },
+    "cold-search": {
+      "keys": [
+        "franchises",
+        "sources"
+      ],
+      "franchises": 1
+    },
+    "import-preview-poll": {
+      "keys": [
+        "id",
+        "state"
+      ]
+    },
+    "import-apply": {
+      "keys": [
+        "id",
+        "state",
+        "shows",
+        "remaining",
+        "failed"
+      ]
+    }
+  },
+  "results": [
+    {
+      "name": "warmup",
+      "rps": 15,
+      "seconds": 120,
+      "offered": 1800,
+      "sent": 1800,
+      "completed": 1800,
+      "dropped": 0,
+      "requestErrors": 0,
+      "timeouts": 0,
+      "serverErrors": 0,
+      "non2xx": 0,
+      "incorrectResponses": 0,
+      "bytes": 110911129,
+      "wireBytes": 5495084,
+      "jsonBytes": 110911129,
+      "gzipResponses": 1530,
+      "errors": [],
+      "latency": {
+        "count": 1800,
+        "meanMs": 59.86117921388905,
+        "p50Ms": 19,
+        "p95Ms": 82,
+        "p99Ms": 1185,
+        "maxMs": 2474.4347500000003
+      },
+      "sendLag": {
+        "count": 1800,
+        "meanMs": 1.177326363335405,
+        "p50Ms": 1,
+        "p95Ms": 3,
+        "p99Ms": 3,
+        "maxMs": 44.66154133333475
+      },
+      "peakInFlight": 28,
+      "routes": {
+        "library": {
+          "completed": 540,
+          "errors": 0,
+          "bytes": 90154620,
+          "wireBytes": 3693094,
+          "jsonBytes": 90154620,
+          "gzipResponses": 540,
+          "latency": {
+            "count": 540,
+            "meanMs": 55.43847283703696,
+            "p50Ms": 24,
+            "p95Ms": 249,
+            "p99Ms": 886,
+            "maxMs": 1191.4465000000055
+          },
+          "throughputRPS": 4.499966145554696
+        },
+        "detail": {
+          "completed": 450,
+          "errors": 0,
+          "bytes": 4564700,
+          "wireBytes": 559031,
+          "jsonBytes": 4564700,
+          "gzipResponses": 450,
+          "latency": {
+            "count": 450,
+            "meanMs": 33.731185571111375,
+            "p50Ms": 11,
+            "p95Ms": 32,
+            "p99Ms": 1080,
+            "maxMs": 1215.838374999992
+          },
+          "throughputRPS": 3.7499717879622465
+        },
+        "warm-search": {
+          "completed": 360,
+          "errors": 0,
+          "bytes": 2045160,
+          "wireBytes": 263880,
+          "jsonBytes": 2045160,
+          "gzipResponses": 360,
+          "latency": {
+            "count": 360,
+            "meanMs": 58.96573585833343,
+            "p50Ms": 22,
+            "p95Ms": 127,
+            "p99Ms": 799,
+            "maxMs": 2474.4347500000003
+          },
+          "throughputRPS": 2.999977430369797
+        },
+        "feed": {
+          "completed": 180,
+          "errors": 0,
+          "bytes": 14139269,
+          "wireBytes": 971699,
+          "jsonBytes": 14139269,
+          "gzipResponses": 180,
+          "latency": {
+            "count": 180,
+            "meanMs": 126.68144515000017,
+            "p50Ms": 29,
+            "p95Ms": 1246,
+            "p99Ms": 2404,
+            "maxMs": 2425.297041999991
+          },
+          "throughputRPS": 1.4999887151848985
+        },
+        "notifications": {
+          "completed": 90,
+          "errors": 0,
+          "bytes": 3690,
+          "wireBytes": 3690,
+          "jsonBytes": 3690,
+          "gzipResponses": 0,
+          "latency": {
+            "count": 90,
+            "meanMs": 71.84247970000109,
+            "p50Ms": 7,
+            "p95Ms": 839,
+            "p99Ms": 1408,
+            "maxMs": 1407.2242499999993
+          },
+          "throughputRPS": 0.7499943575924493
+        },
+        "watch-sessions": {
+          "completed": 90,
+          "errors": 0,
+          "bytes": 1350,
+          "wireBytes": 1350,
+          "jsonBytes": 1350,
+          "gzipResponses": 0,
+          "latency": {
+            "count": 90,
+            "meanMs": 57.04837778888805,
+            "p50Ms": 6,
+            "p95Ms": 863,
+            "p99Ms": 1080,
+            "maxMs": 1079.140625
+          },
+          "throughputRPS": 0.7499943575924493
+        },
+        "progress-write": {
+          "completed": 90,
+          "errors": 0,
+          "bytes": 2340,
+          "wireBytes": 2340,
+          "jsonBytes": 2340,
+          "gzipResponses": 0,
+          "latency": {
+            "count": 90,
+            "meanMs": 77.82012817777917,
+            "p50Ms": 12,
+            "p95Ms": 1078,
+            "p99Ms": 1311,
+            "maxMs": 1310.5389580000046
+          },
+          "throughputRPS": 0.7499943575924493
+        }
+      },
+      "achievedRPS": 14.999887151848986,
+      "offeredRPS": 14.999887151848986,
+      "scheduledWindowCompletedRPS": 15,
+      "drainMs": 1.027709000001778,
+      "actualElapsedMs": 120000.90279200001,
+      "server": {
+        "phase": "warmup",
+        "providerStats": {
+          "anilistCalls": 0,
+          "searches": 0,
+          "malMappings": 0,
+          "mediaReads": 0,
+          "loopbackRequests": 0,
+          "blockedRequests": 0,
+          "unsupportedQueries": 0,
+          "simulatedLatencyMs": 20
+        },
+        "socketGuard": {
+          "rejectedConnections": 0,
+          "rejectedHosts": []
+        },
+        "runtimeMemoryBudget": {
+          "heapSizeLimitBytes": 293601280,
+          "nodeOptions": "--max-old-space-size=256 --max-semi-space-size=8",
+          "note": "GC duration is wall time of observed GC entries, not isolated CPU cost. No forced GC."
+        },
+        "gc": {
+          "count": 1602,
+          "totalMs": 1103,
+          "meanMs": 0.689,
+          "p50Ms": 1,
+          "p95Ms": 2,
+          "p99Ms": 3,
+          "maxMs": 17.17433299124241,
+          "binWidthMs": 1,
+          "overflowBinMs": 60000,
+          "kinds": {
+            "1": 1438,
+            "4": 82,
+            "8": 82
+          }
+        },
+        "query": {
+          "phase": "warmup",
+          "startedAt": "2026-10-06T10:54:58.734Z",
+          "endedAt": null,
+          "queries": {
+            "count": 23353,
+            "totalMs": 128482,
+            "meanMs": 5.502,
+            "p50Ms": 1,
+            "p95Ms": 9,
+            "p99Ms": 163,
+            "maxMs": 1343.054124999995,
+            "binWidthMs": 1,
+            "overflowBinMs": 60000
+          },
+          "dispatchWait": {
+            "count": 3819,
+            "totalMs": 12886,
+            "meanMs": 3.374,
+            "p50Ms": 1,
+            "p95Ms": 1,
+            "p99Ms": 111,
+            "maxMs": 1027.4188330000034,
+            "binWidthMs": 1,
+            "overflowBinMs": 60000
+          },
+          "dispatchWaitDescription": "Client query handle to postgres onexecute callback; includes client dispatch, connection availability and socket buffering. Callback does not cover every query and is not isolated pool wait.",
+          "dispatchCoverage": 0.16353359311437501,
+          "errors": 0,
+          "inFlight": 0,
+          "peakInFlight": 53
+        },
+        "resources": {
+          "at": "2026-10-06T10:56:58.473Z",
+          "phase": "warmup",
+          "rss": 168116224,
+          "heapTotal": 95567872,
+          "heapUsed": 79115064,
+          "external": 15223311,
+          "arrayBuffers": 10900618,
+          "intervalMs": 4999.839040999999,
+          "cpuPercentOfOneCore": 19.489327396529685,
+          "eventLoopUtilization": 0.15662702039963017,
+          "eventLoopDelayP95Ms": 22.773759,
+          "eventLoopDelayMaxMs": 28.262399,
+          "gcCount": 62,
+          "gcWallDurationMs": 30.846084982156754,
+          "pgActivity": [
+            {
+              "state": "active",
+              "wait_event_type": "Client",
+              "wait_event": "ClientRead",
+              "connections": 1
+            },
+            {
+              "state": "idle",
+              "wait_event_type": "Client",
+              "wait_event": "ClientRead",
+              "connections": 9
+            }
+          ]
+        },
+        "phaseSnapshots": [
+          {
+            "phase": "startup",
+            "startedAt": "2026-10-06T10:54:58.439Z",
+            "endedAt": "2026-10-06T10:54:58.734Z",
+            "queries": {
+              "count": 6,
+              "totalMs": 10,
+              "meanMs": 1.653,
+              "p50Ms": 1,
+              "p95Ms": 7,
+              "p99Ms": 7,
+              "maxMs": 6.866582999999991,
+              "binWidthMs": 1,
+              "overflowBinMs": 60000
+            },
+            "dispatchWait": {
+              "count": 5,
+              "totalMs": 6,
+              "meanMs": 1.156,
+              "p50Ms": 1,
+              "p95Ms": 6,
+              "p99Ms": 6,
+              "maxMs": 5.353290999999899,
+              "binWidthMs": 1,
+              "overflowBinMs": 60000
+            },
+            "dispatchWaitDescription": "Client query handle to postgres onexecute callback; includes client dispatch, connection availability and socket buffering. Callback does not cover every query and is not isolated pool wait.",
+            "dispatchCoverage": 0.8333333333333334,
+            "errors": 0,
+            "inFlight": 0,
+            "peakInFlight": 2
+          },
+          {
+            "phase": "warmup",
+            "startedAt": "2026-10-06T10:54:58.734Z",
+            "endedAt": null,
+            "queries": {
+              "count": 23353,
+              "totalMs": 128482,
+              "meanMs": 5.502,
+              "p50Ms": 1,
+              "p95Ms": 9,
+              "p99Ms": 163,
+              "maxMs": 1343.054124999995,
+              "binWidthMs": 1,
+              "overflowBinMs": 60000
+            },
+            "dispatchWait": {
+              "count": 3819,
+              "totalMs": 12886,
+              "meanMs": 3.374,
+              "p50Ms": 1,
+              "p95Ms": 1,
+              "p99Ms": 111,
+              "maxMs": 1027.4188330000034,
+              "binWidthMs": 1,
+              "overflowBinMs": 60000
+            },
+            "dispatchWaitDescription": "Client query handle to postgres onexecute callback; includes client dispatch, connection availability and socket buffering. Callback does not cover every query and is not isolated pool wait.",
+            "dispatchCoverage": 0.16353359311437501,
+            "errors": 0,
+            "inFlight": 0,
+            "peakInFlight": 53
+          }
+        ],
+        "resourceSamples": 25
+      }
+    },
+    {
+      "name": "sustained",
+      "rps": 75,
+      "seconds": 180,
+      "offered": 13500,
+      "sent": 13500,
+      "completed": 13500,
+      "dropped": 0,
+      "requestErrors": 0,
+      "timeouts": 0,
+      "serverErrors": 0,
+      "non2xx": 0,
+      "incorrectResponses": 0,
+      "bytes": 831850406,
+      "wireBytes": 41244135,
+      "jsonBytes": 831850406,
+      "gzipResponses": 11475,
+      "errors": [],
+      "latency": {
+        "count": 13500,
+        "meanMs": 25.567713355111255,
+        "p50Ms": 12,
+        "p95Ms": 103,
+        "p99Ms": 214,
+        "maxMs": 846.5400829999999
+      },
+      "sendLag": {
+        "count": 13500,
+        "meanMs": 0.39755847881465645,
+        "p50Ms": 1,
+        "p95Ms": 2,
+        "p99Ms": 2,
+        "maxMs": 47.660832666646456
+      },
+      "peakInFlight": 64,
+      "routes": {
+        "library": {
+          "completed": 4050,
+          "errors": 0,
+          "bytes": 676159650,
+          "wireBytes": 27725169,
+          "jsonBytes": 676159650,
+          "gzipResponses": 4050,
+          "latency": {
+            "count": 4050,
+            "meanMs": 21.554224511852563,
+            "p50Ms": 14,
+            "p95Ms": 32,
+            "p99Ms": 198,
+            "maxMs": 846.5400829999999
+          },
+          "throughputRPS": 22.499916880557063
+        },
+        "detail": {
+          "completed": 3375,
+          "errors": 0,
+          "bytes": 34252886,
+          "wireBytes": 4193714,
+          "jsonBytes": 34252886,
+          "gzipResponses": 3375,
+          "latency": {
+            "count": 3375,
+            "meanMs": 8.30565084562956,
+            "p50Ms": 5,
+            "p95Ms": 9,
+            "p99Ms": 66,
+            "maxMs": 454.25787499998114
+          },
+          "throughputRPS": 18.74993073379755
+        },
+        "warm-search": {
+          "completed": 2700,
+          "errors": 0,
+          "bytes": 15338700,
+          "wireBytes": 1979100,
+          "jsonBytes": 15338700,
+          "gzipResponses": 2700,
+          "latency": {
+            "count": 2700,
+            "meanMs": 12.156928586296612,
+            "p50Ms": 11,
+            "p95Ms": 18,
+            "p99Ms": 47,
+            "maxMs": 263.51524999999674
+          },
+          "throughputRPS": 14.999944587038042
+        },
+        "feed": {
+          "completed": 1350,
+          "errors": 0,
+          "bytes": 106043820,
+          "wireBytes": 7290802,
+          "jsonBytes": 106043820,
+          "gzipResponses": 1350,
+          "latency": {
+            "count": 1350,
+            "meanMs": 90.14059723777694,
+            "p50Ms": 85,
+            "p95Ms": 164,
+            "p99Ms": 348,
+            "maxMs": 796.5051669999957
+          },
+          "throughputRPS": 7.499972293519021
+        },
+        "notifications": {
+          "completed": 675,
+          "errors": 0,
+          "bytes": 27675,
+          "wireBytes": 27675,
+          "jsonBytes": 27675,
+          "gzipResponses": 0,
+          "latency": {
+            "count": 675,
+            "meanMs": 72.69407513925911,
+            "p50Ms": 62,
+            "p95Ms": 122,
+            "p99Ms": 362,
+            "maxMs": 686.932084
+          },
+          "throughputRPS": 3.7499861467595106
+        },
+        "watch-sessions": {
+          "completed": 675,
+          "errors": 0,
+          "bytes": 10125,
+          "wireBytes": 10125,
+          "jsonBytes": 10125,
+          "gzipResponses": 0,
+          "latency": {
+            "count": 675,
+            "meanMs": 22.6063369155565,
+            "p50Ms": 4,
+            "p95Ms": 83,
+            "p99Ms": 292,
+            "maxMs": 590.3082089999807
+          },
+          "throughputRPS": 3.7499861467595106
+        },
+        "progress-write": {
+          "completed": 675,
+          "errors": 0,
+          "bytes": 17550,
+          "wireBytes": 17550,
+          "jsonBytes": 17550,
+          "gzipResponses": 0,
+          "latency": {
+            "count": 675,
+            "meanMs": 16.291344927406108,
+            "p50Ms": 7,
+            "p95Ms": 34,
+            "p99Ms": 226,
+            "maxMs": 596.4883330000157
+          },
+          "throughputRPS": 3.7499861467595106
+        }
+      },
+      "achievedRPS": 74.9997229351902,
+      "offeredRPS": 74.9997229351902,
+      "scheduledWindowCompletedRPS": 75,
+      "drainMs": 0.17245799995725974,
+      "actualElapsedMs": 180000.66495799998,
+      "server": {
+        "phase": "sustained",
+        "providerStats": {
+          "anilistCalls": 406,
+          "searches": 200,
+          "malMappings": 6,
+          "mediaReads": 200,
+          "loopbackRequests": 0,
+          "blockedRequests": 0,
+          "unsupportedQueries": 0,
+          "simulatedLatencyMs": 20
+        },
+        "socketGuard": {
+          "rejectedConnections": 0,
+          "rejectedHosts": []
+        },
+        "runtimeMemoryBudget": {
+          "heapSizeLimitBytes": 293601280,
+          "nodeOptions": "--max-old-space-size=256 --max-semi-space-size=8",
+          "note": "GC duration is wall time of observed GC entries, not isolated CPU cost. No forced GC."
+        },
+        "gc": {
+          "count": 12963,
+          "totalMs": 5747,
+          "meanMs": 0.443,
+          "p50Ms": 1,
+          "p95Ms": 2,
+          "p99Ms": 3,
+          "maxMs": 42.08116699755192,
+          "binWidthMs": 1,
+          "overflowBinMs": 60000,
+          "kinds": {
+            "1": 11941,
+            "4": 511,
+            "8": 511
+          }
+        },
+        "query": {
+          "phase": "sustained",
+          "startedAt": "2026-10-06T10:56:58.743Z",
+          "endedAt": null,
+          "queries": {
+            "count": 181481,
+            "totalMs": 410412,
+            "meanMs": 2.261,
+            "p50Ms": 1,
+            "p95Ms": 14,
+            "p99Ms": 33,
+            "maxMs": 520.1749579999887,
+            "binWidthMs": 1,
+            "overflowBinMs": 60000
+          },
+          "dispatchWait": {
+            "count": 29833,
+            "totalMs": 21791,
+            "meanMs": 0.73,
+            "p50Ms": 1,
+            "p95Ms": 1,
+            "p99Ms": 12,
+            "maxMs": 467.22266699999454,
+            "binWidthMs": 1,
+            "overflowBinMs": 60000
+          },
+          "dispatchWaitDescription": "Client query handle to postgres onexecute callback; includes client dispatch, connection availability and socket buffering. Callback does not cover every query and is not isolated pool wait.",
+          "dispatchCoverage": 0.1643863544944099,
+          "errors": 0,
+          "inFlight": 0,
+          "peakInFlight": 67
+        },
+        "resources": {
+          "at": "2026-10-06T10:59:58.513Z",
+          "phase": "sustained",
+          "rss": 173490176,
+          "heapTotal": 99500032,
+          "heapUsed": 77210576,
+          "external": 13164663,
+          "arrayBuffers": 8841970,
+          "intervalMs": 5000.544666000002,
+          "cpuPercentOfOneCore": 70.27400482777728,
+          "eventLoopUtilization": 0.5670045134485511,
+          "eventLoopDelayP95Ms": 29.294591,
+          "eventLoopDelayMaxMs": 51.281919,
+          "gcCount": 300,
+          "gcWallDurationMs": 181.18866302073002,
+          "pgActivity": [
+            {
+              "state": "active",
+              "wait_event_type": null,
+              "wait_event": null,
+              "connections": 5
+            },
+            {
+              "state": "idle",
+              "wait_event_type": "Client",
+              "wait_event": "ClientRead",
+              "connections": 3
+            },
+            {
+              "state": "idle in transaction",
+              "wait_event_type": "Client",
+              "wait_event": "ClientRead",
+              "connections": 2
+            }
+          ]
+        },
+        "phaseSnapshots": [
+          {
+            "phase": "startup",
+            "startedAt": "2026-10-06T10:54:58.439Z",
+            "endedAt": "2026-10-06T10:54:58.734Z",
+            "queries": {
+              "count": 6,
+              "totalMs": 10,
+              "meanMs": 1.653,
+              "p50Ms": 1,
+              "p95Ms": 7,
+              "p99Ms": 7,
+              "maxMs": 6.866582999999991,
+              "binWidthMs": 1,
+              "overflowBinMs": 60000
+            },
+            "dispatchWait": {
+              "count": 5,
+              "totalMs": 6,
+              "meanMs": 1.156,
+              "p50Ms": 1,
+              "p95Ms": 6,
+              "p99Ms": 6,
+              "maxMs": 5.353290999999899,
+              "binWidthMs": 1,
+              "overflowBinMs": 60000
+            },
+            "dispatchWaitDescription": "Client query handle to postgres onexecute callback; includes client dispatch, connection availability and socket buffering. Callback does not cover every query and is not isolated pool wait.",
+            "dispatchCoverage": 0.8333333333333334,
+            "errors": 0,
+            "inFlight": 0,
+            "peakInFlight": 2
+          },
+          {
+            "phase": "warmup",
+            "startedAt": "2026-10-06T10:54:58.734Z",
+            "endedAt": "2026-10-06T10:56:58.743Z",
+            "queries": {
+              "count": 23353,
+              "totalMs": 128482,
+              "meanMs": 5.502,
+              "p50Ms": 1,
+              "p95Ms": 9,
+              "p99Ms": 163,
+              "maxMs": 1343.054124999995,
+              "binWidthMs": 1,
+              "overflowBinMs": 60000
+            },
+            "dispatchWait": {
+              "count": 3819,
+              "totalMs": 12886,
+              "meanMs": 3.374,
+              "p50Ms": 1,
+              "p95Ms": 1,
+              "p99Ms": 111,
+              "maxMs": 1027.4188330000034,
+              "binWidthMs": 1,
+              "overflowBinMs": 60000
+            },
+            "dispatchWaitDescription": "Client query handle to postgres onexecute callback; includes client dispatch, connection availability and socket buffering. Callback does not cover every query and is not isolated pool wait.",
+            "dispatchCoverage": 0.16353359311437501,
+            "errors": 0,
+            "inFlight": 0,
+            "peakInFlight": 53
+          },
+          {
+            "phase": "sustained",
+            "startedAt": "2026-10-06T10:56:58.743Z",
+            "endedAt": null,
+            "queries": {
+              "count": 181481,
+              "totalMs": 410412,
+              "meanMs": 2.261,
+              "p50Ms": 1,
+              "p95Ms": 14,
+              "p99Ms": 33,
+              "maxMs": 520.1749579999887,
+              "binWidthMs": 1,
+              "overflowBinMs": 60000
+            },
+            "dispatchWait": {
+              "count": 29833,
+              "totalMs": 21791,
+              "meanMs": 0.73,
+              "p50Ms": 1,
+              "p95Ms": 1,
+              "p99Ms": 12,
+              "maxMs": 467.22266699999454,
+              "binWidthMs": 1,
+              "overflowBinMs": 60000
+            },
+            "dispatchWaitDescription": "Client query handle to postgres onexecute callback; includes client dispatch, connection availability and socket buffering. Callback does not cover every query and is not isolated pool wait.",
+            "dispatchCoverage": 0.1643863544944099,
+            "errors": 0,
+            "inFlight": 0,
+            "peakInFlight": 67
+          }
+        ],
+        "resourceSamples": 61
+      }
+    },
+    {
+      "name": "burst",
+      "rps": 150,
+      "seconds": 30,
+      "offered": 4500,
+      "sent": 4500,
+      "completed": 4500,
+      "dropped": 0,
+      "requestErrors": 0,
+      "timeouts": 0,
+      "serverErrors": 0,
+      "non2xx": 0,
+      "incorrectResponses": 0,
+      "bytes": 277283700,
+      "wireBytes": 13755530,
+      "jsonBytes": 277283700,
+      "gzipResponses": 3825,
+      "errors": [],
+      "latency": {
+        "count": 4500,
+        "meanMs": 61.95587989466701,
+        "p50Ms": 46,
+        "p95Ms": 174,
+        "p99Ms": 219,
+        "maxMs": 271.35533300001407
+      },
+      "sendLag": {
+        "count": 4500,
+        "meanMs": 0.19075954393084005,
+        "p50Ms": 0,
+        "p95Ms": 1,
+        "p99Ms": 2,
+        "maxMs": 4.027624999987893
+      },
+      "peakInFlight": 41,
+      "routes": {
+        "library": {
+          "completed": 1350,
+          "errors": 0,
+          "bytes": 225386710,
+          "wireBytes": 9249624,
+          "jsonBytes": 225386710,
+          "gzipResponses": 1350,
+          "latency": {
+            "count": 1350,
+            "meanMs": 86.6166851133341,
+            "p50Ms": 78,
+            "p95Ms": 182,
+            "p99Ms": 222,
+            "maxMs": 271.35533300001407
+          },
+          "throughputRPS": 44.82246227291126
+        },
+        "detail": {
+          "completed": 1125,
+          "errors": 0,
+          "bytes": 11417625,
+          "wireBytes": 1398021,
+          "jsonBytes": 11417625,
+          "gzipResponses": 1125,
+          "latency": {
+            "count": 1125,
+            "meanMs": 20.047274992888795,
+            "p50Ms": 5,
+            "p95Ms": 89,
+            "p99Ms": 131,
+            "maxMs": 157.02737500000512
+          },
+          "throughputRPS": 37.35205189409271
+        },
+        "warm-search": {
+          "completed": 900,
+          "errors": 0,
+          "bytes": 5112900,
+          "wireBytes": 659700,
+          "jsonBytes": 5112900,
+          "gzipResponses": 900,
+          "latency": {
+            "count": 900,
+            "meanMs": 9.71103462777799,
+            "p50Ms": 9,
+            "p95Ms": 18,
+            "p99Ms": 27,
+            "maxMs": 41.740500000014435
+          },
+          "throughputRPS": 29.881641515274172
+        },
+        "feed": {
+          "completed": 450,
+          "errors": 0,
+          "bytes": 35348015,
+          "wireBytes": 2429735,
+          "jsonBytes": 35348015,
+          "gzipResponses": 450,
+          "latency": {
+            "count": 450,
+            "meanMs": 130.420446026668,
+            "p50Ms": 150,
+            "p95Ms": 226,
+            "p99Ms": 240,
+            "maxMs": 255.72362499998417
+          },
+          "throughputRPS": 14.940820757637086
+        },
+        "notifications": {
+          "completed": 225,
+          "errors": 0,
+          "bytes": 9225,
+          "wireBytes": 9225,
+          "jsonBytes": 9225,
+          "gzipResponses": 0,
+          "latency": {
+            "count": 225,
+            "meanMs": 113.07178168000007,
+            "p50Ms": 114,
+            "p95Ms": 172,
+            "p99Ms": 187,
+            "maxMs": 190.36666699999478
+          },
+          "throughputRPS": 7.470410378818543
+        },
+        "watch-sessions": {
+          "completed": 225,
+          "errors": 0,
+          "bytes": 3375,
+          "wireBytes": 3375,
+          "jsonBytes": 3375,
+          "gzipResponses": 0,
+          "latency": {
+            "count": 225,
+            "meanMs": 98.22038966222175,
+            "p50Ms": 101,
+            "p95Ms": 137,
+            "p99Ms": 154,
+            "maxMs": 156.33554099994944
+          },
+          "throughputRPS": 7.470410378818543
+        },
+        "progress-write": {
+          "completed": 225,
+          "errors": 0,
+          "bytes": 5850,
+          "wireBytes": 5850,
+          "jsonBytes": 5850,
+          "gzipResponses": 0,
+          "latency": {
+            "count": 225,
+            "meanMs": 108.20391034222182,
+            "p50Ms": 105,
+            "p95Ms": 150,
+            "p99Ms": 159,
+            "maxMs": 170.12579099996947
+          },
+          "throughputRPS": 7.470410378818543
+        }
+      },
+      "achievedRPS": 149.40820757637084,
+      "offeredRPS": 149.40820757637084,
+      "scheduledWindowCompletedRPS": 150,
+      "drainMs": 119.49300000001676,
+      "actualElapsedMs": 30118.827292,
+      "server": {
+        "phase": "burst",
+        "providerStats": {
+          "anilistCalls": 406,
+          "searches": 200,
+          "malMappings": 6,
+          "mediaReads": 200,
+          "loopbackRequests": 0,
+          "blockedRequests": 0,
+          "unsupportedQueries": 0,
+          "simulatedLatencyMs": 20
+        },
+        "socketGuard": {
+          "rejectedConnections": 0,
+          "rejectedHosts": []
+        },
+        "runtimeMemoryBudget": {
+          "heapSizeLimitBytes": 293601280,
+          "nodeOptions": "--max-old-space-size=256 --max-semi-space-size=8",
+          "note": "GC duration is wall time of observed GC entries, not isolated CPU cost. No forced GC."
+        },
+        "gc": {
+          "count": 16636,
+          "totalMs": 7381,
+          "meanMs": 0.444,
+          "p50Ms": 1,
+          "p95Ms": 2,
+          "p99Ms": 3,
+          "maxMs": 42.08116699755192,
+          "binWidthMs": 1,
+          "overflowBinMs": 60000,
+          "kinds": {
+            "1": 15336,
+            "4": 650,
+            "8": 650
+          }
+        },
+        "query": {
+          "phase": "burst",
+          "startedAt": "2026-10-06T10:59:58.748Z",
+          "endedAt": null,
+          "queries": {
+            "count": 58284,
+            "totalMs": 322448,
+            "meanMs": 5.532,
+            "p50Ms": 2,
+            "p95Ms": 29,
+            "p99Ms": 55,
+            "maxMs": 107.2267920000013,
+            "binWidthMs": 1,
+            "overflowBinMs": 60000
+          },
+          "dispatchWait": {
+            "count": 9458,
+            "totalMs": 31150,
+            "meanMs": 3.293,
+            "p50Ms": 1,
+            "p95Ms": 24,
+            "p99Ms": 47,
+            "maxMs": 83.33924999996088,
+            "binWidthMs": 1,
+            "overflowBinMs": 60000
+          },
+          "dispatchWaitDescription": "Client query handle to postgres onexecute callback; includes client dispatch, connection availability and socket buffering. Callback does not cover every query and is not isolated pool wait.",
+          "dispatchCoverage": 0.16227438061903782,
+          "errors": 0,
+          "inFlight": 0,
+          "peakInFlight": 53
+        },
+        "resources": {
+          "at": "2026-10-06T11:00:28.514Z",
+          "phase": "burst",
+          "rss": 197689344,
+          "heapTotal": 110919680,
+          "heapUsed": 86505864,
+          "external": 17123061,
+          "arrayBuffers": 12800368,
+          "intervalMs": 4999.70083300001,
+          "cpuPercentOfOneCore": 106.13461039459737,
+          "eventLoopUtilization": 0.735083663575903,
+          "eventLoopDelayP95Ms": 32.227327,
+          "eventLoopDelayMaxMs": 46.432255,
+          "gcCount": 596,
+          "gcWallDurationMs": 277.71965213119984,
+          "pgActivity": [
+            {
+              "state": "active",
+              "wait_event_type": null,
+              "wait_event": null,
+              "connections": 2
+            },
+            {
+              "state": "idle",
+              "wait_event_type": "Client",
+              "wait_event": "ClientRead",
+              "connections": 8
+            }
+          ]
+        },
+        "phaseSnapshots": [
+          {
+            "phase": "startup",
+            "startedAt": "2026-10-06T10:54:58.439Z",
+            "endedAt": "2026-10-06T10:54:58.734Z",
+            "queries": {
+              "count": 6,
+              "totalMs": 10,
+              "meanMs": 1.653,
+              "p50Ms": 1,
+              "p95Ms": 7,
+              "p99Ms": 7,
+              "maxMs": 6.866582999999991,
+              "binWidthMs": 1,
+              "overflowBinMs": 60000
+            },
+            "dispatchWait": {
+              "count": 5,
+              "totalMs": 6,
+              "meanMs": 1.156,
+              "p50Ms": 1,
+              "p95Ms": 6,
+              "p99Ms": 6,
+              "maxMs": 5.353290999999899,
+              "binWidthMs": 1,
+              "overflowBinMs": 60000
+            },
+            "dispatchWaitDescription": "Client query handle to postgres onexecute callback; includes client dispatch, connection availability and socket buffering. Callback does not cover every query and is not isolated pool wait.",
+            "dispatchCoverage": 0.8333333333333334,
+            "errors": 0,
+            "inFlight": 0,
+            "peakInFlight": 2
+          },
+          {
+            "phase": "warmup",
+            "startedAt": "2026-10-06T10:54:58.734Z",
+            "endedAt": "2026-10-06T10:56:58.743Z",
+            "queries": {
+              "count": 23353,
+              "totalMs": 128482,
+              "meanMs": 5.502,
+              "p50Ms": 1,
+              "p95Ms": 9,
+              "p99Ms": 163,
+              "maxMs": 1343.054124999995,
+              "binWidthMs": 1,
+              "overflowBinMs": 60000
+            },
+            "dispatchWait": {
+              "count": 3819,
+              "totalMs": 12886,
+              "meanMs": 3.374,
+              "p50Ms": 1,
+              "p95Ms": 1,
+              "p99Ms": 111,
+              "maxMs": 1027.4188330000034,
+              "binWidthMs": 1,
+              "overflowBinMs": 60000
+            },
+            "dispatchWaitDescription": "Client query handle to postgres onexecute callback; includes client dispatch, connection availability and socket buffering. Callback does not cover every query and is not isolated pool wait.",
+            "dispatchCoverage": 0.16353359311437501,
+            "errors": 0,
+            "inFlight": 0,
+            "peakInFlight": 53
+          },
+          {
+            "phase": "sustained",
+            "startedAt": "2026-10-06T10:56:58.743Z",
+            "endedAt": "2026-10-06T10:59:58.748Z",
+            "queries": {
+              "count": 181481,
+              "totalMs": 410412,
+              "meanMs": 2.261,
+              "p50Ms": 1,
+              "p95Ms": 14,
+              "p99Ms": 33,
+              "maxMs": 520.1749579999887,
+              "binWidthMs": 1,
+              "overflowBinMs": 60000
+            },
+            "dispatchWait": {
+              "count": 29833,
+              "totalMs": 21791,
+              "meanMs": 0.73,
+              "p50Ms": 1,
+              "p95Ms": 1,
+              "p99Ms": 12,
+              "maxMs": 467.22266699999454,
+              "binWidthMs": 1,
+              "overflowBinMs": 60000
+            },
+            "dispatchWaitDescription": "Client query handle to postgres onexecute callback; includes client dispatch, connection availability and socket buffering. Callback does not cover every query and is not isolated pool wait.",
+            "dispatchCoverage": 0.1643863544944099,
+            "errors": 0,
+            "inFlight": 0,
+            "peakInFlight": 67
+          },
+          {
+            "phase": "burst",
+            "startedAt": "2026-10-06T10:59:58.748Z",
+            "endedAt": null,
+            "queries": {
+              "count": 58284,
+              "totalMs": 322448,
+              "meanMs": 5.532,
+              "p50Ms": 2,
+              "p95Ms": 29,
+              "p99Ms": 55,
+              "maxMs": 107.2267920000013,
+              "binWidthMs": 1,
+              "overflowBinMs": 60000
+            },
+            "dispatchWait": {
+              "count": 9458,
+              "totalMs": 31150,
+              "meanMs": 3.293,
+              "p50Ms": 1,
+              "p95Ms": 24,
+              "p99Ms": 47,
+              "maxMs": 83.33924999996088,
+              "binWidthMs": 1,
+              "overflowBinMs": 60000
+            },
+            "dispatchWaitDescription": "Client query handle to postgres onexecute callback; includes client dispatch, connection availability and socket buffering. Callback does not cover every query and is not isolated pool wait.",
+            "dispatchCoverage": 0.16227438061903782,
+            "errors": 0,
+            "inFlight": 0,
+            "peakInFlight": 53
+          }
+        ],
+        "resourceSamples": 67
+      }
+    },
+    {
+      "name": "recovery",
+      "rps": 15,
+      "seconds": 60,
+      "offered": 900,
+      "sent": 900,
+      "completed": 900,
+      "dropped": 0,
+      "requestErrors": 0,
+      "timeouts": 0,
+      "serverErrors": 0,
+      "non2xx": 0,
+      "incorrectResponses": 0,
+      "bytes": 55461451,
+      "wireBytes": 2748700,
+      "jsonBytes": 55461451,
+      "gzipResponses": 765,
+      "errors": [],
+      "latency": {
+        "count": 900,
+        "meanMs": 36.46417524666791,
+        "p50Ms": 15,
+        "p95Ms": 180,
+        "p99Ms": 543,
+        "maxMs": 892.9795000000158
+      },
+      "sendLag": {
+        "count": 900,
+        "meanMs": 2.7339905962763846,
+        "p50Ms": 1,
+        "p95Ms": 2,
+        "p99Ms": 77,
+        "maxMs": 240.38912499998696
+      },
+      "peakInFlight": 14,
+      "routes": {
+        "library": {
+          "completed": 270,
+          "errors": 0,
+          "bytes": 45077409,
+          "wireBytes": 1846879,
+          "jsonBytes": 45077409,
+          "gzipResponses": 270,
+          "latency": {
+            "count": 270,
+            "meanMs": 50.35993947407783,
+            "p50Ms": 16,
+            "p95Ms": 215,
+            "p99Ms": 697,
+            "maxMs": 892.9795000000158
+          },
+          "throughputRPS": 4.499881768756444
+        },
+        "detail": {
+          "completed": 225,
+          "errors": 0,
+          "bytes": 2288241,
+          "wireBytes": 280101,
+          "jsonBytes": 2288241,
+          "gzipResponses": 225,
+          "latency": {
+            "count": 225,
+            "meanMs": 17.836062400000067,
+            "p50Ms": 6,
+            "p95Ms": 25,
+            "p99Ms": 361,
+            "maxMs": 443.3610420000041
+          },
+          "throughputRPS": 3.749901473963703
+        },
+        "warm-search": {
+          "completed": 180,
+          "errors": 0,
+          "bytes": 1022580,
+          "wireBytes": 131940,
+          "jsonBytes": 1022580,
+          "gzipResponses": 180,
+          "latency": {
+            "count": 180,
+            "meanMs": 51.72055945555459,
+            "p50Ms": 19,
+            "p95Ms": 277,
+            "p99Ms": 475,
+            "maxMs": 488.9656670000404
+          },
+          "throughputRPS": 2.999921179170962
+        },
+        "feed": {
+          "completed": 90,
+          "errors": 0,
+          "bytes": 7069531,
+          "wireBytes": 486090,
+          "jsonBytes": 7069531,
+          "gzipResponses": 90,
+          "latency": {
+            "count": 90,
+            "meanMs": 53.46973002222108,
+            "p50Ms": 28,
+            "p95Ms": 207,
+            "p99Ms": 287,
+            "maxMs": 286.1190420000348
+          },
+          "throughputRPS": 1.499960589585481
+        },
+        "notifications": {
+          "completed": 45,
+          "errors": 0,
+          "bytes": 1845,
+          "wireBytes": 1845,
+          "jsonBytes": 1845,
+          "gzipResponses": 0,
+          "latency": {
+            "count": 45,
+            "meanMs": 10.284022222225191,
+            "p50Ms": 6,
+            "p95Ms": 47,
+            "p99Ms": 99,
+            "maxMs": 98.28308299998753
+          },
+          "throughputRPS": 0.7499802947927405
+        },
+        "watch-sessions": {
+          "completed": 45,
+          "errors": 0,
+          "bytes": 675,
+          "wireBytes": 675,
+          "jsonBytes": 675,
+          "gzipResponses": 0,
+          "latency": {
+            "count": 45,
+            "meanMs": 3.7902814222241026,
+            "p50Ms": 4,
+            "p95Ms": 7,
+            "p99Ms": 14,
+            "maxMs": 13.324208999983966
+          },
+          "throughputRPS": 0.7499802947927405
+        },
+        "progress-write": {
+          "completed": 45,
+          "errors": 0,
+          "bytes": 1170,
+          "wireBytes": 1170,
+          "jsonBytes": 1170,
+          "gzipResponses": 0,
+          "latency": {
+            "count": 45,
+            "meanMs": 10.047554577780991,
+            "p50Ms": 9,
+            "p95Ms": 18,
+            "p99Ms": 32,
+            "maxMs": 31.95624999998836
+          },
+          "throughputRPS": 0.7499802947927405
+        }
+      },
+      "achievedRPS": 14.999605895854812,
+      "offeredRPS": 14.999605895854812,
+      "scheduledWindowCompletedRPS": 15,
+      "drainMs": 0.5014169999631122,
+      "actualElapsedMs": 60001.576457999996,
+      "server": {
+        "phase": "recovery",
+        "providerStats": {
+          "anilistCalls": 406,
+          "searches": 200,
+          "malMappings": 6,
+          "mediaReads": 200,
+          "loopbackRequests": 0,
+          "blockedRequests": 0,
+          "unsupportedQueries": 0,
+          "simulatedLatencyMs": 20
+        },
+        "socketGuard": {
+          "rejectedConnections": 0,
+          "rejectedHosts": []
+        },
+        "runtimeMemoryBudget": {
+          "heapSizeLimitBytes": 293601280,
+          "nodeOptions": "--max-old-space-size=256 --max-semi-space-size=8",
+          "note": "GC duration is wall time of observed GC entries, not isolated CPU cost. No forced GC."
+        },
+        "gc": {
+          "count": 17455,
+          "totalMs": 7902,
+          "meanMs": 0.453,
+          "p50Ms": 1,
+          "p95Ms": 2,
+          "p99Ms": 3,
+          "maxMs": 42.08116699755192,
+          "binWidthMs": 1,
+          "overflowBinMs": 60000,
+          "kinds": {
+            "1": 16067,
+            "4": 694,
+            "8": 694
+          }
+        },
+        "query": {
+          "phase": "recovery",
+          "startedAt": "2026-10-06T11:00:28.871Z",
+          "endedAt": null,
+          "queries": {
+            "count": 11672,
+            "totalMs": 31721,
+            "meanMs": 2.718,
+            "p50Ms": 1,
+            "p95Ms": 10,
+            "p99Ms": 54,
+            "maxMs": 615.8400419999962,
+            "binWidthMs": 1,
+            "overflowBinMs": 60000
+          },
+          "dispatchWait": {
+            "count": 1905,
+            "totalMs": 206,
+            "meanMs": 0.108,
+            "p50Ms": 1,
+            "p95Ms": 1,
+            "p99Ms": 1,
+            "maxMs": 53.08058299997356,
+            "binWidthMs": 1,
+            "overflowBinMs": 60000
+          },
+          "dispatchWaitDescription": "Client query handle to postgres onexecute callback; includes client dispatch, connection availability and socket buffering. Callback does not cover every query and is not isolated pool wait.",
+          "dispatchCoverage": 0.1632111034955449,
+          "errors": 0,
+          "inFlight": 0,
+          "peakInFlight": 14
+        },
+        "resources": {
+          "at": "2026-10-06T11:01:28.543Z",
+          "phase": "recovery",
+          "rss": 131334144,
+          "heapTotal": 98451456,
+          "heapUsed": 80851376,
+          "external": 16401021,
+          "arrayBuffers": 12078328,
+          "intervalMs": 5000.430083000043,
+          "cpuPercentOfOneCore": 19.72872300232483,
+          "eventLoopUtilization": 0.15496264487495284,
+          "eventLoopDelayP95Ms": 21.823487,
+          "eventLoopDelayMaxMs": 34.734079,
+          "gcCount": 66,
+          "gcWallDurationMs": 34.54445904493332,
+          "pgActivity": [
+            {
+              "state": "idle",
+              "wait_event_type": "Client",
+              "wait_event": "ClientRead",
+              "connections": 10
+            }
+          ]
+        },
+        "phaseSnapshots": [
+          {
+            "phase": "startup",
+            "startedAt": "2026-10-06T10:54:58.439Z",
+            "endedAt": "2026-10-06T10:54:58.734Z",
+            "queries": {
+              "count": 6,
+              "totalMs": 10,
+              "meanMs": 1.653,
+              "p50Ms": 1,
+              "p95Ms": 7,
+              "p99Ms": 7,
+              "maxMs": 6.866582999999991,
+              "binWidthMs": 1,
+              "overflowBinMs": 60000
+            },
+            "dispatchWait": {
+              "count": 5,
+              "totalMs": 6,
+              "meanMs": 1.156,
+              "p50Ms": 1,
+              "p95Ms": 6,
+              "p99Ms": 6,
+              "maxMs": 5.353290999999899,
+              "binWidthMs": 1,
+              "overflowBinMs": 60000
+            },
+            "dispatchWaitDescription": "Client query handle to postgres onexecute callback; includes client dispatch, connection availability and socket buffering. Callback does not cover every query and is not isolated pool wait.",
+            "dispatchCoverage": 0.8333333333333334,
+            "errors": 0,
+            "inFlight": 0,
+            "peakInFlight": 2
+          },
+          {
+            "phase": "warmup",
+            "startedAt": "2026-10-06T10:54:58.734Z",
+            "endedAt": "2026-10-06T10:56:58.743Z",
+            "queries": {
+              "count": 23353,
+              "totalMs": 128482,
+              "meanMs": 5.502,
+              "p50Ms": 1,
+              "p95Ms": 9,
+              "p99Ms": 163,
+              "maxMs": 1343.054124999995,
+              "binWidthMs": 1,
+              "overflowBinMs": 60000
+            },
+            "dispatchWait": {
+              "count": 3819,
+              "totalMs": 12886,
+              "meanMs": 3.374,
+              "p50Ms": 1,
+              "p95Ms": 1,
+              "p99Ms": 111,
+              "maxMs": 1027.4188330000034,
+              "binWidthMs": 1,
+              "overflowBinMs": 60000
+            },
+            "dispatchWaitDescription": "Client query handle to postgres onexecute callback; includes client dispatch, connection availability and socket buffering. Callback does not cover every query and is not isolated pool wait.",
+            "dispatchCoverage": 0.16353359311437501,
+            "errors": 0,
+            "inFlight": 0,
+            "peakInFlight": 53
+          },
+          {
+            "phase": "sustained",
+            "startedAt": "2026-10-06T10:56:58.743Z",
+            "endedAt": "2026-10-06T10:59:58.748Z",
+            "queries": {
+              "count": 181481,
+              "totalMs": 410412,
+              "meanMs": 2.261,
+              "p50Ms": 1,
+              "p95Ms": 14,
+              "p99Ms": 33,
+              "maxMs": 520.1749579999887,
+              "binWidthMs": 1,
+              "overflowBinMs": 60000
+            },
+            "dispatchWait": {
+              "count": 29833,
+              "totalMs": 21791,
+              "meanMs": 0.73,
+              "p50Ms": 1,
+              "p95Ms": 1,
+              "p99Ms": 12,
+              "maxMs": 467.22266699999454,
+              "binWidthMs": 1,
+              "overflowBinMs": 60000
+            },
+            "dispatchWaitDescription": "Client query handle to postgres onexecute callback; includes client dispatch, connection availability and socket buffering. Callback does not cover every query and is not isolated pool wait.",
+            "dispatchCoverage": 0.1643863544944099,
+            "errors": 0,
+            "inFlight": 0,
+            "peakInFlight": 67
+          },
+          {
+            "phase": "burst",
+            "startedAt": "2026-10-06T10:59:58.748Z",
+            "endedAt": "2026-10-06T11:00:28.871Z",
+            "queries": {
+              "count": 58284,
+              "totalMs": 322448,
+              "meanMs": 5.532,
+              "p50Ms": 2,
+              "p95Ms": 29,
+              "p99Ms": 55,
+              "maxMs": 107.2267920000013,
+              "binWidthMs": 1,
+              "overflowBinMs": 60000
+            },
+            "dispatchWait": {
+              "count": 9458,
+              "totalMs": 31150,
+              "meanMs": 3.293,
+              "p50Ms": 1,
+              "p95Ms": 24,
+              "p99Ms": 47,
+              "maxMs": 83.33924999996088,
+              "binWidthMs": 1,
+              "overflowBinMs": 60000
+            },
+            "dispatchWaitDescription": "Client query handle to postgres onexecute callback; includes client dispatch, connection availability and socket buffering. Callback does not cover every query and is not isolated pool wait.",
+            "dispatchCoverage": 0.16227438061903782,
+            "errors": 0,
+            "inFlight": 0,
+            "peakInFlight": 53
+          },
+          {
+            "phase": "recovery",
+            "startedAt": "2026-10-06T11:00:28.871Z",
+            "endedAt": null,
+            "queries": {
+              "count": 11672,
+              "totalMs": 31721,
+              "meanMs": 2.718,
+              "p50Ms": 1,
+              "p95Ms": 10,
+              "p99Ms": 54,
+              "maxMs": 615.8400419999962,
+              "binWidthMs": 1,
+              "overflowBinMs": 60000
+            },
+            "dispatchWait": {
+              "count": 1905,
+              "totalMs": 206,
+              "meanMs": 0.108,
+              "p50Ms": 1,
+              "p95Ms": 1,
+              "p99Ms": 1,
+              "maxMs": 53.08058299997356,
+              "binWidthMs": 1,
+              "overflowBinMs": 60000
+            },
+            "dispatchWaitDescription": "Client query handle to postgres onexecute callback; includes client dispatch, connection availability and socket buffering. Callback does not cover every query and is not isolated pool wait.",
+            "dispatchCoverage": 0.1632111034955449,
+            "errors": 0,
+            "inFlight": 0,
+            "peakInFlight": 14
+          }
+        ],
+        "resourceSamples": 79
+      }
+    }
+  ],
+  "backgroundStress": {
+    "offered": 219,
+    "sent": 219,
+    "completed": 219,
+    "dropped": 0,
+    "requestErrors": 0,
+    "timeouts": 0,
+    "serverErrors": 0,
+    "non2xx": 0,
+    "incorrectResponses": 0,
+    "bytes": 91467,
+    "wireBytes": 82405,
+    "jsonBytes": 91467,
+    "gzipResponses": 2,
+    "errors": [],
+    "latency": {
+      "count": 219,
+      "meanMs": 45.23322168036507,
+      "p50Ms": 30,
+      "p95Ms": 168,
+      "p99Ms": 202,
+      "maxMs": 275.46545800000604
+    },
+    "sendLag": {
+      "count": 0,
+      "meanMs": null,
+      "p50Ms": null,
+      "p95Ms": null,
+      "p99Ms": null,
+      "maxMs": 0
+    },
+    "peakInFlight": 0,
+    "routes": {
+      "cold-search": {
+        "completed": 200,
+        "errors": 0,
+        "bytes": 79600,
+        "wireBytes": 79600,
+        "jsonBytes": 79600,
+        "gzipResponses": 0,
+        "latency": {
+          "count": 200,
+          "meanMs": 47.75129960499988,
+          "p50Ms": 31,
+          "p95Ms": 151,
+          "p99Ms": 202,
+          "maxMs": 275.46545800000604
+        },
+        "throughputRPS": 12.336717059828947
+      },
+      "import-preview": {
+        "completed": 2,
+        "errors": 0,
+        "bytes": 126,
+        "wireBytes": 126,
+        "jsonBytes": 126,
+        "gzipResponses": 0,
+        "latency": {
+          "count": 2,
+          "meanMs": 8.384125000004133,
+          "p50Ms": 8,
+          "p95Ms": 10,
+          "p99Ms": 10,
+          "maxMs": 9.243500000011409
+        },
+        "throughputRPS": 0.12336717059828947
+      },
+      "import-preview-poll": {
+        "completed": 15,
+        "errors": 0,
+        "bytes": 11549,
+        "wireBytes": 2487,
+        "jsonBytes": 11549,
+        "gzipResponses": 2,
+        "latency": {
+          "count": 15,
+          "meanMs": 2.1550695333290304,
+          "p50Ms": 2,
+          "p95Ms": 4,
+          "p99Ms": 4,
+          "maxMs": 3.52470799999719
+        },
+        "throughputRPS": 0.925253779487171
+      },
+      "import-apply": {
+        "completed": 2,
+        "errors": 0,
+        "bytes": 192,
+        "wireBytes": 192,
+        "jsonBytes": 192,
+        "gzipResponses": 0,
+        "latency": {
+          "count": 2,
+          "meanMs": 153.36066700001538,
+          "p50Ms": 126,
+          "p95Ms": 182,
+          "p99Ms": 182,
+          "maxMs": 181.0391670000099
+        },
+        "throughputRPS": 0.12336717059828947
+      }
+    },
+    "achievedRPS": 13.508705180512697,
+    "offeredRPS": 13.508705180512697,
+    "actualElapsedSeconds": 16.211768417
+  },
+  "importResults": [
+    {
+      "userIndex": 499,
+      "startedAt": "2026-10-06T10:56:58.746Z",
+      "finishedAt": "2026-10-06T10:57:12.899Z",
+      "durationMs": 14152.800625000003,
+      "ok": true,
+      "progress": {
+        "id": "4ba4356c-582c-449a-b2ce-b7f7901a0534",
+        "state": "done",
+        "shows": 50,
+        "remaining": 0,
+        "failed": 0
+      }
+    },
+    {
+      "userIndex": 498,
+      "startedAt": "2026-10-06T10:56:58.746Z",
+      "finishedAt": "2026-10-06T10:57:14.956Z",
+      "durationMs": 16209.720582999988,
+      "ok": true,
+      "progress": {
+        "id": "728351d8-29cc-447e-af1e-407c347f458e",
+        "state": "done",
+        "shows": 50,
+        "remaining": 0,
+        "failed": 0
+      }
+    }
+  ],
+  "canonicalWriteOracle": {
+    "ok": true,
+    "checked": 729,
+    "mismatchCount": 0,
+    "mismatches": [],
+    "counts": {
+      "users": 500,
+      "franchises": 1200,
+      "media": 3200,
+      "subscriptions": 25100,
+      "progress": 75300
+    }
+  },
+  "finalMetrics": {
+    "phase": "recovery",
+    "providerStats": {
+      "anilistCalls": 406,
+      "searches": 200,
+      "malMappings": 6,
+      "mediaReads": 200,
+      "loopbackRequests": 0,
+      "blockedRequests": 0,
+      "unsupportedQueries": 0,
+      "simulatedLatencyMs": 20
+    },
+    "socketGuard": {
+      "rejectedConnections": 0,
+      "rejectedHosts": []
+    },
+    "runtimeMemoryBudget": {
+      "heapSizeLimitBytes": 293601280,
+      "nodeOptions": "--max-old-space-size=256 --max-semi-space-size=8",
+      "note": "GC duration is wall time of observed GC entries, not isolated CPU cost. No forced GC."
+    },
+    "gc": {
+      "count": 17455,
+      "totalMs": 7902,
+      "meanMs": 0.453,
+      "p50Ms": 1,
+      "p95Ms": 2,
+      "p99Ms": 3,
+      "maxMs": 42.08116699755192,
+      "binWidthMs": 1,
+      "overflowBinMs": 60000,
+      "kinds": {
+        "1": 16067,
+        "4": 694,
+        "8": 694
+      }
+    },
+    "query": {
+      "phase": "recovery",
+      "startedAt": "2026-10-06T11:00:28.871Z",
+      "endedAt": null,
+      "queries": {
+        "count": 11672,
+        "totalMs": 31721,
+        "meanMs": 2.718,
+        "p50Ms": 1,
+        "p95Ms": 10,
+        "p99Ms": 54,
+        "maxMs": 615.8400419999962,
+        "binWidthMs": 1,
+        "overflowBinMs": 60000
+      },
+      "dispatchWait": {
+        "count": 1905,
+        "totalMs": 206,
+        "meanMs": 0.108,
+        "p50Ms": 1,
+        "p95Ms": 1,
+        "p99Ms": 1,
+        "maxMs": 53.08058299997356,
+        "binWidthMs": 1,
+        "overflowBinMs": 60000
+      },
+      "dispatchWaitDescription": "Client query handle to postgres onexecute callback; includes client dispatch, connection availability and socket buffering. Callback does not cover every query and is not isolated pool wait.",
+      "dispatchCoverage": 0.1632111034955449,
+      "errors": 0,
+      "inFlight": 0,
+      "peakInFlight": 14
+    },
+    "resources": {
+      "at": "2026-10-06T11:01:28.543Z",
+      "phase": "recovery",
+      "rss": 131334144,
+      "heapTotal": 98451456,
+      "heapUsed": 80851376,
+      "external": 16401021,
+      "arrayBuffers": 12078328,
+      "intervalMs": 5000.430083000043,
+      "cpuPercentOfOneCore": 19.72872300232483,
+      "eventLoopUtilization": 0.15496264487495284,
+      "eventLoopDelayP95Ms": 21.823487,
+      "eventLoopDelayMaxMs": 34.734079,
+      "gcCount": 66,
+      "gcWallDurationMs": 34.54445904493332,
+      "pgActivity": [
+        {
+          "state": "idle",
+          "wait_event_type": "Client",
+          "wait_event": "ClientRead",
+          "connections": 10
+        }
+      ]
+    },
+    "phaseSnapshots": [
+      {
+        "phase": "startup",
+        "startedAt": "2026-10-06T10:54:58.439Z",
+        "endedAt": "2026-10-06T10:54:58.734Z",
+        "queries": {
+          "count": 6,
+          "totalMs": 10,
+          "meanMs": 1.653,
+          "p50Ms": 1,
+          "p95Ms": 7,
+          "p99Ms": 7,
+          "maxMs": 6.866582999999991,
+          "binWidthMs": 1,
+          "overflowBinMs": 60000
+        },
+        "dispatchWait": {
+          "count": 5,
+          "totalMs": 6,
+          "meanMs": 1.156,
+          "p50Ms": 1,
+          "p95Ms": 6,
+          "p99Ms": 6,
+          "maxMs": 5.353290999999899,
+          "binWidthMs": 1,
+          "overflowBinMs": 60000
+        },
+        "dispatchWaitDescription": "Client query handle to postgres onexecute callback; includes client dispatch, connection availability and socket buffering. Callback does not cover every query and is not isolated pool wait.",
+        "dispatchCoverage": 0.8333333333333334,
+        "errors": 0,
+        "inFlight": 0,
+        "peakInFlight": 2
+      },
+      {
+        "phase": "warmup",
+        "startedAt": "2026-10-06T10:54:58.734Z",
+        "endedAt": "2026-10-06T10:56:58.743Z",
+        "queries": {
+          "count": 23353,
+          "totalMs": 128482,
+          "meanMs": 5.502,
+          "p50Ms": 1,
+          "p95Ms": 9,
+          "p99Ms": 163,
+          "maxMs": 1343.054124999995,
+          "binWidthMs": 1,
+          "overflowBinMs": 60000
+        },
+        "dispatchWait": {
+          "count": 3819,
+          "totalMs": 12886,
+          "meanMs": 3.374,
+          "p50Ms": 1,
+          "p95Ms": 1,
+          "p99Ms": 111,
+          "maxMs": 1027.4188330000034,
+          "binWidthMs": 1,
+          "overflowBinMs": 60000
+        },
+        "dispatchWaitDescription": "Client query handle to postgres onexecute callback; includes client dispatch, connection availability and socket buffering. Callback does not cover every query and is not isolated pool wait.",
+        "dispatchCoverage": 0.16353359311437501,
+        "errors": 0,
+        "inFlight": 0,
+        "peakInFlight": 53
+      },
+      {
+        "phase": "sustained",
+        "startedAt": "2026-10-06T10:56:58.743Z",
+        "endedAt": "2026-10-06T10:59:58.748Z",
+        "queries": {
+          "count": 181481,
+          "totalMs": 410412,
+          "meanMs": 2.261,
+          "p50Ms": 1,
+          "p95Ms": 14,
+          "p99Ms": 33,
+          "maxMs": 520.1749579999887,
+          "binWidthMs": 1,
+          "overflowBinMs": 60000
+        },
+        "dispatchWait": {
+          "count": 29833,
+          "totalMs": 21791,
+          "meanMs": 0.73,
+          "p50Ms": 1,
+          "p95Ms": 1,
+          "p99Ms": 12,
+          "maxMs": 467.22266699999454,
+          "binWidthMs": 1,
+          "overflowBinMs": 60000
+        },
+        "dispatchWaitDescription": "Client query handle to postgres onexecute callback; includes client dispatch, connection availability and socket buffering. Callback does not cover every query and is not isolated pool wait.",
+        "dispatchCoverage": 0.1643863544944099,
+        "errors": 0,
+        "inFlight": 0,
+        "peakInFlight": 67
+      },
+      {
+        "phase": "burst",
+        "startedAt": "2026-10-06T10:59:58.748Z",
+        "endedAt": "2026-10-06T11:00:28.871Z",
+        "queries": {
+          "count": 58284,
+          "totalMs": 322448,
+          "meanMs": 5.532,
+          "p50Ms": 2,
+          "p95Ms": 29,
+          "p99Ms": 55,
+          "maxMs": 107.2267920000013,
+          "binWidthMs": 1,
+          "overflowBinMs": 60000
+        },
+        "dispatchWait": {
+          "count": 9458,
+          "totalMs": 31150,
+          "meanMs": 3.293,
+          "p50Ms": 1,
+          "p95Ms": 24,
+          "p99Ms": 47,
+          "maxMs": 83.33924999996088,
+          "binWidthMs": 1,
+          "overflowBinMs": 60000
+        },
+        "dispatchWaitDescription": "Client query handle to postgres onexecute callback; includes client dispatch, connection availability and socket buffering. Callback does not cover every query and is not isolated pool wait.",
+        "dispatchCoverage": 0.16227438061903782,
+        "errors": 0,
+        "inFlight": 0,
+        "peakInFlight": 53
+      },
+      {
+        "phase": "recovery",
+        "startedAt": "2026-10-06T11:00:28.871Z",
+        "endedAt": null,
+        "queries": {
+          "count": 11672,
+          "totalMs": 31721,
+          "meanMs": 2.718,
+          "p50Ms": 1,
+          "p95Ms": 10,
+          "p99Ms": 54,
+          "maxMs": 615.8400419999962,
+          "binWidthMs": 1,
+          "overflowBinMs": 60000
+        },
+        "dispatchWait": {
+          "count": 1905,
+          "totalMs": 206,
+          "meanMs": 0.108,
+          "p50Ms": 1,
+          "p95Ms": 1,
+          "p99Ms": 1,
+          "maxMs": 53.08058299997356,
+          "binWidthMs": 1,
+          "overflowBinMs": 60000
+        },
+        "dispatchWaitDescription": "Client query handle to postgres onexecute callback; includes client dispatch, connection availability and socket buffering. Callback does not cover every query and is not isolated pool wait.",
+        "dispatchCoverage": 0.1632111034955449,
+        "errors": 0,
+        "inFlight": 0,
+        "peakInFlight": 14
+      }
+    ],
+    "resourceSamples": 79
+  },
+  "productionObservability": {
+    "measuredAt": 1791284488907,
+    "startedAt": 1791284097643,
+    "uptimeSeconds": 391.957689708,
+    "memory": {
+      "rss": 130154496,
+      "heapTotal": 93929472,
+      "heapUsed": 64713248,
+      "external": 13139218,
+      "arrayBuffers": 8816525
+    },
+    "cpu": {
+      "user": 160778718,
+      "system": 12248382
+    },
+    "eventLoopMs": {
+      "mean": 21.373458797202797,
+      "p95": 25.149439,
+      "p99": 39.321599
+    },
+    "latencyBucketUpperMs": [
+      25,
+      50,
+      100,
+      250,
+      500,
+      1000,
+      2000,
+      5000
+    ],
+    "routes": {
+      "GET /ready": {
+        "requests": 1,
+        "errors": 0,
+        "totalMs": 3.1030419999999594,
+        "buckets": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ],
+        "statuses": {
+          "2xx": 1
+        }
+      },
+      "POST /__load/phase": {
+        "requests": 4,
+        "errors": 0,
+        "totalMs": 3.584583000039629,
+        "buckets": [
+          4,
+          4,
+          4,
+          4,
+          4,
+          4,
+          4,
+          4
+        ],
+        "statuses": {
+          "2xx": 4
+        }
+      },
+      "GET /me/library": {
+        "requests": 6210,
+        "errors": 0,
+        "totalMs": 230491.92146000126,
+        "buckets": [
+          4577,
+          5136,
+          5654,
+          6137,
+          6153,
+          6206,
+          6210,
+          6210
+        ],
+        "statuses": {
+          "2xx": 6210
+        }
+      },
+      "GET /franchises/:id": {
+        "requests": 5175,
+        "errors": 0,
+        "totalMs": 66708.32620700111,
+        "buckets": [
+          4816,
+          4954,
+          5094,
+          5139,
+          5165,
+          5170,
+          5175,
+          5175
+        ],
+        "statuses": {
+          "2xx": 5175
+        }
+      },
+      "GET /search": {
+        "requests": 4340,
+        "errors": 0,
+        "totalMs": 78818.85212600065,
+        "buckets": [
+          3956,
+          4232,
+          4265,
+          4311,
+          4328,
+          4338,
+          4338,
+          4340
+        ],
+        "statuses": {
+          "2xx": 4340
+        }
+      },
+      "GET /me/feed": {
+        "requests": 2070,
+        "errors": 0,
+        "totalMs": 191659.81387000057,
+        "buckets": [
+          139,
+          693,
+          1460,
+          2034,
+          2056,
+          2060,
+          2067,
+          2070
+        ],
+        "statuses": {
+          "2xx": 2070
+        }
+      },
+      "GET /me/notifications": {
+        "requests": 1035,
+        "errors": 0,
+        "totalMs": 71463.3249179994,
+        "buckets": [
+          254,
+          467,
+          865,
+          1016,
+          1025,
+          1031,
+          1035,
+          1035
+        ],
+        "statuses": {
+          "2xx": 1035
+        }
+      },
+      "GET /me/watch-sessions": {
+        "requests": 1035,
+        "errors": 0,
+        "totalMs": 35893.56635099977,
+        "buckets": [
+          723,
+          788,
+          922,
+          1024,
+          1026,
+          1034,
+          1035,
+          1035
+        ],
+        "statuses": {
+          "2xx": 1035
+        }
+      },
+      "PUT /me/progress": {
+        "requests": 1035,
+        "errors": 0,
+        "totalMs": 37844.00075200027,
+        "buckets": [
+          768,
+          789,
+          922,
+          1025,
+          1025,
+          1030,
+          1035,
+          1035
+        ],
+        "statuses": {
+          "2xx": 1035
+        }
+      },
+      "GET /__load/metrics": {
+        "requests": 5,
+        "errors": 0,
+        "totalMs": 6.574873999983538,
+        "buckets": [
+          5,
+          5,
+          5,
+          5,
+          5,
+          5,
+          5,
+          5
+        ],
+        "statuses": {
+          "2xx": 5
+        }
+      },
+      "POST /me/import/preview": {
+        "requests": 2,
+        "errors": 0,
+        "totalMs": 14.223041999997804,
+        "buckets": [
+          2,
+          2,
+          2,
+          2,
+          2,
+          2,
+          2,
+          2
+        ],
+        "statuses": {
+          "2xx": 2
+        }
+      },
+      "GET /me/import/:id/preview": {
+        "requests": 15,
+        "errors": 0,
+        "totalMs": 28.30312200001208,
+        "buckets": [
+          15,
+          15,
+          15,
+          15,
+          15,
+          15,
+          15,
+          15
+        ],
+        "statuses": {
+          "2xx": 15
+        }
+      },
+      "POST /me/import/:id/apply": {
+        "requests": 2,
+        "errors": 0,
+        "totalMs": 306.14837399998214,
+        "buckets": [
+          0,
+          0,
+          0,
+          2,
+          2,
+          2,
+          2,
+          2
+        ],
+        "statuses": {
+          "2xx": 2
+        }
+      },
+      "POST /__load/oracle": {
+        "requests": 1,
+        "errors": 0,
+        "totalMs": 21.98554199998034,
+        "buckets": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ],
+        "statuses": {
+          "2xx": 1
+        }
+      }
+    }
+  },
+  "productionUsage": {
+    "measuredAt": 1791284488909,
+    "counts": {
+      "registered": 500,
+      "active_24h": 0,
+      "active_7d": 0,
+      "registered_7d": 500,
+      "library_users": 500,
+      "progress_users": 500
+    },
+    "deletion": {
+      "pending": 0
+    },
+    "definition": "Activity is the most recent confirmed app-open timestamp; no cross-app tracking or per-user event export."
+  },
+  "readiness": {
+    "ok": true
+  },
+  "failures": [],
+  "passedRequestAndLatencyCriteria": true,
+  "memoryRecoveryRequiresResourceReview": true,
+  "limitations": [
+    "Loopback HTTP excludes public ISP/tunnel/TLS latency and loss.",
+    "Deterministic20msAniList stub excludes actual provider variability/rate limits.",
+    "DEV_AUTH_BYPASS exercises real identity/upsert/ownership paths, not liveApple/Clerk tokenverification.",
+    "Synthetic cachedanime-onlycatalogue; no productiondata copied.",
+    "SharedMacMini co-resident services/simulator; no dedicatedcapacityclaim."
+  ]
+}

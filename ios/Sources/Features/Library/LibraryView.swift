@@ -411,6 +411,7 @@ private struct LibraryContinueShelf: View {
                     ForEach(items) { f in
                         if let part = f.resumePart {
                             LibraryContinueCard(franchise: f, part: part) { onOpen(f) }
+                                .qaIdentifier("qa.show.\(f.id)")
                                 .containerRelativeFrame(.horizontal,
                                                         count: typeSize.isAccessibilitySize ? 1 : LibraryRootMetrics.continueCardCount,
                                                         // A shelf of one runs gutter to gutter (review, 5 Sep).
@@ -526,6 +527,7 @@ private struct LibraryLandscapeShelf: View {
                             }
                         }
                             .frame(width: typeSize.isAccessibilitySize ? 210 : 150)
+                            .qaIdentifier("qa.show.\(item.franchise.id)")
                             .zoomSource("lib/\(item.franchise.id)")
                             .franchiseQuickActions(item.franchise, appModel: appModel)
                     }

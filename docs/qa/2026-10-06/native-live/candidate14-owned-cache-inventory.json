@@ -1,0 +1,133 @@
+{
+  "checkedAt": "2026-10-06T15:14:07.661044+00:00",
+  "status": "read_only_candidates_not_deleted",
+  "diskAvailableBytes": 992567296,
+  "diskFloorBytes": 2200000000,
+  "ownershipEvidence": "Candidate14 Release build ledgers use ios/build/DerivedData; both enumerated info.plist WorkspacePath values match this exact Previously.xcodeproj",
+  "ownedDerivedData": [
+    {
+      "root": "/Users/shan2new/Projects/previously/ios/build/DerivedData",
+      "metadata": {
+        "WorkspacePath": "/Users/shan2new/Projects/previously/ios/Previously.xcodeproj",
+        "LastAccessedDate": "2026-10-06T14:47:46"
+      },
+      "candidates": [
+        {
+          "relativePath": "Build/Intermediates.noindex",
+          "allocatedBytesApproximate": 2019815424,
+          "reconstructable": true,
+          "preserve": false,
+          "modifiedUTC": "2026-10-04T14:31:01.316610+00:00"
+        },
+        {
+          "relativePath": "ModuleCache.noindex",
+          "allocatedBytesApproximate": 145670144,
+          "reconstructable": true,
+          "preserve": false,
+          "modifiedUTC": "2026-10-06T14:23:15.207019+00:00"
+        },
+        {
+          "relativePath": "Index.noindex",
+          "allocatedBytesApproximate": 87326720,
+          "reconstructable": true,
+          "preserve": false,
+          "modifiedUTC": "2026-10-02T08:45:47.350203+00:00"
+        },
+        {
+          "relativePath": "Build/Products",
+          "allocatedBytesApproximate": 612327424,
+          "reconstructable": false,
+          "preserve": true,
+          "modifiedUTC": "2026-10-06T14:28:21.653520+00:00"
+        }
+      ],
+      "preserve": [
+        "Logs",
+        "SourcePackages",
+        "Build/Products",
+        "all xcresults and test logs"
+      ]
+    },
+    {
+      "root": "/Users/shan2new/Library/Developer/Xcode/DerivedData/Previously-fglcamicmniqpnepoqlhfidxrzuc",
+      "metadata": {
+        "WorkspacePath": "/Users/shan2new/Projects/previously/ios/Previously.xcodeproj",
+        "LastAccessedDate": "2026-10-06T13:32:23"
+      },
+      "candidates": [
+        {
+          "relativePath": "Build/Intermediates.noindex",
+          "allocatedBytesApproximate": 897024,
+          "reconstructable": true,
+          "preserve": false,
+          "modifiedUTC": "2026-10-04T08:52:28.398292+00:00"
+        },
+        {
+          "relativePath": "Index.noindex",
+          "allocatedBytesApproximate": 185565184,
+          "reconstructable": true,
+          "preserve": false,
+          "modifiedUTC": "2026-10-06T13:31:44.498140+00:00"
+        }
+      ],
+      "preserve": [
+        "Logs",
+        "SourcePackages",
+        "Build/Products",
+        "all xcresults and test logs"
+      ]
+    }
+  ],
+  "narrowDebugSimulatorObjectCandidates": [
+    {
+      "path": "/Users/shan2new/Projects/previously/ios/build/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKit-t.build/Objects-normal",
+      "allocatedBytesApproximate": 154746880,
+      "reconstructable": true
+    },
+    {
+      "path": "/Users/shan2new/Projects/previously/ios/build/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKitUI-t.build/Objects-normal",
+      "allocatedBytesApproximate": 266620928,
+      "reconstructable": true
+    },
+    {
+      "path": "/Users/shan2new/Projects/previously/ios/build/DerivedData/Build/Intermediates.noindex/Nuke.build/Debug-iphonesimulator/Nuke-t.build/Objects-normal",
+      "allocatedBytesApproximate": 27127808,
+      "reconstructable": true
+    },
+    {
+      "path": "/Users/shan2new/Projects/previously/ios/build/DerivedData/Build/Intermediates.noindex/Nuke.build/Debug-iphonesimulator/NukeUI-t.build/Objects-normal",
+      "allocatedBytesApproximate": 4472832,
+      "reconstructable": true
+    },
+    {
+      "path": "/Users/shan2new/Projects/previously/ios/build/DerivedData/Build/Intermediates.noindex/PhoneNumberKit.build/Debug-iphonesimulator/PhoneNumberKit-t.build/Objects-normal",
+      "allocatedBytesApproximate": 7843840,
+      "reconstructable": true
+    },
+    {
+      "path": "/Users/shan2new/Projects/previously/ios/build/DerivedData/Build/Intermediates.noindex/Previously.build/Debug-iphonesimulator/Previously.build/Objects-normal",
+      "allocatedBytesApproximate": 475938816,
+      "reconstructable": true
+    },
+    {
+      "path": "/Users/shan2new/Projects/previously/ios/build/DerivedData/Build/Intermediates.noindex/Previously.build/Debug-iphonesimulator/PreviouslyWidgets.build/Objects-normal",
+      "allocatedBytesApproximate": 4939776,
+      "reconstructable": true
+    }
+  ],
+  "narrowCandidateAllocatedBytesApproximate": 941690880,
+  "buildCompilerProcessesObserved": 0,
+  "processArgumentsOrEnvironmentInspected": false,
+  "deletions": 0,
+  "preserve": [
+    "All .xcarchive and Xcode Archives",
+    "All ios/Tools/qa/.runs including its DerivedData",
+    "All xcresults and Logs/Test",
+    "Current Release app/products/intermediates",
+    "All ArchiveIntermediates",
+    "All SourcePackages/source/captures",
+    "Historical home-nav-review source/build baseline"
+  ],
+  "cleanupPrecondition": "Root explicit scoped authorization plus fresh active-build/process check before any removal",
+  "measurementLimit": "du allocated-byte sums are estimates; APFS/df before and after removal establish actual recovered free space"
+}

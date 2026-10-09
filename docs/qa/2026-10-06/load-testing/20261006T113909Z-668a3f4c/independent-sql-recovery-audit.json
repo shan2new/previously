@@ -1,0 +1,17 @@
+{
+  "database": "previously_qa_load_2131499eb7f04418a21f82794705137c",
+  "users": 500,
+  "franchises": 1200,
+  "media": 3200,
+  "subscriptions": 25100,
+  "progress": 75300,
+  "coldFranchises": 200,
+  "coldMedia": 200,
+  "progressRowsIndependentlyChecked": 74802,
+  "unchangedOrImportedProgressMismatches": 0,
+  "unexpectedProgressRows": 0,
+  "subscriptionOwnershipOrStatusMismatches": 0,
+  "unexpectedSubscriptions": 0,
+  "auditedAt": "2026-10-06T12:01:38.933898+00:00",
+  "transactionReadOnly": true
+}

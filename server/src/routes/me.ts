@@ -1,7 +1,5 @@
 import type { FastifyPluginAsync } from 'fastify'
 import { z } from 'zod'
-import { eq, getTableName, sql } from 'drizzle-orm'
-import type { PgColumn, PgTable } from 'drizzle-orm/pg-core'
 import { env } from '../env.js'
 import { getLibrary } from '../services/franchiseView.js'
 import { listNotifications, markNotificationsRead } from '../services/notifications.js'
@@ -16,28 +14,10 @@ import {
   unsubscribe,
 } from '../services/library.js'
 import { readVisitAnchors } from '../services/visits.js'
-import { eraseClerkIdentity, recordErasure } from '../services/erasure.js'
+import { recordErasure } from '../services/erasure.js'
+import { deletionResponse, enqueueDeletion, finishDeletion, lockIdentity, recordAppleRevocation } from '../services/deletionLedger.js'
+import { prepareAppleDeletion } from '../services/appleDeletion.js'
 import { db } from '../db/index.js'
-import {
-  blocks,
-  commentLikes,
-  comments,
-  episodeRatings,
-  feedHides,
-  likes,
-  notifications,
-  progress,
-  recommendationFeedback,
-  reminders,
-  reports,
-  saves,
-  subscriptions,
-  userAudience,
-  userPreferences,
-  userProfiles,
-  users,
-  watchSessions,
-} from '../db/schema.js'
 import type {
   AccountDeletedResponse,
   NotificationsPage,
@@ -48,7 +28,6 @@ import { decodeCursor } from '../util/cursor.js'
 import { MAX_MEDIA_ID } from '../social/subjects.js'
 import { enqueueAnimeVideoFallback } from '../services/animeVideoFallback.js'
 import { enqueueRecommendationRefresh } from '../services/catalogEnrichment.js'
-import { isMissingTable } from '../services/audience.js'
 import {
   applyProviderPreferences,
   getUserPreferences,
@@ -62,6 +41,9 @@ import {
   recordRecommendationFeedback,
 } from '../services/recommendations.js'
 import { deleteWatchSession, listWatchSessions, putWatchSession } from '../services/watchSessions.js'
+import { ClientMutationError, clientMutationContext } from '../services/clientMutations.js'
+import { eraseOwnedAccount } from '../services/accountErasurePlan.js'
+export { accountErasurePlan, accountOwnedTableNames, type ErasureParent, type ErasureStep } from '../services/accountErasurePlan.js'
 
 // Board 09's status vocabulary. `subscriptions.status` is a text() column, so the two added
 // values need no migration.
@@ -142,6 +124,10 @@ const progressCommand = z.union([
 
 export const meRoutes: FastifyPluginAsync = async (app) => {
   app.addHook('preHandler', app.authenticate)
+  app.setErrorHandler((error, _req, reply) => {
+    if (error instanceof ClientMutationError) return reply.code(error.statusCode).send({ error: error.message })
+    throw error
+  })
 
   app.get('/me/library', async (req, reply) => {
     const query = countryQuery.safeParse(req.query)
@@ -219,9 +205,14 @@ export const meRoutes: FastifyPluginAsync = async (app) => {
     const params = sessionIdParams.safeParse(req.params)
     const body = watchSessionBody.safeParse(req.body)
     if (!params.success || !body.success) return reply.code(400).send({ error: 'invalid request' })
-    const result = await putWatchSession(req.user!.id, params.data.id, body.data)
+    const context = clientMutationContext(req)
+    const result = await putWatchSession(req.user!.id, params.data.id, body.data, context)
+    if (context.stamp && (result === 'saved' || result === 'superseded')) {
+      reply.header('X-Previously-Applied', result === 'saved' ? 'true' : 'false')
+    }
     switch (result) {
       case 'saved':
+      case 'superseded':
         return reply.code(204).send()
       case 'deleted':
         return reply.code(410).send({ error: 'session deleted' })
@@ -235,31 +226,36 @@ export const meRoutes: FastifyPluginAsync = async (app) => {
   app.delete('/me/watch-sessions/:id', async (req, reply) => {
     const params = sessionIdParams.safeParse(req.params)
     if (!params.success) return reply.code(400).send({ error: 'invalid request' })
-    await deleteWatchSession(req.user!.id, params.data.id)
+    const context = clientMutationContext(req)
+    const applied = await deleteWatchSession(req.user!.id, params.data.id, context)
+    if (context.stamp) reply.header('X-Previously-Applied', applied ? 'true' : 'false')
     return reply.code(204).send()
   })
 
   app.post('/me/subscriptions', async (req, reply) => {
     const body = z.object({ franchiseId: z.string().uuid(), status: statusEnum.optional() }).parse(req.body)
     if (!(await franchiseExists(body.franchiseId))) return reply.code(404).send({ error: 'franchise not found' })
-    await subscribe(req.user!.id, body.franchiseId, body.status)
-    enqueueAnimeVideoFallback(body.franchiseId)
+    const context = clientMutationContext(req)
+    const applied = await subscribe(req.user!.id, body.franchiseId, body.status, context)
+    if (applied) enqueueAnimeVideoFallback(body.franchiseId)
     // A newly followed show votes at once, not after the next weekly enrichment.
-    enqueueRecommendationRefresh(body.franchiseId)
-    return { ok: true }
+    if (applied) enqueueRecommendationRefresh(body.franchiseId)
+    return { ok: true, ...(context.stamp ? { applied } : {}) }
   })
 
   app.patch('/me/subscriptions/:franchiseId', async (req) => {
     const { franchiseId } = z.object({ franchiseId: z.string().uuid() }).parse(req.params)
     const { status } = z.object({ status: statusEnum }).parse(req.body)
-    await setSubscriptionStatus(req.user!.id, franchiseId, status)
-    return { ok: true }
+    const context = clientMutationContext(req)
+    const applied = await setSubscriptionStatus(req.user!.id, franchiseId, status, context)
+    return { ok: true, ...(context.stamp ? { applied } : {}) }
   })
 
   app.delete('/me/subscriptions/:franchiseId', async (req) => {
     const { franchiseId } = z.object({ franchiseId: z.string().uuid() }).parse(req.params)
-    await unsubscribe(req.user!.id, franchiseId)
-    return { ok: true }
+    const context = clientMutationContext(req)
+    const applied = await unsubscribe(req.user!.id, franchiseId, context)
+    return { ok: true, ...(context.stamp ? { applied } : {}) }
   })
 
   // The count is clamped (services/aired.ts): a RELEASING part to what has aired by now, a
@@ -268,9 +264,10 @@ export const meRoutes: FastifyPluginAsync = async (app) => {
   app.put('/me/progress', async (req, reply) => {
     const body = progressBody.safeParse(req.body)
     if (!body.success) return reply.code(400).send({ error: 'invalid request' })
-    const result = await setProgress(req.user!.id, body.data.mediaId, body.data.episodes)
+    const context = clientMutationContext(req)
+    const result = await setProgress(req.user!.id, body.data.mediaId, body.data.episodes, context)
     if (!result.ok) return reply.code(404).send({ error: 'media not found' })
-    return { ok: true }
+    return { ok: true, ...(context.stamp ? { applied: result.applied } : {}) }
   })
 
   app.put('/me/franchises/:franchiseId/progress', async (req, reply) => {
@@ -278,7 +275,7 @@ export const meRoutes: FastifyPluginAsync = async (app) => {
     const body = progressCommand.safeParse(req.body)
     if (!params.success || !body.success) return reply.code(400).send({ error: 'invalid request' })
     try {
-      return await setFranchiseProgress(req.user!.id, params.data.franchiseId, body.data)
+      return await setFranchiseProgress(req.user!.id, params.data.franchiseId, body.data, clientMutationContext(req))
     } catch (error) {
       if (error instanceof FranchiseProgressError) {
         return reply.code(error.reason === 'not_found' ? 404 : 400).send({ error: error.message })
@@ -336,123 +333,30 @@ export const meRoutes: FastifyPluginAsync = async (app) => {
   // suspended one, banned in Clerk. A Clerk failure does not undo the erasure: it is logged
   // (`account.clerk_delete_failed`) for `npm run moderation -- clerk-delete <clerkId>`.
   app.delete('/me', async (req, reply) => {
-    // Nothing to read, and validated anyway: an irreversible route rejects a request it does not
-    // fully understand instead of ignoring the part it did not expect. `safeParse` rather than
-    // `parse`, because a thrown ZodError surfaces as a 500 — and "the server broke" is the wrong
-    // answer to "you sent me a field I do not know" on the one route that cannot be undone.
-    if (!z.object({}).strict().safeParse(req.body ?? {}).success) {
+    // Fresh Apple proof belongs only to this authenticated deletion request. Never persist it.
+    const request = z.object({ apple: z.object({ identityToken: z.string().max(16_384).optional(),
+      authorizationCode: z.string().max(8_192).optional() }).strict().optional() }).strict().safeParse(req.body ?? {})
+    if (!request.success) {
       return reply.code(400).send({ error: 'unexpected body' })
     }
     const userId = req.user!.id
-    await db.transaction(async (tx) => {
-      for (const step of accountErasurePlan) {
-        const scope = step.via
-          ? sql`${step.column} in (select ${step.via.key} from ${step.via.table} where ${step.via.owner} = ${userId})`
-          : eq(step.column, userId)
-        if (!step.optional) {
-          await tx.delete(step.table).where(scope)
-          continue
-        }
-        // A table that may not exist yet: inside a SAVEPOINT, so "no such table" undoes only this
-        // statement instead of aborting the erasure. Any other failure still fails all of it.
-        try {
-          await tx.transaction(async (savepoint) => {
-            await savepoint.delete(step.table).where(scope)
-          })
-        } catch (error) {
-          if (!isMissingTable(error)) throw error
-        }
-      }
-      // Last: everything that references it is gone, so this succeeds with or without the cascade.
-      await tx.delete(users).where(eq(users.id, userId))
-    })
     const clerkId = req.user!.clerkId
+    const apple = await prepareAppleDeletion(clerkId, request.data.apple)
+    await db.transaction(async (tx) => {
+      await lockIdentity(tx, clerkId)
+      await enqueueDeletion(tx, clerkId, apple.initial)
+      await eraseOwnedAccount(tx, userId)
+    })
     recordErasure(clerkId)
-    const clerk = await eraseClerkIdentity(clerkId)
-    if (clerk.outcome === 'failed') {
-      req.log.error({ event: 'account.clerk_delete_failed', clerkId, error: clerk.error })
-    } else {
-      req.log.info({ event: 'account.erased', clerk: clerk.outcome })
+    const appleRevocation = await apple.finish()
+    if (appleRevocation !== apple.initial) {
+      try { await recordAppleRevocation(clerkId, appleRevocation) }
+      catch { req.log.warn({ event: 'account.apple_outcome_persistence_failed' }) }
     }
-    const body: AccountDeletedResponse = { deleted: true }
-    return reply.code(200).send(body)
+    const ledger = await finishDeletion(clerkId, req.log)
+    const body: AccountDeletedResponse = deletionResponse(ledger ?? { completedAt: null })
+    return reply.code(body.deleted ? 200 : 202).send(body)
   })
+  // authenticate answers this before any user upsert; reconciliation never creates an account.
+  app.get('/me/deletion', async () => ({ deleted: false, status: 'active' }))
 }
-
-/**
- * A plan table read by a second-level step: rows of `table` whose `owner` is the caller, and the
- * `key` a child's foreign key points at (the parent's id).
- */
-export interface ErasureParent {
-  table: PgTable
-  key: PgColumn
-  owner: PgColumn
-}
-
-/**
- * One delete of `DELETE /me`: every row of `table` whose `column` is the caller — or, with `via`,
- * whose `column` points at one of the caller's rows of another plan table (`via.table`).
- */
-export interface ErasureStep {
-  table: PgTable
-  column: PgColumn
-  via?: ErasureParent
-  /**
-   * The table comes with a migration that may not have been applied where this code already runs
-   * (the API is served from the working tree): the step is skipped when the table does not exist,
-   * instead of failing the erasure. Its rows cascade from `users` once it does.
-   */
-  optional?: boolean
-}
-
-/** The caller's comments, for the rows that hang off them. */
-const VIA_COMMENTS: ErasureParent = { table: comments, key: comments.id, owner: comments.userId }
-
-/**
- * Every row that is the user's (owner) or ABOUT the user (the other side of a relationship), in
- * foreign-key-safe order: the rows hanging off the user's comments go before the comments, and the
- * `users` row goes after all of it (the route appends it).
- *
- * Exported so `me.account.test.ts` can hold it against the schema: every foreign key to `users` or
- * to a plan table (whatever its column is called — `actor_user_id`, `blocked_user_id`) must have an
- * owner step, a `via` step that runs before its parent's rows go, or be ON DELETE SET NULL; and
- * every column named like a user id (`…user_id`, `clerk_id`) must have a step or be a disclosed
- * retention.
- *
- * Other people's replies to the user's comments SURVIVE: `comments.parent_id` is ON DELETE SET
- * NULL, so they become top-level comments of the same thread. `comments.report_count` on other
- * people's comments this user reported stays too, as an anonymous aggregate.
- */
-export const accountErasurePlan: readonly ErasureStep[] = [
-  { table: commentLikes, column: commentLikes.userId }, //                        likes BY the user
-  { table: commentLikes, column: commentLikes.commentId, via: VIA_COMMENTS }, //  likes ON the user's comments
-  { table: reports, column: reports.userId }, //                                  reports BY the user
-  { table: reports, column: reports.commentId, via: VIA_COMMENTS }, //            reports ABOUT the user's comments
-  { table: notifications, column: notifications.userId }, //                      the user's inbox
-  { table: notifications, column: notifications.actorUserId }, //                 rows about the user's actions in others' inboxes
-  { table: notifications, column: notifications.commentId, via: VIA_COMMENTS }, // anything else hanging off their comments
-  { table: comments, column: comments.userId }, //                                hard delete; others' replies → parent_id NULL (FK)
-  { table: likes, column: likes.userId },
-  { table: saves, column: saves.userId },
-  { table: reminders, column: reminders.userId },
-  { table: feedHides, column: feedHides.userId },
-  { table: episodeRatings, column: episodeRatings.userId },
-  { table: blocks, column: blocks.userId }, //                                    whom they blocked
-  { table: blocks, column: blocks.blockedUserId }, //                             who blocked them
-  { table: userProfiles, column: userProfiles.userId }, //                        frees the handle
-  { table: subscriptions, column: subscriptions.userId },
-  { table: progress, column: progress.userId },
-  { table: watchSessions, column: watchSessions.userId }, //                    tombstones included
-  { table: userPreferences, column: userPreferences.userId },
-  { table: userAudience, column: userAudience.userId, optional: true }, //         migration 0012
-  { table: recommendationFeedback, column: recommendationFeedback.userId },
-]
-
-/**
- * The tables `DELETE /me` erases before the `users` row itself, derived from the plan (kept for
- * compatibility): if a future table gains a `userId` column and is not in the plan,
- * `me.account.test.ts` fails rather than the deletion quietly leaving that table's rows behind.
- */
-export const accountOwnedTableNames: readonly string[] = [
-  ...new Set(accountErasurePlan.map((step) => getTableName(step.table))),
-]

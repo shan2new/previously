@@ -1,0 +1,85 @@
+{
+  "checkedAtUTC": "2026-10-06T16:37:44.732873+00:00",
+  "scope": "Focused local draft retention/privacy audit; no runtime, provider, status, PDF or publication changes",
+  "draft": true,
+  "effectiveDate": null,
+  "sourceSHA256": "e4293a44d2412669485c6ed7defce02f1e9eaaae77d520e10a2778f20845434f",
+  "focusedDiffPath": "docs/qa/2026-10-06/landing-final/effective-policy-draft.patch",
+  "validation": {
+    "copyLint": "passed",
+    "strictTypeScript": "passed",
+    "productionBuildRun": false,
+    "deploymentPerformed": false,
+    "effectivePolicyPublished": false
+  },
+  "installedOpsHashes": {
+    "run-server.mjs": "8bce1cb9b2c06db830d0fa8f778ad2538e21366e0ad1b67ccbd2512f6d29800c",
+    "common.mjs": "498c2af70e716e20f2205dc435811ed24d0ff83866f0498b1ea241914abfad6e",
+    "collect.mjs": "24eefeda1eae278ab43da65879f33f6151d23eb2c53db92073e35686c13220ce",
+    "backup.mjs": "49cc5157f141c69ea4f1cb7fd3a8cb21c1fef3fd718c915857a596a5c8aa29b5"
+  },
+  "facts": {
+    "legacyJuneDumpRetiredWithOwnerApproval": true,
+    "legacyLogsRetirementVerified": false,
+    "legacyLogActiveWriterReceiptIsHistorical": true,
+    "managedJobsInstalledVerified": true,
+    "sameMiniBackupAndNoOffDeviceCopy": true,
+    "actualProviderAccountDeletionVerified": false,
+    "googleClerkEnabledVerified": false,
+    "appleClerkConfiguredVerified": false,
+    "actualNativeSSOVerified": false,
+    "filesExportCompletionVerified": false,
+    "finalSignedBuild": 14,
+    "appStorePrivacyPublishedVerified": true
+  },
+  "retentionInterpretation": {
+    "logs": "Daily segments; closed file expiry seven days after last write; an early entry can be about eight days old plus scheduled cleanup interval. Derived from hash-matched installed source, not eight days of observed data.",
+    "snapshots": "Thirty-day age pruning on scheduled collector; no instantaneous per-record erasure guarantee.",
+    "backups": "Seven-day age/count pruning on scheduled collector/backup; earlier account data remains until scheduled removal.",
+    "legacyLogs": "Two restricted historical logs outside managed expiry. Owner must choose retirement or justified bounded treatment; no assumed removal or indefinite period."
+  },
+  "remainingPolicyBehaviorWitness": "Real isolated consumer erasure with provider absence, canonical tombstone/status, preserved protected-account data and restart reconciliation; no existing receipt proves this",
+  "inputsRead": [
+    "docs/release/2026-10-06/release-status.json",
+    "docs/release/2026-10-06/operations-handoff.md",
+    "docs/qa/2026-10-06/operations/actual-installed-live-receipt.json",
+    "docs/qa/2026-10-06/operations/legacy-log-files-secured.json",
+    "docs/qa/2026-10-06/operations/legacy-backup-retired.json",
+    "docs/qa/2026-10-06/native-live/live-account-erasure-verification-prepared.json",
+    "docs/qa/2026-10-06/app-store/provider-frontend-readback.json"
+  ],
+  "historicalLogRetirementAloneSufficient": false,
+  "runtimeChangeNeededForCorrectedRetentionCopy": false,
+  "concreteOwnerActions": [
+    "Decide exact historical-log retirement or justified bounded retention treatment",
+    "Complete prepared Google/Apple Clerk credential-entry handoff",
+    "Complete normal disposable QA device-verification login",
+    "Complete ordinary Files controls if automation remains unavailable"
+  ],
+  "remainingLiveBehaviorProofs": [
+    "Scoped consumer erasure with provider absence, canonical tombstone/status, protected-account equality and restart reconciliation",
+    "Ordinary native Google/Apple sign-in after connection activation",
+    "Linked Apple erasure with actual automatic revocation or truthful manual fallback",
+    "Ordinary partial/all-skipped import and saved export completion"
+  ],
+  "verificationWithoutKnownRuntimeDefect": [
+    "Managed-expiry observation if claiming live-tested expiry",
+    "Files completion",
+    "Production provider/native readback after configuration"
+  ],
+  "publicationWork": [
+    "Remove draft-only historical-log decision text only after verified resolution",
+    "Set actual effective date and draft=false",
+    "Build/deploy exact effective-policy artifact and verify canonical HTTP/mobile/copy/metadata/sitemap"
+  ],
+  "rootReportedCurrentLegacyLogPreflight": {
+    "noOpenWritersViaLsof": true,
+    "mode": "0600",
+    "stdoutBytes": 8599042,
+    "stderrBytes": 292864,
+    "deleted": false,
+    "scope": "Root direct current readback; this subtask did not inspect contents or alter files"
+  },
+  "physicalDeviceAndIOS18RuntimeAvailable": false,
+  "physicalQAAddedAsPolicyCondition": false
+}

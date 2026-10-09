@@ -105,7 +105,7 @@ describe('alertModeration', () => {
     const broken = vi.fn(async () => Promise.reject(new Error('ECONNREFUSED')))
     expect(await alertModeration(alert, { url: HOOK, fetch: broken })).toBe(false)
     expect(warn).toHaveBeenCalledWith({ event: 'moderation.alert_failed', status: 500 })
-    expect(warn).toHaveBeenCalledWith({ event: 'moderation.alert_failed', error: 'ECONNREFUSED' })
+    expect(warn).toHaveBeenCalledWith({ event: 'moderation.alert_failed', error: 'diagnostic details redacted' })
     warn.mockRestore()
   })
 })

@@ -1,0 +1,27 @@
+{
+  "verifiedAt": "2026-10-06T16:34:11.636163+00:00",
+  "state": "existing_forms_still_offer_enable_connection_public_DOM",
+  "browserId": "1",
+  "google": {
+    "tabId": "1825902927",
+    "publicEnableConnectionControlPresent": true,
+    "publicSaveControlPresent": true,
+    "publicDisableConnectionControlPresent": false,
+    "headerOffscreen": true
+  },
+  "apple": {
+    "tabId": "1825902930",
+    "publicEnableConnectionControlPresent": true,
+    "publicSaveControlPresent": true,
+    "publicDisableConnectionControlPresent": false,
+    "headerOffscreen": true
+  },
+  "privateFieldsRead": false,
+  "credentialsEntered": false,
+  "saveOrEnableClicked": false,
+  "ownerFormsScrolledOrReloaded": false,
+  "tabsPreservedHandoff": true,
+  "currentPersistedEnabledStatus": "requires_fresh_public_FAPI_readback_existing_form_DOM_can_be_stale",
+  "screenshotCaptured": false,
+  "screenshotLimitation": "Provider headers are above viewport; scrolling could disturb owner credential entry, and full viewport may contain private fields."
+}

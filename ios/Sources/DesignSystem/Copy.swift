@@ -452,6 +452,13 @@ enum Copy {
         /// The reason a write failed, in the user's words. Never a status code, never a stack of
         /// `localizedDescription` — Sync status shows this beside each failed command.
         static func reason(_ error: Error) -> String {
+            if let journal = error as? MutationJournal.JournalError {
+                switch journal {
+                case .immutableOperation: return "Discard this change and make a fresh update."
+                case .corruptJournal: return "Discard the unreadable saved changes before making a fresh update."
+                default: return "Couldn't save this change on this device. Try again before closing the app."
+                }
+            }
             if let api = error as? APIError {
                 switch api {
                 case .unauthorized: return signedOut

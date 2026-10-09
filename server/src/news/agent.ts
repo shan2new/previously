@@ -251,7 +251,7 @@ async function researchWithClaude(input: NewsResearchInput, prompt: string): Pro
           if ((message as { api_error_status?: number }).api_error_status === 429) {
             providerRetryAfter = Date.now() + 60 * 60 * 1000
           }
-          console.warn(`[news] "${input.title}": provider error: ${String('result' in message ? message.result : message.subtype).slice(0, 300)}`)
+          console.warn('[news] provider research failed')
           return { available: false }
         }
         if (message.subtype === 'success') {
@@ -283,7 +283,7 @@ async function researchWithClaude(input: NewsResearchInput, prompt: string): Pro
       }),
     ])
   } catch (err) {
-    console.warn(`[news] "${input.title}": agent error:`, (err as Error).message)
+    console.warn(`[news] "${input.title}": agent error:`, 'diagnostic details redacted')
     return { available: false }
   } finally {
     clearTimeout(timer)

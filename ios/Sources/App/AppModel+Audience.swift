@@ -47,28 +47,36 @@ enum Audience: String, Codable, CaseIterable, Sendable {
 
     /// The account's choice as this device last knew it, so the first frame is already the
     /// viewer's — a launch must not open on the other audience's Trending and then correct itself.
-    private static let key = "previously.audience"
-    /// A choice made here that the server has not confirmed (offline, or the server unreachable).
-    private static let pendingKey = "previously.audience.pending"
+    private struct LocalState: Codable { var choice: Audience?; var pending = false }
 
-    static var stored: Audience {
-        UserDefaults.standard.string(forKey: key).flatMap(Audience.init(rawValue:)) ?? .both
+    @MainActor private static var state: LocalState {
+        get {
+            AccountLocalStore.shared.read("audience.json", owner: AccountLocalStore.shared.current)
+                .flatMap { try? JSONDecoder().decode(LocalState.self, from: $0) } ?? LocalState()
+        }
+        set {
+            guard let data = try? JSONEncoder().encode(newValue) else { return }
+            try? AccountLocalStore.shared.write(data, name: "audience.json", owner: AccountLocalStore.shared.current)
+        }
     }
 
-    static var storedChosen: Bool { UserDefaults.standard.string(forKey: key) != nil }
+    @MainActor static var stored: Audience { state.choice ?? .both }
+    @MainActor static var storedChosen: Bool { state.choice != nil }
 
-    static var pending: Bool {
-        get { UserDefaults.standard.bool(forKey: pendingKey) }
-        set { UserDefaults.standard.set(newValue, forKey: pendingKey) }
+    /// A choice made here that the server has not confirmed (offline, or unreachable).
+    @MainActor static var pending: Bool {
+        get { state.pending }
+        set { var next = state; next.pending = newValue; state = next }
     }
 
     @MainActor
     static func store(_ value: Audience?) {
         if let value {
-            UserDefaults.standard.set(value.rawValue, forKey: key)
+            var next = state
+            next.choice = value
+            state = next
         } else {
-            UserDefaults.standard.removeObject(forKey: key)
-            UserDefaults.standard.removeObject(forKey: pendingKey)
+            AccountLocalStore.shared.remove("audience.json", owner: AccountLocalStore.shared.current)
         }
         // Discover's genre art leans the same way (`GenreArt.leaningKey`): illustration for anime,
         // photographs for TV. Both keeps whatever it last leaned to.
@@ -121,9 +129,13 @@ extension AppModel {
     }
 
     private func pushAudience() async {
+        guard !erasing else { return }
+        let epoch = accountEpoch
+        let owner = accountStorage
         let value = audience
         do {
             try await api.saveAudience(value)
+            guard epoch == accountEpoch, !erasing, AccountLocalStore.shared.matches(owner) else { return }
             // Still the viewer's last word (they may have changed it while this was in flight).
             if value == audience { Audience.pending = false }
         } catch {
@@ -136,6 +148,7 @@ extension AppModel {
     /// the account's answer is adopted (it may have been changed on another device). An account
     /// that has never answered is asked, once.
     func syncAudience() async {
+        guard !erasing else { return }
         if Audience.pending {
             await pushAudience()
             return

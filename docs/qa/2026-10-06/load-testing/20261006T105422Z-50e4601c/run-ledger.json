@@ -1,0 +1,43 @@
+{
+  "startedAt": "2026-10-06T10:54:22.012998+00:00",
+  "database": "previously_qa_load_16b09317c4c7471d9572ff6eb3167a1a",
+  "host": "127.0.0.1",
+  "databaseCreated": true,
+  "databaseRemoved": true,
+  "productionDatabaseReadOrWritten": false,
+  "dotenvLoaded": false,
+  "credentialsInherited": false,
+  "quickHarnessOnly": true,
+  "calibrationOnly": true,
+  "nodeOptions": "--max-old-space-size=256 --max-semi-space-size=8",
+  "sourceRevision": "19649b3748eac6ca7508f86ad96be9f533406fcb",
+  "dirtySource": true,
+  "coResidentLimitation": "Shared Mac Mini with normal services and native QA simulator; no production service altered.",
+  "postgresVersion": "18.3 (Homebrew)",
+  "hardware": [
+    "17179869184",
+    "10"
+  ],
+  "ownedOpsRoot": "/private/var/folders/t8/18rddswj5r76q9782g0hlc9m0000gn/T/previously_qa_load_16b09317c4c7471d9572ff6eb3167a1a_ops_rq4t86bm",
+  "ownedOpsRemoved": true,
+  "hostMemoryBefore": "vm.swapusage: total = 5120.00M  used = 4464.12M  free = 655.88M  (encrypted)",
+  "databaseCreationAttempted": true,
+  "ownedServerPID": 83749,
+  "baseURL": "http://127.0.0.1:58008",
+  "ownedTrafficPID": 83792,
+  "runError": "SystemExit: 143",
+  "memoryReviewPassed": false,
+  "scratchConnectionsBeforeDrop": 0,
+  "hostMemoryAfter": "vm.swapusage: total = 5120.00M  used = 4464.12M  free = 655.88M  (encrypted)",
+  "sourceChangedDuringRun": [
+    "server/ops/collect.mjs",
+    "server/ops/prepare-install.mjs",
+    "server/ops/process-wrapper.test.mjs",
+    "server/ops/run-server.mjs",
+    "server/package-lock.json",
+    "server/package.json",
+    "server/qa/run-load-test.py"
+  ],
+  "overallExitCode": 1,
+  "finishedAt": "2026-10-06T10:54:55.886366+00:00"
+}

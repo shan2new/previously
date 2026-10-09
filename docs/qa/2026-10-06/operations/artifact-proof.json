@@ -1,0 +1,30 @@
+{
+  "at": "2026-10-06T11:23:15.516Z",
+  "runtime": "v24.21.0",
+  "artifact": "/Users/shan2new/Infra/previously/releases/20261006T111848Z/server",
+  "sourceSHA256": "5bc9ab5894769b2ae10af7df5fda7cf2cb59cba27b3c5e3383398850da859caa",
+  "sourceFileCount": 534,
+  "sourceMatchesCheckout": true,
+  "productionDependenciesOnly": true,
+  "productionAuditAdvisories": 0,
+  "devToolsAbsent": true,
+  "credentialsIncludedInArtifact": false,
+  "launchCandidate": {
+    "directory": "/Users/shan2new/Infra/previously/install-candidates/20261006T111848Z",
+    "jobs": [
+      "com.shan.previously",
+      "com.shan.previously.backup",
+      "com.shan.previously.ops"
+    ],
+    "installed": false
+  },
+  "configurationReady": false,
+  "pending": [
+    "Clerk production secret",
+    "matching expected issuer",
+    "production native key",
+    "verified identity reassociation"
+  ],
+  "installed": false,
+  "artifactWritePermissionsRemoved": true
+}

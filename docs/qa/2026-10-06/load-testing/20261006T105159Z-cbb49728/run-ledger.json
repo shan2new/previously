@@ -1,0 +1,38 @@
+{
+  "startedAt": "2026-10-06T10:51:59.519795+00:00",
+  "database": "previously_qa_load_2a10977e3fb44c058b0b4d2d22b8014b",
+  "host": "127.0.0.1",
+  "databaseCreated": true,
+  "databaseRemoved": true,
+  "productionDatabaseReadOrWritten": false,
+  "dotenvLoaded": false,
+  "credentialsInherited": false,
+  "quickHarnessOnly": true,
+  "nodeOptions": "--max-old-space-size=256",
+  "sourceRevision": "19649b3748eac6ca7508f86ad96be9f533406fcb",
+  "dirtySource": true,
+  "coResidentLimitation": "Shared Mac Mini with normal services and native QA simulator; no production service altered.",
+  "postgresVersion": "18.3 (Homebrew)",
+  "hardware": [
+    "17179869184",
+    "10"
+  ],
+  "databaseCreationAttempted": true,
+  "ownedServerPID": 82100,
+  "baseURL": "http://127.0.0.1:57749",
+  "ownedTrafficPID": 82124,
+  "testExitCode": 0,
+  "memoryReviewPassed": false,
+  "scratchConnectionsBeforeDrop": 0,
+  "sourceChangedDuringRun": [
+    "server/ops/ledger.mjs",
+    "server/ops/restore-check.mjs",
+    "server/ops/run-server.mjs",
+    "server/package.json",
+    "server/src/auth/clerk.test.ts",
+    "server/src/services/audience.test.ts",
+    "server/src/services/moderationAlert.test.ts"
+  ],
+  "overallExitCode": 0,
+  "finishedAt": "2026-10-06T10:52:24.207365+00:00"
+}

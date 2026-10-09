@@ -1,0 +1,26 @@
+{
+  "checkedAt": "2026-10-06T13:44:13.761630+00:00",
+  "ownedXcodeAndSimulatorUIQuit": true,
+  "fixtureStopped": true,
+  "matchingNativeCompilerOrUIProcesses": [
+    {
+      "pid": 35742,
+      "parentPID": 1,
+      "executable": "/Library/Developer/PrivateFrameworks/CoreSimulator.framework/Versions/A/XPCServices/com.apple.CoreSimulator.CoreSimulatorService.xpc/Contents/MacOS/com.apple.CoreSimulator.CoreSimulatorService",
+      "cpuPercent": 0.0
+    },
+    {
+      "pid": 35743,
+      "parentPID": 1,
+      "executable": "/Library/Developer/PrivateFrameworks/CoreSimulator.framework/Versions/A/XPCServices/SimulatorTrampoline.xpc/Contents/MacOS/SimulatorTrampoline",
+      "cpuPercent": 0.0
+    },
+    {
+      "pid": 44485,
+      "parentPID": 44452,
+      "executable": "/Library/Developer/PrivateFrameworks/CoreSimulator.framework/Versions/A/Resources/Platforms/iphoneos/usr/libexec/CoreSimulatorBridge",
+      "cpuPercent": 0.0
+    }
+  ],
+  "noFurtherBuildsOrSimulatorRunsUntilCapacityRelease": true
+}

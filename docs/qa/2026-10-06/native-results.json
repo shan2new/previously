@@ -1,0 +1,598 @@
+{
+  "schemaVersion": 1,
+  "qualificationStatus": "passed",
+  "directedProductPassed": 39,
+  "directedProductTotal": 39,
+  "directedSelectedPassed": 42,
+  "directedSelectedTotal": 42,
+  "directedUIJourneyPassed": 21,
+  "directedUIJourneyTotal": 21,
+  "directedActualModelPassed": 18,
+  "directedActualModelTotal": 18,
+  "directedHarnessPassed": 3,
+  "directedHarnessTotal": 3,
+  "directedFailed": 0,
+  "directedSkipped": 0,
+  "directedSuitePassed": {
+    "AccountDeletionRequestTests": 3,
+    "AccountLocalStoreTests": 4,
+    "ImportModelTests": 2,
+    "MutationJournalTests": 6,
+    "PreviouslyAccountIsolationTests": 2,
+    "PreviouslyDeletionTests": 7,
+    "PreviouslyDirectedTests": 9,
+    "PreviouslyDurabilityTests": 3,
+    "QAHarnessTests": 3,
+    "RewatchStoreTests": 3
+  },
+  "directedCountDefinition": "42 individually named passes: 21 native UI journeys, 18 actual production storage/rewatch/journal/request/import tests and 3 harness checks. Three fixed 300-second random phases also passed.",
+  "seeds": [
+    {
+      "seed": 20261006,
+      "durationSeconds": 331.09680795669556,
+      "completedActions": 249,
+      "unavailableActions": 66,
+      "driverAssertions": 149,
+      "visitedStates": [
+        "anime-detail",
+        "discover",
+        "feed",
+        "home",
+        "library",
+        "schedule"
+      ],
+      "passed": true,
+      "status": "passed",
+      "randomBudgetSeconds": 300,
+      "resultBundle": "/Users/shan2new/Projects/previously/ios/Tools/qa/.runs/20261006T130049100512Z/monkey-20261006.xcresult"
+    },
+    {
+      "seed": 60102620,
+      "durationSeconds": 331.25397396087646,
+      "completedActions": 277,
+      "unavailableActions": 57,
+      "driverAssertions": 135,
+      "visitedStates": [
+        "anime-detail",
+        "discover",
+        "feed",
+        "home",
+        "library",
+        "schedule"
+      ],
+      "passed": true,
+      "status": "passed",
+      "randomBudgetSeconds": 300,
+      "resultBundle": "/Users/shan2new/Projects/previously/ios/Tools/qa/.runs/20261006T130049100512Z/monkey-60102620.xcresult"
+    },
+    {
+      "seed": 38654705664,
+      "durationSeconds": 339.61626493930817,
+      "completedActions": 295,
+      "unavailableActions": 93,
+      "driverAssertions": 125,
+      "visitedStates": [
+        "anime-detail",
+        "discover",
+        "feed",
+        "home",
+        "library",
+        "schedule"
+      ],
+      "passed": true,
+      "status": "passed",
+      "randomBudgetSeconds": 300,
+      "resultBundle": "/Users/shan2new/Projects/previously/ios/Tools/qa/.runs/20261006T130049100512Z/monkey-38654705664.xcresult"
+    }
+  ],
+  "pendingSeeds": [],
+  "randomBudgetSecondsPerSeed": 300,
+  "fixturePassed": 24,
+  "fixtureTotal": 24,
+  "runnerGuardPassed": 12,
+  "runnerGuardTotal": 12,
+  "finalEvidencePath": "/Users/shan2new/Projects/previously/ios/Tools/qa/.runs/20261006T130049100512Z",
+  "sourceFingerprint": {
+    "sha256": "6d235db238214339fa87caa8f392b639adf40873e5a96d3e4dc3e6c39c6c151c",
+    "fileCount": 200
+  },
+  "sourceRevision": "19649b3748eac6ca7508f86ad96be9f533406fcb",
+  "workingTreeDirty": true,
+  "configuration": "QA",
+  "simulator": {
+    "name": "Previously QA iPhone 14 Pro",
+    "id": "F3AD17A6-813D-4C7E-8263-6383F952302C",
+    "runtime": "iOS 27.0"
+  },
+  "cliPackage": "xcodebuildmcp@2.7.0",
+  "mutationAudit": {
+    "passed": true,
+    "protectedWrites": 61,
+    "uniqueOperations": 44,
+    "failures": []
+  },
+  "rewatchPassed": 3,
+  "rewatchTotal": 3,
+  "durableUncertainDeletionPassed": 7,
+  "durableUncertainDeletionTotal": 7,
+  "directedTests": [
+    {
+      "suite": "AccountDeletionRequestTests",
+      "test": "testCanonicalStatusRetainsManualInstructionsAndUnknownReceiptFailsClosed",
+      "status": "passed",
+      "durationMs": 160
+    },
+    {
+      "suite": "AccountDeletionRequestTests",
+      "test": "testFreshAppleProofUsesDefinedBodyAndManualReceipt",
+      "status": "passed",
+      "durationMs": 49
+    },
+    {
+      "suite": "AccountDeletionRequestTests",
+      "test": "testNoProofKeepsEmptyBodyAndHonestPendingReceipt",
+      "status": "passed",
+      "durationMs": 37
+    },
+    {
+      "suite": "AccountLocalStoreTests",
+      "test": "testColdSignedOutCleanupRemovesOwnedCachesWithoutActivatingAnAccount",
+      "status": "passed",
+      "durationMs": 41
+    },
+    {
+      "suite": "AccountLocalStoreTests",
+      "test": "testLegacyUnownedDataIsDiscardedInsteadOfMigrated",
+      "status": "passed",
+      "durationMs": 33
+    },
+    {
+      "suite": "AccountLocalStoreTests",
+      "test": "testOwnerSwitchRejectsStaleWritesAndDeletesPreviousFiles",
+      "status": "passed",
+      "durationMs": 62
+    },
+    {
+      "suite": "AccountLocalStoreTests",
+      "test": "testRelaunchRestoresOnlyRecordedOwnerAndNoOwnerCannotWrite",
+      "status": "passed",
+      "durationMs": 37
+    },
+    {
+      "suite": "ImportModelTests",
+      "test": "testAdultOmissionsSurvivePersistenceAndInterruptedConversionSeparately",
+      "status": "passed",
+      "durationMs": 32
+    },
+    {
+      "suite": "ImportModelTests",
+      "test": "testOlderSavedProgressWithoutOmissionsRestoresAsZero",
+      "status": "passed",
+      "durationMs": 34
+    },
+    {
+      "suite": "MutationJournalTests",
+      "test": "testAcknowledgementDiskFailureLeavesOperationReplayable",
+      "status": "passed",
+      "durationMs": 42
+    },
+    {
+      "suite": "MutationJournalTests",
+      "test": "testExplicitDiscardPersistsAndAccountTeardownCannotResurrectPendingChanges",
+      "status": "passed",
+      "durationMs": 33
+    },
+    {
+      "suite": "MutationJournalTests",
+      "test": "testMissingOrStaleOwnerCannotStageOrAcknowledge",
+      "status": "passed",
+      "durationMs": 35
+    },
+    {
+      "suite": "MutationJournalTests",
+      "test": "testOlderReceiptCannotRetireNewerCoalescedIntentOrRewriteSameOperation",
+      "status": "passed",
+      "durationMs": 66
+    },
+    {
+      "suite": "MutationJournalTests",
+      "test": "testStagingDiskFailureKeepsLastDurableIntent",
+      "status": "passed",
+      "durationMs": 34
+    },
+    {
+      "suite": "MutationJournalTests",
+      "test": "testStagingSuccessRestoresCompleteMutationAndIntentOnColdLaunch",
+      "status": "passed",
+      "durationMs": 45
+    },
+    {
+      "suite": "PreviouslyAccountIsolationTests",
+      "test": "testOldOwnerDelayedWriteCannotRetryWithNewOwnerToken",
+      "status": "passed",
+      "durationMs": 51913
+    },
+    {
+      "suite": "PreviouslyAccountIsolationTests",
+      "test": "testOldOwnerFailedRetryAndCacheDoNotAppearForNewOwner",
+      "status": "passed",
+      "durationMs": 36763
+    },
+    {
+      "suite": "PreviouslyDeletionTests",
+      "test": "testAcceptedDeletionShowsManualAppleInstructionsAfterRelaunch",
+      "status": "passed",
+      "durationMs": 20370
+    },
+    {
+      "suite": "PreviouslyDeletionTests",
+      "test": "testAcceptedPendingDeletionShowsNoticeAndSignsOut",
+      "status": "passed",
+      "durationMs": 19898
+    },
+    {
+      "suite": "PreviouslyDeletionTests",
+      "test": "testCommittedDeleteLostResponseRestoresHoldAndConfirmsComplete",
+      "status": "passed",
+      "durationMs": 26414
+    },
+    {
+      "suite": "PreviouslyDeletionTests",
+      "test": "testCommittedDeleteLostResponseRestoresHoldAndShowsPending",
+      "status": "passed",
+      "durationMs": 25885
+    },
+    {
+      "suite": "PreviouslyDeletionTests",
+      "test": "testDefinitiveRefusalResumesTrackingAndLeavesNoHold",
+      "status": "passed",
+      "durationMs": 28139
+    },
+    {
+      "suite": "PreviouslyDeletionTests",
+      "test": "testProxyForbiddenAfterCommittedDeleteKeepsHoldUntilCanonicalStatus",
+      "status": "passed",
+      "durationMs": 26041
+    },
+    {
+      "suite": "PreviouslyDeletionTests",
+      "test": "testUndefinedEmptySuccessAfterCommittedDeleteKeepsHoldUntilCanonicalStatus",
+      "status": "passed",
+      "durationMs": 26254
+    },
+    {
+      "suite": "PreviouslyDirectedTests",
+      "test": "testAcceptedNewerProgressRetiresOlderFailedRetry",
+      "status": "passed",
+      "durationMs": 28410
+    },
+    {
+      "suite": "PreviouslyDirectedTests",
+      "test": "testAccountSwitchDoesNotExposePreviousLibrary",
+      "status": "passed",
+      "durationMs": 30946
+    },
+    {
+      "suite": "PreviouslyDirectedTests",
+      "test": "testCommittedWriteWithLostResponseHasOneEffect",
+      "status": "passed",
+      "durationMs": 19808
+    },
+    {
+      "suite": "PreviouslyDirectedTests",
+      "test": "testFailedProgressReplayRetainsMutationIdentityAcrossRelaunch",
+      "status": "passed",
+      "durationMs": 24689
+    },
+    {
+      "suite": "PreviouslyDirectedTests",
+      "test": "testLateSearchCannotOverwriteNewerQuery",
+      "status": "passed",
+      "durationMs": 38517
+    },
+    {
+      "suite": "PreviouslyDirectedTests",
+      "test": "testOlderRetryCannotBypassNewerProgressInFlight",
+      "status": "passed",
+      "durationMs": 30309
+    },
+    {
+      "suite": "PreviouslyDirectedTests",
+      "test": "testProgressUndoConvergesAcrossTabsAndRelaunch",
+      "status": "passed",
+      "durationMs": 22202
+    },
+    {
+      "suite": "PreviouslyDirectedTests",
+      "test": "testRapidProgressThenBackgroundRetainsLatestIntent",
+      "status": "passed",
+      "durationMs": 25574
+    },
+    {
+      "suite": "PreviouslyDirectedTests",
+      "test": "testUpdatedFailureRetryUsesNewestIntent",
+      "status": "passed",
+      "durationMs": 23479
+    },
+    {
+      "suite": "PreviouslyDurabilityTests",
+      "test": "testKillAfterCommitBeforeReceiptReplaysOriginalOperationOnce",
+      "status": "passed",
+      "durationMs": 24745
+    },
+    {
+      "suite": "PreviouslyDurabilityTests",
+      "test": "testKillBeforeCatchRestoresOriginalDurableProgress",
+      "status": "passed",
+      "durationMs": 20955
+    },
+    {
+      "suite": "PreviouslyDurabilityTests",
+      "test": "testKillWithNewerQueuedProgressRetainsNewestDurableIntent",
+      "status": "passed",
+      "durationMs": 26507
+    },
+    {
+      "suite": "QAHarnessTests",
+      "test": "testExplicitTokenAndBoundedRunBudget",
+      "status": "passed",
+      "durationMs": 79
+    },
+    {
+      "suite": "QAHarnessTests",
+      "test": "testPublicAndMalformedQAEndpointsAreRefused",
+      "status": "passed",
+      "durationMs": 34
+    },
+    {
+      "suite": "QAHarnessTests",
+      "test": "testSeedProducesStableActionSelection",
+      "status": "passed",
+      "durationMs": 33
+    },
+    {
+      "suite": "RewatchStoreTests",
+      "test": "testCanonicalReadCannotOverwriteNewerLocalIntentOrSignedOutOwner",
+      "status": "passed",
+      "durationMs": 40
+    },
+    {
+      "suite": "RewatchStoreTests",
+      "test": "testCanonicalReadRequirementSurvivesColdLaunchAndReceiptParsing",
+      "status": "passed",
+      "durationMs": 32
+    },
+    {
+      "suite": "RewatchStoreTests",
+      "test": "testSupersededReceiptRequiresCanonicalReadAndPersistsItsResult",
+      "status": "passed",
+      "durationMs": 30
+    }
+  ],
+  "startedAt": "20261006T130049100512Z",
+  "fixtureStopped": true,
+  "limits": [
+    "One QA iPhone 14 Pro simulator on iOS 27.0; separate QA bundle and synthetic dev issuer.",
+    "Not proof of production Clerk, physical TestFlight behavior, real Files import, VoiceOver or iOS 18 compatibility.",
+    "Action/driver assertion counts include deterministic setup and final checks; random budgets do not measure universal coverage."
+  ],
+  "supportChecksCompletedOn": "2026-10-06",
+  "uncertainCommittedDeletionPassed": 4,
+  "uncertainCommittedDeletionTotal": 4,
+  "deletionSuiteCountDefinition": "Seven deletion cases: four ambiguous postcommit responses through durable cold recovery, one accepted pending notice, one definitive refusal that resumes tracking, and one persisted manual Apple-disconnection notice.",
+  "finishedAt": "2026-10-06T13:28:27.481623+00:00",
+  "preDispatchPersistenceVerified": true,
+  "monitorRestartVerified": true,
+  "historicalQualifiedBoundary": {
+    "evidencePath": "/Users/shan2new/Projects/previously/ios/Tools/qa/.runs/20261006T112209258256Z",
+    "status": "interrupted_for_new_confirmed_reliability_defects",
+    "directedPassed": 27,
+    "directedTotal": 27,
+    "seeds": [
+      {
+        "seed": 20261006,
+        "passed": true,
+        "status": "passed",
+        "durationSeconds": 331.581951,
+        "completedActions": 263,
+        "unavailableActions": 69,
+        "driverAssertions": 153,
+        "visitedStates": [
+          "anime-detail",
+          "discover",
+          "feed",
+          "home",
+          "library",
+          "schedule"
+        ]
+      }
+    ],
+    "sourceFingerprint": {
+      "sha256": "3fca6272dc588ea4c8b3f2f80a62a8039da0ea0066b03ae14392593764438c58",
+      "fileCount": 189
+    }
+  },
+  "historicalFailureEvidencePath": "/Users/shan2new/Projects/previously/ios/Tools/qa/.runs/20261006T110834245008Z",
+  "trailerPrivacyLiveValidation": {
+    "status": "passed",
+    "passed": 1,
+    "total": 1,
+    "evidencePath": "/Users/shan2new/Projects/previously/ios/Tools/qa/.runs/20261006T125503628555Z",
+    "sourceFingerprint": {
+      "sha256": "6c69bff2a4757a369910f45a33cfa71de4d967fe319653dc92a4047d6c088c32",
+      "fileCount": 198
+    },
+    "verified": [
+      "actual iframe host www.youtube-nocookie.com",
+      "actual nonpersistent WKWebsiteDataStore",
+      "provider playing clock advancement",
+      "provider-acknowledged native pause/play/mute/unmute/forward seek",
+      "same paused player clock across automatic rotation return",
+      "screenshot-observed physical inline fullscreen control with recorded frame and tap point",
+      "explicit fullscreen resumed state 1 and same advancing clock through native exit"
+    ],
+    "explicitControlProof": {
+      "cardFramePoints": [
+        16,
+        438,
+        361,
+        203
+      ],
+      "tapPointPoints": [
+        355,
+        587
+      ],
+      "screenshotPath": "/Users/shan2new/Projects/previously/ios/Tools/qa/.runs/20261006T125503628555Z/attachments/5FEB612E-9798-4279-BC77-934641AB1B03.png",
+      "pausedInlineSeconds": 20.221175331,
+      "playingFullscreenSeconds": 21.22237010128113,
+      "playingReturnedSeconds": 23.489979892182127
+    },
+    "noPhysicalDeviceClaim": true,
+    "noFullVoiceOverClaim": true,
+    "includedInCoreCount": false
+  },
+  "historicalColdRetry": {
+    "passed": true,
+    "test": "testFailedProgressReplayRetainsMutationIdentityAcrossRelaunch",
+    "uiEpisodes": 4,
+    "canonicalEpisodes": 4,
+    "logicalProgressCommits": 1,
+    "sameMutationAcrossAttempts": true,
+    "restoredRetryTapped": true
+  },
+  "coldRetry": {
+    "passed": true,
+    "test": "testFailedProgressReplayRetainsMutationIdentityAcrossRelaunch",
+    "uiEpisodes": 4,
+    "canonicalEpisodes": 4,
+    "logicalProgressCommits": 1,
+    "sameMutationAcrossAttempts": true,
+    "restoredRetryTapped": true,
+    "evidencePath": "/Users/shan2new/Projects/previously/ios/Tools/qa/.runs/20261006T130049100512Z"
+  },
+  "supportingEvidencePath": "/Users/shan2new/Projects/previously/docs/qa/2026-10-06/native-supporting-checks.json",
+  "currentRepairFocus": {
+    "durability": {
+      "passed": 3,
+      "total": 3,
+      "evidencePath": "ios/Tools/qa/.runs/20261006T121613847863Z",
+      "qualifiedAgainstFinalSource": false
+    },
+    "monitorRestart": {
+      "passed": true,
+      "evidencePath": "ios/Tools/qa/.runs/20261006T120831365496Z",
+      "qualifiedAgainstFinalSource": false
+    },
+    "appleDeletion": {
+      "passed": 10,
+      "total": 10,
+      "evidencePath": "ios/Tools/qa/.runs/20261006T122600331319Z",
+      "qualifiedAgainstFinalSource": false,
+      "breakdown": {
+        "actualProductionRequest": 3,
+        "nativeDeletionUI": 7
+      },
+      "noRealAppleGrantClaim": true
+    },
+    "importOmissions": {
+      "passed": 2,
+      "total": 2,
+      "evidencePath": "/Users/shan2new/Projects/previously/ios/Tools/qa/.runs/20261006T125941134366Z",
+      "actualProductionModel": true,
+      "qualifiedAgainstFinalSource": false
+    },
+    "finalDirected": {
+      "passed": 42,
+      "total": 42,
+      "evidencePath": "/Users/shan2new/Projects/previously/ios/Tools/qa/.runs/20261006T130049100512Z",
+      "sourceFingerprint": {
+        "sha256": "6d235db238214339fa87caa8f392b639adf40873e5a96d3e4dc3e6c39c6c151c",
+        "fileCount": 200
+      }
+    }
+  },
+  "directedMutationAudit": {
+    "passed": true,
+    "protectedWrites": 37,
+    "uniqueOperations": 20,
+    "failures": []
+  },
+  "preDispatchPersistenceCases": [
+    "testKillAfterCommitBeforeReceiptReplaysOriginalOperationOnce",
+    "testKillBeforeCatchRestoresOriginalDurableProgress",
+    "testKillWithNewerQueuedProgressRetainsNewestDurableIntent"
+  ],
+  "monitorRestartCase": "PreviouslyAccountIsolationTests/testOldOwnerDelayedWriteCannotRetryWithNewOwnerToken",
+  "minimumDeploymentTarget": "iOS18.0",
+  "minimumDeploymentTargetEvidence": "Compilation targets iOS18.0; this run executed on iOS27.0 only.",
+  "originalTrailerUIAnatomyPreserved": true,
+  "runtimeCodeFingerprint": {
+    "sha256": "4fc959e277db2e3d317505bcf628491e6fc3995b5aaa0929440c40f149b1b984",
+    "fileCount": 199,
+    "definition": "Same sorted path-and-byte format as native runner, excluding only PrivacyInfo.xcprivacy."
+  },
+  "qualifiedPrivacyManifestSHA256": "6aa8171a1685b7de8dbec2c78f83601e58f7cf30d68315db934e243bbbb4a89a",
+  "seededCompletedActions": 821,
+  "seededUnavailableDecisions": 216,
+  "seededDriverAssertions": 409,
+  "seededVisitedStates": [
+    "anime-detail",
+    "discover",
+    "feed",
+    "home",
+    "library",
+    "schedule"
+  ],
+  "shippingSDKPrivacyAuditPath": "/Users/shan2new/Projects/previously/docs/qa/2026-10-06/sdk-privacy-audit.json",
+  "productionArchive": {
+    "status": "uploaded",
+    "build": 13,
+    "version": "1.0",
+    "archivePath": "/Users/shan2new/Library/Developer/Xcode/Archives/2026-10-06/Previously 06-10-26, 7.05\u202fPM.xcarchive",
+    "platform": [
+      "iPhoneOS"
+    ],
+    "architectures": [
+      "arm64"
+    ],
+    "sdk": "iphoneos27.0",
+    "minimumOSVersion": "18.0",
+    "productionBundle": "com.cognipin.previously",
+    "liveClerkPublicKeyMatchesPreparedConfiguration": true,
+    "apiBaseURL": "https://anime.cognipin.com",
+    "privacyPolicyURL": "https://previously.cognipin.com/privacy",
+    "termsURL": "https://previously.cognipin.com/terms",
+    "signatureVerifyPassed": true,
+    "appAppleEntitlementPresent": true,
+    "widgetBuild": 13,
+    "privacyManifestInventoryPath": "/Users/shan2new/Projects/previously/docs/qa/2026-10-06/sdk-privacy-audit.json",
+    "uploadStatus": "passed",
+    "submittedForReview": false,
+    "knownQAFixtureMarkersAbsent": true,
+    "binarySHA256": "460197ed68ad75ac994ceed4a9f59d86d7dff34c5a0828cf2e0c3b6e53646f0f",
+    "assetsSHA256": "877a9f05bf32942682712e6fb9a9bab8356824e4879a66354132c512bc49d80e",
+    "iconRenderPath": "/Users/shan2new/Projects/previously/docs/qa/2026-10-06/archive13/native-icon-152.png",
+    "uploadCompletedAt": "2026-10-06T13:39:00Z",
+    "uploadTimePrecision": "Organizer local label Today 7:09PM, UTC minute precision; success observed13:39UTC",
+    "uploadVerifiedVia": "Official Xcode Organizer successful distribution sheet and persistent archive status",
+    "uploadReceiptText": "App upload complete: Previously 1.0(13) uploaded",
+    "organizerStatusText": "Uploaded to Apple; Submission Status Uploaded; Build Number13",
+    "uidDeviceFamily": [
+      1
+    ],
+    "appStoreProcessingStatus": "awaiting separate ASC verification",
+    "localIPAExportStatus": "not exported: native Save panel Export/New Folder disabled across owned evidence and Desktop destinations; optional",
+    "organizerPrivacyPDFStatus": "not exported: same native Save panel limitation; actual bundled manifests independently inventoried"
+  },
+  "postQualificationManifestDelta": {
+    "changedAt": "2026-10-06T13:29:58.393652+00:00",
+    "path": "ios/Resources/PrivacyInfo.xcprivacy",
+    "beforeSHA256": "6aa8171a1685b7de8dbec2c78f83601e58f7cf30d68315db934e243bbbb4a89a",
+    "afterSHA256": "1dbd4ccfcf2f16699db8750f0a41bcea77ff60d06c1ba082dd175fdf7e4211a0",
+    "runtimeCodeSHA256Before": "4fc959e277db2e3d317505bcf628491e6fc3995b5aaa0929440c40f149b1b984",
+    "runtimeCodeSHA256After": "4fc959e277db2e3d317505bcf628491e6fc3995b5aaa0929440c40f149b1b984",
+    "runtimeCodeUnchanged": true,
+    "change": "Declare Clerk authentication DeviceID, linked yes, tracking no, AppFunctionality; truthful SDK comment.",
+    "resourceValidation": "plutil passed; actual Release archive inventory pending."
+  }
+}

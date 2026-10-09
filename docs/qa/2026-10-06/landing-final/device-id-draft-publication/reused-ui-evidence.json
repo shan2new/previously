@@ -1,0 +1,20 @@
+{
+  "checkedAt": "2026-10-06T13:29:02.082964+00:00",
+  "unchangedSourceComparedWith": "docs/qa/2026-10-06/landing-final/draft-publication/source-manifest.json",
+  "onlyChangedUploadFile": "lib/legal-content.ts",
+  "newlyExecutedPrivacyLayouts": [
+    390,
+    320
+  ],
+  "priorSixLegalLayouts": {
+    "count": 6,
+    "receipt": "docs/qa/2026-10-06/landing-final/draft-publication/candidate-mobile-browser.json",
+    "scope": "Historical privacy/terms/delete at 390/320; unchanged legal shell, draft behavior, terms and delete copy. Privacy Clerk paragraph superseded by new two layout checks."
+  },
+  "priorHomeInteractionChecks": {
+    "count": 19,
+    "receipt": "docs/qa/2026-10-06/landing-release/vercel-production/public-browser/browser-report.json",
+    "scope": "Historical unchanged Home interaction/component/style behavior and artwork; not rerun or relabeled as new."
+  },
+  "sourceStillMatchesUpload": true
+}

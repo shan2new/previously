@@ -1,0 +1,59 @@
+{
+  "fixtureVersion": "deletion-status-recovery-v1",
+  "cases": [
+    {
+      "name": "real DELETE rollback leaves rows intact and only independent pending intent",
+      "status": "passed",
+      "evidence": {
+        "deleteStatus": 500,
+        "users": 1,
+        "progress": 1,
+        "receipts": 1,
+        "cursors": 1,
+        "dbDeletionRows": 0,
+        "journalPending": true
+      }
+    },
+    {
+      "name": "failed status reconciliation remains unknown and cannot release native hold",
+      "status": "passed",
+      "evidence": {
+        "status": 500,
+        "active": false,
+        "pendingReceipt": false,
+        "trackingRowsStillPresent": true
+      }
+    },
+    {
+      "name": "authenticated status alone reconciles and erases rows before pending receipt",
+      "status": "passed",
+      "evidence": {
+        "status": 202,
+        "users": 0,
+        "progress": 0,
+        "receipts": 0,
+        "cursors": 0,
+        "pending": true,
+        "explicitReconcileInvocations": 0
+      }
+    },
+    {
+      "name": "subsequent real authenticated progress write is denied without recreating account",
+      "status": "passed",
+      "evidence": {
+        "status": 401,
+        "accountRecreated": false,
+        "ownedRows": 0
+      }
+    }
+  ],
+  "summary": {
+    "passed": 4,
+    "failed": 0,
+    "total": 4
+  },
+  "rejectedOutbound": 0,
+  "realClerkCalls": 0,
+  "listenerStarted": false,
+  "productionDataReadOrWritten": false
+}

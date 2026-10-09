@@ -11,6 +11,7 @@ export type AnimeTmdbMediaType = 'tv' | 'movie'
 
 export interface AnimeTmdbCandidate {
   id: number
+  adult?: boolean
   title: string
   originalTitle: string | null
   year: number | null
@@ -72,7 +73,7 @@ export function pickAnimeTmdbCandidate(
   if (names.length === 0) return null
 
   const scored = candidates.flatMap((candidate) => {
-    if (!animeCandidate(candidate)) return []
+    if (candidate.adult === true || !animeCandidate(candidate)) return []
     const candidateNames = [candidate.title, candidate.originalTitle ?? ''].map(normalizedTitle).filter(Boolean)
     const exact = candidateNames.some((name) => names.includes(name))
     const bestSimilarity = Math.max(
@@ -96,6 +97,7 @@ export function pickAnimeTmdbCandidate(
 function tvCandidate(hit: TmdbSearchResult): AnimeTmdbCandidate {
   return {
     id: hit.id,
+    adult: hit.adult,
     title: hit.name,
     originalTitle: hit.original_name ?? null,
     year: yearFromDate(hit.first_air_date),
@@ -108,6 +110,7 @@ function tvCandidate(hit: TmdbSearchResult): AnimeTmdbCandidate {
 function movieCandidate(hit: TmdbMovieSearchResult): AnimeTmdbCandidate {
   return {
     id: hit.id,
+    adult: hit.adult,
     title: hit.title,
     originalTitle: hit.original_title ?? null,
     year: yearFromDate(hit.release_date),

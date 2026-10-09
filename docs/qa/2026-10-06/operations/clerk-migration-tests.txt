@@ -1,0 +1,7 @@
+RUN  v4.1.11 /Users/shan2new/Projects/previously/server
+
+
+ Test Files  1 passed (1)
+      Tests  14 passed (14)
+   Start at  16:34:47
+   Duration  5.24s (transform 37ms, setup 0ms, import 101ms, tests 5.07s, environment 0ms)

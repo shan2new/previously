@@ -52,30 +52,50 @@ extension AppModel {
     /// (false: kept for the next trigger).
     private func drainWatchSessions(epoch: Int) async -> Bool {
         let store = RewatchStore.shared
-        while epoch == accountEpoch, canSyncWatchSessions, let next = store.nextPendingWrite() {
-            do {
-                switch next.write.kind {
-                case .save:
-                    // A save whose session is gone was overtaken by a delete; nothing to send.
-                    if let session = next.session { try await api.putWatchSession(id: next.id, WatchSessionBody(session)) }
-                case .delete:
-                    try await api.deleteWatchSession(id: next.id)
-                }
-                guard epoch == accountEpoch else { return false }
-                store.acknowledge(next.id, next.write)
-            } catch {
-                guard epoch == accountEpoch, !error.isCancellation else { return false }
-                switch (error as? APIError)?.status {
-                case 410?:
-                    store.deletedElsewhere(next.id, next.write)
-                case let code? where (400..<500).contains(code) && code != 408 && code != 429:
-                    AppModel.log.error("watch session \(next.id.uuidString, privacy: .public) refused: \(code)")
-                    store.refuse(next.id, next.write)
-                default:
-                    return false
+        while epoch == accountEpoch, canSyncWatchSessions {
+            while let next = store.nextPendingWrite() {
+                do {
+                    let applied: Bool
+                    switch next.write.kind {
+                    case .save:
+                        // A save whose session is gone was overtaken by a delete; nothing to send.
+                        if let session = next.session {
+                            applied = try await api.putWatchSession(id: next.id, WatchSessionBody(session), mutation: next.write.mutation)
+                        } else { applied = true }
+                    case .delete:
+                        applied = try await api.deleteWatchSession(id: next.id, mutation: next.write.mutation)
+                    }
+                    guard epoch == accountEpoch, canSyncWatchSessions else { return false }
+                    store.acknowledge(next.id, next.write, applied: applied)
+                } catch {
+                    guard epoch == accountEpoch, !error.isCancellation else { return false }
+                    switch (error as? APIError)?.status {
+                    case 410?:
+                        store.deletedElsewhere(next.id, next.write)
+                    case let code? where (400..<500).contains(code) && code != 408 && code != 429:
+                        AppModel.log.error("watch session \(next.id.uuidString, privacy: .public) refused: \(code)")
+                        store.refuse(next.id, next.write)
+                    default:
+                        return false
+                    }
                 }
             }
+            // A pending intent whose stamp/queue could not be persisted must remain held;
+            // reporting a drain would recursively schedule another immediate flush forever.
+            guard !store.hasUnsentWrites else { return false }
+            guard store.needsCanonicalRead else { return true }
+            // A superseded 204 accepted no local body. Read within this lane, avoiding a recursive
+            // flush. A newer local intent changes revision and stays queued rather than being
+            // overwritten by a response captured before it.
+            let revision = store.revision
+            do {
+                let remote = try await api.watchSessions()
+                guard epoch == accountEpoch, canSyncWatchSessions else { return false }
+                if store.merge(server: remote.compactMap(WatchSession.init(wire:)), readAt: revision) { return true }
+            } catch {
+                return false // The persistent canonical-read marker survives a failed read/relaunch.
+            }
         }
-        return true
+        return false
     }
 }

@@ -1,0 +1,47 @@
+{
+  "atUTC": "2026-10-06T11:13:48.594752+00:00",
+  "scope": "authenticated CLI automatic Vercel protection bypass; not anonymous public proof",
+  "deploymentId": "dpl_EMPz5q73ktnuHwhEesBQX4ZjBdhN",
+  "checks": [
+    {
+      "path": "/",
+      "status": 200,
+      "bodyBytes": 53769
+    },
+    {
+      "path": "/privacy",
+      "status": 200,
+      "bodyBytes": 51861
+    },
+    {
+      "path": "/terms",
+      "status": 200,
+      "bodyBytes": 36814
+    },
+    {
+      "path": "/support",
+      "status": 200,
+      "bodyBytes": 28140
+    },
+    {
+      "path": "/delete-account",
+      "status": 200,
+      "bodyBytes": 32364
+    },
+    {
+      "path": "/robots.txt",
+      "status": 200,
+      "bodyBytes": 121
+    },
+    {
+      "path": "/sitemap.xml",
+      "status": 200,
+      "bodyBytes": 361
+    },
+    {
+      "path": "/no-such-release-page",
+      "status": 404,
+      "bodyBytes": 11159
+    }
+  ]
+}

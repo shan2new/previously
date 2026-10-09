@@ -1,0 +1,30 @@
+{
+  "candidate": 14,
+  "startedAt": "2026-10-06T14:44:47.911383+00:00",
+  "runtimeSourceSHA256": "1b21f11ed3e74ef85b57b95638d8e76ce7990c7e550e73249207267d47810764",
+  "fileCount": 199,
+  "configuration": {
+    "projectPath": "/Users/shan2new/Projects/previously/ios/Previously.xcodeproj",
+    "scheme": "Previously",
+    "configuration": "Release",
+    "simulatorId": "F3AD17A6-813D-4C7E-8263-6383F952302C",
+    "derivedDataPath": "/Users/shan2new/Projects/previously/ios/build/DerivedData",
+    "extraArgs": [
+      "-jobs",
+      "1",
+      "CURRENT_PROJECT_VERSION=14",
+      "CLERK_PUBLISHABLE_KEY=pk_live_Y2xlcmsucHJldmlvdXNseS5jb2duaXBpbi5jb20k",
+      "API_BASE_URL=https://anime.cognipin.com",
+      "PRIVACY_POLICY_URL=https://previously.cognipin.com/privacy",
+      "TERMS_URL=https://previously.cognipin.com/terms"
+    ]
+  },
+  "initialFreeBytes": 3895631872,
+  "minimumFreeBytes": 3797381120,
+  "status": "completed",
+  "nativeUIStarted": false,
+  "exitCode": 0,
+  "finishedAt": "2026-10-06T14:47:19.576308+00:00",
+  "finalFreeBytes": 3859750912,
+  "qualification": "superseded: final capture and guard refinement requires exact final rebuild"
+}

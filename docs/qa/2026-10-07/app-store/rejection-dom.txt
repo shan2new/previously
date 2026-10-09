@@ -1,0 +1,116 @@
+- banner "App Store Connect":
+  - heading "App Store Connect" [level=1]:
+    - link "App Store Connect":
+      - /url: /
+  - navigation "Global":
+    - list:
+      - link "Apps":
+        - /url: /apps
+      - link "Xcode Cloud":
+        - /url: /teams/ed70022a-b3ca-4ff2-b4ab-1947652610e7/xcode-cloud
+      - link "Trends":
+        - /url: /trends
+      - link "Reports":
+        - /url: /itc/payments_and_financial_reports
+      - link "Business":
+        - /url: /business
+  - button "Shantanu Sinha Shantanu Sinha|11614668096|1 Account name menu":
+    - generic: Shantanu Sinha
+    - generic: Shantanu Sinha|11614668096|1
+- button "Apps menu, Previously., selected":
+  - generic "Previously.":
+    - img "Previously."
+  - generic: Previously.
+- navigation "Apps":
+  - list:
+    - link "Distribution":
+      - /url: /apps/6818452741/distribution
+    - link "Analytics":
+      - /url: /apps/6818452741/analytics
+    - link "TestFlight":
+      - /url: /teams/ed70022a-b3ca-4ff2-b4ab-1947652610e7/apps/6818452741/testflight
+- main:
+  - link "App Review":
+    - /url: /apps/6818452741/distribution/reviewsubmissions
+    - text: App Review
+  - heading "iOS Submission" [level=2]
+  - button "Resubmit to App Review" [disabled]
+  - paragraph:
+    - text: Unresolved Issues
+  - paragraph: Your app version was rejected and no other items submitted can be accepted or approved. You can make edits to your app version below.
+  - heading "Items Submitted (1)" [level=3]
+  - generic: You can review and make edits to your items below, or communicate with Apple. Accepted items won't be available for release until all items with issues are resubmitted and accepted. You can also remove those items and resubmit them later.
+  - table:
+    - rowgroup:
+      - row "Item Type Review Status Action":
+        - columnheader "Item":
+          - generic: Item
+        - columnheader "Type":
+          - generic: Type
+        - columnheader "Review Status":
+          - generic: Review Status
+        - columnheader "Action":
+          - generic: Action
+        - columnheader
+    - rowgroup:
+      - 'row "App Icon iOS App 1.0 1.0 (14) App Version Rejected 2.1.0 Performance: App Completeness Edit Delete"':
+        - cell "App Icon iOS App 1.0 1.0 (14)":
+          - generic "App Icon":
+            - img "App Icon"
+          - paragraph: iOS App 1.0
+          - paragraph:
+            - link "1.0 (14)":
+              - /url: /apps/6818452741/testflight/ios/f7e3b1bc-c75b-465b-b51b-e888d9c48b50/metadata
+          - paragraph
+        - cell "App Version":
+          - generic: App Version
+        - 'cell "Rejected 2.1.0 Performance: App Completeness"':
+          - text: Rejected
+          - paragraph: "2.1.0 Performance: App Completeness"
+        - cell "Edit":
+          - link "Edit":
+            - /url: /apps/6818452741/distribution/ios/version/inflight
+        - cell "Delete":
+          - button "Delete":
+  - heading "Messages (1)" [level=3]
+  - button "AppleToday 9:16 AM" [expanded]:
+    - heading "AppleToday 9:16 AM" [level=6]
+  - region "AppleToday 9:16 AM":
+    - heading "Guideline 2.1 - Information Needed - New App Submission" [level=3]
+    - text: "This app has been submitted by a developer account that has a limited App Review history. We need additional information to better understand the app and complete the review. Note: Before submitting, run the submitted build through your own testing and quality assurance process on supported physical devices. App Review is intended for apps and metadata that are complete and ready for App Store customers. If the app is ready for review, follow the directions below. Next Steps Reply in App Store Connect with all of the following information and also add this information to the Notes field of the App Review Information section in App Store Connect, for reference on future submissions: 1. A screen recording captured on a physical device, running the latest operating system, demonstrating the app's functionality. The recording must begin with launching the app and show the typical user flow. If the app has any of the following, include them in the recording: - Account registration, login, and account deletion flows. Account deletion is required in apps that support account creation. - Any user-generated content, including the required content reporting and blocking mechanisms. - Accessing paid content or features within the app. 2. A description of the app's purpose and target audience, including the problem it solves and the value it provides 3. Instructions for setting up and accessing the app's main features, including any required login credentials or sample files 4. A list of the external services, tools, or platforms the app uses to deliver its core functionality (for example, data providers, authentication services, payment processors, or AI services) 5. Describe any regional differences in the app’s features or content, or confirm that the app functions consistently across all regions 6. If the app operates in a highly regulated industry or includes protected third-party material, provide any relevant documentation or credentials to demonstrate you are authorized to provide these services or protected material Prevent Common Issues - Guideline 2.1 - Bugs and crashes: Apps are reviewed on physical devices to mirror real-world conditions. Test the app on each supported device platform before submitting. Use"
+    - link "TestFlight":
+      - /url: https://developer.apple.com/testflight/
+    - text: "to distribute builds for beta testing on real devices. - Guideline 2.1 - Accessing the app: If the app includes account-based features, provide up-to-date login credentials for a demo account in App Store Connect. If the app has multiple account types, provide credentials for each type in the Notes field. - Guideline 2.3.3 - Screenshots: App screenshots on the App Store must show the actual app in use, and not merely the title art, login page, or splash screen. - Guideline 3.1.1 - In-App Purchase: In-App Purchase products should be"
+    - link "configured and submitted alongside the app":
+      - /url: https://developer.apple.com/help/app-store-connect/configure-in-app-purchase-settings/overview-for-configuring-in-app-purchases/
+    - text: ". - Guideline 3.2 - Other Business Models: If your app is intended to be used by specific businesses, organizations or employees then use one of the"
+    - link "other distribution options":
+      - /url: https://support.apple.com/guide/deployment/intro-to-content-distribution-depe1553f932/web
+    - text: available to you through the Apple Developer Program Account.
+    - separator
+    - paragraph:
+      - button "Reply to App Review":
+        - generic: Reply to App Review
+  - generic: Date Submitted
+  - generic: Oct 6, 2026 at 10:59 PM
+  - generic: Submission ID
+  - generic: 581db571-26c5-4b46-9ead-f7e73a3c940a
+  - generic: Submitted By
+  - generic: Shantanu Sinha
+  - generic: Last Updated By
+  - generic: Apple
+  - button "Cancel Submission"
+- contentinfo:
+  - list:
+    - link "App Store Connect":
+      - /url: /apps
+  - list:
+    - listitem: Copyright © 2026 Apple Inc. All rights reserved. |
+    - link "Terms of Service":
+      - /url: /WebObjects/iTunesConnect.woa/wa/termsOfService
+    - text: "|"
+    - link "Privacy Policy":
+      - /url: https://www.apple.com/legal/privacy
+    - text: "|"
+    - link "Contact Us":
+      - /url: /contact-us

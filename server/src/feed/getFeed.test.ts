@@ -41,6 +41,9 @@ vi.mock('../services/franchiseView.js', () => ({
   getSummaries: mocks.getSummaries,
   trendingFranchiseIds: mocks.trendingFranchiseIds,
 }))
+// Policy eligibility is independently exercised against real PostgreSQL in content-policy QA;
+// these feed composition fixtures are all visible and have no persisted catalogue rows.
+vi.mock('../services/consumerContent.js', () => ({ consumerFranchiseIds: async (ids: string[]) => new Set(ids) }))
 // Only the loader: anything else of the recommender's (its materialisation queue above all) is
 // undefined here, so a feed that reached for it would throw.
 vi.mock('../services/recommendations.js', () => ({ loadRankInput: mocks.loadRankInput }))

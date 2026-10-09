@@ -1,0 +1,25 @@
+{
+  "checkedAt": "2026-10-06T13:54:25.466Z",
+  "home": {
+    "canonical": "https://previously.cognipin.com",
+    "comingSoon": true,
+    "documentWidth": 1470,
+    "dotColor": "rgb(240, 86, 63)",
+    "hero": "https://previously.cognipin.com/app/library-current.jpg",
+    "heroLoaded": true,
+    "icon": "https://previously.cognipin.com/brand/native-icon.png",
+    "url": "https://previously.cognipin.com/",
+    "width": 1470
+  },
+  "privacy": {
+    "deviceParagraph": true,
+    "documentWidth": 390,
+    "dotColor": "rgb(240, 86, 63)",
+    "draft": true,
+    "icon": "https://previously.cognipin.com/brand/native-icon.png",
+    "url": "https://previously.cognipin.com/privacy",
+    "width": 390
+  },
+  "passed": true,
+  "scope": "Canonical exactcandidate brand/newhero/draftprivacy visible readback; no production auth/nativeproof"
+}

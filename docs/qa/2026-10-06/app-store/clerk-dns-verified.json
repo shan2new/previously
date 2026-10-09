@@ -1,0 +1,34 @@
+{
+  "checkedAt": "2026-10-06T12:07:09.473789+00:00",
+  "instanceId": "ins_3KJtgHKq296iry2eBmj1IkEQmpQ",
+  "clerkDashboardAllFiveVerified": true,
+  "tlsIssuing": true,
+  "records": [
+    {
+      "name": "clerk.previously.cognipin.com",
+      "expected": "frontend-api.clerk.services",
+      "publicCname": "frontend-api.clerk.services."
+    },
+    {
+      "name": "accounts.previously.cognipin.com",
+      "expected": "accounts.clerk.services",
+      "publicCname": "accounts.clerk.services."
+    },
+    {
+      "name": "clkmail.previously.cognipin.com",
+      "expected": "mail.bj4laf8d08wt.clerk.services",
+      "publicCname": "mail.bj4laf8d08wt.clerk.services."
+    },
+    {
+      "name": "clk._domainkey.previously.cognipin.com",
+      "expected": "dkim1.bj4laf8d08wt.clerk.services",
+      "publicCname": "dkim1.bj4laf8d08wt.clerk.services."
+    },
+    {
+      "name": "clk2._domainkey.previously.cognipin.com",
+      "expected": "dkim2.bj4laf8d08wt.clerk.services",
+      "publicCname": "dkim2.bj4laf8d08wt.clerk.services."
+    }
+  ],
+  "screenshot": "clerk-dns-verified.png"
+}

@@ -1,0 +1,30 @@
+{
+  "candidate": 14,
+  "attempt": 2,
+  "startedAt": "2026-10-06T14:47:43.772099+00:00",
+  "runtimeSourceSHA256": "baaf904adf90bc13809ef9b3c331a800385409a40d18cf1bf1aceaf79c97e6ef",
+  "fileCount": 199,
+  "configuration": {
+    "projectPath": "/Users/shan2new/Projects/previously/ios/Previously.xcodeproj",
+    "scheme": "Previously",
+    "configuration": "Release",
+    "simulatorId": "F3AD17A6-813D-4C7E-8263-6383F952302C",
+    "derivedDataPath": "/Users/shan2new/Projects/previously/ios/build/DerivedData",
+    "extraArgs": [
+      "-jobs",
+      "1",
+      "CURRENT_PROJECT_VERSION=14",
+      "CLERK_PUBLISHABLE_KEY=pk_live_Y2xlcmsucHJldmlvdXNseS5jb2duaXBpbi5jb20k",
+      "API_BASE_URL=https://anime.cognipin.com",
+      "PRIVACY_POLICY_URL=https://previously.cognipin.com/privacy",
+      "TERMS_URL=https://previously.cognipin.com/terms"
+    ]
+  },
+  "initialFreeBytes": 3857006592,
+  "minimumFreeBytes": 3826532352,
+  "status": "completed",
+  "nativeUIStarted": false,
+  "exitCode": 0,
+  "finishedAt": "2026-10-06T14:50:04.439880+00:00",
+  "finalFreeBytes": 3852951552
+}

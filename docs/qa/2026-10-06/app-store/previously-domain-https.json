@@ -1,0 +1,75 @@
+{
+  "checkedAt": "2026-10-06T12:16:23.508348+00:00",
+  "origin": "https://previously.cognipin.com",
+  "deploymentId": "dpl_EMPz5q73ktnuHwhEesBQX4ZjBdhN",
+  "certificateId": "cert_zCC3PMdoeuyFDdR8qsMiRK8N",
+  "authenticatedRequest": false,
+  "routes": [
+    {
+      "path": "/",
+      "status": 200,
+      "bytes": 53769,
+      "contentType": "text/html; charset=utf-8",
+      "effectiveUrl": "https://previously.cognipin.com/",
+      "nosniff": true
+    },
+    {
+      "path": "/privacy",
+      "status": 200,
+      "bytes": 51861,
+      "contentType": "text/html; charset=utf-8",
+      "effectiveUrl": "https://previously.cognipin.com/privacy",
+      "nosniff": true
+    },
+    {
+      "path": "/terms",
+      "status": 200,
+      "bytes": 36814,
+      "contentType": "text/html; charset=utf-8",
+      "effectiveUrl": "https://previously.cognipin.com/terms",
+      "nosniff": true
+    },
+    {
+      "path": "/support",
+      "status": 200,
+      "bytes": 28140,
+      "contentType": "text/html; charset=utf-8",
+      "effectiveUrl": "https://previously.cognipin.com/support",
+      "nosniff": true
+    },
+    {
+      "path": "/delete-account",
+      "status": 200,
+      "bytes": 32364,
+      "contentType": "text/html; charset=utf-8",
+      "effectiveUrl": "https://previously.cognipin.com/delete-account",
+      "nosniff": true
+    },
+    {
+      "path": "/robots.txt",
+      "status": 200,
+      "bytes": 121,
+      "contentType": "text/plain; charset=utf-8",
+      "effectiveUrl": "https://previously.cognipin.com/robots.txt",
+      "nosniff": true
+    },
+    {
+      "path": "/sitemap.xml",
+      "status": 200,
+      "bytes": 361,
+      "contentType": "application/xml",
+      "effectiveUrl": "https://previously.cognipin.com/sitemap.xml",
+      "nosniff": true
+    },
+    {
+      "path": "/no-such-release-page",
+      "status": 404,
+      "bytes": 11159,
+      "contentType": "text/html; charset=utf-8",
+      "effectiveUrl": "https://previously.cognipin.com/no-such-release-page",
+      "nosniff": true
+    }
+  ],
+  "allExpected": true,
+  "scope": "Actual HTTPS custom-domain routing on existing production deployment; draft policies remain draft."
+}

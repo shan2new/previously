@@ -1,0 +1,19 @@
+{
+  "checkedAt": "2026-10-06T13:30:25.973Z",
+  "deploymentId": "dpl_7LeP7Y1i3y8F48AJbJpwbLTZqLKB",
+  "observation": {
+    "clerkParagraph": "Clerk receives information needed for sign-in, authentication, session management and account security. This includes account information, a vendor device identifier, session and device tokens, device model, operating-system and app information, and technical connection information.",
+    "documentWidth": 390,
+    "draftVisible": true,
+    "origin": "https://previously.cognipin.com",
+    "path": "/privacy",
+    "scrollY": 3447.5,
+    "sectionY": 55.03125,
+    "width": 390
+  },
+  "screenshots": [
+    "canonical-privacy-390.png",
+    "canonical-privacy-providers-390.png"
+  ],
+  "passed": true
+}

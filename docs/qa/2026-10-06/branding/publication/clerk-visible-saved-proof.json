@@ -1,0 +1,33 @@
+{
+  "images": [
+    {
+      "alt": "Uploaded Logo",
+      "complete": true,
+      "height": 76,
+      "src": "https://img.clerk.com/eyJ0eXBlIjoicHJveHkiLCJzcmMiOiJodHRwczovL2ltYWdlcy5jbGVyay5kZXYvdXBsb2FkZWQvaW1nXzNLSzdxQXNvUXJwbHFVSTJ6TVpad2tROE82TCJ9?width=256",
+      "width": 76
+    },
+    {
+      "alt": "Uploaded Favicon",
+      "complete": true,
+      "height": 76,
+      "src": "https://img.clerk.com/eyJ0eXBlIjoicHJveHkiLCJzcmMiOiJodHRwczovL2ltYWdlcy5jbGVyay5kZXYvdXBsb2FkZWQvaW1nXzNLSzdzODhPcXB0ZnlhNVVDN1MyU1gwdWl6MCJ9?width=256",
+      "width": 76
+    }
+  ],
+  "paidBrandRemoval": [
+    {
+      "checked": null,
+      "label": null
+    }
+  ],
+  "url": "https://dashboard.clerk.com/apps/app_3FUb7r97UcdmzHsvIHPipn3PbtD/instances/ins_3KJtgHKq296iry2eBmj1IkEQmpQ/settings",
+  "visibleSaveButtons": [],
+  "checkedAt": "2026-10-06T13:50:30.389Z",
+  "sourcePNG": "/Users/shan2new/Projects/previously/docs/qa/2026-10-06/archive13/native-icon-152.png",
+  "sourceSHA256": "baf5bdeefe3b0496878e8e4faab834ed5106f88c1298e15c5ced36f56f20bbd5",
+  "uploadVia": "Ordinary native macOS Open panel after extension chooser rejected; no extension permission change",
+  "persistedAfterReload": true,
+  "authSettingsChanged": false,
+  "paidPlanChanged": false
+}

@@ -2,6 +2,7 @@
 import { ArrowUpRight } from 'lucide-react';
 import { Experience, Questions } from './experience';
 import { Brand, SiteFooter } from './site-chrome';
+import { siteOrigin } from '@/lib/site-config';
 import './gallery.css';
 import './product-tour.css';
 export default function Home() {
@@ -41,9 +42,9 @@ export default function Home() {
             name: 'Previously.',
             description:
               'A TV and anime tracking app for iPhone. Keep your shows, seasons and episode progress together, see upcoming episodes, and catch up on release updates.',
-            applicationCategory: 'LifestyleApplication',
+            applicationCategory: 'EntertainmentApplication',
             operatingSystem: 'iOS 18 or later',
-            url: 'https://landing-ten-theta-55.vercel.app',
+            url: siteOrigin,
             author: {
               '@type': 'Person',
               name: 'Shantanu Sinha',

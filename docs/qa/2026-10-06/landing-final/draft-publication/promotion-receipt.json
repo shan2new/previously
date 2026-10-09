@@ -1,0 +1,20 @@
+{
+  "startedAt": "2026-10-06T13:13:12.241506+00:00",
+  "finishedAt": "2026-10-06T13:13:16.331514+00:00",
+  "exitCode": 0,
+  "deploymentId": "dpl_2BUUc6ZREKY29QVMdaF6zEr4BeGg",
+  "canonicalOrigin": "https://previously.cognipin.com",
+  "rollbackDeploymentId": "dpl_EMPz5q73ktnuHwhEesBQX4ZjBdhN",
+  "rollbackURL": "landing-8ypdokade-shan2news-projects.vercel.app",
+  "sourceManifestSha256": "21f9d2ee7b0148574f34aec471818d0b4a3f4833e4b7366ed2aadcbcdf27e36a",
+  "buildRepeated": false,
+  "dnsChanged": false,
+  "projectOrPlanCreated": false,
+  "ssoProtectionChanged": false,
+  "draft": true,
+  "effectiveDate": null,
+  "candidateQualification": [
+    "candidate-http-assets.json",
+    "candidate-mobile-browser.json"
+  ]
+}

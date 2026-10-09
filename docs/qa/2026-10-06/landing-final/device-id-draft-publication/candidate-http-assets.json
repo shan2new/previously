@@ -1,0 +1,490 @@
+{
+  "checkedAt": "2026-10-06T13:27:41.255668+00:00",
+  "deploymentId": "dpl_7LeP7Y1i3y8F48AJbJpwbLTZqLKB",
+  "origin": "https://landing-ten-theta-55.vercel.app",
+  "scope": "Anonymous HTTPS static draft candidate; five visible pages compared with prior qualified public copy plus one exact Clerk paragraph replacement; no new local build or production backend/native claim",
+  "draft": true,
+  "effectiveDate": null,
+  "routes": [
+    {
+      "path": "/",
+      "status": 200,
+      "expectedStatus": 200,
+      "finalURL": "https://landing-ten-theta-55.vercel.app/",
+      "sha256": "609480a69e83289d53370ebf4ad24924710a14f90b37bb72aa333294ae697628",
+      "bytes": 53721,
+      "headers": {
+        "content-type": "text/html; charset=utf-8",
+        "x-content-type-options": "nosniff",
+        "referrer-policy": "strict-origin-when-cross-origin",
+        "permissions-policy": "camera=(), microphone=(), geolocation=()"
+      },
+      "h1": 1,
+      "canonical": [
+        "https://previously.cognipin.com"
+      ],
+      "robots": [
+        "index, follow"
+      ],
+      "draftVisible": false,
+      "effectiveDateVisible": false,
+      "externalScripts": [],
+      "visibleCopyMatchesExpectedSource": true,
+      "clerkDeviceDisclosureMatchesSource": null,
+      "contactLinked": true
+    },
+    {
+      "path": "/privacy",
+      "status": 200,
+      "expectedStatus": 200,
+      "finalURL": "https://landing-ten-theta-55.vercel.app/privacy",
+      "sha256": "5c9a4bed8f9983e09a46716bf44a952aad4efb01a179c450ede6442d082f1c80",
+      "bytes": 61150,
+      "headers": {
+        "content-type": "text/html; charset=utf-8",
+        "x-content-type-options": "nosniff",
+        "referrer-policy": "strict-origin-when-cross-origin",
+        "permissions-policy": "camera=(), microphone=(), geolocation=()"
+      },
+      "h1": 1,
+      "canonical": [
+        "https://previously.cognipin.com/privacy"
+      ],
+      "robots": [
+        "noindex, follow"
+      ],
+      "draftVisible": true,
+      "effectiveDateVisible": false,
+      "externalScripts": [],
+      "visibleCopyMatchesExpectedSource": true,
+      "clerkDeviceDisclosureMatchesSource": true,
+      "contactLinked": true
+    },
+    {
+      "path": "/terms",
+      "status": 200,
+      "expectedStatus": 200,
+      "finalURL": "https://landing-ten-theta-55.vercel.app/terms",
+      "sha256": "0eeefd37215046146a759bc0e82beaac2ddea3ec42ea2bc576a4243826e5e41c",
+      "bytes": 38019,
+      "headers": {
+        "content-type": "text/html; charset=utf-8",
+        "x-content-type-options": "nosniff",
+        "referrer-policy": "strict-origin-when-cross-origin",
+        "permissions-policy": "camera=(), microphone=(), geolocation=()"
+      },
+      "h1": 1,
+      "canonical": [
+        "https://previously.cognipin.com/terms"
+      ],
+      "robots": [
+        "noindex, follow"
+      ],
+      "draftVisible": true,
+      "effectiveDateVisible": false,
+      "externalScripts": [],
+      "visibleCopyMatchesExpectedSource": true,
+      "clerkDeviceDisclosureMatchesSource": null,
+      "contactLinked": true
+    },
+    {
+      "path": "/support",
+      "status": 200,
+      "expectedStatus": 200,
+      "finalURL": "https://landing-ten-theta-55.vercel.app/support",
+      "sha256": "8643e50a3c1d757f5a853f8fe52470454da2a0a2a64c1b898f1ddcd91f1080fc",
+      "bytes": 32356,
+      "headers": {
+        "content-type": "text/html; charset=utf-8",
+        "x-content-type-options": "nosniff",
+        "referrer-policy": "strict-origin-when-cross-origin",
+        "permissions-policy": "camera=(), microphone=(), geolocation=()"
+      },
+      "h1": 1,
+      "canonical": [
+        "https://previously.cognipin.com/support"
+      ],
+      "robots": [
+        "index, follow"
+      ],
+      "draftVisible": false,
+      "effectiveDateVisible": false,
+      "externalScripts": [],
+      "visibleCopyMatchesExpectedSource": true,
+      "clerkDeviceDisclosureMatchesSource": null,
+      "contactLinked": true
+    },
+    {
+      "path": "/delete-account",
+      "status": 200,
+      "expectedStatus": 200,
+      "finalURL": "https://landing-ten-theta-55.vercel.app/delete-account",
+      "sha256": "70a72939d5bbb181f9dea723ca6d0b968b91e040c0a479408f209ee6052a0097",
+      "bytes": 37188,
+      "headers": {
+        "content-type": "text/html; charset=utf-8",
+        "x-content-type-options": "nosniff",
+        "referrer-policy": "strict-origin-when-cross-origin",
+        "permissions-policy": "camera=(), microphone=(), geolocation=()"
+      },
+      "h1": 1,
+      "canonical": [
+        "https://previously.cognipin.com/delete-account"
+      ],
+      "robots": [
+        "noindex, follow"
+      ],
+      "draftVisible": true,
+      "effectiveDateVisible": false,
+      "externalScripts": [],
+      "visibleCopyMatchesExpectedSource": true,
+      "clerkDeviceDisclosureMatchesSource": null,
+      "contactLinked": true
+    },
+    {
+      "path": "/robots.txt",
+      "status": 200,
+      "expectedStatus": 200,
+      "finalURL": "https://landing-ten-theta-55.vercel.app/robots.txt",
+      "sha256": "b61e89c2221cd818e386ff04b43677f1c91dc419874fb6d2680ffd7002f3fd2b",
+      "bytes": 113,
+      "headers": {
+        "content-type": "text/plain; charset=utf-8",
+        "x-content-type-options": "nosniff",
+        "referrer-policy": "strict-origin-when-cross-origin",
+        "permissions-policy": "camera=(), microphone=(), geolocation=()"
+      },
+      "matchesPreparedBytes": true
+    },
+    {
+      "path": "/sitemap.xml",
+      "status": 200,
+      "expectedStatus": 200,
+      "finalURL": "https://landing-ten-theta-55.vercel.app/sitemap.xml",
+      "sha256": "798329451a2f0feb586b3c7a6c596d32935c05e784ef6db66046448bbc17159f",
+      "bytes": 345,
+      "headers": {
+        "content-type": "application/xml",
+        "x-content-type-options": "nosniff",
+        "referrer-policy": "strict-origin-when-cross-origin",
+        "permissions-policy": "camera=(), microphone=(), geolocation=()"
+      },
+      "matchesPreparedBytes": true
+    },
+    {
+      "path": "/__previously_release_missing__",
+      "status": 404,
+      "expectedStatus": 404,
+      "finalURL": "https://landing-ten-theta-55.vercel.app/__previously_release_missing__",
+      "sha256": "8084deff158f04085cb6bb439360ebc27b168fe63dc232dfd2d5df73ecb3a7f1",
+      "bytes": 11127,
+      "headers": {
+        "content-type": "text/html; charset=utf-8",
+        "x-content-type-options": "nosniff",
+        "referrer-policy": "strict-origin-when-cross-origin",
+        "permissions-policy": "camera=(), microphone=(), geolocation=()"
+      }
+    }
+  ],
+  "assets": [
+    {
+      "path": "app/library-preview.webp",
+      "status": 200,
+      "bytes": 138866,
+      "sha256": "786cb8621dcb7c884e0cdd01d19b1ffd41ebc6c79e107862f9881b26aa2c140a",
+      "matchesLocalSource": true,
+      "matchesPriorQualifiedAsset": true,
+      "samePublicOrigin": true
+    },
+    {
+      "path": "app/library.webp",
+      "status": 200,
+      "bytes": 1711570,
+      "sha256": "aa21cb607f8baac1735a3c0763180c5f48ef93efb2b0c2085e133452371956b2",
+      "matchesLocalSource": true,
+      "matchesPriorQualifiedAsset": true,
+      "samePublicOrigin": true
+    },
+    {
+      "path": "app/schedule-preview.webp",
+      "status": 200,
+      "bytes": 132010,
+      "sha256": "66d806a79af51f12fcb527c04a717c8dbea6d83c01a63f28ce2867d86f9399f1",
+      "matchesLocalSource": true,
+      "matchesPriorQualifiedAsset": true,
+      "samePublicOrigin": true
+    },
+    {
+      "path": "app/schedule.webp",
+      "status": 200,
+      "bytes": 1732346,
+      "sha256": "c672e461b61b3b103f0ddb5c4873365ae8a31de239444c7687b9f528b6e43580",
+      "matchesLocalSource": true,
+      "matchesPriorQualifiedAsset": true,
+      "samePublicOrigin": true
+    },
+    {
+      "path": "app/search-preview.webp",
+      "status": 200,
+      "bytes": 204816,
+      "sha256": "43b02f5c9005f15a294f289f86fb3ec4bb7a8e579ede1f102d65653e6b96027a",
+      "matchesLocalSource": true,
+      "matchesPriorQualifiedAsset": true,
+      "samePublicOrigin": true
+    },
+    {
+      "path": "app/search.webp",
+      "status": 200,
+      "bytes": 2253064,
+      "sha256": "fddcdc6c073f3844f806826aaa2c8205bc5c7d36a1a8c5978f48eab538ca6b26",
+      "matchesLocalSource": true,
+      "matchesPriorQualifiedAsset": true,
+      "samePublicOrigin": true
+    },
+    {
+      "path": "app/seasons.webp",
+      "status": 200,
+      "bytes": 806370,
+      "sha256": "ebab6d5916f9e1fb1216e4cb2fed1974ec0243b84ed92c44bfb29c15bd4a9bef",
+      "matchesLocalSource": true,
+      "matchesPriorQualifiedAsset": true,
+      "samePublicOrigin": true
+    },
+    {
+      "path": "app/today-preview.webp",
+      "status": 200,
+      "bytes": 138564,
+      "sha256": "5deb3cecbeb9fffcc28b19dbc910eb3b23a40c29d4ec22006b5c646f1c8846c0",
+      "matchesLocalSource": true,
+      "matchesPriorQualifiedAsset": true,
+      "samePublicOrigin": true
+    },
+    {
+      "path": "app/today.webp",
+      "status": 200,
+      "bytes": 2070154,
+      "sha256": "85277cdf52945e7741524ba22732a1c9abbfbb19ac88e7a079e96e7c55e45165",
+      "matchesLocalSource": true,
+      "matchesPriorQualifiedAsset": true,
+      "samePublicOrigin": true
+    },
+    {
+      "path": "brand/icon.svg",
+      "status": 200,
+      "bytes": 993,
+      "sha256": "6e67da4108502f931599d75c84eff619b2d165b4bd94811ed1d2d4386202468b",
+      "matchesLocalSource": true,
+      "matchesPriorQualifiedAsset": true,
+      "samePublicOrigin": true
+    },
+    {
+      "path": "brand/mark-tight.svg",
+      "status": 200,
+      "bytes": 609,
+      "sha256": "453676b803b0317c8e645451e12ae894cad6ed70a94f9f85bb777f16f2426ba5",
+      "matchesLocalSource": true,
+      "matchesPriorQualifiedAsset": true,
+      "samePublicOrigin": true
+    },
+    {
+      "path": "brand/mark.svg",
+      "status": 200,
+      "bytes": 609,
+      "sha256": "574c6f734be5312c41c813ef4914f2f8ede50500c265aaf170c24cd5d2ae6db3",
+      "matchesLocalSource": true,
+      "matchesPriorQualifiedAsset": true,
+      "samePublicOrigin": true
+    },
+    {
+      "path": "fonts/BarlowCondensed-OFL.txt",
+      "status": 200,
+      "bytes": 4377,
+      "sha256": "186d750eb496a4c17a76385f82be6aea2ac1cf2de074a811d63786cf374ea73f",
+      "matchesLocalSource": true,
+      "matchesPriorQualifiedAsset": true,
+      "samePublicOrigin": true
+    },
+    {
+      "path": "fonts/BarlowCondensed-SemiBold.ttf",
+      "status": 200,
+      "bytes": 86636,
+      "sha256": "0d85af813fc3ed87db0c6265515689b2eef5cbaf7aab17922528dfc95a2cd73f",
+      "matchesLocalSource": true,
+      "matchesPriorQualifiedAsset": true,
+      "samePublicOrigin": true
+    },
+    {
+      "path": "fonts/Outfit-Bold.ttf",
+      "status": 200,
+      "bytes": 48340,
+      "sha256": "49dcdf653a004a2575b3de649f5e4c549d774fecddf317812330edd0ad70685a",
+      "matchesLocalSource": true,
+      "matchesPriorQualifiedAsset": true,
+      "samePublicOrigin": true
+    },
+    {
+      "path": "fonts/Outfit-Medium.ttf",
+      "status": 200,
+      "bytes": 47800,
+      "sha256": "9a9f465776e653cd6175661d844555e08684d432518f1d2c621bcb3006598f9c",
+      "matchesLocalSource": true,
+      "matchesPriorQualifiedAsset": true,
+      "samePublicOrigin": true
+    },
+    {
+      "path": "fonts/Outfit-Regular.ttf",
+      "status": 200,
+      "bytes": 47844,
+      "sha256": "6a8c9be856a6b9e09c66615634904616152c9de5e44db343a3ced240479c586a",
+      "matchesLocalSource": true,
+      "matchesPriorQualifiedAsset": true,
+      "samePublicOrigin": true
+    },
+    {
+      "path": "fonts/Outfit-SemiBold.ttf",
+      "status": 200,
+      "bytes": 48456,
+      "sha256": "8900df5726b5a6f23e723594f11d5ea27e695bd85c884f18d88ed080544fe205",
+      "matchesLocalSource": true,
+      "matchesPriorQualifiedAsset": true,
+      "samePublicOrigin": true
+    },
+    {
+      "path": "images/arcane.jpg",
+      "status": 200,
+      "bytes": 65740,
+      "sha256": "d3d1a3cdc7f08f267dc3de167294d39d7f4a726202a3c2f0aee08d1dd30afe06",
+      "matchesLocalSource": true,
+      "matchesPriorQualifiedAsset": true,
+      "samePublicOrigin": true
+    },
+    {
+      "path": "images/attack-on-titan-2x3.jpg",
+      "status": 200,
+      "bytes": 102344,
+      "sha256": "9b83ed1ef55bd185d5a56f75a158ed9049dec0b6d5048a1bbe75b41d455f8614",
+      "matchesLocalSource": true,
+      "matchesPriorQualifiedAsset": true,
+      "samePublicOrigin": true
+    },
+    {
+      "path": "images/bear-wide.jpg",
+      "status": 200,
+      "bytes": 202806,
+      "sha256": "db85967526b3daa935fed2bf78fa595bc9e6104ca8ec931cb1cc0106ce696096",
+      "matchesLocalSource": true,
+      "matchesPriorQualifiedAsset": true,
+      "samePublicOrigin": true
+    },
+    {
+      "path": "images/bear.jpg",
+      "status": 200,
+      "bytes": 87722,
+      "sha256": "2aa0b3e73db52f4d51808d332fb6b48a0de0f46576a95b2c9b5400dc2652102c",
+      "matchesLocalSource": true,
+      "matchesPriorQualifiedAsset": true,
+      "samePublicOrigin": true
+    },
+    {
+      "path": "images/breaking-bad.jpg",
+      "status": 200,
+      "bytes": 164768,
+      "sha256": "4e6864c0b0e6238f0c27bd7fc0584c7029239bbc70b3e5afc77023bdcd8b7da4",
+      "matchesLocalSource": true,
+      "matchesPriorQualifiedAsset": true,
+      "samePublicOrigin": true
+    },
+    {
+      "path": "images/frieren-poster.jpg",
+      "status": 200,
+      "bytes": 80850,
+      "sha256": "4ca9457666437129022e416a9612d808d747b3861897299118f1e65e184c9e39",
+      "matchesLocalSource": true,
+      "matchesPriorQualifiedAsset": true,
+      "samePublicOrigin": true
+    },
+    {
+      "path": "images/frieren-wide.jpg",
+      "status": 200,
+      "bytes": 153189,
+      "sha256": "c8e5c345c4c9529d0fc724e14430e7859a9b1918ad801ad8db8210486b7fa416",
+      "matchesLocalSource": true,
+      "matchesPriorQualifiedAsset": true,
+      "samePublicOrigin": true
+    },
+    {
+      "path": "images/severance-poster.jpg",
+      "status": 200,
+      "bytes": 73646,
+      "sha256": "3b42fc5627b01ffb1bc786485e0b725d95781a26f6e0b17620848b4ce57a84ac",
+      "matchesLocalSource": true,
+      "matchesPriorQualifiedAsset": true,
+      "samePublicOrigin": true
+    },
+    {
+      "path": "images/severance-wide.jpg",
+      "status": 200,
+      "bytes": 75407,
+      "sha256": "7ae04e98d0dd3cbf67e445b08b3de38fab3f56d6334eeb5f64a14fe7b4856027",
+      "matchesLocalSource": true,
+      "matchesPriorQualifiedAsset": true,
+      "samePublicOrigin": true
+    },
+    {
+      "path": "images/severance.jpg",
+      "status": 200,
+      "bytes": 125469,
+      "sha256": "bd2f6d3b50b8b61da24c34c66601b2af98f8c58147ff0c0e272c808674d470e5",
+      "matchesLocalSource": true,
+      "matchesPriorQualifiedAsset": true,
+      "samePublicOrigin": true
+    },
+    {
+      "path": "images/shogun.jpg",
+      "status": 200,
+      "bytes": 131996,
+      "sha256": "423a0fec97f5d7e1794b43d05d3ba250b7996923d7444204653c00832a3c9057",
+      "matchesLocalSource": true,
+      "matchesPriorQualifiedAsset": true,
+      "samePublicOrigin": true
+    },
+    {
+      "path": "images/silo.jpg",
+      "status": 200,
+      "bytes": 45596,
+      "sha256": "77b337b9bce3a0fbd13385bfd140c4b73e5365966697d5f56819fff0bc23498e",
+      "matchesLocalSource": true,
+      "matchesPriorQualifiedAsset": true,
+      "samePublicOrigin": true
+    },
+    {
+      "path": "images/stranger-things.jpg",
+      "status": 200,
+      "bytes": 53345,
+      "sha256": "30ae55afeb2ec9a584691070e1e21557a61e22b26f4645bca77048bdefe817e2",
+      "matchesLocalSource": true,
+      "matchesPriorQualifiedAsset": true,
+      "samePublicOrigin": true
+    },
+    {
+      "path": "images/succession.jpg",
+      "status": 200,
+      "bytes": 102124,
+      "sha256": "6112e1fcd09ce0c5436de30cf650e93960fdea52f94195a446dca1428e9f43ac",
+      "matchesLocalSource": true,
+      "matchesPriorQualifiedAsset": true,
+      "samePublicOrigin": true
+    },
+    {
+      "path": "images/the-last-of-us.jpg",
+      "status": 200,
+      "bytes": 127074,
+      "sha256": "5132d415371e835dc1488c54c5a685a7dee90484a41a7aa1ce6877bf3ddff085",
+      "matchesLocalSource": true,
+      "matchesPriorQualifiedAsset": true,
+      "samePublicOrigin": true
+    }
+  ],
+  "failures": [],
+  "passed": true
+}

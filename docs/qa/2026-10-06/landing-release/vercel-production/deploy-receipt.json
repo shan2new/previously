@@ -1,0 +1,9 @@
+{
+  "startedAt": "2026-10-06T11:09:15.563417+00:00",
+  "finishedAt": "2026-10-06T11:09:56.924544+00:00",
+  "exitCode": 1,
+  "projectId": "prj_osATa26wuWMoLf7yLOEaXvYuiial",
+  "target": "production",
+  "promotionDeferredForSmoke": true,
+  "rollbackId": "dpl_6nzwjys7thtUHrV4pdV8dU4GqLM8"
+}

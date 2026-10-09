@@ -1,0 +1,17 @@
+{
+  "verifiedAt": "2026-10-06T12:23:21.193391+00:00",
+  "appId": "6818452741",
+  "version": "1.0",
+  "supportUrl": "https://previously.cognipin.com/support",
+  "marketingUrl": "https://previously.cognipin.com",
+  "privacyPolicyUrl": "https://previously.cognipin.com/privacy",
+  "privacyChoicesUrl": "https://previously.cognipin.com/delete-account",
+  "versionLinksSaved": true,
+  "privacyLinksSaved": true,
+  "privacyPublished": false,
+  "verification": "Actual App Store Connect saved fields and dismissed privacy save dialog with canonical URLs; no build or review submission implied.",
+  "screenshots": [
+    "canonical-store-urls.png",
+    "canonical-privacy-urls.png"
+  ]
+}

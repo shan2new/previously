@@ -1,0 +1,55 @@
+{
+  "createdAt": "2026-10-06T15:03:53.976133+00:00",
+  "purpose": "Two tiny synthetic MAL export documents selected through the ordinary native Files importer; no QA runtime/fixture/backend override",
+  "providerMetadataURL": "https://graphql.anilist.co",
+  "providerMetadata": {
+    "data": {
+      "safe": {
+        "id": 1,
+        "idMal": 1,
+        "isAdult": false,
+        "genres": [
+          "Action",
+          "Adventure",
+          "Drama",
+          "Sci-Fi"
+        ]
+      },
+      "excluded": {
+        "id": 1639,
+        "idMal": 1639,
+        "isAdult": true,
+        "genres": [
+          "Hentai",
+          "Romance"
+        ]
+      }
+    }
+  },
+  "documents": [
+    {
+      "name": "review-partial.xml",
+      "bytes": 426,
+      "SHA256": "c3d7cd6c86b88b06da2a1233dbf98c9e6e6ccd0e65d4c364b8e30ce235b7ff77",
+      "stagedAt": "/Users/shan2new/Library/Developer/CoreSimulator/Devices/F3AD17A6-813D-4C7E-8263-6383F952302C/data/Containers/Shared/AppGroup/27CD8B35-7202-4283-9478-3D61E690FFBC/File Provider Storage/review-partial.xml"
+    },
+    {
+      "name": "review-all-skipped.xml",
+      "bytes": 255,
+      "SHA256": "d52a026de435ffef3c24b2394d69ed2e925d9fbd9f1298514f7d511694c4c6eb",
+      "stagedAt": "/Users/shan2new/Library/Developer/CoreSimulator/Devices/F3AD17A6-813D-4C7E-8263-6383F952302C/data/Containers/Shared/AppGroup/27CD8B35-7202-4283-9478-3D61E690FFBC/File Provider Storage/review-all-skipped.xml"
+    }
+  ],
+  "expectedPartial": {
+    "listed": 1,
+    "adultSkipped": 1,
+    "safeTitle": "Cowboy Bebop",
+    "episodes": 3
+  },
+  "expectedAllSkipped": {
+    "listed": 0,
+    "adultSkipped": 1,
+    "addAction": false
+  },
+  "ordinaryFileProviderContainerVerified": true
+}

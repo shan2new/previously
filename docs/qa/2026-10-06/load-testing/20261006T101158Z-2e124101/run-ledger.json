@@ -1,0 +1,31 @@
+{
+  "startedAt": "2026-10-06T10:11:58.440767+00:00",
+  "database": "previously_qa_load_6a609da532424b2db418c1ce7754b584",
+  "host": "127.0.0.1",
+  "databaseCreated": true,
+  "databaseRemoved": true,
+  "productionDatabaseReadOrWritten": false,
+  "dotenvLoaded": false,
+  "credentialsInherited": false,
+  "quickHarnessOnly": false,
+  "sourceRevision": "19649b3748eac6ca7508f86ad96be9f533406fcb",
+  "dirtySource": true,
+  "coResidentLimitation": "Shared Mac Mini with normal services and native QA simulator; no production service altered.",
+  "postgresVersion": "18.3 (Homebrew)",
+  "hardware": [
+    "17179869184",
+    "10"
+  ],
+  "ownedServerPID": 59322,
+  "baseURL": "http://127.0.0.1:54919",
+  "ownedTrafficPID": 59340,
+  "testExitCode": 0,
+  "memoryReviewPassed": false,
+  "scratchConnectionsBeforeDrop": 0,
+  "sourceChangedDuringRun": [
+    "server/qa/deletion-faults.ts",
+    "server/qa/run-deletion-faults.py"
+  ],
+  "overallExitCode": 1,
+  "finishedAt": "2026-10-06T10:35:01.855549+00:00"
+}

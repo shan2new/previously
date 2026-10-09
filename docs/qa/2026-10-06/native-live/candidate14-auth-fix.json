@@ -1,0 +1,18 @@
+{
+  "recordedAt": "2026-10-06T14:49:09.911484+00:00",
+  "scope": "SignInView only versus preserved actual build13 source baseline",
+  "authorization": "Root authorized native fix after two real production Release hangs; archive13 and sealed QA preserved",
+  "mechanism": "AuthView constructed once outside SwiftUI body observation, retained through sheet dismissal, fresh form on each reopening; SDK onAuthComplete replaces parent direct session observation",
+  "causeClassification": "Strongly supported construction/observation hypothesis; actual native verification pending",
+  "sdk": "Resolved Clerk1.5.8 initializer and completion API read from local SourcePackages",
+  "primaryReference": "https://clerk.com/docs/ios/reference/views/authentication/auth-view",
+  "qualificationRule": "Old sealed QA does not qualify this revision; actual new candidate14 UI and subsequent archive qualification required",
+  "modifiedRuntimeFiles": [
+    "ios/Sources/Auth/SignInView.swift"
+  ],
+  "sourceFingerprintPendingFinalBuild": false,
+  "lastVerifiedAt": "2026-10-06T15:23:36.047443+00:00",
+  "runtimeSourceSHA256": "baaf904adf90bc13809ef9b3c331a800385409a40d18cf1bf1aceaf79c97e6ef",
+  "actualProductionSheetAndAuthCyclePassed": true,
+  "qualification": "Actual Release14 cold open/dismiss/reopen/input/idle CPU/password sign-in/cold restore/sign-out/relogin passed; new signed archive remains pending"
+}

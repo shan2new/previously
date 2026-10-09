@@ -1,0 +1,12 @@
+{
+  "schemaVersion": 1,
+  "observedAt": "2026-10-06T11:56:50.009Z",
+  "appDomain": "previously.cognipin.com",
+  "frontendApiOrigin": "https://clerk.previously.cognipin.com",
+  "instanceId": "ins_3KJtgHKq296iry2eBmj1IkEQmpQ",
+  "environmentType": "production",
+  "keyVerified": true,
+  "userMigrationApplied": false,
+  "dnsVerified": false,
+  "signInVerified": false
+}

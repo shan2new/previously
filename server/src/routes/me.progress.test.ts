@@ -81,7 +81,7 @@ describe('PUT /me/progress', () => {
     const res = await server.inject({ method: 'PUT', url: '/me/progress', payload: { mediaId: 16498, episodes: 12 } })
     expect(res.statusCode).toBe(200)
     expect(res.json()).toEqual({ ok: true })
-    expect(mocks.setProgress).toHaveBeenCalledWith(CALLER, 16498, 12)
+    expect(mocks.setProgress).toHaveBeenCalledWith(CALLER, 16498, 12, { user: { id: CALLER, clerkId: 'user_test' }, stamp: null })
     await server.close()
   })
 

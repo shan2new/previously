@@ -23,6 +23,8 @@ export interface AnimeEntry {
   /** The source filed it finished (COMPLETED, or a rewatch of something finished). */
   finished: boolean
   title: string | null
+  /** Source explicitly classified this entry under the existing adult-content exclusion. */
+  contentExcluded?: boolean
 }
 
 /** One show as TV Time knew it: seasons and the episodes seen in each, by TheTVDB's numbering. */

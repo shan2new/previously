@@ -518,6 +518,7 @@ export interface AnnouncementObservationView {
 
 export interface FranchiseProgressCommandResponse {
   ok: true
+  applied?: boolean
   franchiseId: string
   status: WatchStatus | null
   progress: { mediaId: number; episodes: number }[]
@@ -531,7 +532,9 @@ export interface FranchiseProgressCommandResponse {
  * never read "the request was accepted" as "the account no longer exists".
  */
 export interface AccountDeletedResponse {
-  deleted: true
+  deleted: boolean
+  status: 'complete' | 'pending'
+  appleRevocation: 'revoked' | 'manual_required' | 'not_applicable'
 }
 
 // ---------- Notifications (GET /me/notifications) ----------

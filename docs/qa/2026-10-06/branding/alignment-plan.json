@@ -1,0 +1,91 @@
+{
+  "checkedAt": "2026-10-06T13:42:38.327465+00:00",
+  "stage": "audit and candidate file plan only; no brand source changes or publication",
+  "canonicalNativeIcon": {
+    "path": "/Users/shan2new/Projects/previously/docs/qa/2026-10-06/archive13/native-icon-152.png",
+    "width": 152,
+    "height": 152,
+    "sha256": "baf5bdeefe3b0496878e8e4faab834ed5106f88c1298e15c5ced36f56f20bbd5",
+    "identity": "dark split-flap P with red dot",
+    "provenance": "actual archive13 icon, lossless Apple PNG re-encoding; no redraw/upscale",
+    "native1024": "shipping renditions verified in Assets.car metadata; no supported export obtained, Icon Composer EULA intentionally untouched"
+  },
+  "websiteMismatch": {
+    "headerAndFooter": "landing/app/site-chrome.tsx references public/brand/mark-tight.svg amber bookmark",
+    "faviconAndTouch": "landing/app/layout.tsx references public/brand/icon.svg amber bookmark for both",
+    "socialImage": "no explicit Open Graph/Twitter image; candidate will reference same exact native PNG",
+    "legacyAssets": [
+      "public/brand/mark.svg",
+      "public/brand/mark-tight.svg",
+      "public/brand/icon.svg"
+    ],
+    "todayScreenshot": "landing/public/app/today.webp and today-preview.webp visibly show old amber bookmark in app header"
+  },
+  "safeCurrentScreenshotsAvailable": false,
+  "nativeAgentCaptureFinding": "Existing QA captures are synthetic fixtures/wrappers; no safe current production Home/library/details captures yet. Do not relabel them as actual production screenshots. Existing September tour captures are historical real app screens, not current brand proof.",
+  "clerk": {
+    "inspectedActualProductionUI": true,
+    "existingLogo": "amber bookmark with red dot",
+    "existingFavicon": "none",
+    "logoSupportedTypes": [
+      "jpeg",
+      "png",
+      "gif",
+      "webp"
+    ],
+    "faviconSupportedTypes": [
+      "ico",
+      "png"
+    ],
+    "visibleSizeRequirement": null,
+    "canonical152PNGAcceptedByType": true,
+    "actualUploadAcceptance": "not attempted",
+    "paidSecuredByClerkRemoval": "Pro, leave unchanged",
+    "applicationScopedBranding": true,
+    "authAndProviderSettingsChanged": false,
+    "logoChanged": false,
+    "faviconChanged": false,
+    "screenshot": "clerk-branding-before-visible.png"
+  },
+  "candidateFilePlan": [
+    {
+      "path": "landing/public/brand/native-icon.png",
+      "change": "byte-identical copy of native-icon-152.png; preserve152 size; use for all brand contexts"
+    },
+    {
+      "path": "landing/app/site-chrome.tsx",
+      "change": "shared header/footer Brand references same native PNG, square dimensions; maintain existing wordmark link/text"
+    },
+    {
+      "path": "landing/app/globals.css",
+      "change": "square display size36px desktop/29px mobile, preserve intrinsic152 pixels; no stretching or artificial upscale"
+    },
+    {
+      "path": "landing/app/layout.tsx",
+      "change": "same PNG icon/apple-touch metadata with152size; OpenGraph/Twitter summary image references same identity"
+    },
+    {
+      "path": "landing/app/legal-document.tsx",
+      "change": "legal OpenGraph/Twitter override includes same icon image so all public routes align"
+    },
+    {
+      "path": "landing/README.md",
+      "change": "record exact shipping-archive icon provenance, retire old bookmark-source assertion"
+    },
+    {
+      "path": "landing/public/brand/{icon.svg,mark.svg,mark-tight.svg}",
+      "change": "retire unused former-brand public assets after references changed; keep old deployment rollback receipt"
+    },
+    {
+      "path": "landing/public/app/today{,-preview}.webp",
+      "change": "requires actual current safe native capture; no fabricated logo replacement and no synthetic QA marketing image"
+    },
+    {
+      "path": "Clerk application branding Logo/Favicon",
+      "change": "upload same original152PNG through supported separate production settings tab only after plan review; no plan/auth setting changes"
+    }
+  ],
+  "publication": "No source changes/publish yet; root source review requested before narrow remote candidate. Existing dpl_7LeP7Y1i3y8F48AJbJpwbLTZqLKB remains canonical.",
+  "reviewCredentials": "private preflight completed separately; no accounts or Device Trust mutations",
+  "localHeavyBuildOrInstall": false
+}

@@ -852,6 +852,7 @@ struct EpisodeList: View {
         }
         .disabled(!interactive)
         .accessibilityValue(watched ? "Watched" : "Not watched")
+        .qaIdentifier(isNext ? "qa.progress.increment.\(part.mediaId)" : "qa.episode.\(part.mediaId).\(n)")
         .accessibilityHint(hint)
     }
 

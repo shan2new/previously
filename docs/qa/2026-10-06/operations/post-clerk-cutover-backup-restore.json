@@ -1,0 +1,148 @@
+{
+  "verifiedAt": "2026-10-06T14:11:40.513Z",
+  "realm": "post-Clerk-cutover",
+  "manifest": "/Users/shan2new/Infra/previously/backups/previously-20261006T141015983Z-037be3a7225b.manifest.json",
+  "backupCreatedAt": "2026-10-06T14:10:16.826Z",
+  "backupBytes": 12146297,
+  "backupSHA256": "f9ef470fed45ccfb60a2471596934d92f83ec468014b146e2d760e096ca3ba3f",
+  "migrationAppliedAt": "2026-10-06T14:09:35.015Z",
+  "artifact": "/Users/shan2new/Infra/previously/releases/20261006T123751Z/server",
+  "qualifiedRestore": {
+    "scratch": "previously_restore_20261006t141138_4e085f5aca7d",
+    "usersBefore": 16,
+    "usersAfter": 16,
+    "deletedUsersSwept": 0,
+    "ledgerRecords": 0,
+    "restoredDeletionRecords": 0,
+    "deletedIdentitiesRemaining": 0,
+    "sha256": "f9ef470fed45ccfb60a2471596934d92f83ec468014b146e2d760e096ca3ba3f"
+  },
+  "productionMappingsRestored": 4,
+  "internalUUIDsPreserved": true,
+  "exactOwnedTableComparison": [
+    {
+      "table": "users",
+      "rows": 16,
+      "sha256": "c6ea53fbe3f13d98ae6caad7f9c7e9cd2dcbb73a798269ca48f2da7d7cbbb38e",
+      "exactMatch": true
+    },
+    {
+      "table": "blocks",
+      "rows": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "exactMatch": true
+    },
+    {
+      "table": "client_mutation_operations",
+      "rows": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "exactMatch": true
+    },
+    {
+      "table": "client_mutation_resources",
+      "rows": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "exactMatch": true
+    },
+    {
+      "table": "comment_likes",
+      "rows": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "exactMatch": true
+    },
+    {
+      "table": "comments",
+      "rows": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "exactMatch": true
+    },
+    {
+      "table": "episode_ratings",
+      "rows": 1,
+      "sha256": "3bea7d43d1d3ef06a5427dd6b05297886d86a93a3fb870d828a9dd7a3cab2bb2",
+      "exactMatch": true
+    },
+    {
+      "table": "feed_hides",
+      "rows": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "exactMatch": true
+    },
+    {
+      "table": "likes",
+      "rows": 1,
+      "sha256": "729853f4f51f25ad795a2c04fcd3616a97193a01c88730a8b89cb1823467d73d",
+      "exactMatch": true
+    },
+    {
+      "table": "notifications",
+      "rows": 89,
+      "sha256": "7f575b0cc46895a54e65028bf35a59a9d39f1903d73d7458f7aa71e47a3a4c3c",
+      "exactMatch": true
+    },
+    {
+      "table": "progress",
+      "rows": 370,
+      "sha256": "c48be79ef9f079e8bb77c2ca20b4e732b7aebf2bf4294df5475dff8967b72b42",
+      "exactMatch": true
+    },
+    {
+      "table": "recommendation_feedback",
+      "rows": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "exactMatch": true
+    },
+    {
+      "table": "reminders",
+      "rows": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "exactMatch": true
+    },
+    {
+      "table": "reports",
+      "rows": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "exactMatch": true
+    },
+    {
+      "table": "saves",
+      "rows": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "exactMatch": true
+    },
+    {
+      "table": "subscriptions",
+      "rows": 109,
+      "sha256": "06f76c0a88082f9baa5306a33691e94d335e383fc943332ae3f0590ea5ad882f",
+      "exactMatch": true
+    },
+    {
+      "table": "user_audience",
+      "rows": 2,
+      "sha256": "e345798776028f47b7435b212051c71b93d3546f8f96f852c48ded5f73c29d45",
+      "exactMatch": true
+    },
+    {
+      "table": "user_preferences",
+      "rows": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "exactMatch": true
+    },
+    {
+      "table": "user_profiles",
+      "rows": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "exactMatch": true
+    },
+    {
+      "table": "watch_sessions",
+      "rows": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "exactMatch": true
+    }
+  ],
+  "bothOwnedScratchDatabasesRemoved": true,
+  "restoredOverLiveDatabase": false,
+  "ledgerRecords": 0,
+  "oldDevelopmentRealmBackupsAreNotConsumerRecoveryBaseline": true
+}

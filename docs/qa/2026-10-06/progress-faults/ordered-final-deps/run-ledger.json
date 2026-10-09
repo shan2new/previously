@@ -1,0 +1,12 @@
+{
+  "startedAt": "2026-10-06T10:51:27.527979+00:00",
+  "database": "previously_qa_progress_57f1f177569440c19e14c6433a7d6be0",
+  "host": "127.0.0.1",
+  "databaseCreated": true,
+  "databaseRemoved": true,
+  "productionDatabaseReadOrWritten": false,
+  "dotenvLoaded": false,
+  "sourceRevision": "19649b3748eac6ca7508f86ad96be9f533406fcb",
+  "testExitCode": 0,
+  "finishedAt": "2026-10-06T10:51:34.587522+00:00"
+}

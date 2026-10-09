@@ -1,0 +1,19 @@
+{
+  "observedAtUTC": "2026-10-06T17:00:53.448553+00:00",
+  "readOnly": true,
+  "productionFrontendOrigin": "clerk.previously.cognipin.com",
+  "google": {
+    "enabled": true,
+    "required": false,
+    "authenticatable": true,
+    "strategy": "oauth_google"
+  },
+  "apple": {
+    "enabled": true,
+    "required": false,
+    "authenticatable": true,
+    "strategy": "oauth_apple"
+  },
+  "providerMutationsPerformedByReadback": false,
+  "bothProviderSignInFlagsEnabled": true
+}

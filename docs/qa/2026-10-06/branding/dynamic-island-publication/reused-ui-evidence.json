@@ -1,0 +1,10 @@
+{
+  "priorBrandingQualification": "docs/qa/2026-10-06/branding/publication/qualification-receipt.json",
+  "priorFreshResponsiveLayouts": 5,
+  "priorGalleryImageDialogFocusChecks": 4,
+  "scope": "Original icon, raster captures, gallery labels/captions, legal shell/body, dialog implementation and Clerk branding remain unchanged from9wX. Three new hero hardware layouts and one fresh Library link/dialog/Escape focus flow supersede prior hero visuals",
+  "priorLegalMobileChecks": 6,
+  "priorDeviceParagraphMobileChecks": 2,
+  "priorHomeInteractionReferenceRunSize": 19,
+  "historicalScope": "Historical references remain scoped as in prior branding receipt; no prior run relabeled as fresh"
+}

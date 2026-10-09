@@ -1,0 +1,58 @@
+{
+  "recordedAt": "2026-10-06T16:30:44.951951+00:00",
+  "configuration": "Release",
+  "version": "1.0",
+  "build": 14,
+  "runtime": "iOS27 iPhone14Pro simulator",
+  "runtimeSourceSHA256": "baaf904adf90bc13809ef9b3c331a800385409a40d18cf1bf1aceaf79c97e6ef",
+  "runtimeFileCount": 199,
+  "qaFixtureUsed": false,
+  "accountScope": "Dedicated ordinary App Review account; synthetic library only",
+  "ordinaryUISteps": [
+    "Reviewer Home",
+    "Profile",
+    "Import your history",
+    "MyAnimeList",
+    "Choose the file"
+  ],
+  "myAnimeListHelpRendered": true,
+  "ordinaryFilesSheetPresented": true,
+  "pickerVisibleState": "Recents / No Recents / Search / Browse",
+  "pickerPublicProofPath": "/Users/shan2new/Projects/previously/docs/qa/2026-10-06/native-live/files-recheck/mal-files-picker.jpg",
+  "pickerProofScope": "Official XcodeBuildMCP optimized application viewport, visually inspected; no physical-device/hardware-frame claim",
+  "boundedCoordinateStep": "One fresh screenshot-derived click on visible host title to activate the inactive Device Hub window before Browse; tool returned noWindowsAvailable",
+  "currentDriverLimitation": "CUA AX did not expose system Files targets, then native host-window input was unavailable; no Browse or file selection action could be made",
+  "priorMCPContextLimitationReceipt": "../files-runtime-snapshot.json (redacted); prior snapshot exposed only underlying Previously elements; not blindly retried here",
+  "fixtureStaging": [
+    {
+      "name": "review-partial.xml",
+      "stagedPath": "/Users/shan2new/Library/Developer/CoreSimulator/Devices/F3AD17A6-813D-4C7E-8263-6383F952302C/data/Containers/Shared/AppGroup/27CD8B35-7202-4283-9478-3D61E690FFBC/File Provider Storage/review-partial.xml",
+      "exists": true,
+      "sha256MatchesExpected": true
+    },
+    {
+      "name": "review-all-skipped.xml",
+      "stagedPath": "/Users/shan2new/Library/Developer/CoreSimulator/Devices/F3AD17A6-813D-4C7E-8263-6383F952302C/data/Containers/Shared/AppGroup/27CD8B35-7202-4283-9478-3D61E690FFBC/File Provider Storage/review-all-skipped.xml",
+      "exists": true,
+      "sha256MatchesExpected": true
+    }
+  ],
+  "stagedFilesVisibleInPickerVerified": false,
+  "partialImportPreviewRendered": false,
+  "partialImportApplyPassed": false,
+  "allSkippedImportNoteRendered": false,
+  "adultPolicyActualUIVerified": false,
+  "exportUIReached": false,
+  "saveToFilesExportPassed": false,
+  "exportStatus": "Not reached in this bounded recheck because native window input failed; no export success claimed",
+  "importStatus": "Pending ordinary Files selection; no file selected or import applied",
+  "reviewerLibraryMutationPerformed": false,
+  "authSettingsChanged": false,
+  "signOutPerformed": false,
+  "deletionPerformed": false,
+  "sourceOrRuntimeChanged": false,
+  "restoredHomeVia": "Official XcodeBuildMCP simulator stop and launch-app; no sign-out or auth mutation",
+  "homeVerificationReceipt": "restored-home-verification.json",
+  "reviewerHomeSelectedAfterRestore": true,
+  "status": "CONTROL LIMITATION: ordinary MAL Files presentation verified; partial/all-skipped import and export remain pending; reviewer Home restored"
+}

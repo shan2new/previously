@@ -1,0 +1,24 @@
+{
+  "checkedAt": "2026-10-06T13:13:45.320348+00:00",
+  "aliases": [
+    {
+      "alias": "previously.cognipin.com",
+      "deployment": {
+        "id": "dpl_2BUUc6ZREKY29QVMdaF6zEr4BeGg",
+        "url": "landing-faw02og9j-shan2news-projects.vercel.app"
+      },
+      "deploymentId": "dpl_2BUUc6ZREKY29QVMdaF6zEr4BeGg",
+      "projectId": "prj_osATa26wuWMoLf7yLOEaXvYuiial"
+    },
+    {
+      "alias": "landing-ten-theta-55.vercel.app",
+      "deployment": {
+        "id": "dpl_2BUUc6ZREKY29QVMdaF6zEr4BeGg",
+        "url": "landing-faw02og9j-shan2news-projects.vercel.app"
+      },
+      "deploymentId": "dpl_2BUUc6ZREKY29QVMdaF6zEr4BeGg",
+      "projectId": "prj_osATa26wuWMoLf7yLOEaXvYuiial"
+    }
+  ],
+  "passed": true
+}

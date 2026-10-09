@@ -85,12 +85,6 @@ enum SocialWriteFailure: Equatable {
 }
 
 extension AppModel {
-    nonisolated static let socialPendingURL: URL = {
-        let dir = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
-        try? FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
-        return dir.appendingPathComponent("social-pending.json")
-    }()
-
     // MARK: - Overlay reads (server base under the pending word)
 
     func isLiked(_ subject: String) -> Bool {
@@ -331,7 +325,7 @@ extension AppModel {
     /// sent after it; one that equals what just landed is done.
     private func flushSocialKey(_ key: SocialToggleKey) {
         guard !isIsolated, !erasing, !accountSuspended, socialLanes[key] == nil,
-              SyncCenter.shared.isOnline else { return }
+              SyncCenter.shared.isOnline, persistSocialPending() else { return }
         let epoch = accountEpoch
         // An episode's heart is gated by the part's progress (409 `episode_locked`): a mark made
         // seconds ago must reach the server before the like does.
@@ -343,6 +337,7 @@ extension AppModel {
             // An erasure stops the lane between words: the word stays pending, unsent.
             while epoch == self.accountEpoch, !self.erasing, let write = self.socialPending[key] {
                 if let until = write.retryAfter, until > .nowMs { break }
+                guard self.persistSocialPending() else { break }
                 do {
                     try await self.sendToggle(key, on: write.on)
                     guard epoch == self.accountEpoch else { return }
@@ -458,69 +453,67 @@ extension AppModel {
 
     // MARK: - Persistence
 
-    /// Debounced 0.5 s, written atomically off the main actor.
-    func persistSocialPending() {
-        guard !isIsolated else { return }
+    /// The outbox reaches disk before a task can dispatch its request. A failed local write
+    /// keeps the word pending and prevents HTTP; teardown cannot race this main-actor write.
+    @discardableResult
+    func persistSocialPending() -> Bool {
+        guard !isIsolated, !erasing, let owner = accountStorage,
+              AccountLocalStore.shared.matches(owner) else { return false }
+        guard !socialPendingRestoreFailed else {
+            showError("Saved activity could not be restored. Sign out to discard this device's saved changes, then sign in again.")
+            return false
+        }
         socialPersistWrite?.cancel()
-        let epoch = accountEpoch
-        socialPersistWrite = Task { [weak self] in
-            try? await Task.sleep(for: .milliseconds(500))
-            guard !Task.isCancelled, let self, epoch == self.accountEpoch else { return }
-            let file = SocialPendingFile(
-                toggles: self.socialPending.map { SocialPendingFile.Toggle(key: $0.key, write: $0.value) },
-                ratings: Array(self.pendingRatings.values),
-                comments: self.pendingComments)
-            let url = Self.socialPendingURL
-            await Task.detached(priority: .utility) {
-                if file.toggles.isEmpty && file.ratings.isEmpty && file.comments.isEmpty {
-                    try? FileManager.default.removeItem(at: url)
-                    return
-                }
-                guard let data = try? JSONEncoder().encode(file) else { return }
-                try? data.write(to: url, options: .atomic)
-            }.value
-            if epoch != self.accountEpoch { try? FileManager.default.removeItem(at: url) }
+        let file = SocialPendingFile(
+            toggles: socialPending.map { SocialPendingFile.Toggle(key: $0.key, write: $0.value) },
+            ratings: Array(pendingRatings.values), comments: pendingComments)
+        do {
+            // Persist the empty receipt too: ignoring a failed file removal would replay an old
+            // toggle after relaunch and could replace a newer word on the server.
+            let data = try JSONEncoder().encode(file)
+            try AccountLocalStore.shared.write(data, name: "social-pending.json", owner: owner)
+            return true
+        } catch {
+            showError(Copy.Notice.reason(MutationJournal.JournalError.persistenceFailure))
+            return false
         }
     }
 
-    /// Restores what the server had not confirmed when the app last ran, then flushes it. A reply
-    /// the app died while sending retries once.
+    /// Restore the small pending outbox synchronously before the UI can enqueue a new word.
+    /// Otherwise a pre-dispatch write could replace the file while a detached restore reads it.
     func loadPendingSocial() {
-        guard !isIsolated else { return }
-        let epoch = accountEpoch
-        Task { [weak self] in
-            let url = Self.socialPendingURL
-            let file = await Task.detached(priority: .userInitiated) { () -> SocialPendingFile? in
-                guard let data = try? Data(contentsOf: url) else { return nil }
-                return try? JSONDecoder().decode(SocialPendingFile.self, from: data)
-            }.value
-            guard let self, epoch == self.accountEpoch else { return }
-            if let file, file.version == 1 {
-                var toggles = self.socialPending
-                var hidesChanged = false
-                for toggle in file.toggles where toggles[toggle.key] == nil {
-                    toggles[toggle.key] = toggle.write
-                    if toggle.key.kind == .hidePost || toggle.key.kind == .muteShow { hidesChanged = true }
-                }
-                self.socialPending = toggles
-                var ratings = self.pendingRatings
-                for rating in file.ratings {
-                    let key = Self.ratingKey(rating.mediaId, rating.episode)
-                    if ratings[key] == nil { ratings[key] = rating }
-                }
-                self.pendingRatings = ratings
-                let known = Set(self.pendingComments.map(\.id))
-                let restored = file.comments.filter { !known.contains($0.id) }
-                if !restored.isEmpty { self.pendingComments += restored }
-                if hidesChanged {
-                    self.feedVersion &+= 1
-                    self.hidesVersion &+= 1
-                }
+        guard !isIsolated, !erasing, let owner = accountStorage,
+              AccountLocalStore.shared.matches(owner) else { return }
+        let savedURL = owner.file("social-pending.json")
+        let savedData = AccountLocalStore.shared.read("social-pending.json", owner: owner)
+        let saved = savedData.flatMap { try? JSONDecoder().decode(SocialPendingFile.self, from: $0) }
+        if FileManager.default.fileExists(atPath: savedURL.path), saved?.version != 1 {
+            socialPendingRestoreFailed = true
+            SyncCenter.shared.localActivityRecoveryRequired = true
+            showError("Saved activity could not be restored. Sign out to discard this device's saved changes, then sign in again.")
+            return
+        }
+        if let file = saved {
+            var toggles = socialPending
+            var hidesChanged = false
+            for toggle in file.toggles where toggles[toggle.key] == nil {
+                toggles[toggle.key] = toggle.write
+                if toggle.key.kind == .hidePost || toggle.key.kind == .muteShow { hidesChanged = true }
             }
-            self.flushSocial()
-            for comment in self.pendingComments where comment.state != .failed {
-                Task { _ = await self.retryComment(id: comment.id) }
+            socialPending = toggles
+            var ratings = pendingRatings
+            for rating in file.ratings {
+                let key = Self.ratingKey(rating.mediaId, rating.episode)
+                if ratings[key] == nil { ratings[key] = rating }
             }
+            pendingRatings = ratings
+            let known = Set(pendingComments.map(\.id))
+            pendingComments += file.comments.filter { !known.contains($0.id) }
+            if hidesChanged { feedVersion &+= 1; hidesVersion &+= 1 }
+        }
+        flushSocial()
+        for comment in pendingComments where comment.state != .failed {
+            Task { _ = await self.retryComment(id: comment.id) }
         }
     }
 
@@ -581,7 +574,7 @@ extension AppModel {
 
     private func flushRating(_ key: String) {
         guard !isIsolated, !erasing, !accountSuspended, ratingLanes[key] == nil,
-              SyncCenter.shared.isOnline else { return }
+              SyncCenter.shared.isOnline, persistSocialPending() else { return }
         let epoch = accountEpoch
         // A rating is gated like the heart: the part's progress must be on the server first.
         let gatedMediaId = pendingRatings[key]?.mediaId
@@ -590,6 +583,7 @@ extension AppModel {
             if let gatedMediaId { await self.awaitEpisodeGate(mediaId: gatedMediaId) }
             var retriedLock = false
             while epoch == self.accountEpoch, !self.erasing, let write = self.pendingRatings[key] {
+                guard self.persistSocialPending() else { break }
                 do {
                     try await self.api.setRating(mediaId: write.mediaId, episode: write.episode, score: write.score)
                     guard epoch == self.accountEpoch else { return }
@@ -948,6 +942,7 @@ extension AppModel {
         var retriedLock = false
         var retriedConflict = false
         while true {
+            guard epoch == accountEpoch, persistSocialPending() else { return .queued }
             do {
                 let res = try await api.postComment(CommentBody(id: pending.id, subject: pending.subject,
                                                                 body: pending.body, parentId: pending.parentId))

@@ -1,0 +1,56 @@
+[
+  {
+    "path": "/Users/shan2new/Projects/previously/ios/build/DerivedData-cta",
+    "sizeBytes": 967122944,
+    "birthAt": "2026-10-04T15:37:47.988745+00:00",
+    "modifiedAt": "2026-10-05T04:45:16.513738+00:00",
+    "info": {
+      "LastAccessedDate": "2026-10-05 04:45:16",
+      "WorkspacePath": "/Users/shan2new/Projects/previously/ios/Previously.xcodeproj"
+    },
+    "topLevelNames": [
+      "SDKStatCaches.noindex",
+      "Index.noindex",
+      "SourcePackages",
+      "SDKExplicitPrecompiledModules",
+      "Logs",
+      "ModuleCache.noindex",
+      "CompilationCache.noindex",
+      "Build",
+      "info.plist"
+    ],
+    "captureOrQAProofPaths": [
+      "/Users/shan2new/Projects/previously/ios/build/DerivedData-cta/Build/Products/Debug-iphonesimulator/Previously.app/AppIcon60x60@2x.png",
+      "/Users/shan2new/Projects/previously/ios/build/DerivedData-cta/Build/Products/Debug-iphonesimulator/Previously.app/AppIcon76x76@2x~ipad.png",
+      "/Users/shan2new/Projects/previously/ios/build/DerivedData-cta/Build/Intermediates.noindex/Previously.build/Debug-iphonesimulator/Previously.build/assetcatalog_output/thinned/AppIcon60x60@2x.png",
+      "/Users/shan2new/Projects/previously/ios/build/DerivedData-cta/Build/Intermediates.noindex/Previously.build/Debug-iphonesimulator/Previously.build/assetcatalog_output/thinned/AppIcon76x76@2x~ipad.png"
+    ]
+  },
+  {
+    "path": "/Users/shan2new/Projects/previously/ios/build/DerivedData-firstrun",
+    "sizeBytes": 976367616,
+    "birthAt": "2026-10-04T09:28:36.514192+00:00",
+    "modifiedAt": "2026-10-04T14:26:16.195688+00:00",
+    "info": {
+      "LastAccessedDate": "2026-10-04 14:26:16",
+      "WorkspacePath": "/Users/shan2new/Projects/previously/ios/Previously.xcodeproj"
+    },
+    "topLevelNames": [
+      "SDKStatCaches.noindex",
+      "Index.noindex",
+      "SourcePackages",
+      "SDKExplicitPrecompiledModules",
+      "Logs",
+      "ModuleCache.noindex",
+      "CompilationCache.noindex",
+      "Build",
+      "info.plist"
+    ],
+    "captureOrQAProofPaths": [
+      "/Users/shan2new/Projects/previously/ios/build/DerivedData-firstrun/Build/Products/Debug-iphonesimulator/Previously.app/AppIcon60x60@2x.png",
+      "/Users/shan2new/Projects/previously/ios/build/DerivedData-firstrun/Build/Products/Debug-iphonesimulator/Previously.app/AppIcon76x76@2x~ipad.png",
+      "/Users/shan2new/Projects/previously/ios/build/DerivedData-firstrun/Build/Intermediates.noindex/Previously.build/Debug-iphonesimulator/Previously.build/assetcatalog_output/thinned/AppIcon60x60@2x.png",
+      "/Users/shan2new/Projects/previously/ios/build/DerivedData-firstrun/Build/Intermediates.noindex/Previously.build/Debug-iphonesimulator/Previously.build/assetcatalog_output/thinned/AppIcon76x76@2x~ipad.png"
+    ]
+  }
+]

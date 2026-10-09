@@ -1,0 +1,23 @@
+{
+  "schema": "xcodebuildmcp.output.install-result",
+  "schemaVersion": "2",
+  "didError": false,
+  "error": null,
+  "data": {
+    "summary": {
+      "status": "SUCCEEDED"
+    },
+    "artifacts": {
+      "simulatorId": "F3AD17A6-813D-4C7E-8263-6383F952302C",
+      "appPath": "/Users/shan2new/Projects/previously/ios/build/DerivedData/Build/Products/Release-iphonesimulator/Previously.app"
+    },
+    "diagnostics": {
+      "warnings": [],
+      "errors": []
+    }
+  },
+  "nextSteps": [
+    "Open the Simulator app: xcodebuildmcp simulator open",
+    "Launch the app: xcodebuildmcp simulator launch-app --simulator-id F3AD17A6-813D-4C7E-8263-6383F952302C --bundle-id com.cognipin.previously"
+  ]
+}

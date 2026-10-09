@@ -9,9 +9,16 @@ import { franchiseRoutes } from './routes/franchises.js'
 import { importRoutes } from './routes/import.js'
 import { meRoutes } from './routes/me.js'
 import { socialRoutes } from './routes/social.js'
+import { startDeletionWorker } from './services/deletionLedger.js'
+import { installObservability } from './observability.js'
+import { installRuntimePolicy, privateLogger } from './runtimePolicy.js'
 
 export async function buildServer(): Promise<FastifyInstance> {
-  const app = Fastify({ logger: true })
+  // Default access logs include raw URLs/query strings. Aggregate route-pattern telemetry keeps
+  // search terms and imported usernames out of logs and avoids unbounded logs at launch.
+  const app = Fastify({ logger: privateLogger, disableRequestLogging: true })
+  await installRuntimePolicy(app)
+  installObservability(app)
 
   await app.register(cors, {
     origin: env.CORS_ORIGIN === '*' ? true : env.CORS_ORIGIN.split(',').map((s) => s.trim()),
@@ -29,6 +36,9 @@ export async function buildServer(): Promise<FastifyInstance> {
   await app.register(accountRoutes)
   await app.register(discoverRoutes)
   await app.register(importRoutes)
+  let stopDeletionWorker: (() => Promise<void>) | undefined
+  app.addHook('onListen', async () => { stopDeletionWorker = startDeletionWorker(app.log) })
+  app.addHook('onClose', async () => stopDeletionWorker?.())
 
   return app
 }

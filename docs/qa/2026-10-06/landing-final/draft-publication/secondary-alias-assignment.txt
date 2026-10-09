@@ -1,0 +1,4 @@
+Vercel CLI 62.4.0
+> Assigning alias landing-ten-theta-55.vercel.app to landing-faw02og9j-shan2news-projects.vercel.app
+Creating alias
+> Success! https://landing-ten-theta-55.vercel.app now points to landing-faw02og9j-shan2news-projects.vercel.app [13s]

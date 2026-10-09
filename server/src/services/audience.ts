@@ -64,7 +64,7 @@ function note(error: unknown): void {
   console.warn(
     missing
       ? '[audience] table user_audience does not exist yet (migration not applied): every viewer is treated as "both" until it does'
-      : `[audience] the audience could not be read or saved; treating the viewer as "both": ${(error as Error)?.message ?? String(error)}`,
+      : `[audience] the audience could not be read or saved; treating the viewer as "both": diagnostic details redacted`,
   )
 }
 

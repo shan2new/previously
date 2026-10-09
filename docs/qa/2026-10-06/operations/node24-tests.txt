@@ -1,0 +1,31 @@
+✔ candidate plists are valid, LTS pinned, reversible and remain uninstalled (34.743208ms)
+✔ precommit intent survives an absent database refresh (99.74075ms)
+✔ completion cannot be downgraded or restore raw ID by delayed request (91.494792ms)
+✔ concurrent requests retain every identity (1064.664708ms)
+✔ missing or corrupted authoritative current ledger fails closed (43.788833ms)
+✔ immutable markers restore a tombstone after an older empty valid snapshot (109.1455ms)
+✔ private snapshot and marker permissions (26.72125ms)
+✔ unchanged ledger reads retain stable records and a matching checksum (59.099375ms)
+▶ real PostgreSQL backup, deletion-safe restore, isolated cleanup and collection
+  ✔ custom dump has a checked SHA, TOC and private permissions (0.480917ms)
+  ✔ newer independent tombstone sweeps a deleted identity from the older backup (793.167459ms)
+  ✔ missing live ledger and altered dump fail before any scratch database survives (11.049709ms)
+  ✔ hourly snapshot authenticates only to loopback and excludes individual data (68.475541ms)
+  ✔ seven-pair retention prunes only owned backups (4.484792ms)
+  ✔ non-cascading ownership fails closed and still drops scratch database (274.353375ms)
+✔ real PostgreSQL backup, deletion-safe restore, isolated cleanup and collection (1905.529833ms)
+✔ sanitized logs exclude identities, query strings, tokens and free text (0.852167ms)
+✔ metrics and usage snapshots retain only aggregate fields (0.18775ms)
+✔ rotation enforces segment and age limits without deleting foreign files (89.936625ms)
+✔ 30-day aggregate pruning only removes owned expired files (1.374125ms)
+✔ a stopped backend does not suspend backup, log or snapshot expiry (13.584291ms)
+{"event":"ops.server_started","heapLimitMiB":256}
+✔ production wrapper applies heap budget, sanitizes both streams and drains SIGTERM (99.409916ms)
+ℹ tests 21
+ℹ suites 0
+ℹ pass 21
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 1965.677208

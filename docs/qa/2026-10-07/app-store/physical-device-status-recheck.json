@@ -1,0 +1,20 @@
+{
+  "schemaVersion": 1,
+  "capturedAtUtc": "2026-10-07T15:10:21.886371+00:00",
+  "method": "Bounded read-only cached official XcodeBuildMCP2.7.0 device list; classification against existing CoreSimulator metadata",
+  "returnedTargets": 4,
+  "registeredSimulatorTargets": 2,
+  "nonSimulatorTargets": 2,
+  "physicalIPhoneAccessibleVerified": true,
+  "recordingCapabilityVerified": false,
+  "deviceOrAccountMutations": false,
+  "privateRawOutputPublished": false,
+  "uiCheckedAtUtc": "2026-10-07T15:14:26.182754+00:00",
+  "uiMethod": "CUA Device Hub visible device tree and View Screen",
+  "physicalModel": "iPhone14Pro",
+  "installedIosObserved": "27.2",
+  "physicalIPhoneScreenLocked": true,
+  "ownerUnlockRequired": true,
+  "uiActionPerformed": "Opened existing View Screen; no pairing/install/account action",
+  "note": "No model/version alone implies latest public OS. Capture/control ability still unverified while phone is locked. Do not publish serials/UDIDs or full inspector screenshot as review evidence."
+}

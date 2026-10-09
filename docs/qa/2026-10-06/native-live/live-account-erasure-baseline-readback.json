@@ -1,0 +1,41 @@
+{
+  "checkedAt": "2026-10-07T15:26:59.145286+00:00",
+  "status": "baseline_not_ready",
+  "purpose": "release_account_erasure_qualification",
+  "providerGETCount": 3,
+  "providerMutations": 0,
+  "appRequestsOrSessionCreation": 0,
+  "readOnlySQLVerified": true,
+  "protectedProviderAccountsPresent": 5,
+  "protectedDBAccountsPresent": 5,
+  "qaAppAccountPresent": false,
+  "qaLibraryEntryCount": 0,
+  "qaProgressEntryCount": 0,
+  "qaEpisodeSum": 0,
+  "providerAbsent": false,
+  "appTombstone": {
+    "present": false,
+    "complete": false,
+    "rawIdentityCleared": false,
+    "appleOutcome": null
+  },
+  "independentJournal": {
+    "snapshotPresent": true,
+    "snapshotIntegrityVerified": true,
+    "rowPresent": false,
+    "rowComplete": false,
+    "rowRawIdentityCleared": false,
+    "requestedMarker": false,
+    "completedMarker": false,
+    "appleOutcome": null,
+    "appleOutcomeMarker": false
+  },
+  "IDsEmailsTokensDataOrPrivateHashesExported": false,
+  "providerOrAppAccountEdits": false,
+  "backendRestartPerformed": false,
+  "DeviceTrustBypassed": false,
+  "consumerUIOutcomeVerifiedByThisHelper": false,
+  "restartOccurredVerifiedByThisHelper": false,
+  "baselineReady": false,
+  "reason": "Normal consumer one-title/one-episode setup or protected account presence not established; no qualified baseline saved"
+}

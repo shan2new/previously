@@ -1,0 +1,48 @@
+{
+  "checkedAt": "2026-10-06T15:14:07.661044+00:00",
+  "status": "documented_archive_capability_absent",
+  "cachedPackageVersion": "2.7.0",
+  "cachedCLI": "/Users/shan2new/.npm/_npx/6389024b78b4e852/node_modules/xcodebuildmcp/build/cli.js",
+  "sessionShowDefaultsCalled": true,
+  "sessionShowDefaultsTransport": "Official MCP stdio tools/call",
+  "sessionShowDefaultsSuccessful": true,
+  "sessionDefaultsPublicRenderingParsed": false,
+  "cliCanonicalTools": 72,
+  "cliTotalTools": 100,
+  "defaultMCPExposedToolCount": 24,
+  "archiveToolCount": 0,
+  "supportedDeviceBuildActions": [
+    "build",
+    "build-for-testing"
+  ],
+  "deviceBuildSchemaHasArchiveAction": false,
+  "extraArgsArchiveInjectionAttempted": false,
+  "reason": "build_device selects a fixed build action; build-utils appends that action after extraArgs. Injecting archive would combine actions outside the documented tool contract.",
+  "evidence": [
+    {
+      "path": "/Users/shan2new/.npm/_npx/6389024b78b4e852/node_modules/xcodebuildmcp/build/mcp/tools/device/build_device.js",
+      "line": 43,
+      "claim": "Fixed build/build-for-testing action"
+    },
+    {
+      "path": "/Users/shan2new/.npm/_npx/6389024b78b4e852/node_modules/xcodebuildmcp/build/utils/build-utils.js",
+      "line": 125,
+      "claim": "extraArgs appended before fixed action"
+    },
+    {
+      "path": "/Users/shan2new/.npm/_npx/6389024b78b4e852/node_modules/xcodebuildmcp/build/cli.js",
+      "line": 128,
+      "claim": "CLI excludes session-management; session_show_defaults called over official MCP"
+    }
+  ],
+  "requiredPath": "Official Xcode GUI Product \u2192 Archive; coordinate UI ownership with native_live",
+  "archiveProduced": false,
+  "uploadAttempted": false,
+  "rawXcodebuildXcrunSimctlUsed": false,
+  "newInstallPerformed": false,
+  "sourceOrProjectMutated": false,
+  "uiFocusChanged": false,
+  "diskAvailableBytes": 992567296,
+  "minimumDiskFloorBytes": 2200000000,
+  "cacheDeletionPerformed": false
+}

@@ -24,9 +24,16 @@ struct RootView: View {
             // for the price of two layers. Under Reduce Motion nothing scales.
             Group {
                 if auth.isSignedIn {
-                    SignedInRoot(fromGate: sawGate)
-                        .task(id: auth.isSignedIn) { appModel.start() }
-                        .transition(.opacity.animation(ThemeMotion.uiGentle))
+                    Group {
+                        if appModel.deletionNeedsConfirmation {
+                            AccountDeletionRecoveryView()
+                        } else {
+                            SignedInRoot(fromGate: sawGate)
+                        }
+                    }
+                    .id(auth.accountID)
+                    .task(id: auth.accountID) { appModel.start(accountID: auth.accountID) }
+                    .transition(.opacity.animation(ThemeMotion.uiGentle))
                 } else {
                     SignInView()
                         .transition(.opacity.animation(ThemeMotion.uiGentle))
@@ -68,6 +75,7 @@ struct RootView: View {
             }
         }
         .environment(launch)
+        .qaReadiness(auth: auth, model: appModel)
         // The ident waits for auth's first answer before it leaves, so the screen it reveals is
         // the right one — never sign-in for a signed-in user.
         .onChange(of: auth.bootstrapped, initial: true) { _, ready in
@@ -78,6 +86,11 @@ struct RootView: View {
         // Activity all survive the view tree. Tear them down here so signing in again starts clean.
         .onChange(of: auth.isSignedIn) { _, signedIn in
             if !signedIn { appModel.teardown() }
+        }
+        .onChange(of: auth.accountID) { previous, current in
+            if let previous, previous != current, appModel.currentAccountID == previous {
+                appModel.teardown()
+            }
         }
         // Foreground refresh: a resumed app can be days stale (aired counts, "Out now") — the 20s
         // clock task alone can't fix data. AppModel decides how much staleness warrants a reload.

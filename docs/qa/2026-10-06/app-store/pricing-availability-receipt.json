@@ -1,0 +1,20 @@
+{
+  "schemaVersion": 1,
+  "observedAt": "2026-10-06T11:46:10.116Z",
+  "appId": "6818452741",
+  "freePriceSavedVerified": true,
+  "basePriceUSD": 0,
+  "countriesWithZeroPrice": 175,
+  "availabilitySavedVerified": true,
+  "availableCountriesOnRelease": 175,
+  "includeFutureCountriesSelectedAtConfirmation": true,
+  "macAvailability": false,
+  "visionProAvailability": false,
+  "appActuallyReleased": false,
+  "evidence": [
+    "free-pricing-saved.png",
+    "global-availability-saved.png",
+    "iphone-distribution-saved.png"
+  ],
+  "note": "App Store Connect saved settings; regional eligibility and review remain separate."
+}

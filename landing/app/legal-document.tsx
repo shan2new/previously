@@ -24,13 +24,15 @@ export function legalMetadata(kind: LegalKind): Metadata {
       description: summary,
       url: `/${kind}`,
       type: 'website',
+      images: [{ url: '/brand/native-icon.png', width: 152, height: 152, alt: 'Previously app icon' }],
     },
     twitter: {
       card: 'summary',
       title: `${title} — Previously.`,
       description: summary,
+      images: ['/brand/native-icon.png'],
     },
-    robots: { index: !legalPublication.draft, follow: true },
+    robots: { index: kind === 'support' || !legalPublication.draft, follow: true },
   };
 }
 export function LegalDocument({ kind }: { kind: LegalKind }) {
@@ -67,6 +69,9 @@ export function LegalDocument({ kind }: { kind: LegalKind }) {
               <span>.</span>
             </h1>
             <p>{doc.summary}</p>
+            {!draft && legalPublication.effectiveDate && kind !== 'support' && (
+              <p className="draft-status">Effective {legalPublication.effectiveDate}</p>
+            )}
             {draft && (
               <p className="draft-status">
                 <span /> Working draft · not yet effective
@@ -135,9 +140,9 @@ export function LegalDocument({ kind }: { kind: LegalKind }) {
                 <div className="legal-draft">
                   <strong>About this draft</strong>
                   <p>
-                    Your contact route is ready. Retention practices and
-                    complete account deletion still need to be resolved before
-                    these pages can support a store submission.
+                    This copy describes the prepared consumer release. Its
+                    effective date will be set when the deployed service and
+                    its deletion and retention checks match these statements.
                   </p>
                 </div>
               )}
@@ -173,6 +178,13 @@ export function LegalDocument({ kind }: { kind: LegalKind }) {
                       ))}
                     </ul>
                   )}
+                  {section.links?.map((link) => (
+                    <p className="legal-source" key={link.href}>
+                      <a href={link.href}>
+                        {link.label} <ArrowUpRight size={14} />
+                      </a>
+                    </p>
+                  ))}
                 </section>
               ))}
               {kind === 'terms' && (

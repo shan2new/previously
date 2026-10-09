@@ -1,0 +1,36 @@
+{
+  "at": "2026-10-06T12:38:40.516Z",
+  "artifact": "/Users/shan2new/Infra/previously/releases/20261006T123751Z/server",
+  "runtime": "v24.21.0",
+  "checks": [
+    {
+      "path": "/health",
+      "status": 200
+    },
+    {
+      "path": "/me/library",
+      "status": 401
+    },
+    {
+      "path": "/internal/metrics",
+      "status": 404
+    },
+    {
+      "path": "/internal/usage",
+      "status": 404
+    },
+    {
+      "path": "/ready",
+      "status": 503
+    }
+  ],
+  "privateMetricsStatus": 200,
+  "privateMetricsCache": "private, no-store",
+  "databaseUnavailableReady": 503,
+  "outboundDenied": 0,
+  "listenerStarted": false,
+  "productionConfigurationRead": false,
+  "productionDatabaseReadOrWritten": false,
+  "providerCalls": 0,
+  "installed": false
+}

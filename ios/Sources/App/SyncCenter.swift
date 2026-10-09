@@ -4,7 +4,7 @@ import Observation
 import UIKit
 
 // The trust layer: how fresh the data is, whether the device can reach anything, and which of the
-// user's writes the server never accepted.
+// user's writes the server has not confirmed.
 //
 // It is a singleton rather than an `AppModel` extension because all of this is *stored* state and
 // stored properties cannot live in an extension. It follows the `EpisodeNotifications.shared`
@@ -114,8 +114,12 @@ final class SyncCenter {
 
     /// Profile's account line, in precedence order: a real failure outranks a stale stamp, and a
     /// check in flight outranks a calm one.
+    var localActivityRecoveryRequired = false
+
     func syncedLine(now: Int64 = .nowMs) -> String {
+        if localActivityRecoveryRequired { return "Saved activity needs recovery" }
         if !failedChanges.isEmpty { return Copy.Toast.syncFailed(failedChanges.count) }
+        if !journal.entries.isEmpty { return Copy.Toast.offlinePending }
         if checking { return Copy.State.checkingForChanges }
         guard let lastSyncedAt else {
             return isOnline ? Copy.State.neverSynced : Copy.State.couldNotCheck
@@ -135,19 +139,35 @@ final class SyncCenter {
     /// The current path is expensive (cellular, a personal hotspot) — the same step down.
     private(set) var isExpensive: Bool = false
 
-    private let monitor = NWPathMonitor()
+    private var monitor: NWPathMonitor?
     private var monitoring = false
+    private var monitorGeneration = 0
+    #if PREVIOUSLY_QA
+    private(set) var qaMonitorCallbacks = 0
+    private(set) var qaMonitorGeneration = 0
+    #endif
 
-    /// Started once, from the app's root. Cheap, but not free — it is not started in `init`.
+    /// Each signed-in lifecycle gets a new monitor; cancelled monitors cannot be restarted.
     func startMonitoring() {
         guard !monitoring else { return }
         monitoring = true
+        monitorGeneration &+= 1
+        let generation = monitorGeneration
+        let monitor = NWPathMonitor()
+        self.monitor = monitor
+        #if PREVIOUSLY_QA
+        qaMonitorGeneration = generation
+        qaMonitorCallbacks = 0
+        #endif
         monitor.pathUpdateHandler = { [weak self] path in
             let satisfied = path.status == .satisfied
             let constrained = path.isConstrained
             let expensive = path.isExpensive
             Task { @MainActor in
-                guard let self else { return }
+                guard let self, self.monitoring, self.monitorGeneration == generation else { return }
+                #if PREVIOUSLY_QA
+                self.qaMonitorCallbacks += 1
+                #endif
                 // Written only when they change: every body that reads one re-evaluates.
                 if self.isOnline != satisfied { self.isOnline = satisfied }
                 if self.isConstrained != constrained { self.isConstrained = constrained }
@@ -160,7 +180,9 @@ final class SyncCenter {
     func stopMonitoring() {
         guard monitoring else { return }
         monitoring = false
-        monitor.cancel()
+        monitorGeneration &+= 1
+        monitor?.cancel()
+        monitor = nil
     }
 
     // MARK: - Failed writes
@@ -174,7 +196,7 @@ final class SyncCenter {
     /// Replays a restored change's `WriteIntent` — the write itself, re-issued, not a reload that
     /// would only confirm the server never got it. Installed by the model in `start()`; captures
     /// it weakly, so it is wiring (like `signals`), not session state.
-    var replay: (@MainActor (WriteIntent) async -> Void)?
+    var replay: (@MainActor (WriteIntent, MutationStamp?) async -> Void)?
 
     /// No failed change runs while set — not a Retry, not a restored intent, not the comment
     /// gate's `replayProgress`: every row reads as having nothing to run (`effectiveRetry` → nil),
@@ -196,8 +218,14 @@ final class SyncCenter {
     /// *directly* failed action and earns one `.directError`; an automatic failure is silent.
     private var userRetriedAt: [String: Int64] = [:]
     private static let directErrorWindow: Int64 = 30_000
-    /// Attempts per key, kept across the optimistic removal a retry performs.
+    /// Attempts per key; also restored so a retried failure always advances its version.
     private var attempts: [String: Int] = [:]
+    private var lastRecordAt: Int64 = 0
+    /// Progress retries stay persisted until their awaited write settles. Running retries cannot
+    /// be started twice, and teardown cancels them before another account can inherit the work.
+    private var retryingIDs: Set<UUID> = []
+    @ObservationIgnored private var retryTasks: [UUID: Task<Void, Never>] = [:]
+    @ObservationIgnored private var retryGeneration = 0
     /// Set while a `retryAll()` batch is in flight, so the batch fires one error haptic, not N.
     private var batchRetryToken: UUID?
     private var batchErrorFired = false
@@ -205,9 +233,14 @@ final class SyncCenter {
     /// Records a write the server never accepted. Called by every mutation's `catch`.
     /// The local value is NOT rolled back for progress writes — the mark is a fact about the user.
     func record(command: String, title: String, reason: String, intent: WriteIntent? = nil,
+                mutation: MutationStamp? = nil,
+                retryable: Bool = true,
                 retry: @escaping @MainActor () async -> Void) {
         let key = FailedChange.key(command: command, title: title, intent: intent)
-        let now: Int64 = .nowMs
+        // Distinct ordering even when a Mark and Undo fail in the same millisecond. The maximum
+        // is restored, so Retry can defend the newest part intent across process restarts too.
+        let now = max(Int64.nowMs, lastRecordAt + 1)
+        lastRecordAt = now
         attempts[key] = (attempts[key] ?? 0) + 1
         // One row per (command, title): a repeatedly failing write is one problem, not a list.
         if let i = failedChanges.firstIndex(where: { $0.key == key }) {
@@ -215,11 +248,14 @@ final class SyncCenter {
             failedChanges[i].at = now
             failedChanges[i].attemptCount = attempts[key] ?? 1
             failedChanges[i].intent = intent ?? failedChanges[i].intent
+            failedChanges[i].mutation = mutation
+            failedChanges[i].retryable = retryable
+            failedChanges[i].retry = retry
         } else {
             failedChanges.append(FailedChange(id: UUID(), command: command, title: title,
                                               reason: reason, at: now,
                                               attemptCount: attempts[key] ?? 1,
-                                              intent: intent, retry: retry))
+                                              intent: intent, mutation: mutation, retryable: retryable, retry: retry))
         }
         // Exactly one error haptic, and only when the user asked for this attempt themselves.
         // Inside a `retryAll()` batch that is one haptic for the whole batch, not one per row.
@@ -237,6 +273,11 @@ final class SyncCenter {
 
     func discard(_ id: UUID) {
         if let change = failedChanges.first(where: { $0.id == id }) {
+            if let mutation = change.mutation,
+               journal.entries.contains(where: { $0.mutation.operationID == mutation.operationID }),
+               !journal.discard(operationID: mutation.operationID, owner: storageOwner) { return }
+            if journal.restoreFailed, change.intent == nil,
+               !journal.discardAll(owner: storageOwner) { return }
             attempts[change.key] = nil
             userRetriedAt[change.key] = nil
         }
@@ -245,14 +286,73 @@ final class SyncCenter {
     }
 
     func discardAll() {
+        guard journal.discardAll(owner: storageOwner) || storageOwner == nil else { return }
         failedChanges.removeAll()
         attempts.removeAll()
         userRetriedAt.removeAll()
         persist()
     }
 
-    /// Retries one change. The row leaves immediately — the write is optimistic again — and the
-    /// command re-records itself if it fails, which is what fires the single `.directError`.
+    /// A snapshot identifies the exact standing failure a later successful write supersedes.
+    /// Another failure recorded while that write awaits its response must remain retryable.
+    struct FailureVersion: Equatable {
+        let id: UUID
+        let attemptCount: Int
+        let intent: WriteIntent?
+        let mutation: MutationStamp?
+
+        init(_ change: FailedChange) {
+            id = change.id
+            attemptCount = change.attemptCount
+            intent = change.intent
+            mutation = change.mutation
+        }
+    }
+
+    func progressFailureVersions(mediaIds: Set<Int>) -> [FailureVersion] {
+        failedChanges.compactMap { change in
+            guard case .progress(_, let mediaId, _)? = change.intent,
+                  mediaIds.contains(mediaId) else { return nil }
+            return FailureVersion(change)
+        }
+    }
+
+    func latestProgressIntent(mediaId: Int) -> WriteIntent? {
+        latestProgressChange(mediaId: mediaId)?.intent
+    }
+
+    func latestProgressChange(mediaId: Int) -> FailedChange? {
+        failedChanges.enumerated().filter {
+            if case .progress(_, let part, _)? = $0.element.intent { return part == mediaId }
+            return false
+        }.max {
+            if let lhs = $0.element.mutation, let rhs = $1.element.mutation, lhs.writerID == rhs.writerID,
+               lhs.sequence != rhs.sequence { return lhs.sequence < rhs.sequence }
+            if $0.element.at != $1.element.at { return $0.element.at < $1.element.at }
+            return $0.offset < $1.offset // Older persisted files may contain equal timestamps.
+        }?.element
+    }
+
+    func settleFailures(_ versions: [FailureVersion]) {
+        let settled = failedChanges.filter { change in
+            versions.contains(FailureVersion(change)) && !journal.entries.contains {
+                $0.mutation.operationID == change.mutation?.operationID
+            }
+        }
+        guard !settled.isEmpty else { return }
+        let ids = Set(settled.map(\.id))
+        failedChanges.removeAll { ids.contains($0.id) }
+        for change in settled {
+            attempts[change.key] = nil
+            userRetriedAt[change.key] = nil
+        }
+        persist()
+    }
+
+    func isRetrying(_ id: UUID) -> Bool { retryingIDs.contains(id) }
+
+    /// Progress retries keep their failure row on disk until the awaited command succeeds.
+    /// A re-recorded failure changes its version and cannot be cleared by the old completion.
     ///
     /// A row is **never** cleared when there is nothing to run: a restored change has no encoded
     /// closure, and if the app has not supplied `onRestoredRetry` the only honest behaviour is to
@@ -263,22 +363,32 @@ final class SyncCenter {
               let run = change.effectiveRetry(self) else { return }
         let key = change.key
         userRetriedAt[key] = .nowMs
-        failedChanges.removeAll { $0.id == id }
-        persist()
-        Task { @MainActor in
+        let retained = change.retainsDuringRetry
+        if !retained { failedChanges.removeAll { $0.id == id }; persist() }
+        retryingIDs.insert(id)
+        let generation = retryGeneration
+        retryTasks[id] = Task { @MainActor in
+            guard !Task.isCancelled, generation == self.retryGeneration else { return }
             await run()
-            self.settleRetry(key)
+            self.settleRetry(change, retained: retained, generation: generation)
+            if generation == self.retryGeneration { self.retryTasks[id] = nil }
         }
     }
 
-    /// A retried write finished. If it failed it already re-recorded itself — `record` runs
-    /// synchronously inside the command's `catch`, consuming the stamp and firing the single
-    /// `.directError` — so by the time this runs the stamp means "the retry SUCCEEDED".
-    ///
-    /// It has to be dropped: the 30-s window is a safety net for a write that fails a moment after
-    /// the tap, never a licence to treat the next unrelated background failure on the same key as
-    /// something the user asked for. Board 11 says a background sync failure is silent.
-    private func settleRetry(_ key: String) {
+    /// A Retry task finished; completing an awaited lane alone does not prove a per-part PUT
+    /// reached the server. That command acknowledges its captured failures explicitly on success
+    /// or a final 404. An unsent/canceled lane therefore leaves its durable failure standing.
+    /// Drop the haptic stamp so a later unrelated background failure cannot inherit the Retry tap.
+    private func settleRetry(_ change: FailedChange, retained: Bool, generation: Int) {
+        guard generation == retryGeneration else { return }
+        retryingIDs.remove(change.id)
+        if retained, !Task.isCancelled, !replaySuspended {
+            switch change.intent {
+            case .progress?: break // `putProgress` owns this receipt; a finished lane is insufficient.
+            default: settleFailures([FailureVersion(change)])
+            }
+        }
+        let key = change.key
         userRetriedAt[key] = nil
         // The attempt counter belongs to a standing failure. With no row left, a later unrelated
         // failure must read "1st attempt", not inherit this key's history for the whole session.
@@ -300,10 +410,16 @@ final class SyncCenter {
     func replayProgress(mediaId: Int) async -> Bool {
         guard let change = failedChanges.first(where: { $0.holdsProgress(mediaId: mediaId) }),
               let run = change.effectiveRetry(self) else { return !hasFailedProgress(mediaId: mediaId) }
-        failedChanges.removeAll { $0.id == change.id }
-        persist()
-        await run()
-        if !failedChanges.contains(where: { $0.key == change.key }) { attempts[change.key] = nil }
+        let generation = retryGeneration
+        retryingIDs.insert(change.id)
+        let task = Task { @MainActor in
+            guard !Task.isCancelled, generation == self.retryGeneration else { return }
+            await run()
+            self.settleRetry(change, retained: true, generation: generation)
+            if generation == self.retryGeneration { self.retryTasks[change.id] = nil }
+        }
+        retryTasks[change.id] = task
+        await task.value
         return !hasFailedProgress(mediaId: mediaId)
     }
 
@@ -316,20 +432,27 @@ final class SyncCenter {
         guard !runnable.isEmpty else { return }
         let now: Int64 = .nowMs
         for (change, _) in runnable { userRetriedAt[change.key] = now }
-        let runnableIDs = Set(runnable.map(\.0.id))
-        failedChanges.removeAll { runnableIDs.contains($0.id) }
+        let removedIDs = Set(runnable.filter { !$0.0.retainsDuringRetry }.map(\.0.id))
+        failedChanges.removeAll { removedIDs.contains($0.id) }
+        retryingIDs.formUnion(runnable.map { $0.0.id })
         persist()
         // One Retry press is one transaction: the whole batch earns at most one `.directError`,
         // however many of its writes fail again and however far apart they land.
         let token = UUID()
         batchRetryToken = token
         batchErrorFired = false
-        Task { @MainActor in
+        let generation = retryGeneration
+        retryTasks[token] = Task { @MainActor in
             for (change, run) in runnable {
+                guard !Task.isCancelled, generation == self.retryGeneration else { break }
                 await run()
-                self.settleRetry(change.key)
+                self.settleRetry(change, retained: change.retainsDuringRetry, generation: generation)
             }
-            if batchRetryToken == token { batchRetryToken = nil }
+            if generation == self.retryGeneration {
+                for (change, _) in runnable { self.retryingIDs.remove(change.id) }
+                if batchRetryToken == token { batchRetryToken = nil }
+                self.retryTasks[token] = nil
+            }
         }
     }
 
@@ -348,13 +471,57 @@ final class SyncCenter {
 
     // MARK: - Persistence
     //
-    // Not board 13's outbox: there is no idempotency key and no sequence. What survives a relaunch
-    // is the knowledge that a change failed AND, for the four writes the app makes, the write
-    // itself (`WriteIntent`) — so Retry after a relaunch re-issues the mark rather than reloading
+    // Account-owned failures and the durable stamped journal survive a relaunch.
+    // Their exact `WriteIntent` replays the mark after a relaunch rather than reloading
     // a library that never had it. A restored row without an intent keeps its place with
     // Discard as the only way out; it is never cleared as if it had succeeded.
 
     private static let storeKey = "previously.sync.failedChanges"
+    private var storageOwner: AccountLocalStore.Snapshot?
+    private let journal = MutationJournal()
+
+    /// Called synchronously before any consumer tracking request or queued task starts.
+    func stage(command: String, title: String, intent: WriteIntent, mutation: MutationStamp?) throws -> Bool {
+        guard let mutation else { throw MutationJournal.JournalError.noCurrentOwner }
+        let encoder = JSONEncoder()
+        encoder.outputFormatting = [.sortedKeys]
+        return try journal.stage(command: command, title: title, intentData: encoder.encode(intent),
+                                 mutation: mutation, coalescingKey: journalKey(intent))
+    }
+
+    private func journalKey(_ intent: WriteIntent) -> String? {
+        switch intent {
+        case .progress(_, let mediaId, _): return "progress:\(mediaId)"
+        case .status(let id, _): return "status:\(id)"
+        case .subscribe(let id, _, _), .unsubscribe(let id, _): return "membership:\(id)"
+        default: return nil
+        }
+    }
+
+    func acknowledgeMutation(_ mutation: MutationStamp?, owner: AccountLocalStore.Snapshot?) {
+        guard let mutation else { return }
+        let key = journal.entries.first { $0.mutation.operationID == mutation.operationID }?.coalescingKey
+        guard journal.acknowledge(mutation, owner: owner) else { return }
+        let before = failedChanges.count
+        failedChanges.removeAll { change in
+            guard let stamp = change.mutation else { return false }
+            if stamp == mutation { return true }
+            guard let key, let intent = change.intent, journalKey(intent) == key else { return false }
+            return stamp.writerID == mutation.writerID && stamp.sequence <= mutation.sequence
+        }
+        if before != failedChanges.count { persist() }
+    }
+
+    #if PREVIOUSLY_QA
+    var qaJournalCount: Int { journal.entries.count }
+    var qaJournalProgress: [(mediaId: Int, episodes: Int, mutation: MutationStamp)] {
+        journal.entries.compactMap { entry in
+            guard let intent = try? JSONDecoder().decode(WriteIntent.self, from: entry.intentData),
+                  case .progress(_, let mediaId, let episodes) = intent else { return nil }
+            return (mediaId, episodes, entry.mutation)
+        }
+    }
+    #endif
 
     private struct StoredChange: Codable {
         let id: UUID
@@ -364,9 +531,18 @@ final class SyncCenter {
         let at: Int64
         let attemptCount: Int
         var intent: WriteIntent? = nil
+        var mutation: MutationStamp? = nil
+        var retryable: Bool? = nil
     }
 
-    private init() {
+    private init() {}
+
+    func activateOwner(_ owner: AccountLocalStore.Snapshot?) {
+        UserDefaults.standard.removeObject(forKey: Self.storeKey)
+        guard owner != storageOwner else { return }
+        teardown()
+        storageOwner = owner
+        journal.activate(owner: owner)
         restore()
     }
 
@@ -374,19 +550,41 @@ final class SyncCenter {
         let rows = failedChanges.map {
             StoredChange(id: $0.id, command: $0.command, title: $0.title,
                          reason: $0.reason, at: $0.at, attemptCount: $0.attemptCount,
-                         intent: $0.intent)
+                         intent: $0.intent, mutation: $0.mutation, retryable: $0.retryable)
         }
         guard let data = try? JSONEncoder().encode(rows) else { return }
-        UserDefaults.standard.set(data, forKey: SyncCenter.storeKey)
+        try? AccountLocalStore.shared.write(data, name: "failed-changes.json", owner: storageOwner)
     }
 
     private func restore() {
-        guard let data = UserDefaults.standard.data(forKey: SyncCenter.storeKey),
-              let rows = try? JSONDecoder().decode([StoredChange].self, from: data) else { return }
-        failedChanges = rows.map {
-            FailedChange(id: $0.id, command: $0.command, title: $0.title, reason: $0.reason,
-                         at: $0.at, attemptCount: $0.attemptCount, intent: $0.intent, retry: nil)
+        let rows = AccountLocalStore.shared.read("failed-changes.json", owner: storageOwner)
+            .flatMap { try? JSONDecoder().decode([StoredChange].self, from: $0) } ?? []
+        let restoredRows = rows.filter { row in
+            guard let stamp = row.mutation, let intent = row.intent, let key = journalKey(intent) else { return true }
+            return !journal.entries.contains { entry in
+                entry.coalescingKey == key && entry.mutation.writerID == stamp.writerID
+                    && entry.mutation.sequence > stamp.sequence
+            }
         }
+        failedChanges = restoredRows.map {
+            FailedChange(id: $0.id, command: $0.command, title: $0.title, reason: $0.reason,
+                         at: $0.at, attemptCount: $0.attemptCount, intent: $0.intent,
+                         mutation: $0.mutation, retryable: $0.retryable ?? true, retry: nil)
+        }
+        for entry in journal.entries.sorted(by: { $0.at < $1.at }) {
+            guard !failedChanges.contains(where: { $0.mutation?.operationID == entry.mutation.operationID }) else { continue }
+            let intent = try? JSONDecoder().decode(WriteIntent.self, from: entry.intentData)
+            failedChanges.append(FailedChange(id: entry.mutation.operationID, command: entry.command, title: entry.title,
+                reason: intent == nil ? "This saved change could not be restored. Discard it to make a fresh update." : Copy.Toast.offlinePending,
+                at: entry.at, attemptCount: 0, intent: intent, mutation: entry.mutation, retryable: intent != nil, retry: nil))
+        }
+        if journal.restoreFailed {
+            failedChanges.append(FailedChange(id: UUID(), command: "Sync", title: "",
+                reason: "Some saved changes could not be restored. Discard them to make a fresh update.",
+                at: .nowMs, attemptCount: 0, intent: nil, retryable: false, retry: nil))
+        }
+        attempts = Dictionary(failedChanges.map { ($0.key, $0.attemptCount) }, uniquingKeysWith: max)
+        lastRecordAt = failedChanges.map(\.at).max() ?? 0
     }
 
     /// Sign-out: the next account must not inherit this one's failures.
@@ -397,9 +595,15 @@ final class SyncCenter {
     /// `signals` is deliberately KEPT: it is the wiring, not session data, and it captures the
     /// model weakly. The root re-installs it on the next sign-in either way.
     func teardown() {
+        retryGeneration += 1
+        retryTasks.values.forEach { $0.cancel() }
+        retryTasks = [:]
+        retryingIDs = []
         failedChanges = []
+        localActivityRecoveryRequired = false
         stamps = [:]
         attempts.removeAll()
+        lastRecordAt = 0
         userRetriedAt.removeAll()
         batchRetryToken = nil
         batchErrorFired = false
@@ -414,6 +618,8 @@ final class SyncCenter {
         // their own, not a token this one already spent.
         SeasonSweepLedger.reset()
         persist()
+        storageOwner = nil
+        journal.reset()
     }
 }
 
@@ -442,8 +648,17 @@ struct FailedChange: Identifiable {
     var attemptCount: Int
     /// The write itself, when it can be expressed — what a restored row retries with.
     var intent: WriteIntent?
+    var mutation: MutationStamp? = nil
+    var retryable = true
     /// `nil` for a change restored from a previous launch: the closure could not be encoded.
-    let retry: (@MainActor () async -> Void)?
+    var retry: (@MainActor () async -> Void)?
+
+    var retainsDuringRetry: Bool {
+        switch intent {
+        case .progress?, .franchiseProgress?: return true
+        default: return false
+        }
+    }
 
     /// Identity for de-duplication: the same command on the same title is one problem — except a
     /// per-part progress write, which is also keyed by its part: two seasons of one show that both
@@ -470,10 +685,10 @@ struct FailedChange: Identifiable {
     /// be mistaken for a successful one, so there is deliberately no empty-closure fallback here.
     @MainActor
     func effectiveRetry(_ center: SyncCenter) -> (@MainActor () async -> Void)? {
-        guard !center.replaySuspended else { return nil }
+        guard retryable, !center.replaySuspended, !center.isRetrying(id) else { return nil }
         if let retry { return retry }
         guard let intent, let replay = center.replay else { return nil }
-        return { await replay(intent) }
+        return { await replay(intent, mutation) }
     }
 
     /// Whether `Retry` can do anything for this row. A row with no runnable retry keeps its place

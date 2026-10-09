@@ -1,0 +1,27 @@
+Vercel CLI 62.4.0
+Fetching Domain previously.cognipin.com under shan2news-projects
+> Domain previously.cognipin.com found under shan2news-projects [2s]
+
+  General
+
+    Name			cognipin.com
+    Registrar			Third Party
+    Expiration Date		-
+    Creator			shan2new
+    Created At			20 April 2025 00:52:13 [535d ago]
+    Edge Network		yes
+    Renewal Price		-
+
+  Nameservers
+
+    Intended Nameservers    Current Nameservers               
+    -                       julian.ns.cloudflare.com     ✘    
+    -                       kinsley.ns.cloudflare.com    ✘    
+
+WARNING! This Domain is not configured properly. To configure it you should either:
+  a) Set the following record on your DNS provider to continue: `A previously.cognipin.com 76.76.21.21` [recommended]
+  b) Change your Domains's nameservers to the intended set detailed above.
+
+  We will run a verification for you and you will receive an email upon completion.
+  Read more: https://vercel.link/domain-configuration
+

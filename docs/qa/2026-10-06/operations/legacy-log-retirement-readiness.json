@@ -1,0 +1,30 @@
+{
+  "observedAtUTC": "2026-10-06T17:04:50.748436+00:00",
+  "readOnly": true,
+  "fileContentsRead": false,
+  "files": [
+    {
+      "path": "/Users/shan2new/Library/Logs/com.shan.previously.out.log",
+      "regularFile": true,
+      "symlink": false,
+      "ownerUID": 501,
+      "mode": "0o600",
+      "bytes": 8599042,
+      "mtimeUTC": "2026-10-06T14:08:00.080335+00:00",
+      "openHandleObserved": false,
+      "lsofExit": 1
+    },
+    {
+      "path": "/Users/shan2new/Library/Logs/com.shan.previously.err.log",
+      "regularFile": true,
+      "symlink": false,
+      "ownerUID": 501,
+      "mode": "0o600",
+      "bytes": 292864,
+      "mtimeUTC": "2026-10-06T13:50:00.799214+00:00",
+      "openHandleObserved": false,
+      "lsofExit": 1
+    }
+  ],
+  "deletionPerformed": false
+}

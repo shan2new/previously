@@ -39,6 +39,9 @@ const recorded = vi.hoisted(() => ({
   clerkOutcome: { outcome: string; error?: string }
 }
 
+const apple = vi.hoisted(() => ({ prepare: vi.fn(), finish: vi.fn(), persist: vi.fn(), outcome: 'manual_required' }))
+vi.mock('../services/appleDeletion.js', () => ({ prepareAppleDeletion: apple.prepare }))
+
 vi.mock('../db/index.js', () => {
   const tx = {
     delete(table: unknown) {
@@ -88,6 +91,16 @@ vi.mock('../services/erasure.js', () => ({
     return recorded.clerkOutcome
   },
 }))
+vi.mock('../services/deletionLedger.js', () => ({
+  lockIdentity: async () => {},
+  enqueueDeletion: async () => {},
+  finishDeletion: async (clerkId: string) => {
+    recorded.events.push(`clerk:${clerkId}`)
+    return { completedAt: recorded.clerkOutcome.outcome === 'deleted' ? new Date() : null, appleRevocation: apple.outcome }
+  },
+  recordAppleRevocation: apple.persist,
+  deletionResponse: (row: { completedAt: Date | null; appleRevocation: string }) => ({ deleted: !!row.completedAt, status: row.completedAt ? 'complete' : 'pending', appleRevocation: row.appleRevocation }),
+}))
 
 const { meRoutes, accountErasurePlan, accountOwnedTableNames } = await import('./me.js')
 
@@ -113,6 +126,10 @@ beforeEach(() => {
   recorded.events.length = 0
   recorded.failTx = false
   recorded.clerkOutcome = { outcome: 'deleted' }
+  apple.outcome = 'manual_required'
+  apple.finish.mockReset().mockResolvedValue('manual_required')
+  apple.prepare.mockReset().mockResolvedValue({ initial: 'manual_required', finish: apple.finish })
+  apple.persist.mockReset().mockImplementation(async (_id, outcome) => { apple.outcome = outcome })
 })
 
 describe('DELETE /me — the account is erased, not deactivated', () => {
@@ -121,7 +138,7 @@ describe('DELETE /me — the account is erased, not deactivated', () => {
     const res = await app.inject({ method: 'DELETE', url: '/me' })
 
     expect(res.statusCode).toBe(200)
-    expect(res.json()).toEqual({ deleted: true })
+    expect(res.json()).toEqual({ deleted: true, status: 'complete', appleRevocation: 'manual_required' })
     expect(recorded.transactions).toBe(1)
     // Exactly the plan, in the plan's order, then the user row.
     expect(recorded.deletes.map((d) => d.table)).toEqual([
@@ -144,7 +161,7 @@ describe('DELETE /me — the account is erased, not deactivated', () => {
     const res = await app.inject({ method: 'DELETE', url: '/me' })
 
     expect(res.statusCode).toBe(200)
-    expect(res.json()).toEqual({ deleted: true })
+    expect(res.json()).toEqual({ deleted: true, status: 'complete', appleRevocation: 'manual_required' })
     expect(recorded.savepoints).toBe(1)
     // Every other table, in order, then the user row — and the erasure committed.
     expect(recorded.deletes.map((d) => d.table)).toEqual([
@@ -189,12 +206,12 @@ describe('DELETE /me — the account is erased, not deactivated', () => {
     await app.close()
   })
 
-  it('a Clerk failure does not undo the erasure: still { deleted: true }', async () => {
+  it('a Clerk failure reports pending cleanup rather than completed deletion', async () => {
     recorded.clerkOutcome = { outcome: 'failed', error: 'timed out' }
     const app = await appWithUser()
     const res = await app.inject({ method: 'DELETE', url: '/me' })
-    expect(res.statusCode).toBe(200)
-    expect(res.json()).toEqual({ deleted: true })
+    expect(res.statusCode).toBe(202)
+    expect(res.json()).toEqual({ deleted: false, status: 'pending', appleRevocation: 'manual_required' })
     expect(recorded.events).toEqual(['commit', 'recordErasure:user_test', 'clerk:user_test'])
     await app.close()
   })
@@ -212,6 +229,59 @@ describe('DELETE /me — the account is erased, not deactivated', () => {
     const res = await app.inject({ method: 'DELETE', url: '/me', payload: { userId: 'someone-else' } })
     expect(res.statusCode).toBe(400)
     expect(recorded.deletes).toEqual([])
+    await app.close()
+  })
+
+  it('finishes Apple only after erasure commits, before deleting the linked Clerk identity', async () => {
+    const proof = { identityToken: 'synthetic-request-jwt', authorizationCode: 'synthetic-request-code' }
+    apple.finish.mockImplementation(async () => {
+      expect(recorded.events).toEqual(['commit', 'recordErasure:user_test'])
+      return 'revoked'
+    })
+    const app = await appWithUser()
+    const response = await app.inject({ method: 'DELETE', url: '/me', payload: { apple: proof } })
+    expect(apple.prepare).toHaveBeenCalledWith('user_test', proof)
+    expect(apple.persist).toHaveBeenCalledWith('user_test', 'revoked')
+    expect(response.json()).toEqual({ deleted: true, status: 'complete', appleRevocation: 'revoked' })
+    expect(recorded.events.at(-1)).toBe('clerk:user_test')
+    await app.close()
+  })
+
+  it('never exchanges or revokes Apple proof after a rolled-back erasure', async () => {
+    recorded.failTx = true
+    const app = await appWithUser()
+    expect((await app.inject({ method: 'DELETE', url: '/me', payload: { apple: { identityToken: 'synthetic-jwt', authorizationCode: 'synthetic-code' } } })).statusCode).toBe(500)
+    expect(apple.finish).not.toHaveBeenCalled()
+    expect(apple.persist).not.toHaveBeenCalled()
+    await app.close()
+  })
+
+  it('still erases app data after Apple provider failure and reports manual fallback', async () => {
+    apple.finish.mockResolvedValue('manual_required')
+    const app = await appWithUser()
+    const response = await app.inject({ method: 'DELETE', url: '/me', payload: { apple: {} } })
+    expect(response.statusCode).toBe(200)
+    expect(response.json().appleRevocation).toBe('manual_required')
+    expect(recorded.deletes.at(-1)?.table).toBe('users')
+    await app.close()
+  })
+
+  it('keeps conservative manual outcome if durable outcome persistence fails after erasure', async () => {
+    apple.finish.mockResolvedValue('revoked')
+    apple.persist.mockRejectedValue(new Error('synthetic outcome storage failure'))
+    const app = await appWithUser()
+    const response = await app.inject({ method: 'DELETE', url: '/me' })
+    expect(response.statusCode).toBe(200)
+    expect(response.json().appleRevocation).toBe('manual_required')
+    expect(recorded.deletes.at(-1)?.table).toBe('users')
+    await app.close()
+  })
+
+  it.each([{ apple: { authorizationCode: 1 } }, { apple: { identityToken: 'x'.repeat(16385) } }, { apple: { subject: 'other-owner' } }])('rejects malformed Apple proof without beginning erasure', async (payload) => {
+    const app = await appWithUser()
+    expect((await app.inject({ method: 'DELETE', url: '/me', payload })).statusCode).toBe(400)
+    expect(recorded.deletes).toEqual([])
+    expect(apple.prepare).not.toHaveBeenCalled()
     await app.close()
   })
 })
@@ -255,7 +325,7 @@ describe('the schema keeps the deletion complete', () => {
    * Tables that keep a user-identifying column on purpose, disclosed in the privacy policy. The ban
    * list is keyed on the Clerk id with no foreign key, so it survives DELETE /me.
    */
-  const RETAINED_BY_DESIGN = ['moderation_bans']
+  const RETAINED_BY_DESIGN = ['moderation_bans', 'account_deletions']
 
   it('lists every user-owned table in the route, so a new one cannot be forgotten', () => {
     expect(new Set(userOwned.map((t) => getTableName(t)))).toEqual(new Set(accountOwnedTableNames))
@@ -368,12 +438,12 @@ describe('the schema keeps the deletion complete', () => {
     for (const retained of RETAINED_BY_DESIGN) expect(accountOwnedTableNames).not.toContain(retained)
   })
 
-  it('the ban list is the one disclosed exception', () => {
+  it('moderation bans and the deletion ledger are explicit retention exceptions', () => {
     const withClerkId = tables
       .filter((t) => getTableName(t) !== 'users')
       .filter((t) => Object.values(getTableColumns(t)).some((c) => c.name === 'clerk_id'))
       .map((t) => getTableName(t))
-    expect(withClerkId).toEqual(['moderation_bans'])
+    expect(withClerkId.sort()).toEqual(['account_deletions', 'moderation_bans'])
     const bans = tables.find((t) => getTableName(t) === 'moderation_bans')!
     expect(
       getTableConfig(bans).foreignKeys.some((fk) => getTableName(fk.reference().foreignTable) === 'users'),

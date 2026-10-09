@@ -1,0 +1,26 @@
+{
+  "startedAt": "2026-10-06T10:06:43.562813+00:00",
+  "database": "previously_qa_load_aef2654ae80345d49c166467ff117c77",
+  "host": "127.0.0.1",
+  "databaseCreated": true,
+  "databaseRemoved": true,
+  "productionDatabaseReadOrWritten": false,
+  "dotenvLoaded": false,
+  "credentialsInherited": false,
+  "quickHarnessOnly": true,
+  "sourceRevision": "19649b3748eac6ca7508f86ad96be9f533406fcb",
+  "dirtySource": true,
+  "coResidentLimitation": "Shared Mac Mini with normal services and native QA simulator; no production service altered.",
+  "postgresVersion": "18.3 (Homebrew)",
+  "hardware": [
+    "17179869184",
+    "10"
+  ],
+  "ownedServerPID": 56030,
+  "baseURL": "http://127.0.0.1:54478",
+  "ownedTrafficPID": 56051,
+  "testExitCode": 1,
+  "memoryReviewPassed": false,
+  "scratchConnectionsBeforeDrop": 0,
+  "finishedAt": "2026-10-06T10:06:56.838897+00:00"
+}

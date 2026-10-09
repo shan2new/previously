@@ -1,0 +1,89 @@
+{
+  "verifiedAt": "2026-10-06T16:25:29.717Z",
+  "state": "restored_usable_public_forms_owner_private_entry_and_submission_pending",
+  "productionInstance": "ins_3KJtgHKq296iry2eBmj1IkEQmpQ",
+  "browserOnlyPrivateCredentialEntryHandoffRequired": true,
+  "privateCredentialValueReadThroughUI": false,
+  "privateCredentialEnteredThroughUI": false,
+  "finalEnableSubmitted": false,
+  "privateFilesMode": "0600",
+  "google": {
+    "tabId": "1825902927",
+    "url": "https://dashboard.clerk.com/apps/app_3FUb7r97UcdmzHsvIHPipn3PbtD/instances/ins_3KJtgHKq296iry2eBmj1IkEQmpQ/user-authentication/sso-connections/builtin/oauth_google",
+    "clientID": "704925514314-2ad2cqjnl76i8fk6pcgj24lhkjp6j8k3.apps.googleusercontent.com",
+    "redirectMatches": true,
+    "clientSecretEmpty": null,
+    "enableForSignUpSignInChecked": true,
+    "privateFile": "~/.config/previously/release/google-oauth.env",
+    "proof": "clerk-google-owner-restored-visible.png",
+    "clientIDFilledAndMatches": true,
+    "privateFieldCurrentValueUnread": true,
+    "previousEmptySecretProof": "clerk-google-owner-ready-visible.png"
+  },
+  "apple": {
+    "tabId": "1825902930",
+    "url": "https://dashboard.clerk.com/apps/app_3FUb7r97UcdmzHsvIHPipn3PbtD/instances/ins_3KJtgHKq296iry2eBmj1IkEQmpQ/user-authentication/sso-connections/builtin/apple",
+    "servicesID": "com.cognipin.previously.auth",
+    "teamID": "YLPZXZS2F4",
+    "keyID": "RPHW7K77H8",
+    "returnURLMatches": true,
+    "relayEmailSourceMatches": true,
+    "privateKeyEmpty": null,
+    "enableForSignUpSignInChecked": false,
+    "privateFile": "~/.config/previously/release/AuthKey_RPHW7K77H8.p8",
+    "proof": "clerk-apple-owner-restored-visible.png",
+    "servicesIDFilledAndMatches": true,
+    "teamIDFilledAndMatches": true,
+    "keyIDFilledAndMatches": true,
+    "privateFieldCurrentValueUnread": true,
+    "previousEmptyPrivateKeyProof": "clerk-apple-owner-ready-visible.png"
+  },
+  "expectedCallback": "https://clerk.previously.cognipin.com/v1/oauth_callback",
+  "consumerGoogleSignInVerified": false,
+  "consumerAppleSignInVerified": false,
+  "latestCompletionReadback": {
+    "verifiedAt": "2026-10-06T16:34:11.636163+00:00",
+    "state": "existing_forms_still_offer_enable_connection_public_DOM",
+    "browserId": "1",
+    "google": {
+      "tabId": "1825902927",
+      "publicEnableConnectionControlPresent": true,
+      "publicSaveControlPresent": true,
+      "publicDisableConnectionControlPresent": false,
+      "headerOffscreen": true
+    },
+    "apple": {
+      "tabId": "1825902930",
+      "publicEnableConnectionControlPresent": true,
+      "publicSaveControlPresent": true,
+      "publicDisableConnectionControlPresent": false,
+      "headerOffscreen": true
+    },
+    "privateFieldsRead": false,
+    "credentialsEntered": false,
+    "saveOrEnableClicked": false,
+    "ownerFormsScrolledOrReloaded": false,
+    "tabsPreservedHandoff": true,
+    "currentPersistedEnabledStatus": "requires_fresh_public_FAPI_readback_existing_form_DOM_can_be_stale",
+    "screenshotCaptured": false,
+    "screenshotLimitation": "Provider headers are above viewport; scrolling could disturb owner credential entry, and full viewport may contain private fields."
+  },
+  "currentProviderReadback": {
+    "source": "restored_public_UI_and_root_independent_FAPI",
+    "googleEnabled": false,
+    "appleConfigured": false,
+    "googleEnableConnectionButtonVisible": true,
+    "appleEnableConnectionButtonVisible": true,
+    "productionFAPIReceipt": "provider-frontend-readback.json",
+    "privateCredentialContentRead": false,
+    "privateFieldReadAfterNoReadDirective": false,
+    "credentialEntryPerformed": false,
+    "saveSubmitted": false,
+    "proofExcludesPrivateFields": true
+  },
+  "historicalPreparedTabIDs": {
+    "google": "1825902902",
+    "apple": "1825902906",
+    "currentStatus": "not_available"
+  }
+}

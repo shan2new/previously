@@ -1,5 +1,7 @@
 # Previously. — legal pages and store-readiness audit
 
+Historical audit. Several findings below were addressed by October implementation work and must not be treated as current release status. The current preparation and evidence dependencies are recorded in [the 6 October Vercel handoff](vercel-release-2026-10-06.md).
+
 Checked 5 September 2026. This is an implementation-grounded preparation report, not a guarantee of store approval or a legal opinion. The current iPhone build was inspected; no Android app was found or assessed.
 
 ## What the stores require

@@ -7,8 +7,8 @@ export function Brand() {
     <a className="wordmark" href="/" aria-label="Previously. home">
       <Image
         unoptimized
-        src="/brand/mark-tight.svg"
-        width={19}
+        src="/brand/native-icon.png"
+        width={36}
         height={36}
         alt=""
       />

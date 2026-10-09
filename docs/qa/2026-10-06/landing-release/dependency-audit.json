@@ -1,0 +1,19 @@
+{
+  "checkedAtUTC": "2026-10-06T10:44:29Z",
+  "counts": {
+    "info": 0,
+    "low": 0,
+    "moderate": 0,
+    "high": 0,
+    "critical": 0,
+    "total": 0
+  },
+  "dependencies": {
+    "prod": 106,
+    "dev": 190,
+    "optional": 110,
+    "peer": 1,
+    "peerOptional": 0,
+    "total": 335
+  }
+}

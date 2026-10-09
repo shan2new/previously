@@ -1,0 +1,18 @@
+{
+  "database": "previously_qa_load_6a609da532424b2db418c1ce7754b584",
+  "users": 500,
+  "franchises": 1200,
+  "media": 3200,
+  "subscriptions": 25100,
+  "progress": 75300,
+  "coldFranchises": 200,
+  "coldMedia": 200,
+  "progressRowsIndependentlyChecked": 74802,
+  "unchangedOrImportedProgressMismatches": 0,
+  "unexpectedProgressRows": 0,
+  "subscriptionOwnershipOrStatusMismatches": 0,
+  "unexpectedSubscriptions": 0,
+  "measuredAt": "2026-10-06T10:16:53.975455+00:00",
+  "readOnlyConnection": true,
+  "boundary": "Mid-sustained snapshot; all seeded baseline progress except498possibleordinarywritekeys, plus300imported rows. Final acknowledged writekeys checked separately by load oracle."
+}

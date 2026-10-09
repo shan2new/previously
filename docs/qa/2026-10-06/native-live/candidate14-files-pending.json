@@ -1,0 +1,28 @@
+{
+  "checkedAt": "2026-10-06T15:14:28.745345+00:00",
+  "candidate": 14,
+  "ordinaryFilesSheetPresented": true,
+  "partialImportPreviewPassed": false,
+  "partialImportApplyPassed": false,
+  "allSkippedPreviewPassed": false,
+  "saveToFilesExportPassed": false,
+  "status": "pending control limitation",
+  "evidence": "captures/ordinary-file-picker-presented.png",
+  "documents": "sample-import-files.json",
+  "providerMetadataVerified": true,
+  "documentsWrittenToOrdinarySimulatorLocalStorage": true,
+  "documentsVisibleInPicker": false,
+  "noQAFixtureOrBackendOverride": true,
+  "controlAttempts": [
+    "CUA ordinary Profile > Import > MyAnimeList > Choose the file: actual Files sheet presented",
+    "CUA AX exposes no Files-system targets; direct Browse taps did not activate, including after Finder activation of official Device Hub app",
+    "Official XcodeBuildMCP runtime snapshot succeeds but exposes only underlying app Home/Profile/Import, not system Files Browse/Recents/Search targets",
+    "Documented tap supports elementRef only, no supported visible Files target available; no invented coordinate or raw simctl driver used"
+  ],
+  "privateSnapshotHandling": "First runtime snapshot included underlying private review email in internal tool output. Raw output moved to0600 owner-only release file; repository snapshot redacted. No password or token emitted.",
+  "remainingSequence": [
+    "Select review-partial.xml through ordinary Files; render1allowed and1adult skipped; apply only CowboyBebop sample",
+    "Select review-all-skipped.xml; render Nothing to import and adult omission note, no Add action",
+    "Export reviewer library JSON/CSV through native ShareLink and Save to Files; keep account JSON private0600"
+  ]
+}

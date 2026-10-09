@@ -1,0 +1,25 @@
+{
+  "verifiedOn": "2026-10-06",
+  "runtime": "Node v24.21.0",
+  "strictTypeScript": "passed",
+  "stubOnlyClerkTestsPassed": 14,
+  "postgresScope": "uniquely owned disposable fixture databases; all removed",
+  "realPlan": {
+    "databaseMode": "repeatable-read read-only transaction",
+    "sourceRecords": 6,
+    "expectedSourceRecords": 6,
+    "realIdentities": 4,
+    "syntheticExcluded": 2,
+    "completeInventory": true,
+    "ownedAccounts": 4,
+    "representedOwnedRelationshipRows": 346,
+    "productionMappings": 0,
+    "stateVersion": 2,
+    "stateFileMode": "0600",
+    "sourceEnvironmentMode": "0600",
+    "inventoryVerifiedVia": "All six source profiles inspected in Chrome; verified identity fields only, no passwords or sessions."
+  },
+  "realClerkCalls": 0,
+  "realClerkWrites": 0,
+  "productionIdentityReassociation": false
+}

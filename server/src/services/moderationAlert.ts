@@ -113,7 +113,7 @@ export async function alertModeration(alert: ModerationAlert, deps: AlertDeps = 
     if (!res.ok) console.warn({ event: 'moderation.alert_failed', status: res.status })
     return res.ok
   } catch (error) {
-    console.warn({ event: 'moderation.alert_failed', error: error instanceof Error ? error.message : String(error) })
+    console.warn({ event: 'moderation.alert_failed', error: 'diagnostic details redacted' })
     return false
   }
 }

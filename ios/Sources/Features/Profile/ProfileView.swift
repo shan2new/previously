@@ -67,6 +67,7 @@ struct ProfileView: View {
     #endif
     @State private var confirmSignOut = false
     @State private var confirmDelete = false
+    @State private var confirmAppleManualDeletion = false
     @State private var discardTarget: UUID?
     @State private var signingOut = false
     @State private var deleting = false
@@ -123,6 +124,7 @@ struct ProfileView: View {
                         .padding(.horizontal, ThemeMetrics.gutter)
                         .padding(.top, ThemeSpace.x4)
                 }
+                .qaIdentifier("qa.scroll.profile")
                 .scrollIndicators(.hidden)
                 // The sheet had no bottom inset, so the last line of the colophon ended flush
                 // against the bezel — text sliced by the screen edge.
@@ -166,6 +168,7 @@ struct ProfileView: View {
                     // The app's one toolbar-action recipe: confirm = `bodyEmphasis` + interactive.
                     // This was the one Done set in raw SF outside the ramp.
                     Button(Copy.Action.done) { dismiss() }
+                        .qaIdentifier("qa.profile.done")
                         .buttonStyle(.plain)
                         .type(ThemeType.bodyEmphasis)
                         .foregroundStyle(ThemeColor.interactive)
@@ -198,12 +201,14 @@ struct ProfileView: View {
         .alert(AccountCopy.signOutTitle, isPresented: $confirmSignOut) {
             Button(Copy.Confirm.cancel, role: .cancel) {}
             Button(AccountCopy.signOut, role: .destructive) { performSignOut() }
+                .qaIdentifier("qa.signout.confirm")
         } message: {
             Text(signOutMessage)
         }
         .alert(AccountCopy.deleteTitle, isPresented: $confirmDelete) {
             Button(Copy.Confirm.cancel, role: .cancel) {}
             Button(AccountCopy.deleteConfirm, role: .destructive) { performDelete() }
+                .qaIdentifier("qa.delete.confirm")
         } message: {
             Text(deleteMessage)
         }
@@ -211,8 +216,16 @@ struct ProfileView: View {
                isPresented: Binding(get: { deleteFailure != nil },
                                     set: { if !$0 { deleteFailure = nil } })) {
             Button(Copy.Action.done, role: .cancel) { deleteFailure = nil }
+                .qaIdentifier("qa.delete.error.done")
         } message: {
             Text(deleteFailure ?? "")
+                .qaIdentifier("qa.delete.error")
+        }
+        .alert("Apple sign-in couldn’t be disconnected", isPresented: $confirmAppleManualDeletion) {
+            Button(Copy.Confirm.cancel, role: .cancel) {}
+            Button(AccountCopy.deleteConfirm, role: .destructive) { performDelete(allowManualAppleRevocation: true) }
+        } message: {
+            Text("You can still delete your Previously account and tracking data. " + AccountDeletionNotice.appleManualInstructions)
         }
         .alert(Copy.Account.signOutFailedTitle, isPresented: $signOutFailed) {
             Button(Copy.Action.done, role: .cancel) { signOutFailed = false }
@@ -596,6 +609,16 @@ struct ProfileView: View {
     /// then — on its own row, clear of the text — WHAT TO DO.
     private func failureRow(_ change: FailedChange, isLast: Bool) -> some View {
         VStack(alignment: .leading, spacing: ThemeSpace.x1) {
+            #if PREVIOUSLY_QA
+            if case .progress(_, let mediaId, let episodes)? = change.intent {
+                Text("Pending progress")
+                    .font(.system(size: 1))
+                    .foregroundStyle(.clear)
+                    .frame(width: 1, height: 1)
+                    .accessibilityIdentifier("qa.sync.pending.progress.\(mediaId)")
+                    .accessibilityValue(String(episodes))
+            }
+            #endif
             HStack(alignment: .firstTextBaseline, spacing: ThemeSpace.x3) {
                 Text(change.title)
                     .type(ThemeType.rowTitle)
@@ -661,12 +684,20 @@ struct ProfileView: View {
                 if change.canRetry(sync) {
                     Button(Copy.Action.retry) { sync.retry(change.id) }
                         .buttonStyle(CompactActionButtonStyle())
+                        .qaIdentifier(retryQAIdentifier(change))
                 }
                 Button(Copy.Confirm.discardChangeConfirm) { discardTarget = change.id }
                     .buttonStyle(InlineLinkButtonStyle(destructive: true))
                     .accessibilityHint("Throws this change away. It can\u{2019}t be undone.")
             }
         }
+    }
+
+    private func retryQAIdentifier(_ change: FailedChange) -> String {
+        if case .progress(_, let mediaId, _)? = change.intent {
+            return "qa.sync.retry.progress.\(mediaId)"
+        }
+        return "qa.sync.retry.\(change.id)"
     }
 
     /// "Couldn't reach the server". The reason string comes from `Copy.Notice.reason(_:)` at record
@@ -887,6 +918,7 @@ struct ProfileView: View {
                        action: { showImport = true }) {
                 trailingGlyph("chevron.forward", tint: ThemeColor.textTertiary)
             }
+            .qaIdentifier("qa.import.open")
             ProfileRow(symbol: "bell",
                        title: "Notifications",
                        action: { notificationsTapped() }) {
@@ -1037,6 +1069,7 @@ struct ProfileView: View {
             }
             .disabled(signingOut || deleting)
             .accessibilityHint("Your library stays in your account")
+            .qaIdentifier("qa.signout")
         }
     }
 
@@ -1057,6 +1090,7 @@ struct ProfileView: View {
                 }
             }
             .disabled(signingOut || deleting)
+            .qaIdentifier("qa.delete.open")
             // VoiceOver carries a severity that colour alone no longer does.
             .accessibilityHint("Permanently deletes your account and library")
         }
@@ -1106,17 +1140,40 @@ struct ProfileView: View {
         }
     }
 
-    private func performDelete() {
+    private func performDelete(allowManualAppleRevocation: Bool = false) {
         FeedbackCoordinator.fire(.destructive)
         withAnimation(ThemeMotion.pick(ThemeMotion.uiGentle, reduceMotion: reduceMotion)) {
             deleting = true
         }
+        let deletionOwner = appModel.currentAccountID
+        let deletionEpoch = appModel.accountEpoch
         Task {
+            var apple: AppleDeletionAuthorization.Proof?
+            if !allowManualAppleRevocation, !auth.linkedAppleUserIDs.isEmpty {
+                do { apple = try await AppleDeletionAuthorization.request(expectedUserIDs: auth.linkedAppleUserIDs) }
+                catch {
+                    guard deletionOwner == auth.accountID, deletionEpoch == appModel.accountEpoch else { return }
+                    deleting = false
+                    if (error as? AppleDeletionAuthorization.Failure) != .cancelled {
+                        confirmAppleManualDeletion = true
+                    }
+                    return // A cancelled system confirmation must never dispatch DELETE.
+                }
+            }
+            guard deletionOwner == auth.accountID, deletionEpoch == appModel.accountEpoch else { return }
             // Nothing the app sends may reach the server after the erasure: a late like, mark or
             // read would bring the account back (`prepareForErasure`).
             await appModel.prepareForErasure()
+            guard deletionOwner == auth.accountID, deletionEpoch == appModel.accountEpoch else { return }
             do {
-                try await AccountDeletion.deleteAccount(token: auth.currentToken)
+                let status = try await AccountDeletion.deleteAccount(apple: apple, token: {
+                    guard deletionOwner == auth.accountID, deletionEpoch == appModel.accountEpoch else { return nil }
+                    let token = await auth.currentToken()
+                    return deletionOwner == auth.accountID && deletionEpoch == appModel.accountEpoch ? token : nil
+                })
+                guard deletionOwner == auth.accountID, deletionEpoch == appModel.accountEpoch else { return }
+                AccountDeletion.markAccepted(accountID: appModel.currentAccountID)
+                AccountDeletionNotice.record(status)
                 // The account is gone; the session must go with it, the snapshot too, and the sheet
                 // with both. A deleted account may not leave its counts on the device — so the
                 // model is wiped FIRST, and the wipe never depends on Clerk's sign-out succeeding.
@@ -1126,8 +1183,10 @@ struct ProfileView: View {
                 deleting = false
                 dismiss()
             } catch {
-                // Not deleted: what the erasure held back (marks, likes, replies) goes now.
-                appModel.abortErasure()
+                guard deletionOwner == auth.accountID, deletionEpoch == appModel.accountEpoch else { return }
+                if (error as? AccountDeletion.Failure) == .unreachable {
+                    appModel.holdUnconfirmedErasure()
+                } else { appModel.abortErasure() }
                 deleting = false
                 deleteFailure = (error as? LocalizedError)?.errorDescription
                     ?? AccountDeletion.Failure.refused.errorDescription
@@ -1363,11 +1422,20 @@ private extension String {
 /// The screen had no memory at all, so an offline open collapsed from `fan + disc + name + counts +
 /// sync + settings` to `disc + name + sync + settings`: the stats plate and the artwork were
 /// REMOVED rather than degraded, and the user lost the only summary of their account exactly when
-/// they could not verify it anywhere else (M4). Three integers and three URLs in `UserDefaults` is
-/// the whole cost of the frame surviving the failure.
-struct ProfileSnapshot: Equatable {
+/// they could not verify it anywhere else (M4). A small snapshot in the current account's local
+/// directory keeps the frame available without exposing another account's cached artwork.
+struct ProfileSnapshot: Codable, Equatable {
     var counts: [String: Int] = [:]
     var covers: [String] = []
+    private var owner: AccountLocalStore.Snapshot? = nil
+    private enum CodingKeys: String, CodingKey { case counts, covers }
+
+    init() {}
+    private init(counts: [String: Int] = [:], covers: [String] = [], owner: AccountLocalStore.Snapshot?) {
+        self.counts = counts
+        self.covers = covers
+        self.owner = owner
+    }
 
     /// Nothing remembered. The screen tells "never synced" apart from "couldn't check" with this.
     var isEmpty: Bool { counts.isEmpty && covers.isEmpty }
@@ -1375,30 +1443,32 @@ struct ProfileSnapshot: Equatable {
     private static let countsKey = "profile.snapshot.counts"
     private static let coversKey = "profile.snapshot.covers"
 
-    static func load() -> ProfileSnapshot {
-        let d = UserDefaults.standard
-        return ProfileSnapshot(counts: d.dictionary(forKey: countsKey) as? [String: Int] ?? [:],
-                               covers: d.stringArray(forKey: coversKey) ?? [])
+    @MainActor static func load() -> ProfileSnapshot {
+        let owner = AccountLocalStore.shared.current
+        guard let data = AccountLocalStore.shared.read("profile-snapshot.json", owner: owner),
+              var decoded = try? JSONDecoder().decode(Self.self, from: data) else { return ProfileSnapshot(owner: owner) }
+        decoded.owner = owner
+        return decoded
     }
 
     /// `nil` when there is nothing worth remembering — an empty library must never overwrite a real
     /// snapshot, because "the request failed" and "the account is empty" arrive as the same value.
-    static func capture(_ library: [Franchise], covers: [String]) -> ProfileSnapshot? {
+    @MainActor static func capture(_ library: [Franchise], covers: [String]) -> ProfileSnapshot? {
         guard !library.isEmpty else { return nil }
         var counts: [String: Int] = [:]
         for status in WatchStatus.allCases {
             counts[status.rawValue] = library.filter { $0.status == status }.count
         }
-        return ProfileSnapshot(counts: counts, covers: covers)
+        return ProfileSnapshot(counts: counts, covers: covers, owner: AccountLocalStore.shared.current)
     }
 
-    func save() {
-        let d = UserDefaults.standard
-        d.set(counts, forKey: Self.countsKey)
-        d.set(covers, forKey: Self.coversKey)
+    @MainActor func save() {
+        guard let data = try? JSONEncoder().encode(self) else { return }
+        try? AccountLocalStore.shared.write(data, name: "profile-snapshot.json", owner: owner)
     }
 
-    static func clear() {
+    @MainActor static func clear() {
+        AccountLocalStore.shared.remove("profile-snapshot.json", owner: AccountLocalStore.shared.current)
         let d = UserDefaults.standard
         d.removeObject(forKey: countsKey)
         d.removeObject(forKey: coversKey)

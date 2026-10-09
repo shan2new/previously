@@ -1,0 +1,121 @@
+{
+  "name": "test_sim_2026-10-06T12-55-05-585Z_pid52843_adfa37dd.xctestproducts",
+  "path": "/Users/shan2new/Library/Developer/XcodeBuildMCP/workspaces/previously-2bd4c895d527/test-products/test_sim_2026-10-06T12-55-05-585Z_pid52843_adfa37dd.xctestproducts",
+  "allocatedBytesApproximate": 258121728,
+  "logicalBytes": 257696755,
+  "fileCount": 188,
+  "completedMarkerExists": true,
+  "completedMarkerSHA256": "043e0554d59b11a67f28532869b4e687f419901b30b3059336250274e660d648",
+  "metadata": [
+    {
+      "relativePath": "Info.plist",
+      "sha256": "1be3e0cc22cb82d9b0eae892ed5bddf74128a7885c71d7661e6a266581464046",
+      "bytes": 486,
+      "topLevelKeys": [
+        "Tests"
+      ],
+      "targetMetadata": {}
+    },
+    {
+      "relativePath": "Tests/0/PreviouslyQA.xctestrun",
+      "sha256": "b94c4a25642275a998e4b29d69ced8452da9f769af55c28e89c9fe42ae3310e1",
+      "bytes": 5178,
+      "topLevelKeys": [
+        "PreviouslyUITests",
+        "__xctestrun_metadata__"
+      ],
+      "targetMetadata": {
+        "PreviouslyUITests": {
+          "BlueprintName": "PreviouslyUITests",
+          "BlueprintProviderName": "Previously",
+          "BlueprintProviderRelativePath": "Previously.xcodeproj",
+          "TestHostBundleIdentifier": "com.cognipin.previously.qa.uitests.xctrunner",
+          "TestBundlePath": "__TESTHOST__/PlugIns/PreviouslyUITests.xctest",
+          "TestHostPath": "__TESTROOT__/QA-iphonesimulator/PreviouslyUITests-Runner.app",
+          "UITargetAppPath": "__TESTROOT__/QA-iphonesimulator/Previously.app",
+          "IsUITestBundle": true,
+          "ProductModuleName": "PreviouslyUITests",
+          "DefaultTestExecutionTimeAllowance": 600,
+          "environmentKeyNames": {
+            "EnvironmentVariables": [
+              "APP_DISTRIBUTOR_ID_OVERRIDE",
+              "DYLD_INSERT_LIBRARIES",
+              "IDE_CHOSEN_LOGGING_METHOD",
+              "OS_ACTIVITY_DT_MODE",
+              "PERFC_ENABLE_EXTENDED_DIAGNOSTIC_FORMAT",
+              "PERFC_ENABLE_PROFILE_MODE",
+              "PERFC_RESET_INSERT_LIBRARIES",
+              "PERFC_SUPPRESS_SYSTEM_REPORTS",
+              "SQLITE_ENABLE_THREAD_ASSERTIONS",
+              "TERM"
+            ],
+            "TestingEnvironmentVariables": [
+              "DYLD_FRAMEWORK_PATH",
+              "DYLD_INSERT_LIBRARIES",
+              "DYLD_LIBRARY_PATH",
+              "XCODE_SCHEME_NAME",
+              "__XCODE_BUILT_PRODUCTS_DIR_PATHS",
+              "__XPC_DYLD_FRAMEWORK_PATH",
+              "__XPC_DYLD_LIBRARY_PATH"
+            ],
+            "UITargetAppEnvironmentVariables": [
+              "APP_DISTRIBUTOR_ID_OVERRIDE",
+              "DYLD_FRAMEWORK_PATH",
+              "DYLD_LIBRARY_PATH",
+              "XCODE_SCHEME_NAME",
+              "__XCODE_BUILT_PRODUCTS_DIR_PATHS",
+              "__XPC_DYLD_FRAMEWORK_PATH",
+              "__XPC_DYLD_LIBRARY_PATH"
+            ]
+          },
+          "commandLineArgumentCounts": {
+            "CommandLineArguments": 0,
+            "UITargetAppCommandLineArguments": 0
+          }
+        },
+        "__xctestrun_metadata__": {
+          "environmentKeyNames": {},
+          "commandLineArgumentCounts": {
+            "CommandLineArguments": 0,
+            "UITargetAppCommandLineArguments": 0
+          }
+        }
+      }
+    }
+  ],
+  "appProvenance": [
+    {
+      "relativePath": "Binaries/0/QA-iphonesimulator/Previously.app/Info.plist",
+      "bundleIdentifier": "com.cognipin.previously.qa",
+      "build": "12",
+      "isQA": true,
+      "keyIsTestPlaceholder": true,
+      "apiIsLoopback": true,
+      "configurationKeyNames": [
+        "APIBaseURL",
+        "ClerkPublishableKey"
+      ]
+    }
+  ],
+  "toolReceiptReferences": [
+    {
+      "toolReceipt": "ios/Tools/qa/.runs/20261006T125503628555Z/directed.json",
+      "buildLogPath": "~/Library/Developer/XcodeBuildMCP/workspaces/previously-2bd4c895d527/logs/test_sim_2026-10-06T12-55-05-585Z_pid52843_6e24c8a0.log",
+      "xcresultPath": "ios/Tools/qa/.runs/20261006T125503628555Z/directed.xcresult",
+      "testProductsPath": "~/Library/Developer/XcodeBuildMCP/workspaces/previously-2bd4c895d527/test-products/test_sim_2026-10-06T12-55-05-585Z_pid52843_adfa37dd.xctestproducts"
+    }
+  ],
+  "symlinks": [
+    {
+      "relativePath": "Tests/0/QA-iphonesimulator",
+      "target": "../../Binaries/0/QA-iphonesimulator",
+      "resolvedInsidePackage": true
+    }
+  ],
+  "resultsLogsOrCaptureMatches": [],
+  "possibleCredentialMetadataFields": [],
+  "unsafeMetadataPatternLocations": [],
+  "preserveReasons": [],
+  "cleanupCandidate": true,
+  "deletionPerformed": false
+}

@@ -1,0 +1,22 @@
+{
+  "startedAt": "2026-10-06T12:21:51.028084+00:00",
+  "database": "previously_qa_content_3f29c15c4d904aafa266d948d38a01cc",
+  "databaseCreated": true,
+  "databaseRemoved": true,
+  "host": "127.0.0.1",
+  "productionDatabaseReadOrWritten": false,
+  "dotenvLoaded": false,
+  "credentialsInherited": false,
+  "productionModule": "server/dist/server.js",
+  "transport": "Fastify inject through production routes/auth; real disposable PostgreSQL",
+  "nodeBinary": "/opt/homebrew/opt/node@24/bin/node",
+  "nodeVersion": "v24.21.0",
+  "ownedOpsRoot": "/private/var/folders/t8/18rddswj5r76q9782g0hlc9m0000gn/T/previously_qa_content_3f29c15c4d904aafa266d948d38a01cc_ops_0s56c10z",
+  "ownedHarnessPID": 34370,
+  "testExitCode": 0,
+  "scratchConnectionsBeforeDrop": 0,
+  "ownedOpsRemoved": true,
+  "sourceChangedDuringRun": [],
+  "finishedAt": "2026-10-06T12:22:17.636718+00:00",
+  "overallExitCode": 0
+}

@@ -1,0 +1,19 @@
+{
+  "id": "dpl_EMPz5q73ktnuHwhEesBQX4ZjBdhN",
+  "url": "landing-8ypdokade-shan2news-projects.vercel.app",
+  "readyState": "READY",
+  "target": "production",
+  "createdAt": 1791285044656,
+  "buildingAt": 1791285045854,
+  "ready": 1791285083465,
+  "alias": [
+    "landing-shan2news-projects.vercel.app"
+  ],
+  "aliasAssigned": true,
+  "framework": null,
+  "nodeVersion": "24.x",
+  "regions": [
+    "iad1"
+  ],
+  "builds": []
+}

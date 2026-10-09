@@ -4,6 +4,9 @@ import Foundation
 enum AppConfig {
     /// Backend base URL. Defaults to the local dev server if the plist value is missing/blank.
     static var apiBaseURL: URL {
+        #if PREVIOUSLY_QA
+        if let url = QARuntime.baseURL { return url }
+        #endif
         let raw = (Bundle.main.object(forInfoDictionaryKey: "APIBaseURL") as? String)?
             .trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
         if let url = URL(string: raw), !raw.isEmpty, url.scheme != nil {

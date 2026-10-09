@@ -1,0 +1,35 @@
+{
+  "id": "dpl_EAcNw6zcnWPrMxkg2Nea3AkeNBBM",
+  "url": "landing-mky50bk66-shan2news-projects.vercel.app",
+  "projectId": "prj_osATa26wuWMoLf7yLOEaXvYuiial",
+  "target": "production",
+  "readyState": "READY",
+  "status": "READY",
+  "alias": [
+    "landing-shan2news-projects.vercel.app"
+  ],
+  "aliasAssigned": true,
+  "createdAt": 1791306657329,
+  "buildingAt": 1791306659279,
+  "ready": 1791306674582,
+  "buildMachine": null,
+  "meta": {
+    "githubCommitAuthorName": "Shantanu Sinha",
+    "githubCommitAuthorEmail": "shan2new@mini.local",
+    "githubCommitMessage": "docs: verify Home seam TestFlight build 12 release",
+    "githubCommitOrg": "shan2new",
+    "githubCommitRef": "main",
+    "githubCommitRepo": "previously",
+    "githubCommitSha": "19649b3748eac6ca7508f86ad96be9f533406fcb",
+    "githubDeployment": "1",
+    "githubOrg": "shan2new",
+    "githubRepo": "previously",
+    "gitDirty": "1",
+    "gitRootDirectory": "landing",
+    "qualifiedSourceManifest": "c0fcde783880c29f8540526569eceb3f8130fd04866ab2eb7cce5dd0a09766a9",
+    "policyEffectiveDate": "2026-10-06",
+    "actor": "codex",
+    "bundler": "turbopack"
+  },
+  "checkedAtUTC": "2026-10-06T17:11:43.303414+00:00"
+}

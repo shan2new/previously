@@ -1,0 +1,61 @@
+{
+  "checkedAtUTC": "2026-10-06T17:15:21.940Z",
+  "checks": [
+    {
+      "date": "Effective 6 October 2026",
+      "draft": false,
+      "h1": "Privacy Policy.",
+      "path": "/privacy",
+      "scrollWidth": 320,
+      "width": 320,
+      "passed": true,
+      "screenshot": "canonical-privacy-320.png"
+    },
+    {
+      "contactLinked": true,
+      "date": "Effective 6 October 2026",
+      "draft": false,
+      "h1": "Privacy Policy.",
+      "path": "/privacy",
+      "scrollWidth": 390,
+      "width": 390,
+      "passed": true,
+      "screenshot": "canonical-privacy-390.png"
+    },
+    {
+      "contactLinked": true,
+      "date": "Effective 6 October 2026",
+      "draft": false,
+      "h1": "Terms of Use.",
+      "path": "/terms",
+      "scrollWidth": 390,
+      "width": 390,
+      "passed": true,
+      "screenshot": "canonical-terms-390.png"
+    },
+    {
+      "contactLinked": true,
+      "date": null,
+      "draft": false,
+      "h1": "Support.",
+      "path": "/support",
+      "scrollWidth": 390,
+      "width": 390,
+      "passed": true,
+      "screenshot": "canonical-support-390.png"
+    },
+    {
+      "contactLinked": true,
+      "date": "Effective 6 October 2026",
+      "draft": false,
+      "h1": "Account Deletion.",
+      "path": "/delete-account",
+      "scrollWidth": 390,
+      "width": 390,
+      "passed": true,
+      "screenshot": "canonical-delete-account-390.png"
+    }
+  ],
+  "passed": true,
+  "scope": "Five fresh public legal layouts/date/link readbacks; candidate320 layouts reused after exact response and asset parity, without relabeling as new"
+}

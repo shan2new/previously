@@ -1,0 +1,31 @@
+{
+  "checkedAt": "2026-10-06T14:01:30.642Z",
+  "desktop": {
+    "capsuleColor": "rgb(0, 0, 0)",
+    "capsuleVisible": true,
+    "comingSoon": true,
+    "documentWidth": 1470,
+    "icon": "https://previously.cognipin.com/brand/native-icon.png",
+    "image": "https://previously.cognipin.com/app/library-current.jpg",
+    "imageLoaded": true,
+    "periodColor": "rgb(240, 86, 63)",
+    "url": "https://previously.cognipin.com/",
+    "width": 1470
+  },
+  "mobile390": {
+    "capsule": {
+      "bottom": 592.7119140625,
+      "height": 25.24346923828125,
+      "left": 164.43450927734375,
+      "right": 242.6119842529297,
+      "top": 567.4684448242188,
+      "width": 78.17747497558594,
+      "x": 164.43450927734375,
+      "y": 567.4684448242188
+    },
+    "documentWidth": 390,
+    "imageLoaded": true,
+    "width": 390
+  },
+  "passed": true
+}

@@ -1,0 +1,167 @@
+{
+  "verifiedAt": "2026-10-06T14:28:59.870320+00:00",
+  "artifact": "/Users/shan2new/Infra/previously/releases/20261006T123751Z/server",
+  "jobsInstalledVerified": true,
+  "jobs": [
+    {
+      "label": "com.shan.previously",
+      "installedSHA256": "fe9518627dccd320fa399e58a708fa9ef8b11ce812636f15454d2aa40f4dd1e3",
+      "candidateHashMatches": true,
+      "mode": "0600",
+      "programArguments": [
+        "/opt/homebrew/opt/node@24/bin/node",
+        "/Users/shan2new/Infra/previously/releases/20261006T123751Z/server/ops/run-server.mjs"
+      ],
+      "runAtLoad": true,
+      "keepAlive": true,
+      "startInterval": null,
+      "startCalendarInterval": null,
+      "actualJobState": {
+        "state": "running",
+        "runs": "2",
+        "pid": "263",
+        "last exit code": "0"
+      }
+    },
+    {
+      "label": "com.shan.previously.backup",
+      "installedSHA256": "e98b23ce2c485f7a5d90a9c7302f658e6b86bdc3a8574bac50efefae15d07276",
+      "candidateHashMatches": true,
+      "mode": "0600",
+      "programArguments": [
+        "/opt/homebrew/opt/node@24/bin/node",
+        "/Users/shan2new/Infra/previously/releases/20261006T123751Z/server/ops/backup.mjs"
+      ],
+      "runAtLoad": false,
+      "keepAlive": false,
+      "startInterval": null,
+      "startCalendarInterval": {
+        "Hour": 3,
+        "Minute": 15
+      },
+      "actualJobState": {
+        "state": "not running",
+        "runs": "1",
+        "last exit code": "0"
+      }
+    },
+    {
+      "label": "com.shan.previously.ops",
+      "installedSHA256": "c2ca25576dccdd815e51692fb09b36ad98ca341b70df1ec1ec6cc501e5321c9a",
+      "candidateHashMatches": true,
+      "mode": "0600",
+      "programArguments": [
+        "/opt/homebrew/opt/node@24/bin/node",
+        "/Users/shan2new/Infra/previously/releases/20261006T123751Z/server/ops/collect.mjs"
+      ],
+      "runAtLoad": true,
+      "keepAlive": false,
+      "startInterval": 3600,
+      "startCalendarInterval": null,
+      "actualJobState": {
+        "state": "not running",
+        "runs": "1",
+        "last exit code": "0"
+      }
+    }
+  ],
+  "gracefulRestart": {
+    "signal": "SIGTERM",
+    "priorWrapperPID": 92207,
+    "currentWrapperPID": 263,
+    "wrapperPIDChanged": true,
+    "oldWrapperExitedZero": true,
+    "shutdownStartedInManagedLog": true,
+    "shutdownFailures": 0,
+    "localReady": {
+      "status": 200,
+      "ok": true
+    },
+    "publicReady": {
+      "status": 200,
+      "ok": true
+    },
+    "freshManagedLogCreated": true
+  },
+  "collector": {
+    "measuredAt": "2026-10-06T14:28:59.408Z",
+    "healthy": true,
+    "publicReady": true,
+    "freeDiskBytes": 4408225792,
+    "deletion": {
+      "sha256": "4b6f19cf2a2632faba2f49db565e0dbb8535742f5ea7c554efbd07855861e6cd",
+      "total": 0,
+      "pending": 0,
+      "oldestPendingHours": 0,
+      "missingPendingIdentity": 0
+    },
+    "usage": {
+      "registered": 16,
+      "active_24h": 2,
+      "active_7d": 2,
+      "registered_7d": 0,
+      "library_users": 8,
+      "progress_users": 6
+    }
+  },
+  "dailyBackupJob": {
+    "lastExitZero": true,
+    "newestManifest": "/Users/shan2new/Infra/previously/backups/previously-20261006T141301793Z-757b258b5af7.manifest.json",
+    "createdAt": "2026-10-06T14:13:04.959Z",
+    "bytes": 12146297,
+    "SHA256": "822a8af82f40c27976c249d3f2e5a5795fcd8e412a9d4ada452446a7c9dbba73",
+    "dumpMode": "0o600",
+    "actualHashAndSizeMatch": true
+  },
+  "managedLogs": [
+    {
+      "file": "previously-20261006T141226744Z-b0616445e3bd.ndjson",
+      "mode": "0o600",
+      "bytes": 355,
+      "rows": 6,
+      "outsideAllowlistKeyCount": 0,
+      "eventCounts": {
+        "child.unstructured_output_redacted": 2,
+        "child.output_sanitized": 2,
+        "social.config": 1,
+        "runtime.shutdown_started": 1
+      }
+    },
+    {
+      "file": "previously-20261006T142804789Z-f73ac70e32ba.ndjson",
+      "mode": "0o600",
+      "bytes": 286,
+      "rows": 5,
+      "outsideAllowlistKeyCount": 0,
+      "eventCounts": {
+        "child.unstructured_output_redacted": 2,
+        "child.output_sanitized": 2,
+        "social.config": 1
+      }
+    }
+  ],
+  "legacyLogs": [
+    {
+      "path": "/Users/shan2new/Library/Logs/com.shan.previously.out.log",
+      "mode": "0o600",
+      "bytes": 8599042,
+      "retained": true
+    },
+    {
+      "path": "/Users/shan2new/Library/Logs/com.shan.previously.err.log",
+      "mode": "0o600",
+      "bytes": 292864,
+      "retained": true
+    }
+  ],
+  "liveRetentionVerified": false,
+  "retentionScope": "Managed logs sanitize and rotate; installed hourly collector prunes owned backups, logs and snapshots. Legacy files retained pending owner approval; production age expiry not observed yet.",
+  "limits": [
+    "Production native/Clerk consumer auth not verified here",
+    "Same-Mini backups do not cover hardware loss",
+    "Not Store review submission evidence"
+  ],
+  "oldMutablePlistRestarted": false,
+  "sharedPostgresOrCloudflareRestarted": false,
+  "probeMechanism": "TLS-verified curl; local Python urllib public probe failed without sufficient error classification and was not treated as service failure."
+}

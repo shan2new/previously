@@ -14,6 +14,7 @@ import { groupFromSeed } from '../grouping/service.js'
 import type { MediaFetcher } from '../grouping/graph.js'
 import { upsertMedia } from '../services/mediaStore.js'
 import { materialiseRecommendation } from '../services/recommendations.js'
+import { ContentExcludedError, consumerAnimeFetcher, consumerFranchiseIds, isExcludedContent } from '../services/consumerContent.js'
 import { tmdbEnabled } from '../tmdb/client.js'
 import { isJapaneseAnimation } from '../tmdb/mapping.js'
 import type { FranchiseSummary } from '../types/api.js'
@@ -79,6 +80,8 @@ export interface ImportPreview {
   unmatched: { count: number; titles: string[] }
   /** A few of the ready shows, for the preview's wall. */
   sample: FranchiseSummary[]
+  /** Source entries intentionally omitted by policy; never counted as provider failures. */
+  skipped: { count: number; reasons: { adult_content: number } }
 }
 
 export interface ImportProgress {
@@ -89,10 +92,12 @@ export interface ImportProgress {
   /** Still to fetch, in the source's unit (list entries for an anime list). */
   remaining: number
   failed: number
+  skipped: { count: number; reasons: { adult_content: number } }
 }
 
 interface PendingTv {
   show: TvShow
+  unitKeys: string[]
   /** The TMDB show to materialise, or — for Japanese animation — the AniList media. */
   tmdbId: number | null
   anilistId: number | null
@@ -119,6 +124,10 @@ interface Session {
   /** Pending units (entries / shows) not yet settled, and those that could not be built. */
   remaining: number
   failed: number
+  listed: number
+  skippedAdult: Set<string>
+  readyUnits: Map<string, Set<string>>
+  animeUnits: Map<number, Set<string>>
 }
 
 const SESSION_TTL_MS = 30 * 60_000
@@ -194,17 +203,22 @@ async function tvFranchises(tmdbIds: number[]): Promise<Map<number, string>> {
 }
 
 /** Anime entries → one plan per franchise the catalogue holds; the media it does not, by id. */
-async function planAnime(entries: AnimeEntry[], nowMs: number): Promise<{ plans: FranchisePlan[]; missing: number[] }> {
+async function planAnime(entries: AnimeEntry[], nowMs: number): Promise<{
+  plans: FranchisePlan[]; missing: number[]; excluded: number[]; units: Map<string, number[]>
+}> {
   const owner = await franchisesOfMedia(entries.map((e) => e.mediaId))
-  const members = await membersOf([...new Set(owner.values())], nowMs)
+  const allowed = await consumerFranchiseIds([...new Set(owner.values())])
+  const members = await membersOf([...allowed], nowMs)
   const byFranchise = new Map<string, AnimeEntry[]>()
   const missing: number[] = []
+  const excluded: number[] = []
   for (const entry of entries) {
     const id = owner.get(entry.mediaId)
     if (!id) {
       missing.push(entry.mediaId)
       continue
     }
+    if (!allowed.has(id)) { excluded.push(entry.mediaId); continue }
     const list = byFranchise.get(id)
     if (list) list.push(entry)
     else byFranchise.set(id, [entry])
@@ -214,7 +228,21 @@ async function planAnime(entries: AnimeEntry[], nowMs: number): Promise<{ plans:
     const plan = planAnimeFranchise(mine, members.get(id) ?? [])
     if (plan) plans.push(plan)
   }
-  return { plans, missing }
+  return { plans, missing, excluded, units: new Map([...byFranchise].map(([id, mine]) => [id, mine.map((entry) => entry.mediaId)])) }
+}
+
+function recordReadyUnits(session: Session, franchiseId: string, keys: Iterable<string>): void {
+  const units = session.readyUnits.get(franchiseId) ?? new Set<string>()
+  for (const key of keys) units.add(key)
+  session.readyUnits.set(franchiseId, units)
+}
+
+function skipAnime(session: Session, mediaId: number): void {
+  for (const key of session.animeUnits.get(mediaId) ?? []) session.skippedAdult.add(key)
+}
+
+function skippedOf(session: Session): ImportProgress['skipped'] {
+  return { count: session.skippedAdult.size, reasons: { adult_content: session.skippedAdult.size } }
 }
 
 // MARK: Preview
@@ -247,58 +275,99 @@ export async function previewImport(userId: string, request: ImportRequest, nowM
     mine: new Map(),
     remaining: 0,
     failed: 0,
+    listed: 0,
+    skippedAdult: new Set(),
+    readyUnits: new Map(),
+    animeUnits: new Map(),
   }
 
   if (request.source === 'tvtime') {
     if (!tmdbEnabled()) throw new ImportSourceError('unavailable')
-    const resolved = await resolveTvShows(request.shows.filter(worthImporting))
+    const shows = request.shows.filter(worthImporting)
+    session.listed = shows.length
+    const keysByShow = new Map<TvShow, string[]>()
+    shows.forEach((show, index) => keysByShow.set(show, [...(keysByShow.get(show) ?? []), `tv:${index}`]))
+    const rawResolved = await resolveTvShows(shows)
+    const resolved = rawResolved.filter((row) => {
+      if (!row.tmdb || !isExcludedContent(row.tmdb)) return true
+      for (const key of keysByShow.get(row.show) ?? []) session.skippedAdult.add(key)
+      return false
+    })
     const tv = resolved.filter((r) => r.tmdb && !isJapaneseAnimation(r.tmdb))
     const anime = resolved.filter((r) => r.tmdb && isJapaneseAnimation(r.tmdb))
     for (const r of resolved) if (!r.tmdb) session.unmatched.push(r.show.title || 'Untitled')
 
     const known = await tvFranchises(tv.map((r) => r.tmdb!.id))
+    const allowedTv = await consumerFranchiseIds([...known.values()])
     const members = await membersOf([...known.values()], nowMs)
     for (const r of tv) {
       const franchiseId = known.get(r.tmdb!.id)
       if (!franchiseId) {
-        session.pendingTv.push({ show: r.show, tmdbId: r.tmdb!.id, anilistId: null })
+        session.pendingTv.push({ show: r.show, unitKeys: keysByShow.get(r.show) ?? [], tmdbId: r.tmdb!.id, anilistId: null })
+        continue
+      }
+      if (!allowedTv.has(franchiseId)) {
+        for (const key of keysByShow.get(r.show) ?? []) session.skippedAdult.add(key)
         continue
       }
       const plan = planTvFranchise(r.show, members.get(franchiseId) ?? [], nowMs)
-      if (plan) session.ready.push(plan)
+      if (plan) { session.ready.push(plan); recordReadyUnits(session, franchiseId, keysByShow.get(r.show) ?? []) }
     }
     // Japanese animation is AniList's here: found by its exact title, laid along the story.
-    const titled = await mapWithConcurrency(anime, 2, async (r) => ({ r, anilistId: await findAnimeByTitle(r.tmdb!.name || r.show.title) }))
+    const titled = await mapWithConcurrency(anime, 2, async (r) => {
+      try {
+        return { r, anilistId: await findAnimeByTitle(r.tmdb!.name || r.show.title), excluded: false }
+      } catch (error) {
+        if (!(error instanceof ContentExcludedError)) throw error
+        for (const key of keysByShow.get(r.show) ?? []) session.skippedAdult.add(key)
+        return { r, anilistId: null, excluded: true }
+      }
+    })
     const owner = await franchisesOfMedia(titled.flatMap((t) => (t.anilistId == null ? [] : [t.anilistId])))
+    const allowedAnime = await consumerFranchiseIds([...new Set(owner.values())])
     const animeMembers = await membersOf([...new Set(owner.values())], nowMs)
-    for (const { r, anilistId } of titled) {
+    for (const { r, anilistId, excluded } of titled) {
+      if (excluded) continue
       if (anilistId == null) {
         session.unmatched.push(r.show.title || r.tmdb!.name)
         continue
       }
       const franchiseId = owner.get(anilistId)
       if (!franchiseId) {
-        session.pendingTv.push({ show: r.show, tmdbId: null, anilistId })
+        session.pendingTv.push({ show: r.show, unitKeys: keysByShow.get(r.show) ?? [], tmdbId: null, anilistId })
+        continue
+      }
+      if (!allowedAnime.has(franchiseId)) {
+        for (const key of keysByShow.get(r.show) ?? []) session.skippedAdult.add(key)
         continue
       }
       const plan = planTvShowAsAnime(r.show, animeMembers.get(franchiseId) ?? [], nowMs)
-      if (plan) session.ready.push(plan)
+      if (plan) { session.ready.push(plan); recordReadyUnits(session, franchiseId, keysByShow.get(r.show) ?? []) }
     }
   } else {
     let entries: AnimeEntry[]
     if (request.source === 'anilist') {
       entries = await fetchAniListEntries(request.username)
+      session.listed = entries.length
     } else {
       const mapped = await mapMalRows(request.rows)
       entries = mapped.entries
       session.unmatched.push(...mapped.unmatched)
+      session.listed = entries.length + mapped.unmatched.length
     }
-    session.animeEntries = entries
-    const { plans, missing } = await planAnime(entries, nowMs)
+    entries.forEach((entry, index) => {
+      const keys = session.animeUnits.get(entry.mediaId) ?? new Set<string>()
+      keys.add(`anime:${index}`); session.animeUnits.set(entry.mediaId, keys)
+    })
+    for (const entry of entries) if (entry.contentExcluded) skipAnime(session, entry.mediaId)
+    session.animeEntries = entries.filter((entry) => !entry.contentExcluded)
+    const { plans, missing, excluded, units } = await planAnime(session.animeEntries, nowMs)
+    for (const id of excluded) skipAnime(session, id)
+    for (const [id, mediaIds] of units) recordReadyUnits(session, id, mediaIds.flatMap((mediaId) => [...session.animeUnits.get(mediaId) ?? []]))
     session.ready = plans
     // The tail in the order it matters to them: what they are watching, then what they put down,
     // then the history, then the plans.
-    const byId = new Map(entries.map((e) => [e.mediaId, e]))
+    const byId = new Map(session.animeEntries.map((e) => [e.mediaId, e]))
     session.pendingAnime = [...missing].sort(
       (a, b) => TAIL_ORDER.indexOf(byId.get(a)!.status) - TAIL_ORDER.indexOf(byId.get(b)!.status),
     )
@@ -323,9 +392,6 @@ export async function previewImport(userId: string, request: ImportRequest, nowM
   for (const pending of session.pendingTv) {
     for (const season of pending.show.seasons) if (season.number > 0) episodes += new Set(season.watched).size
   }
-  const listed = request.source === 'tvtime'
-    ? session.ready.length + session.pendingTv.length
-    : session.animeEntries.length
   // The wall leads with what they are watching, then what they finished.
   const order: ListStatus[] = ['watching', 'completed', 'paused', 'planned', 'dropped']
   const sampleIds = [...session.ready]
@@ -335,13 +401,14 @@ export async function previewImport(userId: string, request: ImportRequest, nowM
   return {
     id: session.id,
     source: session.source,
-    listed,
+    listed: session.listed,
     ready: session.ready.length,
     toFetch: session.remaining,
     episodes,
     byStatus,
     unmatched: { count: session.unmatched.length, titles: session.unmatched.slice(0, 12) },
     sample: await getSummaries(sampleIds),
+    skipped: skippedOf(session),
   }
 }
 
@@ -395,7 +462,8 @@ function tailFetcher(pending: number[]): MediaFetcher {
 async function buildAnime(mediaId: number, fetcher: MediaFetcher): Promise<string> {
   const known = (await franchisesOfMedia([mediaId])).get(mediaId)
   if (known) return known
-  return (await groupFromSeed(mediaId, { model: env.OPENROUTER_MODEL_BULK, fetcher, enrich: false })).franchiseId
+  return (await groupFromSeed(mediaId, { model: env.OPENROUTER_MODEL_BULK,
+    fetcher: consumerAnimeFetcher(mediaId, fetcher), enrich: false })).franchiseId
 }
 
 /**
@@ -447,6 +515,10 @@ export async function applyPlan(
   restate?: ImportOwnership,
 ): Promise<boolean> {
   return db.transaction(async (tx) => {
+    const [content] = await tx.select({ id: franchise.id, enrichment: franchise.enrichment, genres: franchise.genres })
+      .from(franchise).where(eq(franchise.id, plan.franchiseId)).limit(1)
+    if (!content) throw new Error('import franchise not found')
+    if (isExcludedContent(content)) throw new ContentExcludedError()
     if (restate) {
       const [owned] = await tx.select({ createdAt: subscriptions.createdAt }).from(subscriptions)
         .where(and(eq(subscriptions.userId, userId), eq(subscriptions.franchiseId, plan.franchiseId))).for('update')
@@ -455,7 +527,7 @@ export async function applyPlan(
         return false // The viewer removed this show, or removed and re-added it.
       }
     }
-    const rows: ProgressMediaRow[] = await tx
+    const rows: (ProgressMediaRow & { genres: string[] | null })[] = await tx
       .select({
         mediaId: media.id,
         source: media.source,
@@ -464,11 +536,13 @@ export async function applyPlan(
         next: media.nextAiringEpisode,
         episodesList: media.episodesList,
         watched: progress.episodesWatched,
+        genres: media.genres,
       })
       .from(franchiseMember)
       .innerJoin(media, eq(media.id, franchiseMember.mediaId))
       .leftJoin(progress, and(eq(progress.mediaId, media.id), eq(progress.userId, userId)))
       .where(eq(franchiseMember.franchiseId, plan.franchiseId))
+    if (rows.some(isExcludedContent)) throw new ContentExcludedError()
     const current = new Map(rows.map((row) => [row.mediaId, row.watched ?? 0]))
     const raise = plan.parts.filter((p) => current.has(p.mediaId) && p.episodes > (current.get(p.mediaId) ?? 0))
     const writes = progressWritesForCommand(rows, { parts: raise }, nowMs)
@@ -520,6 +594,7 @@ function progressOf(session: Session): ImportProgress {
     shows: session.written.size,
     remaining: session.state === 'done' ? 0 : session.remaining,
     failed: session.failed,
+    skipped: skippedOf(session),
   }
 }
 
@@ -542,8 +617,10 @@ export async function applyImport(userId: string, id: string): Promise<ImportPro
   for (const plan of session.ready) {
     try {
       await write(session, plan)
-    } catch {
-      session.failed++
+    } catch (error) {
+      if (error instanceof ContentExcludedError) {
+        for (const key of session.readyUnits.get(plan.franchiseId) ?? []) session.skippedAdult.add(key)
+      } else session.failed++
     }
   }
   if (session.pendingAnime.length + session.pendingTv.length === 0) {
@@ -589,9 +666,10 @@ async function finishInBackground(session: Session): Promise<void> {
       // enrichment, since the show is in the library already.
       settle([mediaId, ...session.pendingAnime.filter((id) => ids.has(id))])
       await pictureForHome(plan)
-    } catch {
+    } catch (error) {
       settle([mediaId])
-      session.failed++
+      if (error instanceof ContentExcludedError) skipAnime(session, mediaId)
+      else session.failed++
     }
   }
   for (const pending of session.pendingTv) {
@@ -607,8 +685,10 @@ async function finishInBackground(session: Session): Promise<void> {
       if (!plan) throw new Error('import has no matching members')
       await write(session, plan)
       if (plan && pending.anilistId != null) await pictureForHome(plan)
-    } catch {
-      session.failed++
+    } catch (error) {
+      if (error instanceof ContentExcludedError) {
+        for (const key of pending.unitKeys) session.skippedAdult.add(key)
+      } else session.failed++
     }
     session.remaining = Math.max(0, session.remaining - 1)
   }

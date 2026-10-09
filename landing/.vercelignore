@@ -1,0 +1,14 @@
+.env*
+.vercel
+.openai
+.wrangler
+.vinext
+.next
+out
+dist
+node_modules
+docs
+outputs
+work
+*.log
+*.tsbuildinfo

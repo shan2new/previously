@@ -1,0 +1,23 @@
+{
+  "startedAt": "2026-10-06T10:04:25.666184+00:00",
+  "database": "previously_qa_load_afc5f86e9d8e469ea9a3d3f4f71758b2",
+  "host": "127.0.0.1",
+  "databaseCreated": true,
+  "databaseRemoved": true,
+  "productionDatabaseReadOrWritten": false,
+  "dotenvLoaded": false,
+  "credentialsInherited": false,
+  "quickHarnessOnly": true,
+  "sourceRevision": "19649b3748eac6ca7508f86ad96be9f533406fcb",
+  "dirtySource": true,
+  "coResidentLimitation": "Shared Mac Mini with normal services and native QA simulator; no production service altered.",
+  "postgresVersion": "18.3 (Homebrew)",
+  "hardware": [
+    "17179869184",
+    "10"
+  ],
+  "ownedServerPID": 54580,
+  "runError": "RuntimeError: QA server exited 1; see server.log",
+  "scratchConnectionsBeforeDrop": 0,
+  "finishedAt": "2026-10-06T10:04:27.719221+00:00"
+}

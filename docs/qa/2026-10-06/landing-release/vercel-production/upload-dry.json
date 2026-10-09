@@ -1,0 +1,2075 @@
+{
+  "framework": {
+    "name": "Next.js",
+    "slug": "nextjs"
+  },
+  "basePath": "/Users/shan2new/Projects/previously/landing",
+  "fileCount": 312,
+  "totalSize": 27782380,
+  "ignoredCount": 15,
+  "ignored": [
+    ".DS_Store",
+    ".gitignore",
+    ".next",
+    ".openai/hosting.json",
+    ".vercel",
+    ".wrangler/deploy",
+    ".wrangler/registry",
+    ".wrangler/state",
+    "dist/.openai/hosting.json",
+    "docs/research",
+    "docs/spike.md",
+    "docs/store-readiness.md",
+    "docs/vercel-release-2026-10-06.md",
+    "node_modules",
+    "tsconfig.tsbuildinfo"
+  ],
+  "directories": [
+    {
+      "path": "out",
+      "fileCount": 80,
+      "size": 12508652
+    },
+    {
+      "path": "public",
+      "fileCount": 33,
+      "size": 11065500
+    },
+    {
+      "path": "dist",
+      "fileCount": 104,
+      "size": 3706613
+    },
+    {
+      "path": "components",
+      "fileCount": 60,
+      "size": 235185
+    },
+    {
+      "path": "package-lock.json",
+      "fileCount": 1,
+      "size": 174759
+    },
+    {
+      "path": "app",
+      "fileCount": 15,
+      "size": 58089
+    },
+    {
+      "path": "lib",
+      "fileCount": 3,
+      "size": 20053
+    },
+    {
+      "path": "README.md",
+      "fileCount": 1,
+      "size": 7487
+    },
+    {
+      "path": ".oxlintrc.json",
+      "fileCount": 1,
+      "size": 1370
+    },
+    {
+      "path": "package.json",
+      "fileCount": 1,
+      "size": 1245
+    },
+    {
+      "path": "tsconfig.json",
+      "fileCount": 1,
+      "size": 663
+    },
+    {
+      "path": "hooks",
+      "fileCount": 1,
+      "size": 585
+    },
+    {
+      "path": "components.json",
+      "fileCount": 1,
+      "size": 516
+    },
+    {
+      "path": "vercel.json",
+      "fileCount": 1,
+      "size": 469
+    },
+    {
+      "path": "next.config.ts",
+      "fileCount": 1,
+      "size": 309
+    },
+    {
+      "path": "next-env.d.ts",
+      "fileCount": 1,
+      "size": 288
+    },
+    {
+      "path": ".oxfmtrc.json",
+      "fileCount": 1,
+      "size": 260
+    },
+    {
+      "path": ".vinext",
+      "fileCount": 1,
+      "size": 186
+    },
+    {
+      "path": ".vercelignore",
+      "fileCount": 1,
+      "size": 88
+    },
+    {
+      "path": "postcss.config.mjs",
+      "fileCount": 1,
+      "size": 63
+    },
+    {
+      "path": ".openai",
+      "fileCount": 1,
+      "size": 0
+    },
+    {
+      "path": ".wrangler",
+      "fileCount": 1,
+      "size": 0
+    },
+    {
+      "path": "docs",
+      "fileCount": 1,
+      "size": 0
+    }
+  ],
+  "largestFiles": [
+    {
+      "path": "out/app/search.webp",
+      "size": 2253064,
+      "mode": 33188,
+      "sha": "1a03b3693ae454c9ae67365b7f71c51d7b4fad83"
+    },
+    {
+      "path": "public/app/search.webp",
+      "size": 2253064,
+      "mode": 33188,
+      "sha": "1a03b3693ae454c9ae67365b7f71c51d7b4fad83"
+    },
+    {
+      "path": "out/app/today.webp",
+      "size": 2070154,
+      "mode": 33188,
+      "sha": "74808311108bfb85a41705a474a2d2135bd96262"
+    },
+    {
+      "path": "public/app/today.webp",
+      "size": 2070154,
+      "mode": 33188,
+      "sha": "74808311108bfb85a41705a474a2d2135bd96262"
+    },
+    {
+      "path": "out/app/schedule.webp",
+      "size": 1732346,
+      "mode": 33188,
+      "sha": "86be82904eda490221415bb6304ce470e046f23b"
+    },
+    {
+      "path": "public/app/schedule.webp",
+      "size": 1732346,
+      "mode": 33188,
+      "sha": "86be82904eda490221415bb6304ce470e046f23b"
+    },
+    {
+      "path": "out/app/library.webp",
+      "size": 1711570,
+      "mode": 33188,
+      "sha": "b36bc34221d4cf9f611cb3d5689317a90e5f8ff3"
+    },
+    {
+      "path": "public/app/library.webp",
+      "size": 1711570,
+      "mode": 33188,
+      "sha": "b36bc34221d4cf9f611cb3d5689317a90e5f8ff3"
+    },
+    {
+      "path": "out/app/seasons.webp",
+      "size": 806370,
+      "mode": 33188,
+      "sha": "550a7c03bc64861b4404706051fa5ed66ae46e82"
+    },
+    {
+      "path": "public/app/seasons.webp",
+      "size": 806370,
+      "mode": 33188,
+      "sha": "550a7c03bc64861b4404706051fa5ed66ae46e82"
+    }
+  ],
+  "files": [
+    {
+      "path": ".openai",
+      "size": 0,
+      "mode": 16877
+    },
+    {
+      "path": ".oxfmtrc.json",
+      "size": 260,
+      "mode": 33188,
+      "sha": "cd1cbef2593fb5726ac52f8db4fe2f5938ab0928"
+    },
+    {
+      "path": ".oxlintrc.json",
+      "size": 1370,
+      "mode": 33188,
+      "sha": "736a0052ab0422f00395073ebae543a017b2a83f"
+    },
+    {
+      "path": ".vercelignore",
+      "size": 88,
+      "mode": 33188,
+      "sha": "90a6b2caf1e14080c1a5968634ec21a7bbcbc751"
+    },
+    {
+      "path": ".vinext/dev/lock.json",
+      "size": 186,
+      "mode": 33152,
+      "sha": "a15523bbf17b840ee9d3ba2893c2892d35e1a9ff"
+    },
+    {
+      "path": ".wrangler",
+      "size": 0,
+      "mode": 16877
+    },
+    {
+      "path": "app/delete-account/page.tsx",
+      "size": 208,
+      "mode": 33188,
+      "sha": "740af0d80cd653558e402a4a367dfbbc0e71beaa"
+    },
+    {
+      "path": "app/experience.tsx",
+      "size": 4001,
+      "mode": 33188,
+      "sha": "c5db187f046bfea3c7eebfd6ec6254b29812c4a9"
+    },
+    {
+      "path": "app/gallery.css",
+      "size": 9019,
+      "mode": 33188,
+      "sha": "77c305b3634ffe0fb0663d1184dd265b5c96abff"
+    },
+    {
+      "path": "app/globals.css",
+      "size": 14418,
+      "mode": 33188,
+      "sha": "40e5488a7669e7fcb7fb9ba17aef92e619d42810"
+    },
+    {
+      "path": "app/layout.tsx",
+      "size": 1662,
+      "mode": 33188,
+      "sha": "418ace643fdcd492e2fc7179c9ae9baeac648e7a"
+    },
+    {
+      "path": "app/legal-document.tsx",
+      "size": 7321,
+      "mode": 33188,
+      "sha": "816de04699ee82fc9c119864f2018e0111676499"
+    },
+    {
+      "path": "app/page.tsx",
+      "size": 2342,
+      "mode": 33188,
+      "sha": "d358940177576b78615ff9d3ac9ddd40568f41d9"
+    },
+    {
+      "path": "app/privacy/page.tsx",
+      "size": 194,
+      "mode": 33188,
+      "sha": "04cc545ac76c56b086f40347347a533737bf5bd5"
+    },
+    {
+      "path": "app/product-tour.css",
+      "size": 8100,
+      "mode": 33188,
+      "sha": "587a4b4a2bacfcd5065a91c158e3972b74486f55"
+    },
+    {
+      "path": "app/product-tour.tsx",
+      "size": 7919,
+      "mode": 33188,
+      "sha": "5ffae4a1fd865d3437a000e1e7c13e4fed49c568"
+    },
+    {
+      "path": "app/robots.ts",
+      "size": 292,
+      "mode": 33188,
+      "sha": "8d721d11451facaee49a4b01529ed18c0c4042a3"
+    },
+    {
+      "path": "app/site-chrome.tsx",
+      "size": 1584,
+      "mode": 33188,
+      "sha": "72dc9859b6fb1d649956731c3f4626fbfdb2ef13"
+    },
+    {
+      "path": "app/sitemap.ts",
+      "size": 645,
+      "mode": 33188,
+      "sha": "b3ecd09f129ff5fe050e66fa5110c261803dd1c3"
+    },
+    {
+      "path": "app/support/page.tsx",
+      "size": 194,
+      "mode": 33188,
+      "sha": "56dee21bfe6dc573c94f919ed82f4e87d6da0598"
+    },
+    {
+      "path": "app/terms/page.tsx",
+      "size": 190,
+      "mode": 33188,
+      "sha": "3c52710310ba473696101284ac7f9d834e719ef0"
+    },
+    {
+      "path": "components.json",
+      "size": 516,
+      "mode": 33188,
+      "sha": "577af703bacf304e5c0cc5d5a7d331202b415b0a"
+    },
+    {
+      "path": "components/ui/accordion.tsx",
+      "size": 2664,
+      "mode": 33188,
+      "sha": "fcad5e1a927c063fe92e764f3b151062026478b0"
+    },
+    {
+      "path": "components/ui/alert-dialog.tsx",
+      "size": 5301,
+      "mode": 33188,
+      "sha": "3614879c23a187a8cf85083d6db037a4f1f9c0a9"
+    },
+    {
+      "path": "components/ui/alert.tsx",
+      "size": 2060,
+      "mode": 33188,
+      "sha": "28b1b686eedfacad819bb468da724c462d6f495b"
+    },
+    {
+      "path": "components/ui/aspect-ratio.tsx",
+      "size": 406,
+      "mode": 33188,
+      "sha": "7a1661d43dc339e35bb25504c88d7547b05ea8ba"
+    },
+    {
+      "path": "components/ui/attachment.tsx",
+      "size": 6132,
+      "mode": 33188,
+      "sha": "de8f27535f2015f9b14b32c36ad524d894aed175"
+    },
+    {
+      "path": "components/ui/avatar.tsx",
+      "size": 3056,
+      "mode": 33188,
+      "sha": "b2399ba87042646a1936b082e7be0fc27b9bdae5"
+    },
+    {
+      "path": "components/ui/badge.tsx",
+      "size": 1934,
+      "mode": 33188,
+      "sha": "c3a38482f47f0659d4e261b422e1709b189c5d45"
+    },
+    {
+      "path": "components/ui/breadcrumb.tsx",
+      "size": 2602,
+      "mode": 33188,
+      "sha": "b5b9fc25aa60a9416655b6ddfe54246048a912ad"
+    },
+    {
+      "path": "components/ui/bubble.tsx",
+      "size": 4828,
+      "mode": 33188,
+      "sha": "6361979975e89c9ba68c883d4b0e52156e4e5460"
+    },
+    {
+      "path": "components/ui/button-group.tsx",
+      "size": 2494,
+      "mode": 33188,
+      "sha": "623d74a214c17bfcf3a887a4f47aa9c7092cd7fa"
+    },
+    {
+      "path": "components/ui/button.tsx",
+      "size": 3247,
+      "mode": 33188,
+      "sha": "e35428aca3c188cee990e51d6ea8857fb84ce70b"
+    },
+    {
+      "path": "components/ui/calendar.tsx",
+      "size": 8503,
+      "mode": 33188,
+      "sha": "2b7b0c4e2661859cd1d05df56e73d5260e7d5a88"
+    },
+    {
+      "path": "components/ui/card.tsx",
+      "size": 2645,
+      "mode": 33188,
+      "sha": "c0a721216e67dd408f95744118e8d5bf0c77a681"
+    },
+    {
+      "path": "components/ui/carousel.tsx",
+      "size": 5727,
+      "mode": 33188,
+      "sha": "41d7230cb25c99dfa42f9c152c3f5d84dc1b9d9d"
+    },
+    {
+      "path": "components/ui/chart.tsx",
+      "size": 10581,
+      "mode": 33188,
+      "sha": "893a601d2f659c2de897f752b1422bd3394da5ba"
+    },
+    {
+      "path": "components/ui/checkbox.tsx",
+      "size": 1538,
+      "mode": 33188,
+      "sha": "5380380fd2be10f8a2a3a44cdef4325c98205ba2"
+    },
+    {
+      "path": "components/ui/collapsible.tsx",
+      "size": 664,
+      "mode": 33188,
+      "sha": "817e63fac3571381db716ac6627678a2953de2ec"
+    },
+    {
+      "path": "components/ui/combobox.tsx",
+      "size": 9135,
+      "mode": 33188,
+      "sha": "76466a6fcdaf70e9536ee814a67a76aedb138074"
+    },
+    {
+      "path": "components/ui/command.tsx",
+      "size": 5029,
+      "mode": 33188,
+      "sha": "a9bc587eeaf4a25ca92683b3ec1bbe2c3efef5ea"
+    },
+    {
+      "path": "components/ui/context-menu.tsx",
+      "size": 8166,
+      "mode": 33188,
+      "sha": "a14aa4b0800ac6d86db02f6297c664ce8a4b8962"
+    },
+    {
+      "path": "components/ui/dialog.tsx",
+      "size": 4087,
+      "mode": 33188,
+      "sha": "fa4cd2721385a0231b5128d88043df46b1cf0b7a"
+    },
+    {
+      "path": "components/ui/direction.tsx",
+      "size": 105,
+      "mode": 33188,
+      "sha": "b92c8ea2fc1e29bd4cc7b07e7bf69b951afaa504"
+    },
+    {
+      "path": "components/ui/drawer.tsx",
+      "size": 11396,
+      "mode": 33188,
+      "sha": "45471299b4f4c52344746ece501f8ea6fa4efc6b"
+    },
+    {
+      "path": "components/ui/dropdown-menu.tsx",
+      "size": 8809,
+      "mode": 33188,
+      "sha": "f43618cec7919183278d5ea94860bad5e326dff5"
+    },
+    {
+      "path": "components/ui/empty.tsx",
+      "size": 2415,
+      "mode": 33188,
+      "sha": "a68da44f75ff65cb543b1e454a8ea3eaa665acb9"
+    },
+    {
+      "path": "components/ui/field.tsx",
+      "size": 6303,
+      "mode": 33188,
+      "sha": "848eac1d37a4cc7aa7362bc21cf6977ffcecd44c"
+    },
+    {
+      "path": "components/ui/hover-card.tsx",
+      "size": 1863,
+      "mode": 33188,
+      "sha": "3e9a6318772be265ca3f285b94e3e5c30a7ef3dd"
+    },
+    {
+      "path": "components/ui/input-group.tsx",
+      "size": 5289,
+      "mode": 33188,
+      "sha": "a8f0470306effc70a0c8bb90d7dca54c90aabf51"
+    },
+    {
+      "path": "components/ui/input-otp.tsx",
+      "size": 2558,
+      "mode": 33188,
+      "sha": "24ff4179bf636f080c1624cfb6a1433d09162fc5"
+    },
+    {
+      "path": "components/ui/input.tsx",
+      "size": 1046,
+      "mode": 33188,
+      "sha": "714cbfc0564f0bf93336f6b36ee35a6f20d8ae9a"
+    },
+    {
+      "path": "components/ui/item.tsx",
+      "size": 4888,
+      "mode": 33188,
+      "sha": "154eae4d8c7a300c45d91ea5a276946567304640"
+    },
+    {
+      "path": "components/ui/kbd.tsx",
+      "size": 842,
+      "mode": 33188,
+      "sha": "a8468f9d9ee41febb3f57d297ab8cc6cd52cec8c"
+    },
+    {
+      "path": "components/ui/label.tsx",
+      "size": 524,
+      "mode": 33188,
+      "sha": "339a7b7896c7863ee8c8a220a32746361e36781b"
+    },
+    {
+      "path": "components/ui/marker.tsx",
+      "size": 1962,
+      "mode": 33188,
+      "sha": "3130e4ab55c06b426f41b1ed972c839ae9dc4b1b"
+    },
+    {
+      "path": "components/ui/menubar.tsx",
+      "size": 8315,
+      "mode": 33188,
+      "sha": "2ac64b86e7ee76337180537df148bdbd5f66b210"
+    },
+    {
+      "path": "components/ui/message-scroller.tsx",
+      "size": 4070,
+      "mode": 33188,
+      "sha": "c4666c9ac3b16085f13812b09ae7d57bbc016ac9"
+    },
+    {
+      "path": "components/ui/message.tsx",
+      "size": 2246,
+      "mode": 33188,
+      "sha": "ce0395b5564101228ea2e768f99d64663d825a40"
+    },
+    {
+      "path": "components/ui/native-select.tsx",
+      "size": 2133,
+      "mode": 33188,
+      "sha": "b0c582db435b32cb7b1b9d07ceb309f2235bc981"
+    },
+    {
+      "path": "components/ui/navigation-menu.tsx",
+      "size": 7436,
+      "mode": 33188,
+      "sha": "60389a0c814cb8df91a869e6cd1409814b8a366d"
+    },
+    {
+      "path": "components/ui/pagination.tsx",
+      "size": 2928,
+      "mode": 33188,
+      "sha": "e38845d697d528a1067a9defcb17c918196f103e"
+    },
+    {
+      "path": "components/ui/popover.tsx",
+      "size": 2586,
+      "mode": 33188,
+      "sha": "aba0025db626f54b8826d88c9ae40abdee89f021"
+    },
+    {
+      "path": "components/ui/progress.tsx",
+      "size": 1751,
+      "mode": 33188,
+      "sha": "6330518fa535a332f54ced93e6b535c8449d95e0"
+    },
+    {
+      "path": "components/ui/radio-group.tsx",
+      "size": 1843,
+      "mode": 33188,
+      "sha": "7f77e47106fdf225211e9b0468f30f9c15e02bf5"
+    },
+    {
+      "path": "components/ui/resizable.tsx",
+      "size": 1681,
+      "mode": 33188,
+      "sha": "0cc7552e2e0921216fc7e95868389d8db8dd50f7"
+    },
+    {
+      "path": "components/ui/scroll-area.tsx",
+      "size": 1632,
+      "mode": 33188,
+      "sha": "8765c0f7c75836f52c3f07bed1ea3591e5cb4d4d"
+    },
+    {
+      "path": "components/ui/select.tsx",
+      "size": 6700,
+      "mode": 33188,
+      "sha": "38cd6ea36908750217a6b89aae70755a426f5c88"
+    },
+    {
+      "path": "components/ui/separator.tsx",
+      "size": 551,
+      "mode": 33188,
+      "sha": "9d4299988dbc16be779557c1a72bd7879be75ff2"
+    },
+    {
+      "path": "components/ui/sheet.tsx",
+      "size": 4446,
+      "mode": 33188,
+      "sha": "ff0c2edff4bae2773d5eaa7d52142a3030ec768e"
+    },
+    {
+      "path": "components/ui/sidebar.tsx",
+      "size": 21779,
+      "mode": 33188,
+      "sha": "81bdd9ae49068cf1e690d93b136f719f9f32e51a"
+    },
+    {
+      "path": "components/ui/skeleton.tsx",
+      "size": 278,
+      "mode": 33188,
+      "sha": "6ca0dbc0afc5cf5705e433bba23d9701e8ee8192"
+    },
+    {
+      "path": "components/ui/slider.tsx",
+      "size": 1879,
+      "mode": 33188,
+      "sha": "ea442ae902e68e033fa7dff13d700e7353c7c6f1"
+    },
+    {
+      "path": "components/ui/spinner.tsx",
+      "size": 360,
+      "mode": 33188,
+      "sha": "dcf181f819f34372c852905ff6edd91769fa6752"
+    },
+    {
+      "path": "components/ui/switch.tsx",
+      "size": 1818,
+      "mode": 33188,
+      "sha": "3a0ec3ca3627755abf4c4aefd3723b25c43c81e7"
+    },
+    {
+      "path": "components/ui/table.tsx",
+      "size": 2418,
+      "mode": 33188,
+      "sha": "2c78a8455e5508feccb512e6f94a3c73466ad0c5"
+    },
+    {
+      "path": "components/ui/tabs.tsx",
+      "size": 3510,
+      "mode": 33188,
+      "sha": "d20529e2ca6ac6b127209b9087505405283589ba"
+    },
+    {
+      "path": "components/ui/textarea.tsx",
+      "size": 847,
+      "mode": 33188,
+      "sha": "1e06fadb8a3821d9284382dc0a5d464c36329a0c"
+    },
+    {
+      "path": "components/ui/toast.tsx",
+      "size": 7353,
+      "mode": 33188,
+      "sha": "b09d97d45917c51413983dbf6031bb833f20b178"
+    },
+    {
+      "path": "components/ui/toggle-group.tsx",
+      "size": 3201,
+      "mode": 33188,
+      "sha": "877764554492020504d9176e49a0c663d22a02fc"
+    },
+    {
+      "path": "components/ui/toggle.tsx",
+      "size": 1770,
+      "mode": 33188,
+      "sha": "6c3657b8b82e0b1bd1ac57b26331d11d4cb8ad90"
+    },
+    {
+      "path": "components/ui/tooltip.tsx",
+      "size": 2855,
+      "mode": 33188,
+      "sha": "7f999be43cb3db66bb57f1dc4a088a27eed740b1"
+    },
+    {
+      "path": "dist/.openai",
+      "size": 0,
+      "mode": 16877
+    },
+    {
+      "path": "dist/client/_headers",
+      "size": 131,
+      "mode": 33188,
+      "sha": "058390db92a642d82b8b0979d86bac464593ecbd"
+    },
+    {
+      "path": "dist/client/_next/static/911172a5-f954-41af-ae50-05bf1579014b/_buildManifest.js",
+      "size": 159,
+      "mode": 33188,
+      "sha": "9201e917d1b8defcdb8d2a84e619b18aadc8de8e"
+    },
+    {
+      "path": "dist/client/_next/static/911172a5-f954-41af-ae50-05bf1579014b/_ssgManifest.js",
+      "size": 76,
+      "mode": 33188,
+      "sha": "c0a0dc51ee8a2852baf5ff30c33b1478ff302585"
+    },
+    {
+      "path": "dist/client/_next/static/chunks/app-route-prefetch-policy-CXFrJl5J.js",
+      "size": 937,
+      "mode": 33188,
+      "sha": "916023a75209a3413f4671e06cdba3f5ab72948c"
+    },
+    {
+      "path": "dist/client/_next/static/chunks/experience-p-HQdo7M.js",
+      "size": 80614,
+      "mode": 33188,
+      "sha": "a945b6c7ef7c81836a6fc49b03dddaf78b419e37"
+    },
+    {
+      "path": "dist/client/_next/static/chunks/framework-D_rUT4EX.js",
+      "size": 190152,
+      "mode": 33188,
+      "sha": "bf9d172d3558dd2f88425ed59c366829ad22d8c3"
+    },
+    {
+      "path": "dist/client/_next/static/chunks/Icon-Bo9jbUr1.js",
+      "size": 1082,
+      "mode": 33188,
+      "sha": "e035552e9574e0427cb67b30c10f1852626b95ee"
+    },
+    {
+      "path": "dist/client/_next/static/chunks/image-Bi08zWtT.js",
+      "size": 46757,
+      "mode": 33188,
+      "sha": "18103b175a38501c22d7ac270716ad5435bb4f10"
+    },
+    {
+      "path": "dist/client/_next/static/chunks/index-BuV24ers.js",
+      "size": 194419,
+      "mode": 33188,
+      "sha": "3d52bd41844c52894aa7ccc0c398c3ff2bdcd053"
+    },
+    {
+      "path": "dist/client/_next/static/chunks/layout-segment-context-NzHrZoDN.js",
+      "size": 494,
+      "mode": 33188,
+      "sha": "c3c7692ec83e6a6f89ca96211d6a7342fc2e2b42"
+    },
+    {
+      "path": "dist/client/_next/static/chunks/rolldown-runtime-C60lm6uB.js",
+      "size": 694,
+      "mode": 33188,
+      "sha": "c27a8b2d2969dd2684fa56deef86ca35ee51a5db"
+    },
+    {
+      "path": "dist/client/_next/static/chunks/streamed-icons-Cs-m6aYg.js",
+      "size": 772,
+      "mode": 33188,
+      "sha": "1519ccceafda369f6b27a2634f2aea3e029a8bb0"
+    },
+    {
+      "path": "dist/client/_next/static/css/index.UljDDjAr.css",
+      "size": 186862,
+      "mode": 33188,
+      "sha": "5d178165ee7baf51aa48b638765cf756aec570a9"
+    },
+    {
+      "path": "dist/client/_next/static/css/page.CUnTg_Hq.css",
+      "size": 19421,
+      "mode": 33188,
+      "sha": "3cf9584841d1712997c38606cd9747f7e8d20720"
+    },
+    {
+      "path": "dist/client/.assetsignore",
+      "size": 30,
+      "mode": 33188,
+      "sha": "5bb4925013b19b576eb1473e79a35d3cce4f4b22"
+    },
+    {
+      "path": "dist/client/.vite/manifest.json",
+      "size": 2976,
+      "mode": 33188,
+      "sha": "e220f6fc39213e06cc54b3b5abd44353e09bed0d"
+    },
+    {
+      "path": "dist/client/brand/icon.svg",
+      "size": 993,
+      "mode": 33188,
+      "sha": "cc9832960b8b7e1efc45e5d52cd527b2f6b9fc60"
+    },
+    {
+      "path": "dist/client/brand/mark-tight.svg",
+      "size": 609,
+      "mode": 33188,
+      "sha": "9d5554607baa84b311aa0d4607b4bc92146589c3"
+    },
+    {
+      "path": "dist/client/brand/mark.svg",
+      "size": 609,
+      "mode": 33188,
+      "sha": "1cb8de32ef521c198f80da3be1fe27f02b0c1f5d"
+    },
+    {
+      "path": "dist/client/fonts/BarlowCondensed-OFL.txt",
+      "size": 4377,
+      "mode": 33188,
+      "sha": "d0dbf6e88cdad08b4270220f0c92fbd7c9fc1c6b"
+    },
+    {
+      "path": "dist/client/fonts/BarlowCondensed-SemiBold.ttf",
+      "size": 86636,
+      "mode": 33188,
+      "sha": "9bd81d0ffcab0c2da785f5181f8ef93aea3c21a5"
+    },
+    {
+      "path": "dist/client/fonts/Outfit-Bold.ttf",
+      "size": 48340,
+      "mode": 33188,
+      "sha": "7f80cab803c7eafec1d4deb10ba9a9699a9af552"
+    },
+    {
+      "path": "dist/client/fonts/Outfit-Medium.ttf",
+      "size": 47800,
+      "mode": 33188,
+      "sha": "9e9a094b61389254add0df9536fe962a9d668926"
+    },
+    {
+      "path": "dist/client/fonts/Outfit-Regular.ttf",
+      "size": 47844,
+      "mode": 33188,
+      "sha": "3024f9b4f58fd6769d8634b6352a423b5cf73647"
+    },
+    {
+      "path": "dist/client/fonts/Outfit-SemiBold.ttf",
+      "size": 48456,
+      "mode": 33188,
+      "sha": "7b4dd31fa1c9ada8f879b12f2fff5663115734d2"
+    },
+    {
+      "path": "dist/client/images/arcane.jpg",
+      "size": 65740,
+      "mode": 33188,
+      "sha": "ba71a81be223f546f2bf3b3bc840bb3bd8ecc779"
+    },
+    {
+      "path": "dist/client/images/attack-on-titan-2x3.jpg",
+      "size": 102344,
+      "mode": 33188,
+      "sha": "a8e42170eff9b5dc1922b1c897fbaf0fba7951c7"
+    },
+    {
+      "path": "dist/client/images/bear-wide.jpg",
+      "size": 202806,
+      "mode": 33188,
+      "sha": "a9863d2ccd96dc9ed73e039f2bca2a015bb9d3f2"
+    },
+    {
+      "path": "dist/client/images/bear.jpg",
+      "size": 87722,
+      "mode": 33188,
+      "sha": "8f5a7d1b86db4ec9a26491729214cb5408a8f3b2"
+    },
+    {
+      "path": "dist/client/images/breaking-bad.jpg",
+      "size": 164768,
+      "mode": 33188,
+      "sha": "64a1f04800341e7ab46335491780271a7f773b86"
+    },
+    {
+      "path": "dist/client/images/frieren-poster.jpg",
+      "size": 80850,
+      "mode": 33188,
+      "sha": "ff4329c7dd0ce8ce809bcaa452c77a146d7d93e0"
+    },
+    {
+      "path": "dist/client/images/frieren-wide.jpg",
+      "size": 153189,
+      "mode": 33188,
+      "sha": "bf6e58b591f840626770d5f4ed18215abd85a82d"
+    },
+    {
+      "path": "dist/client/images/severance-poster.jpg",
+      "size": 73646,
+      "mode": 33188,
+      "sha": "1342429e0f359899cfb4a097bb5a6850f24865e9"
+    },
+    {
+      "path": "dist/client/images/severance-wide.jpg",
+      "size": 75407,
+      "mode": 33188,
+      "sha": "cc39524f64f0018954592ec2d3f7721723ba353e"
+    },
+    {
+      "path": "dist/client/images/severance.jpg",
+      "size": 125469,
+      "mode": 33188,
+      "sha": "284eb5508de713ba40a311dab86f09578ba564ee"
+    },
+    {
+      "path": "dist/client/images/shogun.jpg",
+      "size": 131996,
+      "mode": 33188,
+      "sha": "6ba01a8bf81590ae91a69c56bc201978e86067b1"
+    },
+    {
+      "path": "dist/client/images/silo.jpg",
+      "size": 45596,
+      "mode": 33188,
+      "sha": "c8ae349a413c63ccc45f5fbb720abacff55911a7"
+    },
+    {
+      "path": "dist/client/images/stranger-things.jpg",
+      "size": 53345,
+      "mode": 33188,
+      "sha": "9ad31e9220f18ce5ad18e49f49860562e0f6043b"
+    },
+    {
+      "path": "dist/client/images/succession.jpg",
+      "size": 102124,
+      "mode": 33188,
+      "sha": "246158e8c545c0332adea23fba1a3b98a7ac84aa"
+    },
+    {
+      "path": "dist/client/images/the-last-of-us.jpg",
+      "size": 127074,
+      "mode": 33188,
+      "sha": "12f23c7990dfdea91fac0652e818f4f10caec55f"
+    },
+    {
+      "path": "dist/client/vinext-client-entry-manifest.json",
+      "size": 65,
+      "mode": 33188,
+      "sha": "02191dec84c39f2c133de1753b860e73c1ce7a12"
+    },
+    {
+      "path": "dist/server/__vite_rsc_assets_manifest.js",
+      "size": 3087,
+      "mode": 33188,
+      "sha": "dd4ae773710bce39fd1d4eb6f7e25aad2fa73131"
+    },
+    {
+      "path": "dist/server/_next/static/als-registry-BxXlcmpy.js",
+      "size": 530,
+      "mode": 33188,
+      "sha": "975cb5575bda49a6045922f7676abd242341a65a"
+    },
+    {
+      "path": "dist/server/_next/static/app-page-cache-BZ8fqn77.js",
+      "size": 5193,
+      "mode": 33188,
+      "sha": "eb2a5f8c1942e74a996346e4e6bd169eca0fe3aa"
+    },
+    {
+      "path": "dist/server/_next/static/app-page-cache-finalizer-uo_a0pQq.js",
+      "size": 3479,
+      "mode": 33188,
+      "sha": "c9db789c98492242c21c48e661f635488ad83008"
+    },
+    {
+      "path": "dist/server/_next/static/app-page-cache-render-B6Kh6ySJ.js",
+      "size": 1916,
+      "mode": 33188,
+      "sha": "a49c89ae375b50bed924765b77b17e9bdd4aefca"
+    },
+    {
+      "path": "dist/server/_next/static/app-page-stream-4eXKLzaO.js",
+      "size": 9970,
+      "mode": 33188,
+      "sha": "f8b75725d64006972dff8fbcfe80dc00a37e9edb"
+    },
+    {
+      "path": "dist/server/_next/static/app-prerender-endpoints-B6j0_GFy.js",
+      "size": 2021,
+      "mode": 33188,
+      "sha": "3bd5f254395d846383eab99eca4dc3a4f57091a1"
+    },
+    {
+      "path": "dist/server/_next/static/app-prerender-static-params-Duk5CNfH.js",
+      "size": 170,
+      "mode": 33188,
+      "sha": "951102f38fe171d27471b1e978b8032f4cbf0b8b"
+    },
+    {
+      "path": "dist/server/_next/static/app-route-handler-dispatch-K8dowuEp.js",
+      "size": 26251,
+      "mode": 33188,
+      "sha": "474ae304e4b88a7851022ea47ceb7695a3ee3d41"
+    },
+    {
+      "path": "dist/server/_next/static/app-segment-config-DaZZAUhh.js",
+      "size": 11682,
+      "mode": 33188,
+      "sha": "ef3511215b21bc27bcaf1b253d729078c0072e00"
+    },
+    {
+      "path": "dist/server/_next/static/app-static-generation-yOskrLyP.js",
+      "size": 916,
+      "mode": 33188,
+      "sha": "32dd2f4617a1c79b936cf9209fa71d2351367dd3"
+    },
+    {
+      "path": "dist/server/_next/static/base-path-DoTXrg9A.js",
+      "size": 315,
+      "mode": 33188,
+      "sha": "7a0e2b1c1dd83900f3c269e62a2c89c3f82ca95f"
+    },
+    {
+      "path": "dist/server/_next/static/cache-headers-BMIK3PuX.js",
+      "size": 46259,
+      "mode": 33188,
+      "sha": "572a9f2f66f7567788230ddde1b38aaf58e9dd20"
+    },
+    {
+      "path": "dist/server/_next/static/css/index.UljDDjAr.css",
+      "size": 186862,
+      "mode": 33188,
+      "sha": "5d178165ee7baf51aa48b638765cf756aec570a9"
+    },
+    {
+      "path": "dist/server/_next/static/css/page.CUnTg_Hq.css",
+      "size": 19421,
+      "mode": 33188,
+      "sha": "3cf9584841d1712997c38606cd9747f7e8d20720"
+    },
+    {
+      "path": "dist/server/_next/static/dist-D7IP5vMX.js",
+      "size": 1590,
+      "mode": 33188,
+      "sha": "acbfad237a3ebc6e3a4e5d9ef4c2013a578d724e"
+    },
+    {
+      "path": "dist/server/_next/static/file-based-metadata-BhS1daFa.js",
+      "size": 6756,
+      "mode": 33188,
+      "sha": "5e275e791f75caa4e736f0f0b11a2a3974721ae6"
+    },
+    {
+      "path": "dist/server/_next/static/framework~index-CeyZbFfc.js",
+      "size": 210,
+      "mode": 33188,
+      "sha": "2d7a82f3c2ec17858f108f753f3f8a84a2c1c2c0"
+    },
+    {
+      "path": "dist/server/_next/static/framework~index~page~layout~page~page~page~page~app-page-cache-render~app-page-cache~app-ro~czc1rg2u-Dg03Conu.js",
+      "size": 6125,
+      "mode": 33188,
+      "sha": "a62b6c8b73de6b3cb2c71427339704c825308a0f"
+    },
+    {
+      "path": "dist/server/_next/static/framework~index~page~page~page~page~page~app-route-handler-dispatch-CyxQXRvR.js",
+      "size": 56622,
+      "mode": 33188,
+      "sha": "4f70c5106b879008d2aee6ea5ed6c400dd782112"
+    },
+    {
+      "path": "dist/server/_next/static/http-error-responses-MHMqC7hK.js",
+      "size": 647,
+      "mode": 33188,
+      "sha": "dcfdf27462a4231cb05b037d25e397d4dc5f5b57"
+    },
+    {
+      "path": "dist/server/_next/static/implicit-tags-B2vGtJBI.js",
+      "size": 1350,
+      "mode": 33188,
+      "sha": "24952ebbaeb3d75ab07dc762531eb247e33f2457"
+    },
+    {
+      "path": "dist/server/_next/static/isr-cache-D66vNtnc.js",
+      "size": 3354,
+      "mode": 33188,
+      "sha": "c5f665dbcb426ce03c1b8184d9090993fdc50dac"
+    },
+    {
+      "path": "dist/server/_next/static/legal-document-B9iHyGkv.js",
+      "size": 4916,
+      "mode": 33188,
+      "sha": "0ab461f56983a971c460fa985c01e56fb7f0b4b2"
+    },
+    {
+      "path": "dist/server/_next/static/metadata-route-response-D8XrSkK6.js",
+      "size": 4964,
+      "mode": 33188,
+      "sha": "2cf3810ada5457eb67ef07bd0e1e6c85b7408801"
+    },
+    {
+      "path": "dist/server/_next/static/metadata-routes-Dr36W9GX.js",
+      "size": 4166,
+      "mode": 33188,
+      "sha": "8f085e421d4d516aeb7e0325efe528a21192b780"
+    },
+    {
+      "path": "dist/server/_next/static/navigation-runtime-DnLBImGD.js",
+      "size": 803,
+      "mode": 33188,
+      "sha": "245f2bd2801f8fd834f66fd2adf636cdebeb2708"
+    },
+    {
+      "path": "dist/server/_next/static/page-BLLRX_Lf.js",
+      "size": 300,
+      "mode": 33188,
+      "sha": "4db4f6577140e3479fee036934f32c536d47eead"
+    },
+    {
+      "path": "dist/server/_next/static/page-C1qahNJe.js",
+      "size": 296,
+      "mode": 33188,
+      "sha": "92381dbcc8e349f070088e18b98ecb7591ce9668"
+    },
+    {
+      "path": "dist/server/_next/static/page-CyUJi4zQ.js",
+      "size": 314,
+      "mode": 33188,
+      "sha": "f2e47928505c170198925e29de213ce00053b697"
+    },
+    {
+      "path": "dist/server/_next/static/page-DQym39Z0.js",
+      "size": 2789,
+      "mode": 33188,
+      "sha": "22b9e6a2560124932c96f4570dc023f24375046a"
+    },
+    {
+      "path": "dist/server/_next/static/page-DwUZBHab.js",
+      "size": 300,
+      "mode": 33188,
+      "sha": "cf593e34007c5b14b8777c052416e8cc1097e88f"
+    },
+    {
+      "path": "dist/server/_next/static/ppr-fallback-shell-Dk1705li.js",
+      "size": 2060,
+      "mode": 33188,
+      "sha": "0923bf141484237769df190b8291fb098b78db61"
+    },
+    {
+      "path": "dist/server/_next/static/record-DMxQLK5r.js",
+      "size": 1580,
+      "mode": 33188,
+      "sha": "e3328cf1ec819a64862f9608d09da7254ca7eeca"
+    },
+    {
+      "path": "dist/server/_next/static/rolldown-runtime-DUnMT5BP.js",
+      "size": 694,
+      "mode": 33188,
+      "sha": "c27a8b2d2969dd2684fa56deef86ca35ee51a5db"
+    },
+    {
+      "path": "dist/server/_next/static/root-params-CZEXSVqJ.js",
+      "size": 661,
+      "mode": 33188,
+      "sha": "b3dbc7e35bab3cbf9e50c3ea92705f30b64bc275"
+    },
+    {
+      "path": "dist/server/_next/static/route-pattern-CtZt71-D.js",
+      "size": 1925,
+      "mode": 33188,
+      "sha": "f6860cd5a7ac9404d5ccc6b41ce001a3722fc540"
+    },
+    {
+      "path": "dist/server/_next/static/rsc-BmHN4iu7.js",
+      "size": 745,
+      "mode": 33188,
+      "sha": "041d06de55aafe327e272151040fc54ceb7ac365"
+    },
+    {
+      "path": "dist/server/_next/static/site-chrome-BBurmfP7.js",
+      "size": 15939,
+      "mode": 33188,
+      "sha": "e003af3a67886e4b277a9063b12d7ed633a1853f"
+    },
+    {
+      "path": "dist/server/_next/static/text-stream-DRn2CMqM.js",
+      "size": 19413,
+      "mode": 33188,
+      "sha": "9cde97687a56eff15945de84fc711e8b5da34053"
+    },
+    {
+      "path": "dist/server/_next/static/thenable-params-D7sJOuEf.js",
+      "size": 2405,
+      "mode": 33188,
+      "sha": "ddb75efd809219baf2926b8fc81d72c590fd6a26"
+    },
+    {
+      "path": "dist/server/_next/static/unified-request-context-qhL7wVUy.js",
+      "size": 2891,
+      "mode": 33188,
+      "sha": "97f02de786762a9abbdc31c55b62c1d15124c168"
+    },
+    {
+      "path": "dist/server/.vite/manifest.json",
+      "size": 13721,
+      "mode": 33188,
+      "sha": "aebe7c668708a522190341e7fb14b0bff6bd1271"
+    },
+    {
+      "path": "dist/server/BUILD_ID",
+      "size": 36,
+      "mode": 33188,
+      "sha": "7c182f82adf71a5296bc5a8966897ec00d3d7a78"
+    },
+    {
+      "path": "dist/server/index.js",
+      "size": 204549,
+      "mode": 33188,
+      "sha": "4fd9cc6db86bc64cc54446fee24b0d5aa05fa17e"
+    },
+    {
+      "path": "dist/server/ssr/__vite_rsc_assets_manifest.js",
+      "size": 3087,
+      "mode": 33188,
+      "sha": "dd4ae773710bce39fd1d4eb6f7e25aad2fa73131"
+    },
+    {
+      "path": "dist/server/ssr/_next/static/app-prefetch-fetch-queue-gTaZhh19.js",
+      "size": 0,
+      "mode": 33188,
+      "sha": "da39a3ee5e6b4b0d3255bfef95601890afd80709"
+    },
+    {
+      "path": "dist/server/ssr/_next/static/app-router-scroll-C6_fVA72.js",
+      "size": 2543,
+      "mode": 33188,
+      "sha": "5b549196815acaa42d22d0edba812bd0947d487c"
+    },
+    {
+      "path": "dist/server/ssr/_next/static/error-boundary-CHluiF0K.js",
+      "size": 5399,
+      "mode": 33188,
+      "sha": "a6abf1b201a40d3f3cbec834b2ee6f3af8dca88c"
+    },
+    {
+      "path": "dist/server/ssr/_next/static/experience-D1lZNu-J.js",
+      "size": 80565,
+      "mode": 33188,
+      "sha": "22c72e95e3923ca3942cba3b7993fce9b187860f"
+    },
+    {
+      "path": "dist/server/ssr/_next/static/Icon-DSirLvbR.js",
+      "size": 1029,
+      "mode": 33188,
+      "sha": "16f77a871c1333c24e20b4897bed3b7544798467"
+    },
+    {
+      "path": "dist/server/ssr/_next/static/image-CRu0xGYc.js",
+      "size": 45158,
+      "mode": 33188,
+      "sha": "e4d0c75719173a97c4daf5181ae6b937ce5bd612"
+    },
+    {
+      "path": "dist/server/ssr/_next/static/layout-segment-context-BmtTeCpq.js",
+      "size": 381,
+      "mode": 33188,
+      "sha": "bf15072a23d7428a2438956d065a1feab49d9abf"
+    },
+    {
+      "path": "dist/server/ssr/_next/static/static.edge-DxxiVpFD.js",
+      "size": 168,
+      "mode": 33188,
+      "sha": "011131c0538630d071ff6f0a3eda3a80c85fd210"
+    },
+    {
+      "path": "dist/server/ssr/_next/static/streamed-icons-DOVZSNyE.js",
+      "size": 691,
+      "mode": 33188,
+      "sha": "73bce3a0e106bd9643c6914ca51f3c7e0554f7cb"
+    },
+    {
+      "path": "dist/server/ssr/index.js",
+      "size": 278635,
+      "mode": 33188,
+      "sha": "c056e0013886f594f62a7c4451ea8bd37e60a00f"
+    },
+    {
+      "path": "dist/server/ssr/vinext-client-assets.js",
+      "size": 2018,
+      "mode": 33188,
+      "sha": "02e0d395491efffd01e3c1e011368a6feaecd3aa"
+    },
+    {
+      "path": "dist/server/ssr/vinext-server.json",
+      "size": 86,
+      "mode": 33188,
+      "sha": "9de9227710bd7b87acc03bba07e75d814bb740f6"
+    },
+    {
+      "path": "dist/server/vinext-client-assets.js",
+      "size": 2018,
+      "mode": 33188,
+      "sha": "02e0d395491efffd01e3c1e011368a6feaecd3aa"
+    },
+    {
+      "path": "dist/server/vinext-externals.json",
+      "size": 3,
+      "mode": 33188,
+      "sha": "cd0d4cc32346750408f7d4f5e78ec9a6e5b79a0d"
+    },
+    {
+      "path": "dist/server/vinext-server.json",
+      "size": 86,
+      "mode": 33188,
+      "sha": "9de9227710bd7b87acc03bba07e75d814bb740f6"
+    },
+    {
+      "path": "dist/server/wrangler.json",
+      "size": 1172,
+      "mode": 33188,
+      "sha": "d74beef252d33f76d917ed0e14accf5e9eaba18c"
+    },
+    {
+      "path": "docs",
+      "size": 0,
+      "mode": 16877
+    },
+    {
+      "path": "hooks/use-mobile.ts",
+      "size": 585,
+      "mode": 33188,
+      "sha": "202bb2ea86fe276409a5f485440755cddc0a9347"
+    },
+    {
+      "path": "lib/legal-content.ts",
+      "size": 19253,
+      "mode": 33188,
+      "sha": "e99170c2e44a5e45936c96ec2c61124618236288"
+    },
+    {
+      "path": "lib/site-config.ts",
+      "size": 631,
+      "mode": 33188,
+      "sha": "d736a17f6eabb6f9d145759772c2c64a48af4004"
+    },
+    {
+      "path": "lib/utils.ts",
+      "size": 169,
+      "mode": 33188,
+      "sha": "c90970573af77a6d09641e5b319dff2f8075aafe"
+    },
+    {
+      "path": "next-env.d.ts",
+      "size": 288,
+      "mode": 33188,
+      "sha": "915946e261450f4fb6aab2ca862c8b440b748240"
+    },
+    {
+      "path": "next.config.ts",
+      "size": 309,
+      "mode": 33188,
+      "sha": "3eec1c29c21138bcbba1fe480a19e6f81e0d3aaa"
+    },
+    {
+      "path": "out/__next.__PAGE__.txt",
+      "size": 9464,
+      "mode": 33188,
+      "sha": "736fcb217a4042ee72ba5615f53e84bca1c6ef3f"
+    },
+    {
+      "path": "out/__next._full.txt",
+      "size": 10035,
+      "mode": 33188,
+      "sha": "1b0cfab6d60d70f04d2e319ec46cf495d39ef731"
+    },
+    {
+      "path": "out/__next._tree.txt",
+      "size": 472,
+      "mode": 33188,
+      "sha": "b2661d4de0fbb2338a7a519d8a8b62d3fe91dc09"
+    },
+    {
+      "path": "out/_next/mgbucEYEUdclcOXZcLTZH",
+      "size": 0,
+      "mode": 16877
+    },
+    {
+      "path": "out/_next/static/chunks/02ovu3a35ry0d.js",
+      "size": 228922,
+      "mode": 33204,
+      "sha": "66e8c88a7ca87aca474851f409b752d67bd4d10d"
+    },
+    {
+      "path": "out/_next/static/chunks/0cz1d0mv5g_q7.js",
+      "size": 112594,
+      "mode": 33204,
+      "sha": "3f4899d0f1d29d89df1ae015f694c8714284cfb0"
+    },
+    {
+      "path": "out/_next/static/chunks/12aruqaur5huj.js",
+      "size": 22139,
+      "mode": 33204,
+      "sha": "46ebfee24a1c3cc4b11067a85b8889b20ac017bc"
+    },
+    {
+      "path": "out/_next/static/chunks/13yxs8tvcajse.js",
+      "size": 177648,
+      "mode": 33204,
+      "sha": "4d3812238f045fd5aa4a29e2a330da73acf6721e"
+    },
+    {
+      "path": "out/_next/static/chunks/18e-uu5md_502.js",
+      "size": 16752,
+      "mode": 33204,
+      "sha": "4a8eab7a95e7dc1bfc6c626ad887ada30676538b"
+    },
+    {
+      "path": "out/_next/static/chunks/21n_74_eermw5.css",
+      "size": 13472,
+      "mode": 33204,
+      "sha": "bb321c1c8eafd7a3e660e79681527f88ac1fd9ee"
+    },
+    {
+      "path": "out/_next/static/chunks/3fntmmi971322.js",
+      "size": 14377,
+      "mode": 33204,
+      "sha": "0e765fa20082908caa2ba3fee4ff23826786c0aa"
+    },
+    {
+      "path": "out/_next/static/chunks/3humct-5aoi50.css",
+      "size": 168260,
+      "mode": 33204,
+      "sha": "3736fda28f8f4811dd6fe9f32c9ade83ab5da34b"
+    },
+    {
+      "path": "out/_next/static/chunks/3r53606uavn7w.js",
+      "size": 135533,
+      "mode": 33204,
+      "sha": "ca4cd75508c1fada6a395d03c0c290ecad6f972b"
+    },
+    {
+      "path": "out/_next/static/chunks/turbopack-3p7tra_9wusf8.js",
+      "size": 9688,
+      "mode": 33204,
+      "sha": "2d4ca9e34694db2c2107f42ebcca3cbbbce7b166"
+    },
+    {
+      "path": "out/_next/static/mgbucEYEUdclcOXZcLTZH/_buildManifest.js",
+      "size": 219,
+      "mode": 33188,
+      "sha": "e8cf7adcc68be2b4cb8913d46b913ab4a71668bc"
+    },
+    {
+      "path": "out/_next/static/mgbucEYEUdclcOXZcLTZH/_clientMiddlewareManifest.js",
+      "size": 96,
+      "mode": 33188,
+      "sha": "9ae8c9aa991e3f34f0594f8c728c7fcc9fbb6f3d"
+    },
+    {
+      "path": "out/_next/static/mgbucEYEUdclcOXZcLTZH/_ssgManifest.js",
+      "size": 80,
+      "mode": 33188,
+      "sha": "011268d6627898dc2caac8b9678086cd9b9a7dfe"
+    },
+    {
+      "path": "out/_not-found.html",
+      "size": 11159,
+      "mode": 33188,
+      "sha": "84bdee2e9a1c9dbf962807cd2a253598b6df8000"
+    },
+    {
+      "path": "out/_not-found.txt",
+      "size": 6781,
+      "mode": 33188,
+      "sha": "6c8f036f6b7b9e0e5488e13732cdcac5345c8f4d"
+    },
+    {
+      "path": "out/_not-found/__next._full.txt",
+      "size": 6781,
+      "mode": 33188,
+      "sha": "6c8f036f6b7b9e0e5488e13732cdcac5345c8f4d"
+    },
+    {
+      "path": "out/_not-found/__next._not-found.__PAGE__.txt",
+      "size": 5889,
+      "mode": 33188,
+      "sha": "d12f558b9e81d5b4fac7907a31e449d7ffb77f96"
+    },
+    {
+      "path": "out/_not-found/__next._tree.txt",
+      "size": 496,
+      "mode": 33188,
+      "sha": "ae9f6dc70cd2fceb7cbe7976bf3caea582f6d0bb"
+    },
+    {
+      "path": "out/404.html",
+      "size": 11159,
+      "mode": 33188,
+      "sha": "84bdee2e9a1c9dbf962807cd2a253598b6df8000"
+    },
+    {
+      "path": "out/app/library-preview.webp",
+      "size": 138866,
+      "mode": 33188,
+      "sha": "f2d1df3ed07f20940106595ab2b9939ab2c167c1"
+    },
+    {
+      "path": "out/app/library.webp",
+      "size": 1711570,
+      "mode": 33188,
+      "sha": "b36bc34221d4cf9f611cb3d5689317a90e5f8ff3"
+    },
+    {
+      "path": "out/app/schedule-preview.webp",
+      "size": 132010,
+      "mode": 33188,
+      "sha": "4ae0577d7fc9a6d7ac70817ba63d42fc0fa16294"
+    },
+    {
+      "path": "out/app/schedule.webp",
+      "size": 1732346,
+      "mode": 33188,
+      "sha": "86be82904eda490221415bb6304ce470e046f23b"
+    },
+    {
+      "path": "out/app/search-preview.webp",
+      "size": 204816,
+      "mode": 33188,
+      "sha": "9e7692078060c86fc4275a27a12da5663161cc29"
+    },
+    {
+      "path": "out/app/search.webp",
+      "size": 2253064,
+      "mode": 33188,
+      "sha": "1a03b3693ae454c9ae67365b7f71c51d7b4fad83"
+    },
+    {
+      "path": "out/app/seasons.webp",
+      "size": 806370,
+      "mode": 33188,
+      "sha": "550a7c03bc64861b4404706051fa5ed66ae46e82"
+    },
+    {
+      "path": "out/app/today-preview.webp",
+      "size": 138564,
+      "mode": 33188,
+      "sha": "ce6b7656352cb81bcb79fdf300bf6f83d2edbac3"
+    },
+    {
+      "path": "out/app/today.webp",
+      "size": 2070154,
+      "mode": 33188,
+      "sha": "74808311108bfb85a41705a474a2d2135bd96262"
+    },
+    {
+      "path": "out/brand/icon.svg",
+      "size": 993,
+      "mode": 33188,
+      "sha": "cc9832960b8b7e1efc45e5d52cd527b2f6b9fc60"
+    },
+    {
+      "path": "out/brand/mark-tight.svg",
+      "size": 609,
+      "mode": 33188,
+      "sha": "9d5554607baa84b311aa0d4607b4bc92146589c3"
+    },
+    {
+      "path": "out/brand/mark.svg",
+      "size": 609,
+      "mode": 33188,
+      "sha": "1cb8de32ef521c198f80da3be1fe27f02b0c1f5d"
+    },
+    {
+      "path": "out/delete-account.html",
+      "size": 32364,
+      "mode": 33188,
+      "sha": "08d25a8436cb650b7156534a5b1beea846ff54c9"
+    },
+    {
+      "path": "out/delete-account.txt",
+      "size": 19070,
+      "mode": 33188,
+      "sha": "66916e2c1753e28b469ed47583a4eca9f2ae686d"
+    },
+    {
+      "path": "out/delete-account/__next._full.txt",
+      "size": 19070,
+      "mode": 33188,
+      "sha": "66916e2c1753e28b469ed47583a4eca9f2ae686d"
+    },
+    {
+      "path": "out/delete-account/__next._tree.txt",
+      "size": 499,
+      "mode": 33188,
+      "sha": "58ccf2cbafd08aab52125a63521f86616990cbd7"
+    },
+    {
+      "path": "out/delete-account/__next.delete-account.__PAGE__.txt",
+      "size": 18425,
+      "mode": 33188,
+      "sha": "eda3973487cfdad353b98dceeb2f21dd6214bb11"
+    },
+    {
+      "path": "out/fonts/BarlowCondensed-OFL.txt",
+      "size": 4377,
+      "mode": 33188,
+      "sha": "d0dbf6e88cdad08b4270220f0c92fbd7c9fc1c6b"
+    },
+    {
+      "path": "out/fonts/BarlowCondensed-SemiBold.ttf",
+      "size": 86636,
+      "mode": 33188,
+      "sha": "9bd81d0ffcab0c2da785f5181f8ef93aea3c21a5"
+    },
+    {
+      "path": "out/fonts/Outfit-Bold.ttf",
+      "size": 48340,
+      "mode": 33188,
+      "sha": "7f80cab803c7eafec1d4deb10ba9a9699a9af552"
+    },
+    {
+      "path": "out/fonts/Outfit-Medium.ttf",
+      "size": 47800,
+      "mode": 33188,
+      "sha": "9e9a094b61389254add0df9536fe962a9d668926"
+    },
+    {
+      "path": "out/fonts/Outfit-Regular.ttf",
+      "size": 47844,
+      "mode": 33188,
+      "sha": "3024f9b4f58fd6769d8634b6352a423b5cf73647"
+    },
+    {
+      "path": "out/fonts/Outfit-SemiBold.ttf",
+      "size": 48456,
+      "mode": 33188,
+      "sha": "7b4dd31fa1c9ada8f879b12f2fff5663115734d2"
+    },
+    {
+      "path": "out/images/arcane.jpg",
+      "size": 65740,
+      "mode": 33188,
+      "sha": "ba71a81be223f546f2bf3b3bc840bb3bd8ecc779"
+    },
+    {
+      "path": "out/images/attack-on-titan-2x3.jpg",
+      "size": 102344,
+      "mode": 33188,
+      "sha": "a8e42170eff9b5dc1922b1c897fbaf0fba7951c7"
+    },
+    {
+      "path": "out/images/bear-wide.jpg",
+      "size": 202806,
+      "mode": 33188,
+      "sha": "a9863d2ccd96dc9ed73e039f2bca2a015bb9d3f2"
+    },
+    {
+      "path": "out/images/bear.jpg",
+      "size": 87722,
+      "mode": 33188,
+      "sha": "8f5a7d1b86db4ec9a26491729214cb5408a8f3b2"
+    },
+    {
+      "path": "out/images/breaking-bad.jpg",
+      "size": 164768,
+      "mode": 33188,
+      "sha": "64a1f04800341e7ab46335491780271a7f773b86"
+    },
+    {
+      "path": "out/images/frieren-poster.jpg",
+      "size": 80850,
+      "mode": 33188,
+      "sha": "ff4329c7dd0ce8ce809bcaa452c77a146d7d93e0"
+    },
+    {
+      "path": "out/images/frieren-wide.jpg",
+      "size": 153189,
+      "mode": 33188,
+      "sha": "bf6e58b591f840626770d5f4ed18215abd85a82d"
+    },
+    {
+      "path": "out/images/severance-poster.jpg",
+      "size": 73646,
+      "mode": 33188,
+      "sha": "1342429e0f359899cfb4a097bb5a6850f24865e9"
+    },
+    {
+      "path": "out/images/severance-wide.jpg",
+      "size": 75407,
+      "mode": 33188,
+      "sha": "cc39524f64f0018954592ec2d3f7721723ba353e"
+    },
+    {
+      "path": "out/images/severance.jpg",
+      "size": 125469,
+      "mode": 33188,
+      "sha": "284eb5508de713ba40a311dab86f09578ba564ee"
+    },
+    {
+      "path": "out/images/shogun.jpg",
+      "size": 131996,
+      "mode": 33188,
+      "sha": "6ba01a8bf81590ae91a69c56bc201978e86067b1"
+    },
+    {
+      "path": "out/images/silo.jpg",
+      "size": 45596,
+      "mode": 33188,
+      "sha": "c8ae349a413c63ccc45f5fbb720abacff55911a7"
+    },
+    {
+      "path": "out/images/stranger-things.jpg",
+      "size": 53345,
+      "mode": 33188,
+      "sha": "9ad31e9220f18ce5ad18e49f49860562e0f6043b"
+    },
+    {
+      "path": "out/images/succession.jpg",
+      "size": 102124,
+      "mode": 33188,
+      "sha": "246158e8c545c0332adea23fba1a3b98a7ac84aa"
+    },
+    {
+      "path": "out/images/the-last-of-us.jpg",
+      "size": 127074,
+      "mode": 33188,
+      "sha": "12f23c7990dfdea91fac0652e818f4f10caec55f"
+    },
+    {
+      "path": "out/index.html",
+      "size": 53769,
+      "mode": 33188,
+      "sha": "55d32fd35caebb9eaa5d64beff6a7f9a7da63b7b"
+    },
+    {
+      "path": "out/index.txt",
+      "size": 10035,
+      "mode": 33188,
+      "sha": "1b0cfab6d60d70f04d2e319ec46cf495d39ef731"
+    },
+    {
+      "path": "out/privacy.html",
+      "size": 51861,
+      "mode": 33188,
+      "sha": "7040181a1edcdb19a63de879e29bcfa7237eaec5"
+    },
+    {
+      "path": "out/privacy.txt",
+      "size": 32202,
+      "mode": 33188,
+      "sha": "cd06f9abb11907fc40bf9e2106bc00ae429c5cb6"
+    },
+    {
+      "path": "out/privacy/__next._full.txt",
+      "size": 32202,
+      "mode": 33188,
+      "sha": "cd06f9abb11907fc40bf9e2106bc00ae429c5cb6"
+    },
+    {
+      "path": "out/privacy/__next._tree.txt",
+      "size": 492,
+      "mode": 33188,
+      "sha": "b4de54386015a761efa2784ebbd7c7165e3197fe"
+    },
+    {
+      "path": "out/privacy/__next.privacy.__PAGE__.txt",
+      "size": 31272,
+      "mode": 33188,
+      "sha": "bb7913380a42ae3305ba7930ec795427ccb513be"
+    },
+    {
+      "path": "out/robots.txt",
+      "size": 121,
+      "mode": 33188,
+      "sha": "03184295f3ef76d29f85b4c88b87d27f9ce189b6"
+    },
+    {
+      "path": "out/sitemap.xml",
+      "size": 361,
+      "mode": 33188,
+      "sha": "55306a5b8e87fe12cae3b4eb55d38c2089929496"
+    },
+    {
+      "path": "out/support.html",
+      "size": 28140,
+      "mode": 33188,
+      "sha": "5afe2f4b55dac2c8bf33df724517a4df7c4dacf0"
+    },
+    {
+      "path": "out/support.txt",
+      "size": 16356,
+      "mode": 33188,
+      "sha": "b2e7ab30219e8eb502b1b35270c65bff60808fd7"
+    },
+    {
+      "path": "out/support/__next._full.txt",
+      "size": 16356,
+      "mode": 33188,
+      "sha": "b2e7ab30219e8eb502b1b35270c65bff60808fd7"
+    },
+    {
+      "path": "out/support/__next._tree.txt",
+      "size": 492,
+      "mode": 33188,
+      "sha": "e984d6f035fb7cbee8ff4d759aa563c1a67be601"
+    },
+    {
+      "path": "out/support/__next.support.__PAGE__.txt",
+      "size": 15745,
+      "mode": 33188,
+      "sha": "3bc4b7d445b471e340b485da1223ff1fc8d6899e"
+    },
+    {
+      "path": "out/terms.html",
+      "size": 36814,
+      "mode": 33188,
+      "sha": "01b303f11d341ddbff7ec72e6c23d7389e086178"
+    },
+    {
+      "path": "out/terms.txt",
+      "size": 21993,
+      "mode": 33188,
+      "sha": "7df06528c283fa0f4891b09380a8634abfef7839"
+    },
+    {
+      "path": "out/terms/__next._full.txt",
+      "size": 21993,
+      "mode": 33188,
+      "sha": "7df06528c283fa0f4891b09380a8634abfef7839"
+    },
+    {
+      "path": "out/terms/__next._tree.txt",
+      "size": 490,
+      "mode": 33188,
+      "sha": "982d967481a295c31cbd3ece2e450d13ba1cc010"
+    },
+    {
+      "path": "out/terms/__next.terms.__PAGE__.txt",
+      "size": 21014,
+      "mode": 33188,
+      "sha": "6553e30c94e139cc6f0f286e2137355b8f490d02"
+    },
+    {
+      "path": "package-lock.json",
+      "size": 174759,
+      "mode": 33188,
+      "sha": "c2738823209a98aefda54dc5c4a1d5fee7b04f75"
+    },
+    {
+      "path": "package.json",
+      "size": 1245,
+      "mode": 33188,
+      "sha": "8bfa0f60c0304acc6b9706a886220e92c396794d"
+    },
+    {
+      "path": "postcss.config.mjs",
+      "size": 63,
+      "mode": 33188,
+      "sha": "259df1cf342ab6f73f56eb099a1803acb86061cb"
+    },
+    {
+      "path": "public/app/library-preview.webp",
+      "size": 138866,
+      "mode": 33188,
+      "sha": "f2d1df3ed07f20940106595ab2b9939ab2c167c1"
+    },
+    {
+      "path": "public/app/library.webp",
+      "size": 1711570,
+      "mode": 33188,
+      "sha": "b36bc34221d4cf9f611cb3d5689317a90e5f8ff3"
+    },
+    {
+      "path": "public/app/schedule-preview.webp",
+      "size": 132010,
+      "mode": 33188,
+      "sha": "4ae0577d7fc9a6d7ac70817ba63d42fc0fa16294"
+    },
+    {
+      "path": "public/app/schedule.webp",
+      "size": 1732346,
+      "mode": 33188,
+      "sha": "86be82904eda490221415bb6304ce470e046f23b"
+    },
+    {
+      "path": "public/app/search-preview.webp",
+      "size": 204816,
+      "mode": 33188,
+      "sha": "9e7692078060c86fc4275a27a12da5663161cc29"
+    },
+    {
+      "path": "public/app/search.webp",
+      "size": 2253064,
+      "mode": 33188,
+      "sha": "1a03b3693ae454c9ae67365b7f71c51d7b4fad83"
+    },
+    {
+      "path": "public/app/seasons.webp",
+      "size": 806370,
+      "mode": 33188,
+      "sha": "550a7c03bc64861b4404706051fa5ed66ae46e82"
+    },
+    {
+      "path": "public/app/today-preview.webp",
+      "size": 138564,
+      "mode": 33188,
+      "sha": "ce6b7656352cb81bcb79fdf300bf6f83d2edbac3"
+    },
+    {
+      "path": "public/app/today.webp",
+      "size": 2070154,
+      "mode": 33188,
+      "sha": "74808311108bfb85a41705a474a2d2135bd96262"
+    },
+    {
+      "path": "public/brand/icon.svg",
+      "size": 993,
+      "mode": 33188,
+      "sha": "cc9832960b8b7e1efc45e5d52cd527b2f6b9fc60"
+    },
+    {
+      "path": "public/brand/mark-tight.svg",
+      "size": 609,
+      "mode": 33188,
+      "sha": "9d5554607baa84b311aa0d4607b4bc92146589c3"
+    },
+    {
+      "path": "public/brand/mark.svg",
+      "size": 609,
+      "mode": 33188,
+      "sha": "1cb8de32ef521c198f80da3be1fe27f02b0c1f5d"
+    },
+    {
+      "path": "public/fonts/BarlowCondensed-OFL.txt",
+      "size": 4377,
+      "mode": 33188,
+      "sha": "d0dbf6e88cdad08b4270220f0c92fbd7c9fc1c6b"
+    },
+    {
+      "path": "public/fonts/BarlowCondensed-SemiBold.ttf",
+      "size": 86636,
+      "mode": 33188,
+      "sha": "9bd81d0ffcab0c2da785f5181f8ef93aea3c21a5"
+    },
+    {
+      "path": "public/fonts/Outfit-Bold.ttf",
+      "size": 48340,
+      "mode": 33188,
+      "sha": "7f80cab803c7eafec1d4deb10ba9a9699a9af552"
+    },
+    {
+      "path": "public/fonts/Outfit-Medium.ttf",
+      "size": 47800,
+      "mode": 33188,
+      "sha": "9e9a094b61389254add0df9536fe962a9d668926"
+    },
+    {
+      "path": "public/fonts/Outfit-Regular.ttf",
+      "size": 47844,
+      "mode": 33188,
+      "sha": "3024f9b4f58fd6769d8634b6352a423b5cf73647"
+    },
+    {
+      "path": "public/fonts/Outfit-SemiBold.ttf",
+      "size": 48456,
+      "mode": 33188,
+      "sha": "7b4dd31fa1c9ada8f879b12f2fff5663115734d2"
+    },
+    {
+      "path": "public/images/arcane.jpg",
+      "size": 65740,
+      "mode": 33188,
+      "sha": "ba71a81be223f546f2bf3b3bc840bb3bd8ecc779"
+    },
+    {
+      "path": "public/images/attack-on-titan-2x3.jpg",
+      "size": 102344,
+      "mode": 33188,
+      "sha": "a8e42170eff9b5dc1922b1c897fbaf0fba7951c7"
+    },
+    {
+      "path": "public/images/bear-wide.jpg",
+      "size": 202806,
+      "mode": 33188,
+      "sha": "a9863d2ccd96dc9ed73e039f2bca2a015bb9d3f2"
+    },
+    {
+      "path": "public/images/bear.jpg",
+      "size": 87722,
+      "mode": 33188,
+      "sha": "8f5a7d1b86db4ec9a26491729214cb5408a8f3b2"
+    },
+    {
+      "path": "public/images/breaking-bad.jpg",
+      "size": 164768,
+      "mode": 33188,
+      "sha": "64a1f04800341e7ab46335491780271a7f773b86"
+    },
+    {
+      "path": "public/images/frieren-poster.jpg",
+      "size": 80850,
+      "mode": 33188,
+      "sha": "ff4329c7dd0ce8ce809bcaa452c77a146d7d93e0"
+    },
+    {
+      "path": "public/images/frieren-wide.jpg",
+      "size": 153189,
+      "mode": 33188,
+      "sha": "bf6e58b591f840626770d5f4ed18215abd85a82d"
+    },
+    {
+      "path": "public/images/severance-poster.jpg",
+      "size": 73646,
+      "mode": 33188,
+      "sha": "1342429e0f359899cfb4a097bb5a6850f24865e9"
+    },
+    {
+      "path": "public/images/severance-wide.jpg",
+      "size": 75407,
+      "mode": 33188,
+      "sha": "cc39524f64f0018954592ec2d3f7721723ba353e"
+    },
+    {
+      "path": "public/images/severance.jpg",
+      "size": 125469,
+      "mode": 33188,
+      "sha": "284eb5508de713ba40a311dab86f09578ba564ee"
+    },
+    {
+      "path": "public/images/shogun.jpg",
+      "size": 131996,
+      "mode": 33188,
+      "sha": "6ba01a8bf81590ae91a69c56bc201978e86067b1"
+    },
+    {
+      "path": "public/images/silo.jpg",
+      "size": 45596,
+      "mode": 33188,
+      "sha": "c8ae349a413c63ccc45f5fbb720abacff55911a7"
+    },
+    {
+      "path": "public/images/stranger-things.jpg",
+      "size": 53345,
+      "mode": 33188,
+      "sha": "9ad31e9220f18ce5ad18e49f49860562e0f6043b"
+    },
+    {
+      "path": "public/images/succession.jpg",
+      "size": 102124,
+      "mode": 33188,
+      "sha": "246158e8c545c0332adea23fba1a3b98a7ac84aa"
+    },
+    {
+      "path": "public/images/the-last-of-us.jpg",
+      "size": 127074,
+      "mode": 33188,
+      "sha": "12f23c7990dfdea91fac0652e818f4f10caec55f"
+    },
+    {
+      "path": "README.md",
+      "size": 7487,
+      "mode": 33188,
+      "sha": "5ab05d8aad85fcd0706ffeab761e12bc13489bfb"
+    },
+    {
+      "path": "tsconfig.json",
+      "size": 663,
+      "mode": 33188,
+      "sha": "f05cfd7b4c9c23caecb54802c4b4af25f45b5761"
+    },
+    {
+      "path": "vercel.json",
+      "size": 469,
+      "mode": 33188,
+      "sha": "5005a622a3849220240c3ddb07701fdb678a6b09"
+    }
+  ]
+}

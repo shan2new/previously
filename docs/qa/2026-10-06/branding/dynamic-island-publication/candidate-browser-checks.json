@@ -1,0 +1,148 @@
+{
+  "checkedAt": "2026-10-06T14:00:36.605Z",
+  "freshHeroLayouts": 3,
+  "desktop": {
+    "capsule": {
+      "ariaHidden": "true",
+      "box": {
+        "bottom": 176.175048828125,
+        "height": 30.313217163085938,
+        "left": 1041.9022216796875,
+        "right": 1131.4400634765625,
+        "top": 145.86183166503906,
+        "width": 89.537841796875,
+        "x": 1041.9022216796875,
+        "y": 145.86183166503906
+      },
+      "color": "rgb(0, 0, 0)",
+      "height": "25.7266px",
+      "pointerEvents": "none",
+      "top": "7.77344px",
+      "width": "88.3125px"
+    },
+    "documentWidth": 1470,
+    "image": {
+      "height": 800,
+      "loaded": true,
+      "src": "https://landing-ten-theta-55.vercel.app/app/library-current.jpg",
+      "width": 369
+    },
+    "viewport": 1470,
+    "wrapper": {
+      "bottom": 745.1561431884766,
+      "height": 611.968505859375,
+      "left": 918.6254272460938,
+      "right": 1225.56201171875,
+      "top": 133.18763732910156,
+      "width": 306.93658447265625,
+      "x": 918.6254272460938,
+      "y": 133.18763732910156
+    }
+  },
+  "mobile": [
+    {
+      "capsule": {
+        "ariaHidden": "true",
+        "box": {
+          "bottom": 592.7119140625,
+          "height": 25.24346923828125,
+          "left": 164.43450927734375,
+          "right": 242.6119842529297,
+          "top": 567.4684448242188,
+          "width": 78.17747497558594,
+          "x": 164.43450927734375,
+          "y": 567.4684448242188
+        },
+        "color": "rgb(0, 0, 0)",
+        "height": "22.5547px",
+        "pointerEvents": "none",
+        "top": "6.82031px",
+        "width": "77.4375px"
+      },
+      "documentWidth": 390,
+      "image": {
+        "height": 800,
+        "loaded": true,
+        "src": "https://landing-ten-theta-55.vercel.app/app/library-current.jpg",
+        "width": 369
+      },
+      "viewport": 390,
+      "wrapper": {
+        "bottom": 1090.54736328125,
+        "height": 532.7666625976562,
+        "left": 64.91886138916016,
+        "right": 325.0811233520508,
+        "top": 557.7807006835938,
+        "width": 260.1622619628906,
+        "x": 64.91886138916016,
+        "y": 557.7807006835938
+      }
+    },
+    {
+      "capsule": {
+        "ariaHidden": "true",
+        "box": {
+          "bottom": 557.9268798828125,
+          "height": 23.99285888671875,
+          "left": 130.95223999023438,
+          "right": 205.2493133544922,
+          "top": 533.9340209960938,
+          "width": 74.29707336425781,
+          "x": 130.95223999023438,
+          "y": 533.9340209960938
+        },
+        "color": "rgb(0, 0, 0)",
+        "height": "21.4375px",
+        "pointerEvents": "none",
+        "top": "6.47656px",
+        "width": "73.5938px"
+      },
+      "documentWidth": 320,
+      "image": {
+        "height": 800,
+        "loaded": true,
+        "src": "https://landing-ten-theta-55.vercel.app/app/library-current.jpg",
+        "width": 369
+      },
+      "viewport": 320,
+      "wrapper": {
+        "bottom": 1031.080322265625,
+        "height": 506.34814453125,
+        "left": 36.36917495727539,
+        "right": 283.63083267211914,
+        "top": 524.732177734375,
+        "width": 247.26165771484375,
+        "x": 36.36917495727539,
+        "y": 524.732177734375
+      }
+    }
+  ],
+  "heroLink": {
+    "url": "https://landing-ten-theta-55.vercel.app/#experience-library",
+    "librarySelected": "true"
+  },
+  "galleryDialog": {
+    "box": {
+      "bottom": 749.6171875,
+      "height": 719.234375,
+      "left": 8,
+      "right": 312,
+      "top": 30.3828125,
+      "width": 304,
+      "x": 8,
+      "y": 30.3828125
+    },
+    "documentWidth": 320,
+    "loaded": true,
+    "naturalHeight": 800,
+    "naturalWidth": 369,
+    "src": "https://landing-ten-theta-55.vercel.app/app/library-current.jpg",
+    "width": 320
+  },
+  "settledFocus": {
+    "activeLabel": "Enlarge Library screenshot",
+    "dialogClosed": true
+  },
+  "passed": true,
+  "scope": "CSS hardwareoverlay only; original screenshot pixels, status and appcontent unaltered. Three freshlayouts and Librarylink/dialog/focusflow"
+}

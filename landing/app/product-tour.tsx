@@ -23,15 +23,18 @@ import {
 const screens = [
   {
     id: 'today',
-    label: 'Today',
+    label: 'Home',
     summary: 'Pick up where you left off',
     icon: TvMinimal,
     title: 'Ready when\nyou are.',
     description:
       'Pick up where you left off. When you’re caught up, see what’s coming and enjoy the quiet.',
     detail: 'New episodes, next up, and upcoming releases.',
-    image: '/app/today.webp',
-    alt: 'Previously Today on iPhone: Re:ZERO is caught up, with its next episode and an Upcoming shelf below.',
+    image: '/app/home-current.png',
+    width: 1179,
+    height: 2556,
+    alt: 'Previously Home on iPhone: Black Clover Season 2 Episode 2, Recently aired, and the five app tabs.',
+    caption: 'New episodes and the stories you follow, together on Home.',
   },
   {
     id: 'schedule',
@@ -42,8 +45,11 @@ const screens = [
     description:
       'See the next episodes of the shows you follow, day by day. Jump to a date or come straight back to today.',
     detail: 'Anime and TV, together in your schedule.',
-    image: '/app/schedule.webp',
-    alt: 'Previously Schedule on iPhone: a day picker and dated episode cards, including the next Re:ZERO episode.',
+    image: '/app/schedule-current.jpg',
+    width: 369,
+    height: 800,
+    alt: 'Previously Schedule on iPhone: the Black Clover premiere, dated episodes and upcoming seasons, with the five app tabs.',
+    caption: 'A sample schedule with upcoming episodes and returning shows.',
   },
   {
     id: 'library',
@@ -54,8 +60,11 @@ const screens = [
     description:
       'Watching. Planned. Watched. And the shows making a return. A library that knows where you are with each story.',
     detail: 'Every season stays with its show.',
-    image: '/app/library.webp',
-    alt: 'Previously Library on iPhone: Returning, Watching and Planned shelves with TV and anime, including Black Clover and Re:ZERO.',
+    image: '/app/library-current.jpg',
+    width: 369,
+    height: 800,
+    alt: 'Previously Library on iPhone: Re:ZERO next up, Returning and Watching shelves, and the five app tabs.',
+    caption: 'A sample library, with your next episode and returning shows.',
   },
   {
     id: 'search',
@@ -66,8 +75,11 @@ const screens = [
     description:
       'Search TV and anime together, or follow a promising find from Trending now. Add the show to make it yours.',
     detail: 'One search. A whole new watchlist.',
-    image: '/app/search.webp',
-    alt: 'Previously Search on iPhone: Search anime and TV, a Trending now poster grid and add or saved controls for each show.',
+    image: '/app/search-current.jpg',
+    width: 369,
+    height: 800,
+    alt: 'Previously Search on iPhone: anime and TV search, For you, Trending and Genres, and a Trending now poster shelf.',
+    caption: 'Find a new show and add it to your library.',
   },
 ];
 
@@ -104,9 +116,9 @@ function ScreenView({ screen }: { screen: (typeof screens)[number] }) {
       >
         <Image
           unoptimized
-          src={screen.image.replace('.webp', '-preview.webp')}
-          width={1179}
-          height={2556}
+          src={screen.image}
+          width={screen.width}
+          height={screen.height}
           alt={screen.alt}
           className="native-screen"
           loading="lazy"
@@ -118,13 +130,13 @@ function ScreenView({ screen }: { screen: (typeof screens)[number] }) {
       <DialogContent className="screen-dialog">
         <DialogTitle>{screen.label} on iPhone</DialogTitle>
         <DialogDescription>
-          A screen from Previously. Captured September 2026.
+          {screen.caption}
         </DialogDescription>
         <Image
           unoptimized
           src={screen.image}
-          width={1179}
-          height={2556}
+          width={screen.width}
+          height={screen.height}
           alt={screen.alt}
         />
       </DialogContent>

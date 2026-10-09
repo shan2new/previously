@@ -1,0 +1,177 @@
+{
+  "checkedAtUTC": "2026-10-06T17:15:57.682Z",
+  "page": {
+    "date": "Effective 6 October 2026",
+    "draft": false,
+    "h1": "Privacy Policy.",
+    "links": [
+      {
+        "href": "#legal-main",
+        "text": "Skip to content"
+      },
+      {
+        "href": "/",
+        "text": "Previously\n."
+      },
+      {
+        "href": "/",
+        "text": "Back to Previously"
+      },
+      {
+        "href": "/privacy",
+        "text": "Privacy Policy"
+      },
+      {
+        "href": "/terms",
+        "text": "Terms of Use"
+      },
+      {
+        "href": "/support",
+        "text": "Support"
+      },
+      {
+        "href": "/delete-account",
+        "text": "Account Deletion"
+      },
+      {
+        "href": "#section-1",
+        "text": ""
+      },
+      {
+        "href": "#section-2",
+        "text": ""
+      },
+      {
+        "href": "#section-3",
+        "text": ""
+      },
+      {
+        "href": "#section-4",
+        "text": ""
+      },
+      {
+        "href": "#section-5",
+        "text": ""
+      },
+      {
+        "href": "#section-6",
+        "text": ""
+      },
+      {
+        "href": "#section-7",
+        "text": ""
+      },
+      {
+        "href": "#section-8",
+        "text": ""
+      },
+      {
+        "href": "#section-1",
+        "text": "01Who this policy covers"
+      },
+      {
+        "href": "#section-2",
+        "text": "02Information used to run Previously."
+      },
+      {
+        "href": "#section-3",
+        "text": "03Why this information is used"
+      },
+      {
+        "href": "#section-4",
+        "text": "04Services that receive information"
+      },
+      {
+        "href": "#section-5",
+        "text": "05Retention and deletion"
+      },
+      {
+        "href": "#section-6",
+        "text": "06Your controls and requests"
+      },
+      {
+        "href": "#section-7",
+        "text": "07Security, location and audience"
+      },
+      {
+        "href": "#section-8",
+        "text": "08Changes and contact"
+      },
+      {
+        "href": "mailto:shantanusinha95@gmail.com",
+        "text": "shantanusinha95@gmail.com"
+      },
+      {
+        "href": "https://github.com/shan2new",
+        "text": "GitHub"
+      },
+      {
+        "href": "https://www.linkedin.com/in/shan2new",
+        "text": "LinkedIn"
+      },
+      {
+        "href": "https://clerk.com/legal/privacy",
+        "text": "Clerk privacy notice "
+      },
+      {
+        "href": "https://www.apple.com/legal/privacy/",
+        "text": "Apple privacy policy "
+      },
+      {
+        "href": "https://policies.google.com/privacy",
+        "text": "Google and YouTube privacy policy "
+      },
+      {
+        "href": "https://www.cloudflare.com/privacypolicy/",
+        "text": "Cloudflare privacy policy "
+      },
+      {
+        "href": "https://vercel.com/legal/privacy-notice",
+        "text": "Vercel privacy notice "
+      },
+      {
+        "href": "#main",
+        "text": "Back to top ↑"
+      },
+      {
+        "href": "/",
+        "text": "Previously\n."
+      },
+      {
+        "href": "/privacy",
+        "text": "Privacy"
+      },
+      {
+        "href": "/terms",
+        "text": "Terms"
+      },
+      {
+        "href": "/delete-account",
+        "text": "Account deletion"
+      },
+      {
+        "href": "/support",
+        "text": "Support"
+      },
+      {
+        "href": "mailto:shantanusinha95@gmail.com",
+        "text": "Shantanu Sinha"
+      },
+      {
+        "href": "https://github.com/shan2new",
+        "text": "GitHub"
+      },
+      {
+        "href": "https://www.linkedin.com/in/shan2new",
+        "text": "LinkedIn"
+      }
+    ],
+    "retention": "05\nRetention and deletion\n\nAccount information and watching records remain until changed or deleted. Removing an individual show from the library does not necessarily erase its episode progress.\n\nWhen an in-app deletion request is accepted, Previously. removes the account’s active app records and clears app-managed account history, pending changes, caches and temporary exports on that device. It also requests deletion of the Clerk sign-in identity. If Clerk is temporarily unavailable, the app identifies the request as pending and the service retries that cleanup automatically. A lost connection does not prove deletion succeeded; the app lets you check the request’s status.\n\nFor an account linked to Apple, the app can ask you to confirm with Apple so the service can revoke that sign-in authorization during deletion. The authorization code and identity token are used only for that request; they are not saved in the app’s pending-change history or deletion ledger. If authorization cannot be revoked automatically, app-data deletion still proceeds and you receive instructions for removing Previously. from Sign in with Apple settings. Deletion status records whether Apple revocation completed or needs this manual step.\n\nA minimal hashed authentication identifier and deletion status are retained to prevent a deleted account from being recreated by an old session and to reconcile deletion requests. The deletion ledger’s raw authentication identifier is retained only while provider cleanup is pending. Existing moderation or security restriction records can separately retain an authentication identifier, reason and timestamps to protect the service and handle related requests; they are not public watching records.\n\nRoutine diagnostic logs are stored in capped files that rotate daily. Each completed file is scheduled for removal seven days after its last entry, so a record in a daily file can be about eight days old before cleanup. The current service records sanitized diagnostic outcomes rather than request bodies, sign-in tokens or search text. Aggregate usage and operational snapshots are scheduled for removal after 30 days. Cleanup runs on a schedule rather than erasing each record at the instant it reaches that age.\n\nRoutine database backups are scheduled for removal after seven days. A backup can contain earlier account records until that cleanup; a restore must reapply completed and pending account deletions before the service is reopened. Deletion does not instantly rewrite every backup. Backups are stored on the operator’s Mac Mini, with no off-device recovery copy; they do not protect against loss of that hardware or storage.\n\nSupport correspondence is kept as needed to resolve the request, protect the service and meet applicable recordkeeping duties. Authentication and infrastructure providers may retain security or operational records under their own policies. Contact us to ask about a specific record or request.",
+    "scrollWidth": 390,
+    "title": "Privacy Policy — Previously.",
+    "url": "https://previously.cognipin.com/privacy",
+    "width": 390
+  },
+  "observedConsoleWarningsAndErrors": [],
+  "scope": "Public canonical policy readback; console observations limited to this browser session. No consumer app QA."
+}

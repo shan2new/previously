@@ -7,6 +7,7 @@ import { inAudience, resolveAudience, sourceFor } from '../services/audience.js'
 import { getFeedFranchises, getSummaries, trendingFranchiseIds } from '../services/franchiseView.js'
 import { rankRecommendations, type RankSeed } from '../services/recommendationRank.js'
 import { loadRankInput } from '../services/recommendations.js'
+import { consumerFranchiseIds } from '../services/consumerContent.js'
 import { clientAnchor, readVisitAnchors } from '../services/visits.js'
 import { formatSubject, parseSubject } from '../social/subjects.js'
 import type {
@@ -198,7 +199,7 @@ function forYouSnapshot(nowMs: number, scope: ForYouScope = null): Promise<ForYo
       .catch((err: unknown) => {
         const previous = forYouCache.get(key)
         if (!previous) throw err
-        console.warn('[feed] For you refresh failed; serving the previous snapshot:', (err as Error).message)
+        console.warn('[feed] For you refresh failed; serving the previous snapshot:', 'diagnostic details redacted')
         return previous.snapshot
       })
       .finally(() => {
@@ -329,7 +330,7 @@ async function forYouViewer(userId: string, snapshot: ForYouSnapshot, nowMs: num
     }
     return viewer
   } catch (err: unknown) {
-    console.warn('[feed] For you could not be personalised; serving trending only:', (err as Error).message)
+    console.warn('[feed] For you could not be personalised; serving trending only:', 'diagnostic details redacted')
     return null
   }
 }
@@ -432,6 +433,19 @@ export async function getFeed(
     trending = snapshot.summaries
       .filter((summary) => !excluded.has(summary.id) && inAudience(scope, summary.source))
       .slice(0, FEED_LIMITS.trendingModule)
+    // Cached composition may predate a catalogue classification change. Recheck visible cards
+    // and named recommendation seeds without evicting shared caches or rewriting owned history.
+    const namedSeeds = ordered.flatMap((post) => post.context?.kind === 'recommended'
+      ? post.context.reason.seeds.map((seed) => seed.franchiseId) : [])
+    const visible = await consumerFranchiseIds([...new Set([
+      ...ordered.map((post) => post.franchiseId), ...trending.map((item) => item.id), ...namedSeeds,
+    ])])
+    ordered = ordered.filter((post) => visible.has(post.franchiseId)).map((post) => ({
+      ...post,
+      context: post.context?.kind === 'recommended' && post.context.reason.seeds.some((seed) => !visible.has(seed.franchiseId))
+        ? null : post.context,
+    }))
+    trending = trending.filter((item) => visible.has(item.id))
     cap = FEED_LIMITS.forYou
   }
 

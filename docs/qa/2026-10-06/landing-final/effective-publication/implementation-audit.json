@@ -1,0 +1,98 @@
+{
+  "checkedAtUTC": "2026-10-06T17:11:14.903764+00:00",
+  "installedArtifact": "/Users/shan2new/Infra/previously/releases/20261006T123751Z/server",
+  "installedSourceFingerprint": "707891eaf17802cd9c62a8dbd2c1e1bb4ab03bfa187a892b4e94c00eb0272b07",
+  "code": [
+    {
+      "path": "src/routes/me.ts",
+      "available": true,
+      "sha256": "91aee14f5aae8d98226d819e089c3be2bc73e9eae912c784599e045918ce6638",
+      "installedMatchesReviewedSource": true
+    },
+    {
+      "path": "src/services/deletionLedger.ts",
+      "available": true,
+      "sha256": "ed6bfc1abc89f7f7aaac563f26c9d7bb91c4a03c213f0a084b78c1b733fbc4e0",
+      "installedMatchesReviewedSource": true
+    },
+    {
+      "path": "src/services/erasure.ts",
+      "available": true,
+      "sha256": "2e8be02313a42602128a405590880767197419382b1e489a64b9ad1200ba5881",
+      "installedMatchesReviewedSource": true
+    },
+    {
+      "path": "src/services/accountErasurePlan.ts",
+      "available": true,
+      "sha256": "b37e7930be3ad6a2973c7d0a239d32222396e54c672da8726f41557dc5d2e2e2",
+      "installedMatchesReviewedSource": true
+    },
+    {
+      "path": "src/services/appleDeletion.ts",
+      "available": true,
+      "sha256": "bd2e8da435639bea288cd3e3e80f7535da86c0c048fb4fa2c7eb13f2e93ca990",
+      "installedMatchesReviewedSource": true
+    },
+    {
+      "path": "ops/run-server.mjs",
+      "available": true,
+      "sha256": "8bce1cb9b2c06db830d0fa8f778ad2538e21366e0ad1b67ccbd2512f6d29800c",
+      "installedMatchesReviewedSource": true
+    },
+    {
+      "path": "ops/common.mjs",
+      "available": true,
+      "sha256": "498c2af70e716e20f2205dc435811ed24d0ff83866f0498b1ea241914abfad6e",
+      "installedMatchesReviewedSource": true
+    },
+    {
+      "path": "ops/collect.mjs",
+      "available": true,
+      "sha256": "24eefeda1eae278ab43da65879f33f6151d23eb2c53db92073e35686c13220ce",
+      "installedMatchesReviewedSource": true
+    },
+    {
+      "path": "ops/backup.mjs",
+      "available": true,
+      "sha256": "49cc5157f141c69ea4f1cb7fd3a8cb21c1fef3fd718c915857a596a5c8aa29b5",
+      "installedMatchesReviewedSource": true
+    }
+  ],
+  "historicalLogs": [
+    {
+      "path": "/Users/shan2new/Library/Logs/com.shan.previously.out.log",
+      "absent": true
+    },
+    {
+      "path": "/Users/shan2new/Library/Logs/com.shan.previously.err.log",
+      "absent": true
+    }
+  ],
+  "historicalLogContentsRead": false,
+  "historicalLogFilesChangedByThisTask": false,
+  "retirementReceipt": "docs/qa/2026-10-06/operations/legacy-log-files-retired.json",
+  "policyReadinessConclusion": "No identified material mismatch between the effective policy and installed/qualified implementation. Missing live consumer workflows remain release QA, not a claim of verified completion or a prerequisite added by this audit.",
+  "liveQAClaimed": false,
+  "nativeConsumerDeletionProvenByThisTask": false,
+  "realAppleGrantRevocationProvenByThisTask": false,
+  "offDeviceBackupRequiredByThisTask": false,
+  "licensingOutreachRequiredByThisTask": false,
+  "routineRetention": "Daily capped log segments expire on scheduled cleanup seven days after last write; individual records can be about eight days old. Database backups scheduled seven days; aggregate snapshots scheduled30days; same Mini.",
+  "sourceEvidence": [
+    "server/src/routes/me.ts",
+    "server/src/services/deletionLedger.ts",
+    "server/src/services/accountErasurePlan.ts",
+    "server/src/services/appleDeletion.ts",
+    "ios/Sources/Features/Profile/ProfileView.swift",
+    "ios/Sources/Features/Profile/AccountDeletion.swift",
+    "ios/Sources/Features/Profile/AccountDeletionNotice.swift",
+    "ios/Sources/Auth/AuthManager.swift"
+  ],
+  "qualifiedTestEvidence": [
+    "docs/qa/2026-10-06/deletion-recovery/compiled-node24-apple-policy/results.json",
+    "docs/qa/2026-10-06/operations/final-ops-tests.txt",
+    "docs/qa/2026-10-06/operations/actual-installed-live-receipt.json",
+    "docs/qa/2026-10-06/sdk-privacy-audit.json"
+  ],
+  "productionProviderConfiguration": "Parent verified Google and Apple enabled through public UI and FAPI; actual native authentication remains separate pending evidence."
+}

@@ -1,0 +1,16 @@
+{
+  "checkedAt": "2026-10-06T12:10:11.040191+00:00",
+  "domain": "previously.cognipin.com",
+  "authoritativePreflight": "Cloudflare hostname search only five Clerk CNAMEs; no exact landing record",
+  "addition": {
+    "type": "A",
+    "name": "previously",
+    "content": "76.76.21.21",
+    "proxied": false,
+    "ttl": "Auto"
+  },
+  "publicResolutionVerified": true,
+  "httpsVerified": true,
+  "screenshot": "previously-dns-saved.png",
+  "httpsEvidence": "previously-domain-https.json"
+}

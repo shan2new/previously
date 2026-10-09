@@ -11,6 +11,7 @@ export type TmdbShowStatus =
 
 export interface TmdbSearchResult {
   id: number
+  adult?: boolean
   name: string
   original_name?: string | null
   genre_ids: number[]
@@ -23,6 +24,7 @@ export interface TmdbSearchResult {
 
 export interface TmdbMovieSearchResult {
   id: number
+  adult?: boolean
   title: string
   original_title?: string | null
   genre_ids: number[]

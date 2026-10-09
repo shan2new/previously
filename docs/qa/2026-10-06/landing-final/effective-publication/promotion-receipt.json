@@ -1,0 +1,12 @@
+{
+  "requestedAtUTC": "2026-10-06T17:14:38.841844+00:00",
+  "deploymentId": "dpl_EAcNw6zcnWPrMxkg2Nea3AkeNBBM",
+  "deploymentURL": "https://landing-mky50bk66-shan2news-projects.vercel.app",
+  "rollbackDeploymentId": "dpl_3nWUk4d8w6tw6Kf3v8VL7qTZv9jB",
+  "rollbackDeploymentURL": "https://landing-8mkz8v72u-shan2news-projects.vercel.app",
+  "exactQualifiedCandidate": true,
+  "rebuildRequested": false,
+  "exitCode": 0,
+  "stdout": "",
+  "stderr": "Vercel CLI 62.4.0\nFetching deployment \"landing-mky50bk66-shan2news-projects.vercel.app\" in shan2news-projects\u2026\n> Fetching deployment \"landing-mky50bk66-shan2news-projects.vercel.app\" in shan2news-projects\u2026\nPromote in progress\u2026\nPromote in progress\u2026\nPromote in progress\u2026\n> Promote in progress\u2026\n> Success! landing was promoted to landing-mky50bk66-shan2news-projects.vercel.app (dpl_EAcNw6zcnWPrMxkg2Nea3AkeNBBM) [2s]\n"
+}

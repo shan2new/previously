@@ -1,0 +1,46 @@
+{
+  "schemaVersion": 1,
+  "checkedAt": "2026-10-07T05:27:27.915595+00:00",
+  "method": "Read exact local plaintext bytes, UTF-8 decode, count and hash; no browser or external mutation",
+  "replyLimit": {
+    "value": 4000,
+    "unit": "characters",
+    "source": "https://developer.apple.com/help/app-store-connect/manage-submissions-to-app-review/reply-to-app-review-messages/",
+    "evidence": "Official Reply dialog screenshot and earlier saved visible UI"
+  },
+  "notesLimit": {
+    "value": 4000,
+    "unit": "bytes",
+    "source": "https://developer.apple.com/help/app-store-connect/reference/app-information/platform-version-information/",
+    "evidence": "Official Notes reference specifies bytes; UTF-8 checked conservatively for local template"
+  },
+  "remainingCharacters": 416,
+  "remainingUtf8Bytes": 416,
+  "templates": [
+    {
+      "path": "docs/release/2026-10-07/apple-review-response.txt",
+      "charactersIncludingFinalNewline": 3584,
+      "utf8BytesIncludingFinalNewline": 3584,
+      "asciiOnly": true,
+      "sha256": "f6a3f1292dd64e657b711dff343c7e25b5103ddc613dc9a90d2d7c86dd9bc472",
+      "unchangedFromSavedDraft": true,
+      "replyCharacterBudgetPassed": true,
+      "notesByteBudgetPassed": true
+    },
+    {
+      "path": "docs/release/2026-10-07/apple-review-notes.txt",
+      "charactersIncludingFinalNewline": 3584,
+      "utf8BytesIncludingFinalNewline": 3584,
+      "asciiOnly": true,
+      "sha256": "f6a3f1292dd64e657b711dff343c7e25b5103ddc613dc9a90d2d7c86dd9bc472",
+      "unchangedFromSavedDraft": true,
+      "replyCharacterBudgetPassed": true,
+      "notesByteBudgetPassed": true
+    }
+  ],
+  "replacePlaceholderThenRecheck": true,
+  "historicalReceiptPreserved": true,
+  "replySent": false,
+  "notesUpdatedLive": false,
+  "resubmitted": false
+}

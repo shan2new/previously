@@ -1,0 +1,87 @@
+{
+  "schemaVersion": 1,
+  "capturedAtUtc": "2026-10-07T05:11:04.873581+00:00",
+  "scope": "One bounded read-only official XcodeBuildMCP device inventory; returned target classification checked against existing local CoreSimulator device metadata",
+  "tool": {
+    "name": "XcodeBuildMCP",
+    "version": "2.7.0",
+    "command": "device list --output json",
+    "didError": false,
+    "returnedTargetCount": 8
+  },
+  "physicalTargetsDetected": 0,
+  "usableExistingPhysicalPairAvailable": false,
+  "unclassifiedTargets": 0,
+  "returnedTargets": [
+    {
+      "model": "iPhone 14 Pro",
+      "toolPlatform": "iOS",
+      "toolConnectionState": "connected",
+      "toolAvailable": true,
+      "osVersion": "27.0",
+      "registeredCoreSimulatorDevice": true
+    },
+    {
+      "model": "iPhone 18 Pro Max",
+      "toolPlatform": "iOS",
+      "toolConnectionState": "disconnected",
+      "toolAvailable": false,
+      "osVersion": "27.0",
+      "registeredCoreSimulatorDevice": true
+    },
+    {
+      "model": "iPhone SE 3rd generation",
+      "toolPlatform": "iOS",
+      "toolConnectionState": "disconnected",
+      "toolAvailable": false,
+      "osVersion": "27.0",
+      "registeredCoreSimulatorDevice": true
+    },
+    {
+      "model": "iPhone 17 Pro",
+      "toolPlatform": "iOS",
+      "toolConnectionState": "disconnected",
+      "toolAvailable": false,
+      "osVersion": "27.0",
+      "registeredCoreSimulatorDevice": true
+    },
+    {
+      "model": "iPhone 14 Pro",
+      "toolPlatform": "iOS",
+      "toolConnectionState": "disconnected",
+      "toolAvailable": false,
+      "osVersion": "27.0",
+      "registeredCoreSimulatorDevice": true
+    },
+    {
+      "model": "iPhone 14 Pro",
+      "toolPlatform": "iOS",
+      "toolConnectionState": "disconnected",
+      "toolAvailable": false,
+      "osVersion": "27.0",
+      "registeredCoreSimulatorDevice": true
+    },
+    {
+      "model": "iPad Pro 13 inch M5 12GB",
+      "toolPlatform": "iPadOS",
+      "toolConnectionState": "disconnected",
+      "toolAvailable": false,
+      "osVersion": "27.0",
+      "registeredCoreSimulatorDevice": true
+    },
+    {
+      "model": "Apple Watch Ultra 3 49mm",
+      "toolPlatform": "watchOS",
+      "toolConnectionState": "disconnected",
+      "toolAvailable": false,
+      "osVersion": "27.0",
+      "registeredCoreSimulatorDevice": true
+    }
+  ],
+  "serialNumbersOrUdidPublished": false,
+  "devicePairingPerformed": false,
+  "appBuildTestRunInstallPerformed": false,
+  "deviceOrAccountMutationsPerformed": false,
+  "recordingCapabilityVerified": false,
+  "conclusion": "No physical iPhone target was returned. All returned devices match registered CoreSimulator devices. Stop: direct physical QA is unavailable through this inventory; owner phone recordings remain separate."
+}

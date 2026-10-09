@@ -1,0 +1,17 @@
+{
+  "verifiedAt": "2026-10-06T11:33:42.939852+00:00",
+  "appId": "6818452741",
+  "version": "1.0",
+  "state": "Prepare for Submission",
+  "metadataSaved": true,
+  "supportURL": "https://thepreviously.vercel.app/support",
+  "marketingURL": "https://thepreviously.vercel.app",
+  "reviewContactNameEmailPresent": true,
+  "reviewContactPhonePresent": true,
+  "reviewContactPhoneSource": "Owner entered in the existing App Store Connect form during this session; value excluded from public evidence.",
+  "reviewCredentialsPresent": false,
+  "finalBuildSelected": false,
+  "submittedForReview": false,
+  "screenshot": "docs/qa/2026-10-06/app-store/metadata-links-saved.png",
+  "screenshotSha256": "1a9838c46dd7e9eec220494ab6564dabd6efbf3853b6f084aabae958aabfb3f0"
+}

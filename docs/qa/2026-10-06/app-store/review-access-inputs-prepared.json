@@ -1,0 +1,57 @@
+{
+  "checkedAt": "2026-10-06T13:38:24.395645+00:00",
+  "scope": "Private inputs and read-only production preflight; not a native login proof",
+  "inputsPrepared": true,
+  "credentialsGeneratedLocally": true,
+  "privateStatePath": "/Users/shan2new/.config/previously/release/app-review-state.json",
+  "privateScriptPath": "/Users/shan2new/.config/previously/release/app-review-provision.py",
+  "privateMode": "0600",
+  "state": "prepared-not-authorized",
+  "accountCreatedByThisInvocation": false,
+  "providerMutationsThisInvocation": 0,
+  "instanceOrGlobalAuthSettingsChanged": false,
+  "snapshot": {
+    "checkedAt": "2026-10-06T13:38:24.394104+00:00",
+    "actualInstanceMatchesExpected": true,
+    "environment": "production",
+    "testMode": false,
+    "passwordFirstFactorEnabled": true,
+    "emailEnabled": true,
+    "subaddressBlockingEnabled": false,
+    "legalConsentEnabled": false,
+    "globalMFARequired": false,
+    "productionAccountCount": 0,
+    "normalizedReviewEmailCollisions": 0,
+    "stableExternalIdCollisions": 0,
+    "ownerVerified": true,
+    "sameMailboxAsOwner": true,
+    "distinctSourceIdentity": true,
+    "globalDeviceTrustApiObserved": null,
+    "globalDeviceTrustNote": "Actual supported GET responses do not expose its toggle; prior root UI observation was ON, no global mutation",
+    "migrationApplied": false
+  },
+  "operations": [
+    {
+      "method": "GET",
+      "resource": "/instance"
+    },
+    {
+      "method": "GET",
+      "resource": "production Frontend API /v1/environment"
+    },
+    {
+      "method": "GET",
+      "resource": "/users"
+    }
+  ],
+  "nativeLoginVerified": false,
+  "reviewCredentialsAddedToASC": false,
+  "missing": [
+    "four-user migration and root provisioning authorization"
+  ],
+  "references": [
+    "https://raw.githubusercontent.com/clerk/openapi-specs/main/bapi/2026-05-12.yml",
+    "https://clerk.com/docs/guides/secure/device-trust",
+    "https://clerk.com/docs/guides/secure/restricting-access"
+  ]
+}

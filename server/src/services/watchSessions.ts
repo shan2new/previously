@@ -1,13 +1,14 @@
-import { and, asc, eq, isNull, sql } from 'drizzle-orm'
+import { and, asc, eq, gt, isNull, sql } from 'drizzle-orm'
 import { db } from '../db/index.js'
-import { franchise, watchSessions } from '../db/schema.js'
+import { clientMutationResources, franchise, watchSessions } from '../db/schema.js'
 import type { WatchSession, WatchSessionBody, WatchStatus } from '../types/api.js'
+import { withClientMutation, type ClientMutationContext, type MutationConnection } from './clientMutations.js'
 
 // Watch sessions (`/me/watch-sessions`, docs/api-contract.md "Watch sessions"). The app owns the
 // history and writes whole sessions; the server keeps them so a new phone, or a reinstall, gets
 // them back. Every query is scoped to the caller.
 
-export type WatchSessionWrite = 'saved' | 'deleted' | 'not_found' | 'franchise_not_found'
+export type WatchSessionWrite = 'saved' | 'superseded' | 'deleted' | 'not_found' | 'franchise_not_found'
 
 type Row = typeof watchSessions.$inferSelect
 
@@ -43,8 +44,25 @@ export async function listWatchSessions(userId: string): Promise<WatchSession[]>
  * session and always sends its whole current state. A tombstoned id answers 'deleted' and is left
  * alone (a replay cannot resurrect it); an id owned by someone else answers 'not_found'.
  */
-export async function putWatchSession(userId: string, id: string, body: WatchSessionBody): Promise<WatchSessionWrite> {
-  const [known] = await db.select({ id: franchise.id }).from(franchise).where(eq(franchise.id, body.franchiseId)).limit(1)
+export async function putWatchSession(userId: string, id: string, body: WatchSessionBody,
+  context?: ClientMutationContext, connection: MutationConnection = db): Promise<WatchSessionWrite> {
+  if (context) return withClientMutation(context, 'watch_session', { id, body }, async (tx, scope) => {
+    const [existing] = await tx.select({ userId: watchSessions.userId, deletedAt: watchSessions.deletedAt })
+      .from(watchSessions).where(eq(watchSessions.id, id)).limit(1)
+    if (existing && existing.userId !== userId) return 'not_found'
+    if (existing?.deletedAt) return 'deleted'
+    // DELETE before the first PUT still consumes this session id. A newer intentional rewatch
+    // must get a new id, just as it must after deletion of an existing session.
+    const [tombstone] = await tx.select({ key: clientMutationResources.resourceKey }).from(clientMutationResources)
+      .where(and(eq(clientMutationResources.userId, userId), eq(clientMutationResources.resourceKey, `session:${id}`),
+        gt(clientMutationResources.deletedSequence, 0))).limit(1)
+    if (tombstone) return 'deleted'
+    const [known] = await tx.select({ id: franchise.id }).from(franchise).where(eq(franchise.id, body.franchiseId)).limit(1)
+    if (!known) return 'franchise_not_found'
+    if (!await scope.apply([`session:${id}`])) return 'superseded'
+    return putWatchSession(userId, id, body, undefined, tx)
+  })
+  const [known] = await connection.select({ id: franchise.id }).from(franchise).where(eq(franchise.id, body.franchiseId)).limit(1)
   if (!known) return 'franchise_not_found'
 
   const fields = {
@@ -59,7 +77,7 @@ export async function putWatchSession(userId: string, id: string, body: WatchSes
     restoreProgress: body.restoreProgress,
     restoreStatus: body.restoreStatus,
   }
-  const written = await db
+  const written = await connection
     .insert(watchSessions)
     .values({ id, userId, ...fields })
     .onConflictDoUpdate({
@@ -71,7 +89,7 @@ export async function putWatchSession(userId: string, id: string, body: WatchSes
     .returning({ id: watchSessions.id })
   if (written.length > 0) return 'saved'
 
-  const [existing] = await db
+  const [existing] = await connection
     .select({ userId: watchSessions.userId, deletedAt: watchSessions.deletedAt })
     .from(watchSessions)
     .where(eq(watchSessions.id, id))
@@ -83,9 +101,18 @@ export async function putWatchSession(userId: string, id: string, body: WatchSes
  * Tombstones session `id`. Idempotent: deleting a session that is already deleted, never reached
  * the server, or belongs to someone else changes nothing.
  */
-export async function deleteWatchSession(userId: string, id: string): Promise<void> {
-  await db
+export async function deleteWatchSession(userId: string, id: string,
+  context?: ClientMutationContext, connection: MutationConnection = db): Promise<boolean> {
+  if (context) return withClientMutation(context, 'delete_watch_session', { id }, async (tx, scope) => {
+    const [existing] = await tx.select({ userId: watchSessions.userId }).from(watchSessions).where(eq(watchSessions.id, id)).limit(1)
+    if (existing && existing.userId !== userId) return false
+    const key = `session:${id}`
+    if (!await scope.apply([key], { deleted: [key] })) return false
+    return deleteWatchSession(userId, id, undefined, tx)
+  })
+  await connection
     .update(watchSessions)
     .set({ deletedAt: sql`now()`, restoreProgress: null, updatedAt: sql`now()` })
     .where(and(eq(watchSessions.id, id), eq(watchSessions.userId, userId), isNull(watchSessions.deletedAt)))
+  return true
 }

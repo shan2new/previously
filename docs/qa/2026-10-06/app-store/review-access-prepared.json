@@ -1,0 +1,34 @@
+{
+  "checkedAt": "2026-10-06T12:53:53Z",
+  "state": "prepared-not-provisioned",
+  "productionAccountCreated": false,
+  "credentialsGenerated": false,
+  "nativeProductionLoginVerified": false,
+  "appStoreReviewCredentialsSaved": false,
+  "globalAuthenticationSettingsChanged": false,
+  "qualifiedSourceChanged": false,
+  "recommendation": "Dedicated ordinary production email/password account containing synthetic data, with per-user bypass_client_trust=true; leave global Device Trust enabled and test mode disabled.",
+  "expectedClerkInstance": "ins_3KJtgHKq296iry2eBmj1IkEQmpQ",
+  "restApiVersion": "2026-05-12",
+  "installedBackendSdk": "@clerk/backend 1.34.0",
+  "installedNativeSdk": "clerk-ios 1.5.8",
+  "nativeSdkRevision": "55b70c27ae525b4f49c9bd08e69d8bec35352593",
+  "officialSchema": {
+    "url": "https://raw.githubusercontent.com/clerk/openapi-specs/main/bapi/2026-05-12.yml",
+    "sha256": "65fe91cf191f509586e8d34d59853784dafb8310af850dfafa14ae4c4a89d674",
+    "createUserFlagLine": 2122,
+    "updateUserFlagLine": 2539,
+    "userReadbackFlagLine": 15625,
+    "paidPlanRequirementStatedForFlag": false,
+    "freeInstanceOperationVerified": false
+  },
+  "plan": "docs/release/2026-10-06/app-review-access-plan.md",
+  "sources": [
+    "https://developer.apple.com/app-store/review/guidelines/",
+    "https://github.com/clerk/openapi-specs/blob/main/bapi/2026-05-12.yml",
+    "https://github.com/clerk/clerk-sdk-python/blob/main/docs/sdks/users/README.md",
+    "https://clerk.com/docs/guides/development/upgrading/versioning",
+    "https://clerk.com/docs/guides/development/testing/test-emails-and-phones",
+    "https://clerk.com/docs/guides/secure/device-trust"
+  ]
+}

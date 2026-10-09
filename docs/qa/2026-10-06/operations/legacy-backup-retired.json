@@ -1,0 +1,14 @@
+{
+  "at": "2026-10-06T12:45:44.355509+00:00",
+  "removedFile": "/Users/shan2new/Projects/previously/previously-2026-06-24.sql",
+  "bytes": 903299,
+  "sha256": "eb8019f6e3a38a4639425b239df9883c07ed1389522e599cb6cb230d454441e1",
+  "explicitOwnerApproval": true,
+  "removed": true,
+  "reason": "Obsolete June24 manual dump fell outside managed seven-day backup retention. Owner approved permanent retirement after current full backup passed restore drill.",
+  "retainedBackup": "/Users/shan2new/Infra/previously/backups/previously-20261006T105955103Z-a79366be96f7.dump",
+  "retainedBackupSha256": "33dfb2b6246d5bc65af010b9246db591c7dd45a605637f847da700e6ded71352",
+  "restoreEvidence": "docs/qa/2026-10-06/operations/production-backup-restore.json",
+  "otherFilesDeleted": false,
+  "liveDatabaseChanged": false
+}

@@ -1,0 +1,81 @@
+{
+  "runAt": "2026-10-06T12:34:45.650Z",
+  "fixtureVersion": "deletion-recovery-v2",
+  "database": "previously_qa_recovery_94d5c8727fac4f4699930f16275eeed1",
+  "boundary": "Real production erasure/identity locks/reconciliation/finishDeletion + actual migrated PostgreSQL and owned FS ledger; route auth via Fastify injection;404 injected at existing ClerkUsersApi seam; no actual Clerk SDK/network or production data.",
+  "rejectedOutbound": 0,
+  "cases": [
+    {
+      "name": "failed database commit preserves requested FS intent and recovery erases account",
+      "status": "passed",
+      "durationMs": 110,
+      "evidence": {
+        "beforeCommitRollback": true,
+        "requestedMarkerSurvived": true,
+        "after": {
+          "users": 0,
+          "progress": 0,
+          "receipts": 0,
+          "cursors": 0
+        },
+        "authAfterRecovery": 401
+      }
+    },
+    {
+      "name": "completed hash-only journal erases a restored account and cannot downgrade",
+      "status": "passed",
+      "durationMs": 150,
+      "evidence": {
+        "restoredRowsErased": true,
+        "completedHashOnly": true,
+        "accountUpsertRejected": true
+      }
+    },
+    {
+      "name": "pending provider cleanup404 completes DB and FS ledgers with no external call",
+      "status": "passed",
+      "durationMs": 149,
+      "evidence": {
+        "injectedClerkUsers404": true,
+        "realFinishDeletion": true,
+        "providerCalls": 1,
+        "completedDBAndFS": true
+      }
+    },
+    {
+      "name": "lost Apple receipt defaults manual and status does not claim revocation after restart recovery",
+      "status": "passed",
+      "durationMs": 123,
+      "evidence": {
+        "appDataErased": true,
+        "conservativeInterruptedOutcome": "manual_required",
+        "reusableTokenJournal": false
+      }
+    },
+    {
+      "name": "proven Apple outcome survives SQL restore and late fallback without recreating an account",
+      "status": "passed",
+      "durationMs": 319,
+      "evidence": {
+        "restoredRowsErased": true,
+        "sqlAndFSOutcome": "revoked",
+        "replayWithoutExchange": true
+      }
+    },
+    {
+      "name": "non-Apple account outcome survives provider cleanup404 with outcome-only metadata",
+      "status": "passed",
+      "durationMs": 252,
+      "evidence": {
+        "provider404Stubbed": true,
+        "rawIdentityRemoved": true,
+        "outcome": "not_applicable"
+      }
+    }
+  ],
+  "summary": {
+    "passed": 6,
+    "failed": 0,
+    "total": 6
+  }
+}

@@ -1,0 +1,11 @@
+{
+  "startedAt": "2026-10-06T13:10:05.712708+00:00",
+  "finishedAt": "2026-10-06T13:10:19.240943+00:00",
+  "deploymentId": "dpl_2BUUc6ZREKY29QVMdaF6zEr4BeGg",
+  "alias": "landing-ten-theta-55.vercel.app",
+  "previousDeploymentId": "dpl_EMPz5q73ktnuHwhEesBQX4ZjBdhN",
+  "exitCode": 0,
+  "canonicalPromotionPerformed": false,
+  "dnsChanged": false,
+  "ssoProtectionChanged": false
+}

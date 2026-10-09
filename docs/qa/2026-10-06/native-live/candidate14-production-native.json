@@ -1,0 +1,77 @@
+{
+  "recordedAt": "2026-10-06T14:55:35.945314+00:00",
+  "candidate": 14,
+  "runtimeSourceSHA256": "baaf904adf90bc13809ef9b3c331a800385409a40d18cf1bf1aceaf79c97e6ef",
+  "bundleId": "com.cognipin.previously",
+  "configuration": "Release",
+  "simulatorId": "F3AD17A6-813D-4C7E-8263-6383F952302C",
+  "runtime": "iOS27 iPhone14Pro simulator",
+  "qaFixtureUsed": false,
+  "productionPublicConfigurationVerified": true,
+  "sheetColdOpenPassed": true,
+  "sheetDismissPassed": true,
+  "sheetReopenPassed": true,
+  "nativeInputFullValuePassed": true,
+  "idleCPUPassed": true,
+  "idleCPUSamples": [
+    {
+      "phase": "preopen",
+      "percent": 0.0
+    },
+    {
+      "phase": "open",
+      "percent": 0.0
+    },
+    {
+      "phase": "input",
+      "percent": 0.0
+    },
+    {
+      "phase": "postpassword",
+      "percent": 0.0
+    }
+  ],
+  "ordinaryProductionReviewPasswordSignInPassed": true,
+  "credentialOutputOrScreenshots": false,
+  "credentialEntry": "Existing private0600 state staged through stdin to native pasteboard; CUA Cmd-V and anticipated iOS paste consent; private AX emit:false with redaction; clipboard cleared after completion",
+  "firstRunCompleted": true,
+  "reviewOnlySyntheticLibrary": [
+    {
+      "title": "Attack on Titan",
+      "placement": "Watching",
+      "watchedThrough": "Season1 Episode1"
+    },
+    {
+      "title": "Reacher",
+      "placement": "Watching",
+      "watchedThrough": "none; next Season1 Episode1"
+    },
+    {
+      "title": "Death Note",
+      "placement": "Completed",
+      "watchedEpisodes": 37
+    }
+  ],
+  "coldRestorePassed": true,
+  "signOutPassed": true,
+  "reloginPassed": true,
+  "filesImportChecksPassed": false,
+  "scopeLimits": [
+    "No physical-device/TestFlight behavioral proof",
+    "No actual iOS18 runtime",
+    "No WAN or VoiceOver claim",
+    "Google/Apple SSO remain owner input pending"
+  ],
+  "qualification": "Actual production auth cycle passed; five production tabs captured; actual Files import/export not verified",
+  "lastCheckedAt": "2026-10-06T15:14:28.745345+00:00",
+  "libraryPreservedAfterColdRestoreAndRelogin": true,
+  "signedOutWelcomeHidesLibrary": true,
+  "firstRunNotRepeatedAfterRelogin": true,
+  "fiveProductionTabsRendered": true,
+  "fiveRawProductionCapturesSaved": true,
+  "ordinaryFilesSheetPresented": true,
+  "filesExportChecksPassed": false,
+  "filesStatus": "pending control limitation; see candidate14-files-pending.json",
+  "credentialOutputScope": "Password/token/OTP values were never output or captured; a review profile email appeared in the first Files runtime tool snapshot, whose repository evidence was immediately redacted and raw snapshot moved to owner-only0600 storage. Root was informed.",
+  "privateIdentifierSnapshotIncidentRecorded": true
+}

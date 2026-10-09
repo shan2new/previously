@@ -77,6 +77,9 @@ extension Copy {
             let more = n > 3 ? " and \((n - min(3, titles.count)).formatted(.number)) more" : ""
             return "\(Copy.plural(n, "title", "titles")) couldn\u{2019}t be matched: \(names)\(more)."
         }
+        static func adultSkipped(_ n: Int) -> String {
+            "\(Copy.plural(n, "title marked as adult was", "titles marked as adult were")) skipped."
+        }
         static let filmsNote = "Films from TV Time aren\u{2019}t imported."
         static func add(_ n: Int, entries: Bool) -> String {
             guard entries else { return "Add \(Copy.plural(n, "show", "shows"))" }
@@ -110,7 +113,7 @@ extension Copy {
             [invite, row, title, lede, privacy, anilist, anilistDetail, mal, malDetail, tvtime, tvtimeDetail,
              anilistTitle, anilistPrompt, anilistNote, find, malTitle, tvtimeTitle, chooseFile, reading, busy, another, tvProgressNote, preserved,
              found(212, entries: false), found(594, entries: true), episodes(3480), ready(82, more: true),
-             ready(7, more: false), grouped, fetching(1), fetching(409), fetching(1100), fetching(2400), unmatched(5, titles: ["A", "B", "C"]),
+             ready(7, more: false), grouped, fetching(1), fetching(409), fetching(1100), fetching(2400), unmatched(5, titles: ["A", "B", "C"]), adultSkipped(1), adultSkipped(4),
              filmsNote, add(212, entries: false), add(594, entries: true), add(1, entries: true), nothingFound, nothingFoundDetail, added(170), onTheirWay(1), onTheirWay(42), missed(1), missed(12),
              notFound, privateList, unavailable, rateLimited, unrecognised, encrypted, emptyFile, expired]
                 + malSteps + tvtimeSteps

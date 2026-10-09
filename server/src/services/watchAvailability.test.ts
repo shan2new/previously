@@ -2,6 +2,12 @@ import { describe, expect, it } from 'vitest'
 import { normalizeWatchProviders, pickAnimeWatchTarget } from './watchAvailability.js'
 
 describe('pickAnimeWatchTarget', () => {
+  it('does not match an explicitly adult provider result even with the same title and year', () => {
+    expect(pickAnimeWatchTarget([{
+      id: 1, title: 'Show', originalTitle: 'Show', year: 2024, popularity: 500,
+      genreIds: [16], originCountries: ['JP'], adult: true,
+    }], ['Show'], 2024)).toBeNull()
+  })
   it('selects the matching Japanese animation and rejects a same-name live-action result', () => {
     const picked = pickAnimeWatchTarget([
       {

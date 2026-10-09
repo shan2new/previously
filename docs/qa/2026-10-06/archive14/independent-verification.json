@@ -1,0 +1,80 @@
+{
+  "checkedAt": "2026-10-06T15:32:38.706676+00:00",
+  "status": "independently_verified",
+  "archivePath": "/Users/shan2new/Library/Developer/Xcode/Archives/2026-10-06/Previously 06-10-26, 8.59\u202fPM.xcarchive",
+  "version": "1.0",
+  "build": "14",
+  "checks": {
+    "version1.0": true,
+    "build14": true,
+    "widgetBuild14": true,
+    "productionBundle": true,
+    "productionWidgetBundle": true,
+    "iPhoneOnlyFamily1": true,
+    "minimum18": true,
+    "iphoneOS": true,
+    "APIURLMatchesProduction": true,
+    "privacyURLCanonical": true,
+    "termsURLCanonical": true,
+    "livePublicKeyMatchesPrepared": true,
+    "arm64Only": true,
+    "appSignatureVerifyPassed": true,
+    "widgetSignatureVerifyPassed": true,
+    "appAppleEntitlement": true,
+    "widgetAppleEntitlementAbsent": true,
+    "archiveGetTaskAllowMatches13": true,
+    "exactFourPrivacyManifests": true,
+    "allPrivacyManifestsUnchanged": true,
+    "canonicalBundledIconPNGsEqual": true,
+    "currentRuntimeFingerprintQualified": true,
+    "archiveReceiptFingerprintMatches": true,
+    "qualifiedSimulatorFingerprintMatches": true
+  },
+  "architectures": [
+    "arm64"
+  ],
+  "privacy": [
+    {
+      "relativePath": "Clerk_ClerkKit.bundle/PrivacyInfo.xcprivacy",
+      "matchesArchive13": true,
+      "sha256": "13a72c8448476d8369a0e9a279464f20913f528022cd7ebfff31baa4d4f840ba"
+    },
+    {
+      "relativePath": "Clerk_ClerkKitUI.bundle/PrivacyInfo.xcprivacy",
+      "matchesArchive13": true,
+      "sha256": "13a72c8448476d8369a0e9a279464f20913f528022cd7ebfff31baa4d4f840ba"
+    },
+    {
+      "relativePath": "PhoneNumberKit_PhoneNumberKit.bundle/PrivacyInfo.xcprivacy",
+      "matchesArchive13": true,
+      "sha256": "561040f7a52952f75d02d4b6758382ff48c563d6f25c84a09f1a655f6dc60ff8"
+    },
+    {
+      "relativePath": "PrivacyInfo.xcprivacy",
+      "matchesArchive13": true,
+      "sha256": "1dbd4ccfcf2f16699db8750f0a41bcea77ff60d06c1ba082dd175fdf7e4211a0"
+    }
+  ],
+  "icons": [
+    {
+      "name": "AppIcon60x60@2x.png",
+      "matchesArchive13": true,
+      "sha256": "885d3ed037e3237ad198d7d95604d95e8abb05b0e740b733afe1e429fd092f88"
+    },
+    {
+      "name": "AppIcon76x76@2x~ipad.png",
+      "matchesArchive13": true,
+      "sha256": "7b75aa76748466beae2aa20bf58a399803bccc5e8424fd74a73086fec57145d8"
+    }
+  ],
+  "runtimeSourceSHA256": "baaf904adf90bc13809ef9b3c331a800385409a40d18cf1bf1aceaf79c97e6ef",
+  "runtimeFileCount": 199,
+  "binarySHA256": "37799ab9b8d101f4f4e9d1a0ec9e0e280bc664d15a9253392cf2458febb1a20d",
+  "archiveGetTaskAllow": true,
+  "archiveSigningPhase": "Development archive; official Organizer performs distribution signing separately",
+  "distributionUploadVerifiedByThisAudit": false,
+  "reviewSubmissionVerifiedByThisAudit": false,
+  "uiOrSourceOrCompilerActivity": false,
+  "runtimeFingerprintBoundary": "Read-only current199-file fingerprint matches the qualified simulator and archive receipts; this does not reconstruct compiler source inputs independently from the archive binary.",
+  "termsPlistKeyVerified": "TermsURL"
+}

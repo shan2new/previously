@@ -1,0 +1,16 @@
+{
+  "checkedAt": "2026-10-06T14:01:50.046257+00:00",
+  "deploymentId": "dpl_3nWUk4d8w6tw6Kf3v8VL7qTZv9jB",
+  "canonicalRouteBytesMatchVerifiedCandidate": [
+    "/",
+    "/privacy",
+    "/terms",
+    "/support",
+    "/delete-account",
+    "/robots.txt",
+    "/sitemap.xml",
+    "/__previously_release_missing__"
+  ],
+  "sourceStillMatchesQualifiedUpload": true,
+  "passed": true
+}

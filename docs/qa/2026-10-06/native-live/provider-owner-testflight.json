@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "recordedAtUTC": "2026-10-06T17:14:30.186235+00:00",
+  "evidenceMethod": "Direct owner report in this chat",
+  "ownerSelectedPath": "Existing iPhone via TestFlight",
+  "requestedVersion": "1.0",
+  "requestedBuild": 14,
+  "buildNumberIndependentlyReadFromOwnerDevice": false,
+  "ownerStatement": "Done the login testing - working fine in both.",
+  "googleSignInPassedOwnerReported": true,
+  "appleSignInPassedOwnerReported": true,
+  "modelReported": null,
+  "iosVersionReported": null,
+  "coldRestorationSeparatelyReported": false,
+  "filesImportExportSeparatelyReported": false,
+  "liveAccountErasureSeparatelyReported": false,
+  "minimumIOS18BehaviorProven": false,
+  "voiceOverBehaviorProven": false,
+  "credentialValuesIncluded": false,
+  "scope": "Google and Apple login only on owner-selected iPhone/TestFlight path; no inference of deletion/Files/minimum OS or independent device capture."
+}

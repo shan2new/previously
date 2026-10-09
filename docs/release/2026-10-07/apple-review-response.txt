@@ -1,0 +1,19 @@
+Thank you. Previously. 1.0 (14) is an independent, free entertainment companion. The six requested details follow.
+
+1. Physical-device recording
+[RECORDING URL PENDING: actual iPhone, latest OS, submitted build 1.0 (14).] The recording will begin with launch and show registration, login, onboarding, tracking and deletion with a separate disposable account. It is not completed yet. This release has no paid features or in-app purchases. Watch history is private; ratings and likes contribute anonymous aggregate numbers. Public comments, replies and chat are disabled. Users cannot publish free-form posts or interact with another named user; reporting/blocking flows are not exposed while comments are off.
+
+2. Purpose and audience
+Previously. helps individual anime/TV viewers remember their last episode, organize planned/watching/completed/paused/dropped shows, and see what airs next. Related anime seasons/parts form one continuing story. It is not restricted to employees or organizations. The saved age questionnaire reflects mature catalog content.
+
+3. Setup and main features
+Use the demo email/password saved in App Store Connect's private Sign-In Information. Tap Sign in, enter email, Continue, then password and Continue; this review account needs no mailbox code or MFA. Its synthetic library has Attack on Titan after episode 1, Reacher before episode 1 and completed Death Note. From Home or Library, open a title, mark an episode and use Undo. Schedule shows upcoming episodes; Discover searches anime/TV; Today presents show updates. New users choose viewing interests, select shows and set their place. Profile includes Import your history, Export library and Delete account. Imports preview a public AniList username, MyAnimeList XML/gzip export or TV Time export before applying. [ATTACH AFTER UPLOAD: previously-review-samples.zip (two XML files).] The synthetic samples cover a permitted title and adult-content omissions.
+
+4. Core services and platforms
+Clerk provides email/password, Google and Sign in with Apple authentication. AniList supplies anime metadata/public-list imports; TMDB supplies TV metadata and country-specific JustWatch availability. Trailers use YouTube's privacy-enhanced IFrame player; viewing links open external providers. Our HTTPS API/PostgreSQL run on a Mac Mini behind Cloudflare; Vercel hosts support/privacy pages. Background editorial research can use Claude Agent SDK with Codex fallback. Paid AI grouping/search correction is disabled. There is no consumer AI chat or payment processor.
+
+5. Regional differences
+Core tracking/import features do not intentionally vary by region; the interface is English. Country preference changes provider availability and regional ratings. Catalog coverage, schedules, trailers, external services and Apple storefront availability may differ. We do not claim identical content/viewing rights worldwide. External provider subscriptions are separate from Previously.
+
+6. Regulated services and third-party material
+This is entertainment tracking, with no financial, medical, gambling or regulated professional service. It displays third-party catalog metadata/artwork and embedded trailers; it does not host, download or stream full episodes. Rights remain with their owners; no broadcaster/platform affiliation is claimed. We confirmed the content-rights declaration in App Store Connect. No separate provider agreement or rights document is supplied with this draft; permission is not inferred from free access. Please identify any specific material or documentation needed for review.

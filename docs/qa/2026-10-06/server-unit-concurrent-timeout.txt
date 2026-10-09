@@ -1,0 +1,33 @@
+
+> previously-server@0.1.0 test
+> vitest run src
+
+
+ RUN  v4.1.11 /Users/shan2new/Projects/previously/server
+
+(node:98112) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ❯ src/scripts/migrate-clerk-production.test.ts (14 tests | 1 failed) 11817ms
+     × rejects an existing destination app collision before creating or banning identities 5007ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/scripts/migrate-clerk-production.test.ts > Clerk production migration with isolated real PG and stub-only Clerk > rejects an existing destination app collision before creating or banning identities
+Error: Test timed out in 5000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+ ❯ src/scripts/migrate-clerk-production.test.ts:218:3
+    216| }
+    217| describe("Clerk production migration with isolated real PG and stub-on…
+    218|   it("rejects an existing destination app collision before creating or…
+       |   ^
+    219|     fixture(async (f) => {
+    220|       f.stub.users.set("user_existing", {
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed | 78 passed (79)
+      Tests  1 failed | 1279 passed (1280)
+   Start at  16:46:31
+   Duration  12.42s (transform 5.00s, setup 0ms, import 31.00s, tests 23.12s, environment 7ms)
+

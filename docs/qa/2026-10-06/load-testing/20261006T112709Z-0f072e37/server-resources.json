@@ -1,0 +1,182 @@
+[
+  {
+    "at": "2026-10-06T11:27:13.231Z",
+    "phase": "startup",
+    "rss": 212975616,
+    "heapTotal": 89997312,
+    "heapUsed": 72275816,
+    "external": 10787765,
+    "arrayBuffers": 6467217,
+    "intervalMs": 16.152999999999793,
+    "cpuPercentOfOneCore": 103.85686869312336,
+    "eventLoopUtilization": 0.999883151179056,
+    "eventLoopDelayP95Ms": 0.000511,
+    "eventLoopDelayMaxMs": 0,
+    "gcCount": 2,
+    "gcWallDurationMs": 0.4555409997701645,
+    "pgActivity": [
+      {
+        "state": "idle",
+        "wait_event_type": "Client",
+        "wait_event": "ClientRead",
+        "connections": 1
+      }
+    ]
+  },
+  {
+    "at": "2026-10-06T11:27:18.239Z",
+    "phase": "sustained",
+    "rss": 192741376,
+    "heapTotal": 93536256,
+    "heapUsed": 70311824,
+    "external": 13507374,
+    "arrayBuffers": 9184689,
+    "intervalMs": 5008.488375,
+    "cpuPercentOfOneCore": 47.44132005697228,
+    "eventLoopUtilization": 0.5154163972015156,
+    "eventLoopDelayP95Ms": 36.765695,
+    "eventLoopDelayMaxMs": 219.414527,
+    "gcCount": 163,
+    "gcWallDurationMs": 112.5698379278183,
+    "pgActivity": [
+      {
+        "state": "active",
+        "wait_event_type": "Client",
+        "wait_event": "ClientRead",
+        "connections": 6
+      },
+      {
+        "state": "active",
+        "wait_event_type": null,
+        "wait_event": null,
+        "connections": 1
+      },
+      {
+        "state": "idle",
+        "wait_event_type": "Client",
+        "wait_event": "ClientRead",
+        "connections": 3
+      }
+    ]
+  },
+  {
+    "at": "2026-10-06T11:27:23.238Z",
+    "phase": "sustained",
+    "rss": 135512064,
+    "heapTotal": 95633408,
+    "heapUsed": 75081936,
+    "external": 14515705,
+    "arrayBuffers": 10193020,
+    "intervalMs": 5003.192000000001,
+    "cpuPercentOfOneCore": 34.32686572891865,
+    "eventLoopUtilization": 0.2638888759761655,
+    "eventLoopDelayP95Ms": 22.659071,
+    "eventLoopDelayMaxMs": 47.087615,
+    "gcCount": 185,
+    "gcWallDurationMs": 71.25712303817272,
+    "pgActivity": [
+      {
+        "state": "idle",
+        "wait_event_type": "Client",
+        "wait_event": "ClientRead",
+        "connections": 10
+      }
+    ]
+  },
+  {
+    "at": "2026-10-06T11:27:28.233Z",
+    "phase": "sustained",
+    "rss": 139591680,
+    "heapTotal": 93405184,
+    "heapUsed": 60469168,
+    "external": 12025720,
+    "arrayBuffers": 7703035,
+    "intervalMs": 4997.713833,
+    "cpuPercentOfOneCore": 1.792099407705323,
+    "eventLoopUtilization": 0.017336936640678726,
+    "eventLoopDelayP95Ms": 21.102591,
+    "eventLoopDelayMaxMs": 61.439999,
+    "gcCount": 3,
+    "gcWallDurationMs": 2.7962919920682907,
+    "pgActivity": [
+      {
+        "state": "active",
+        "wait_event_type": null,
+        "wait_event": null,
+        "connections": 1
+      },
+      {
+        "state": "idle",
+        "wait_event_type": "Client",
+        "wait_event": "ClientRead",
+        "connections": 9
+      }
+    ]
+  },
+  {
+    "at": "2026-10-06T11:27:33.235Z",
+    "phase": "burst",
+    "rss": 132546560,
+    "heapTotal": 102662144,
+    "heapUsed": 85189000,
+    "external": 13652825,
+    "arrayBuffers": 9330140,
+    "intervalMs": 4999.381208999999,
+    "cpuPercentOfOneCore": 17.419795842577848,
+    "eventLoopUtilization": 0.17170701552700293,
+    "eventLoopDelayP95Ms": 23.101439,
+    "eventLoopDelayMaxMs": 46.333951,
+    "gcCount": 43,
+    "gcWallDurationMs": 53.16228890419006,
+    "pgActivity": [
+      {
+        "state": "active",
+        "wait_event_type": "Client",
+        "wait_event": "ClientRead",
+        "connections": 5
+      },
+      {
+        "state": "active",
+        "wait_event_type": null,
+        "wait_event": null,
+        "connections": 1
+      },
+      {
+        "state": "idle",
+        "wait_event_type": "Client",
+        "wait_event": "ClientRead",
+        "connections": 2
+      },
+      {
+        "state": "idle in transaction",
+        "wait_event_type": null,
+        "wait_event": null,
+        "connections": 2
+      }
+    ]
+  },
+  {
+    "at": "2026-10-06T11:27:35.859Z",
+    "phase": "recovery",
+    "rss": 179814400,
+    "heapTotal": 93536256,
+    "heapUsed": 73935352,
+    "external": 15176846,
+    "arrayBuffers": 10854161,
+    "intervalMs": 2626.816541,
+    "cpuPercentOfOneCore": 45.62001119209489,
+    "eventLoopUtilization": 0.3226568834640547,
+    "eventLoopDelayP95Ms": 25.214975,
+    "eventLoopDelayMaxMs": 41.517055,
+    "gcCount": 117,
+    "gcWallDurationMs": 64.23612596094608,
+    "pgActivity": [
+      {
+        "state": "idle",
+        "wait_event_type": "Client",
+        "wait_event": "ClientRead",
+        "connections": 10
+      }
+    ]
+  }
+]

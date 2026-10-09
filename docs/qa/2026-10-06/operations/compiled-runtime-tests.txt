@@ -1,0 +1,32 @@
+✔ candidate plists are valid, LTS pinned, reversible and remain uninstalled (56.835167ms)
+✔ precommit intent survives an absent database refresh (103.508209ms)
+✔ completion cannot be downgraded or restore raw ID by delayed request (97.055792ms)
+✔ concurrent requests retain every identity (976.003209ms)
+✔ missing or corrupted authoritative current ledger fails closed (51.822542ms)
+✔ immutable markers restore a tombstone after an older empty valid snapshot (118.671125ms)
+✔ private snapshot and marker permissions (27.547083ms)
+✔ unchanged ledger reads retain stable records and a matching checksum (60.226ms)
+▶ real PostgreSQL backup, deletion-safe restore, isolated cleanup and collection
+  ✔ custom dump has a checked SHA, TOC and private permissions (0.502417ms)
+  ✔ newer independent tombstone sweeps a deleted identity from the older backup (706.752125ms)
+  ✔ missing live ledger and altered dump fail before any scratch database survives (18.383875ms)
+  ✔ hourly snapshot authenticates only to loopback and excludes individual data (82.053334ms)
+  ✔ seven-pair retention prunes only owned backups (6.062542ms)
+  ✔ non-cascading ownership fails closed and still drops scratch database (363.322625ms)
+✔ real PostgreSQL backup, deletion-safe restore, isolated cleanup and collection (2167.236167ms)
+✔ sanitized logs exclude identities, query strings, tokens and free text (1.673333ms)
+✔ metrics and usage snapshots retain only aggregate fields (0.273542ms)
+✔ rotation enforces segment and age limits without deleting foreign files (89.260791ms)
+✔ 30-day aggregate pruning only removes owned expired files (4.826167ms)
+✔ a stopped backend does not suspend backup, log or snapshot expiry (10.056166ms)
+{"event":"ops.server_started","heapLimitMiB":256}
+✔ production wrapper applies heap budget, sanitizes both streams and drains SIGTERM (77.758792ms)
+✔ compiled JavaScript bytes participate in the actual artifact fingerprint (11.013ms)
+ℹ tests 22
+ℹ suites 0
+ℹ pass 22
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 2233.686958

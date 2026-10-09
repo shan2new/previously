@@ -44,10 +44,15 @@ extension AppModel {
         }
         // Not in the library: drawn now, made canonical by the one-call write. The mark and its
         // Undo are queued on the show's chain, so an Undo tapped before the mark has landed is
-        // sent after it — and not at all if the mark failed and was already rolled back.
+        // sent after it. An unknown mark receipt may already have committed, so Undo remains
+        // a durable newer intent even when the original request failed.
         guard !savingProgressFor.contains(f.id) else { return }
-        final class Outcome { var failed = false }
-        let outcome = Outcome()
+        let mutation: MutationStamp?
+        do { mutation = try prepareBatchMutation(f, parts: batch.parts, status: batch.status) }
+        catch {
+            recordBatchFailure(franchiseId: f.id, title: f.title, parts: batch.parts, status: batch.status, error: error)
+            return
+        }
         var local = f
         for value in batch.parts { local = local.withUpdatedProgress(mediaId: value.mediaId, episodes: value.episodes) }
         insertPending(local.withStatus(batch.status))
@@ -55,11 +60,19 @@ extension AppModel {
         var receipt = UndoState(mediaId: nil, franchiseId: f.id, prevProgress: 0, title: f.title,
                                 episode: 0, count: batch.episodeCount, customMessage: fact) { [weak self] in
             guard let self else { return }
+            let undoMutation: MutationStamp?
+            do { undoMutation = try self.prepareBatchMutation(f, parts: batch.previous, status: nil, removeMembership: true) }
+            catch {
+                self.recordBatchFailure(franchiseId: f.id, title: f.title, parts: batch.previous,
+                    status: nil, removeMembership: true, error: error)
+                return
+            }
             self.withdrawPending(f.id)
             self.enqueueBatch(f.id) { [weak self] in
-                guard let self, !outcome.failed else { return }
+                guard let self else { return }
                 do {
-                    try await self.saveProgressBatch(f, parts: batch.previous, status: nil, removeMembership: true)
+                    try await self.saveProgressBatch(f, parts: batch.previous, status: nil,
+                        removeMembership: true, mutation: undoMutation)
                 } catch {
                     self.recordBatchFailure(franchiseId: f.id, title: f.title, parts: batch.previous,
                                             status: nil, removeMembership: true, error: error)
@@ -71,10 +84,9 @@ extension AppModel {
         enqueueBatch(f.id) { [weak self] in
             guard let self else { return }
             do {
-                try await self.saveProgressBatch(f, parts: batch.parts, status: batch.status)
+                try await self.saveProgressBatch(f, parts: batch.parts, status: batch.status, mutation: mutation)
             } catch {
                 guard !error.isCancellation else { return }
-                outcome.failed = true
                 self.withdrawPending(f.id)
                 if let cur = self.undo, cur.franchiseId == f.id { self.undo = nil }
                 self.recordBatchFailure(franchiseId: f.id, title: f.title, parts: batch.parts,
@@ -163,8 +175,14 @@ extension AppModel {
     /// Put a removed show back exactly as it was — instantly, from the snapshot, before any
     /// network round-trip. The re-subscribe carries the PREVIOUS status, so a Finished show
     /// returns to the Finished shelf rather than silently becoming Planned.
-    private func restoreRemoved(_ state: UndoState) {
+    private func restoreRemoved(_ state: UndoState, mutation: MutationStamp? = nil) {
         guard let f = state.removedFranchise else { return }
+        let generation = accountEpoch
+        let stamp = mutation ?? MutationStamp.fresh(owner: accountStorage)
+        let owner = accountStorage
+        let status = state.prevStatus ?? f.effectiveStatus
+        let staged = Result { try stageTrackingMutation(command: Copy.Action.add, title: f.title,
+            intent: .subscribe(franchiseId: f.id, title: f.title, status: status.rawValue), mutation: stamp) }
         FeedbackCoordinator.fire(.selection)
         undo = nil
         let reduceMotion = UIAccessibility.isReduceMotionEnabled
@@ -173,17 +191,26 @@ extension AppModel {
         }
         Task {
             do {
-                _ = try await api.subscribe(franchiseId: f.id, status: state.prevStatus)
+                guard generation == accountEpoch else { return }
+                guard try staged.get() else { await reload(); return }
+                guard isIsolated || stamp != nil else { throw APIError.transport(URLError(.cannotWriteToFile)) }
+                _ = try await api.subscribe(franchiseId: f.id, status: status, mutation: stamp)
+                guard generation == accountEpoch else { return }
+                SyncCenter.shared.acknowledgeMutation(stamp, owner: owner)
                 await reload()
             } catch {
+                guard generation == accountEpoch, !error.isCancellation else { return }
                 // Membership is a fact about the account, so it rolls back; the failure is
                 // surfaced once, in the SyncBanner, with a Retry that re-issues exactly this call.
                 withAnimation(ThemeMotion.pick(ThemeMotion.uiGentle, reduceMotion: reduceMotion)) {
                     library.removeAll { $0.id == f.id }
                 }
                 fileFailure(command: Copy.Action.add, title: f.title,
-                                         reason: Copy.Notice.reason(error)) {
-                    self.undoTapped(state)
+                                         reason: Copy.Notice.reason(error),
+                                         intent: .subscribe(franchiseId: f.id, title: f.title, status: status.rawValue),
+                                         mutation: stamp,
+                                         retryable: !((error as? APIError)?.isMutationConflict ?? false)) {
+                    self.restoreRemoved(state, mutation: stamp)
                 }
             }
         }

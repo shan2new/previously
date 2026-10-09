@@ -1,3 +1,6 @@
+@import 'tailwindcss';
+@import 'tw-animate-css';
+
 @font-face {
   font-family: Outfit;
   src: url('/fonts/Outfit-Regular.ttf') format('truetype');
@@ -148,7 +151,7 @@ svg {
   object-fit: contain;
 }
 .wordmark > span {
-  color: var(--amber);
+  color: #f0563f;
 }
 .site-header nav {
   display: flex;
@@ -514,7 +517,7 @@ svg {
     font-size: 24px;
   }
   .wordmark img {
-    width: 23px;
+    width: 29px;
     height: 29px;
     margin-right: 8px;
   }

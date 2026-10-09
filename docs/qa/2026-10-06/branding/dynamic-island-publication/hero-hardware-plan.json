@@ -1,0 +1,21 @@
+{
+  "checkedAt": "2026-10-06T13:59:50.847584+00:00",
+  "scope": "CSS hardwareframe only around unchanged hero native capture",
+  "asset": "/app/library-current.jpg",
+  "rasterUnchanged": true,
+  "appContentCropped": false,
+  "statusOrAppTextMoved": false,
+  "normalizedCapsule": {
+    "top": 0.013,
+    "width": 0.32,
+    "height": 0.043,
+    "centerX": 0.5
+  },
+  "capsuleColor": "#000000",
+  "contrast": "0.5px translucent white hairline against dark display",
+  "existingRotation": "3degrees desktop/2degrees mobile now applied to common screenwrapper",
+  "decorative": true,
+  "pointerEvents": "none",
+  "galleryImagesAndInteractionCodeUnchanged": true,
+  "legalCopyUnchanged": true
+}

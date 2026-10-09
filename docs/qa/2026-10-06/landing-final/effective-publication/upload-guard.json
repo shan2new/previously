@@ -1,0 +1,11 @@
+{
+  "fileCount": 118,
+  "totalBytes": 8177584,
+  "changedSourceFiles": [
+    "lib/legal-content.ts"
+  ],
+  "allPublicAssetsByteUnchanged": true,
+  "secretAndGeneratedExclusionPassed": true,
+  "allPathsWithinLanding": true,
+  "sourceManifestSha256": "c0fcde783880c29f8540526569eceb3f8130fd04866ab2eb7cce5dd0a09766a9"
+}

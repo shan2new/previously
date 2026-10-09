@@ -26,6 +26,11 @@ protocol TokenProvider: Sendable {
     func hasSession() async -> Bool
     /// A FRESH token, skipping any cache.
     func refreshedToken() async -> TokenRefreshOutcome
+    func sessionIdentity() async -> String?
+}
+extension TokenProvider {
+    // Offline regression providers have no mutable account; production AuthManager overrides it.
+    func sessionIdentity() async -> String? { nil }
 }
 
 /// What a forced refresh learned. `.notRefreshable` is a FINAL answer from the issuer (a `dev:`
@@ -118,6 +123,13 @@ extension APIError {
         return nil
     }
 
+    var isMutationConflict: Bool {
+        guard case let .http(409, body) = self, let data = body.data(using: .utf8),
+              let payload = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+              let reason = payload["error"] as? String else { return false }
+        return reason == "operation_conflict" || reason == "operation_sequence_conflict"
+    }
+
     /// The social routes' machine-readable error body (`{ error, reason?, retryAfter?,
     /// currentVersion? }`, server §3.4) of an `.http` answer; nil when the body is not one.
     var socialError: SocialError? {
@@ -163,24 +175,38 @@ actor TokenRefresher {
     private var inFlight: Task<TokenRefreshOutcome, Never>?
     private var lastToken: String?
     private var lastAt: Date?
+    private var owner: String?
+    private var ownerLease: UInt64?
+    private var ownerEpoch = 0
 
     /// The `auth.refresh` log lines live HERE, inside the actor, not at the call site: one
     /// `begin`/`end` pair is emitted per actual refresh, so a burst of six concurrent 401s prints
     /// one pair plus five `coalesced`/`reused` lines. Logging at the call site would print six of
     /// each and make single-flight unverifiable from `log stream`.
-    func token(from provider: TokenProvider) async -> TokenRefreshOutcome {
+    func token(from provider: TokenProvider, lease: UInt64) async -> TokenRefreshOutcome {
+        let identity = await provider.sessionIdentity()
+        // A logical request from an earlier account lifetime cannot replace a newer refresh.
+        if let ownerLease, lease < ownerLease { return .notRefreshable }
+        if owner != identity || ownerLease != lease {
+            owner = identity; ownerLease = lease; ownerEpoch += 1
+            inFlight?.cancel(); inFlight = nil; lastToken = nil; lastAt = nil
+        }
+        let epoch = ownerEpoch
         if let lastAt, let lastToken, Date().timeIntervalSince(lastAt) < TokenRefresher.reuseWindow {
             TokenRefresher.log.error("auth.refresh reused")
             return .token(lastToken)
         }
         if let inFlight {
             TokenRefresher.log.error("auth.refresh coalesced")
-            return await inFlight.value
+            let value = await inFlight.value
+            guard epoch == ownerEpoch else { return .notRefreshable }
+            return value
         }
         TokenRefresher.log.error("auth.refresh begin")
         let task = Task { await provider.refreshedToken() }
         inFlight = task
         let value = await task.value
+        guard epoch == ownerEpoch else { return .notRefreshable }
         inFlight = nil
         switch value {
         case .token: TokenRefresher.log.error("auth.refresh end(changed:true)")
@@ -276,7 +302,17 @@ final class APIClient: @unchecked Sendable {
     /// asks for in that window can re-create the erased account's rows (the server's `authenticate`
     /// upserts a user for any valid JWT); lowered by `abortErasure()` and by the next `start()`.
     /// `AccountDeletion` does not use this client, so the DELETE itself is never refused.
-    var halted = false
+    private let lifecycleLock = NSLock()
+    private var lifecycleEpoch: UInt64 = 0
+    private var transportHalted = false
+    var halted: Bool {
+        get { lifecycleLock.withLock { transportHalted } }
+        set { lifecycleLock.withLock { transportHalted = newValue } }
+    }
+    func invalidateRequests() {
+        lifecycleLock.withLock { lifecycleEpoch &+= 1; transportHalted = true }
+    }
+    private var currentEpoch: UInt64 { lifecycleLock.withLock { lifecycleEpoch } }
 
     /// The longest any single attempt may wait. `send` clamps each attempt to whatever is left of
     /// the whole-request budget, so this is a ceiling, never an addend.
@@ -292,6 +328,12 @@ final class APIClient: @unchecked Sendable {
         // only true wall-clock ceiling, and it must not outlive `RetryPolicy.budget`.
         config.timeoutIntervalForResource = RetryPolicy.budget + 1
         config.waitsForConnectivity = false
+        // Account JSON lives only in the explicitly owned offline store. The bearer API has no
+        // use for shared HTTP cache, cookie or credential persistence across account boundaries.
+        config.urlCache = nil
+        config.requestCachePolicy = .reloadIgnoringLocalCacheData
+        config.httpCookieStorage = nil
+        config.urlCredentialStorage = nil
         config.httpAdditionalHeaders = ["Accept": "application/json"]
         return URLSession(configuration: config)
     }
@@ -456,14 +498,21 @@ final class APIClient: @unchecked Sendable {
 
     /// Creates or replaces one session, whole. 410 = deleted on another device; 404 = its
     /// franchise is gone. Both are final.
-    func putWatchSession(id: UUID, _ body: WatchSessionBody) async throws {
-        let _: NoContent = try await request("/me/watch-sessions/\(id.uuidString.lowercased())", method: "PUT",
-                                             body: body, idempotent: true)
+    @discardableResult
+    func putWatchSession(id: UUID, _ body: WatchSessionBody, mutation: MutationStamp? = nil) async throws -> Bool {
+        let data: Data
+        do { data = try encoder.encode(body) }
+        catch { throw APIError.decoding(error) }
+        let (_, response) = try await sendRaw(path: "/me/watch-sessions/\(id.uuidString.lowercased())", method: "PUT",
+                                             body: data, auth: true, idempotent: true, mutation: mutation)
+        return WatchSessionMutationReceipt.applied(response)
     }
 
-    func deleteWatchSession(id: UUID) async throws {
-        let _: NoContent = try await request("/me/watch-sessions/\(id.uuidString.lowercased())", method: "DELETE",
-                                             idempotent: true)
+    @discardableResult
+    func deleteWatchSession(id: UUID, mutation: MutationStamp? = nil) async throws -> Bool {
+        let (_, response) = try await sendRaw(path: "/me/watch-sessions/\(id.uuidString.lowercased())", method: "DELETE",
+                                             body: nil, auth: true, idempotent: true, mutation: mutation)
+        return WatchSessionMutationReceipt.applied(response)
     }
 
     /// A catalogue title with no local franchise yet, materialised (or found) by the server —
@@ -475,38 +524,38 @@ final class APIClient: @unchecked Sendable {
     }
 
     @discardableResult
-    func subscribe(franchiseId: String, status: WatchStatus? = nil) async throws -> OKResponse {
+    func subscribe(franchiseId: String, status: WatchStatus? = nil, mutation: MutationStamp? = nil) async throws -> OKResponse {
         // A server-side upsert: replaying it lands on the same row with the same status.
         try await request("/me/subscriptions", method: "POST",
                           body: SubscribeBody(franchiseId: franchiseId, status: status),
-                          idempotent: true)
+                          idempotent: true, mutation: mutation)
     }
 
     @discardableResult
-    func setStatus(franchiseId: String, status: WatchStatus) async throws -> OKResponse {
+    func setStatus(franchiseId: String, status: WatchStatus, mutation: MutationStamp? = nil) async throws -> OKResponse {
         let encoded = franchiseId.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) ?? franchiseId
         return try await request("/me/subscriptions/\(encoded)", method: "PATCH",
-                                 body: StatusBody(status: status), idempotent: true)
+                                 body: StatusBody(status: status), idempotent: true, mutation: mutation)
     }
 
     @discardableResult
-    func unsubscribe(franchiseId: String) async throws -> OKResponse {
+    func unsubscribe(franchiseId: String, mutation: MutationStamp? = nil) async throws -> OKResponse {
         let encoded = franchiseId.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) ?? franchiseId
-        return try await request("/me/subscriptions/\(encoded)", method: "DELETE", idempotent: true)
+        return try await request("/me/subscriptions/\(encoded)", method: "DELETE", idempotent: true, mutation: mutation)
     }
 
     @discardableResult
-    func setProgress(mediaId: Int, episodes: Int) async throws -> OKResponse {
-        // Absolute value, not a delta — replaying it is a no-op.
+    func setProgress(mediaId: Int, episodes: Int, mutation: MutationStamp? = nil) async throws -> OKResponse {
+        // The stable intent stamp prevents an older absolute value replaying over a newer one.
         try await request("/me/progress", method: "PUT",
-                          body: ProgressBody(mediaId: mediaId, episodes: episodes), idempotent: true)
+                          body: ProgressBody(mediaId: mediaId, episodes: episodes), idempotent: true, mutation: mutation)
     }
 
     func setFranchiseProgress(franchiseId: String, parts: [FranchiseProgressValue],
-                              status: WatchStatus?) async throws -> FranchiseProgressResponse {
+                              status: WatchStatus?, mutation: MutationStamp? = nil) async throws -> FranchiseProgressResponse {
         let encoded = franchiseId.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) ?? franchiseId
         return try await request("/me/franchises/\(encoded)/progress", method: "PUT",
-                                 body: FranchiseProgressBody(parts: parts, status: status), idempotent: true)
+                                 body: FranchiseProgressBody(parts: parts, status: status), idempotent: true, mutation: mutation)
     }
 
     @discardableResult
@@ -739,9 +788,10 @@ final class APIClient: @unchecked Sendable {
         _ path: String,
         method: String = "GET",
         auth: Bool = true,
-        idempotent: Bool
+        idempotent: Bool,
+        mutation: MutationStamp? = nil
     ) async throws -> Response {
-        try await send(path: path, method: method, body: nil, auth: auth, idempotent: idempotent)
+        try await send(path: path, method: method, body: nil, auth: auth, idempotent: idempotent, mutation: mutation)
     }
 
     private func request<Response: Decodable, Body: Encodable>(
@@ -749,12 +799,13 @@ final class APIClient: @unchecked Sendable {
         method: String,
         body: Body,
         auth: Bool = true,
-        idempotent: Bool
+        idempotent: Bool,
+        mutation: MutationStamp? = nil
     ) async throws -> Response {
         let data: Data
         do { data = try encoder.encode(body) }
         catch { throw APIError.decoding(error) }
-        return try await send(path: path, method: method, body: data, auth: auth, idempotent: idempotent)
+        return try await send(path: path, method: method, body: data, auth: auth, idempotent: idempotent, mutation: mutation)
     }
 
     // Failure diagnostics land in the unified log (`log stream --predicate 'subsystem ==
@@ -769,9 +820,10 @@ final class APIClient: @unchecked Sendable {
         method: String,
         body: Data?,
         auth: Bool,
-        idempotent: Bool
+        idempotent: Bool,
+        mutation: MutationStamp? = nil
     ) async throws -> Response {
-        let (data, _) = try await sendRaw(path: path, method: method, body: body, auth: auth, idempotent: idempotent)
+        let (data, _) = try await sendRaw(path: path, method: method, body: body, auth: auth, idempotent: idempotent, mutation: mutation)
 
         // A 204 (or any empty success) for a caller that expects no body — or ignores the one it gets.
         if data.isEmpty {
@@ -816,8 +868,22 @@ final class APIClient: @unchecked Sendable {
         method: String,
         body: Data?,
         auth: Bool,
-        idempotent: Bool
+        idempotent: Bool,
+        mutation: MutationStamp? = nil
     ) async throws -> (Data, HTTPURLResponse) {
+        let lease = currentEpoch
+        let owner = auth ? await tokenProvider.sessionIdentity() : nil
+        func validateLease() throws {
+            guard lease == currentEpoch, !halted, !Task.isCancelled else { throw CancellationError() }
+        }
+        func validateOwner() async throws {
+            try validateLease()
+            if auth {
+                let currentOwner = await tokenProvider.sessionIdentity()
+                try validateLease()
+                if owner != currentOwner { throw CancellationError() }
+            }
+        }
         guard let url = URL(string: path, relativeTo: baseURL) else { throw APIError.invalidURL }
 
         let deadline = Date().addingTimeInterval(RetryPolicy.budget)
@@ -827,7 +893,7 @@ final class APIClient: @unchecked Sendable {
 
         while true {
             // Checked per attempt, so a retry already in its backoff stops too.
-            if halted { throw CancellationError() }
+            try await validateOwner()
             var req = URLRequest(url: url)
             req.httpMethod = method
             // Spend from the shared budget, never restart it: a retry after a 15 s timeout gets
@@ -835,6 +901,11 @@ final class APIClient: @unchecked Sendable {
             req.timeoutInterval = min(APIClient.requestTimeout,
                                       max(RetryPolicy.minAttempt, deadline.timeIntervalSinceNow))
             req.setValue("application/json", forHTTPHeaderField: "Accept")
+            if let mutation {
+                req.setValue(mutation.operationID.uuidString.lowercased(), forHTTPHeaderField: "X-Previously-Operation-Id")
+                req.setValue(mutation.writerID.uuidString.lowercased(), forHTTPHeaderField: "X-Previously-Writer-Id")
+                req.setValue(String(mutation.sequence), forHTTPHeaderField: "X-Previously-Writer-Seq")
+            }
             if let body {
                 req.httpBody = body
                 req.setValue("application/json", forHTTPHeaderField: "Content-Type")
@@ -843,13 +914,16 @@ final class APIClient: @unchecked Sendable {
             if auth {
                 let resolved: String?
                 if let forcedToken { resolved = forcedToken } else { resolved = await tokenProvider.currentToken() }
+                try await validateOwner()
                 guard let token = resolved else {
                     // No token, for one of two very different reasons — and only one of them ends
                     // a session. Either there is no identity at all (signed out), or there IS one
                     // and we could not mint a token right now: a cold launch in airplane mode,
                     // where Clerk's ~60 s JWT has expired and nothing can renew it. Signing a user
                     // out for being offline is the same failure class as the 2026-08-22 regression.
-                    if await tokenProvider.hasSession() {
+                    let hasSession = await tokenProvider.hasSession()
+                    try await validateOwner()
+                    if hasSession {
                         APIClient.log.error("\(method) \(path): token unavailable while signed in — transport, session kept")
                         throw APIError.transport(URLError(.notConnectedToInternet))
                     }
@@ -859,12 +933,15 @@ final class APIClient: @unchecked Sendable {
                 sentToken = token
                 req.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
             }
+            try await validateOwner()
 
             let data: Data
             let response: URLResponse
             do {
                 (data, response) = try await session.data(for: req)
+                try await validateOwner()
             } catch {
+                try await validateOwner()
                 // A request cancelled by the next keystroke is superseded, never retried.
                 if (error as? URLError)?.code == .cancelled { throw APIError.transport(error) }
                 let delay = RetryPolicy.delay(attempt: attempt + 1)
@@ -899,7 +976,8 @@ final class APIClient: @unchecked Sendable {
             if status == 401, auth, !isHTML(data: data, contentType: contentType) {
                 if !refreshed {
                     refreshed = true
-                    let outcome = await refresher.token(from: tokenProvider)
+                    let outcome = await refresher.token(from: tokenProvider, lease: lease)
+                    try await validateOwner()
                     switch outcome {
                     case let .token(fresh) where fresh != sentToken:
                         forcedToken = fresh

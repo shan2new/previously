@@ -1,0 +1,57 @@
+{
+  "capturedAt": "2026-10-06T17:00:54.832Z",
+  "scope": "Public stored-connection activation after owner credential entry and Save; no credential values inspected or entered",
+  "productionInstance": "ins_3KJtgHKq296iry2eBmj1IkEQmpQ",
+  "google": {
+    "tabId": "1825902927",
+    "url": "https://dashboard.clerk.com/apps/app_3FUb7r97UcdmzHsvIHPipn3PbtD/instances/ins_3KJtgHKq296iry2eBmj1IkEQmpQ/user-authentication/sso-connections/builtin/oauth_google",
+    "alerts": [],
+    "invalidCount": 0,
+    "publicConnectionButtons": [
+      {
+        "disabled": false,
+        "label": "Disable"
+      }
+    ],
+    "publicStatuses": [
+      "Enabled",
+      "Enabled"
+    ],
+    "signin": [
+      {
+        "checked": true,
+        "label": "Enable for sign-up and sign-in"
+      }
+    ],
+    "proof": "clerk-google-enabled-public-visible.png"
+  },
+  "apple": {
+    "tabId": "1825902930",
+    "url": "https://dashboard.clerk.com/apps/app_3FUb7r97UcdmzHsvIHPipn3PbtD/instances/ins_3KJtgHKq296iry2eBmj1IkEQmpQ/user-authentication/sso-connections/builtin/apple",
+    "alerts": [],
+    "invalidCount": 0,
+    "publicConnectionButtons": [
+      {
+        "disabled": false,
+        "label": "Disable"
+      }
+    ],
+    "publicStatuses": [
+      "Enabled",
+      "Enabled"
+    ],
+    "signin": [
+      {
+        "checked": true,
+        "label": "Enable for sign-up and sign-in"
+      }
+    ],
+    "proof": "clerk-apple-enabled-public-visible.png"
+  },
+  "credentialValuesRead": false,
+  "credentialValuesWritten": false,
+  "newCredentialSubmission": false,
+  "publicSettingSaved": "Apple Enable for sign-up and sign-in",
+  "nativeProviderAuthenticationProven": false,
+  "frontendAPIReadback": "Root to verify independently"
+}

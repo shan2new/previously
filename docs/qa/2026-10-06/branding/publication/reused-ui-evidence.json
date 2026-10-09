@@ -1,0 +1,12 @@
+{
+  "priorLegalMobileChecks": 6,
+  "priorDeviceParagraphMobileChecks": 2,
+  "priorHomeInteractionChecks": 19,
+  "legalScope": "Historical unchanged legal body copy, draft behavior and paragraph wrapping; two fresh Privacy checks cover the changed shared branding shell",
+  "homeScope": "Historical reference only for unaffected tour/dialog/FAQ/deep-link/reduced-motion implementation. Icon, hero, screenshots, Home label and captions have new narrow evidence; prior visual captures are superseded, not relabeled as new",
+  "source": [
+    "docs/qa/2026-10-06/landing-final/draft-publication/",
+    "docs/qa/2026-10-06/landing-final/device-id-draft-publication/",
+    "docs/qa/2026-10-06/landing-release/vercel-production/public-browser/"
+  ]
+}

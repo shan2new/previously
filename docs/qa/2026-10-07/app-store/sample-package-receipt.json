@@ -1,0 +1,28 @@
+{
+  "verifiedAt": "2026-10-07T05:06:09.259084+00:00",
+  "file": "/Users/shan2new/Projects/previously/output/app-review/2026-10-07/previously-review-samples.zip",
+  "bytes": 594,
+  "SHA256": "ee30abbfd1286be98a853c4d5613cdc59cf8e78449b0c92a0c3bb7ce94289c30",
+  "files": [
+    {
+      "file": "review-partial.xml",
+      "bytes": 426,
+      "SHA256": "c3d7cd6c86b88b06da2a1233dbf98c9e6e6ccd0e65d4c364b8e30ce235b7ff77",
+      "rows": 2,
+      "containsCredentials": false,
+      "syntheticFixture": true
+    },
+    {
+      "file": "review-all-skipped.xml",
+      "bytes": 255,
+      "SHA256": "d52a026de435ffef3c24b2394d69ed2e925d9fbd9f1298514f7d511694c4c6eb",
+      "rows": 1,
+      "containsCredentials": false,
+      "syntheticFixture": true
+    }
+  ],
+  "archiveIntegrityVerified": true,
+  "uploadedToApple": false,
+  "nativeImportCompletedVerified": false,
+  "note": "Packages existing synthetic public fixtures only; not evidence of physical picker/import success."
+}

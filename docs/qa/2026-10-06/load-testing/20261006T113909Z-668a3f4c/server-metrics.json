@@ -1,0 +1,257 @@
+{
+  "phase": "recovery",
+  "providerStats": {
+    "anilistCalls": 406,
+    "searches": 200,
+    "malMappings": 6,
+    "mediaReads": 200,
+    "loopbackRequests": 0,
+    "blockedRequests": 0,
+    "unsupportedQueries": 0,
+    "simulatedLatencyMs": 20
+  },
+  "socketGuard": {
+    "rejectedConnections": 0,
+    "rejectedHosts": []
+  },
+  "runtimeMemoryBudget": {
+    "heapSizeLimitBytes": 293601280,
+    "nodeOptions": "--max-old-space-size=256 --max-semi-space-size=8",
+    "note": "GC duration is wall time of observed GC entries, not isolated CPU cost. No forced GC."
+  },
+  "gc": {
+    "count": 67528,
+    "totalMs": 29834,
+    "meanMs": 0.442,
+    "p50Ms": 1,
+    "p95Ms": 2,
+    "p99Ms": 3,
+    "maxMs": 41.65787500143051,
+    "binWidthMs": 1,
+    "overflowBinMs": 60000,
+    "kinds": {
+      "1": 60384,
+      "4": 3572,
+      "8": 3572
+    }
+  },
+  "query": {
+    "phase": "recovery",
+    "startedAt": "2026-10-06T11:57:12.234Z",
+    "endedAt": "2026-10-06T12:02:12.446Z",
+    "queries": {
+      "count": 58363,
+      "totalMs": 52411,
+      "meanMs": 0.898,
+      "p50Ms": 1,
+      "p95Ms": 3,
+      "p99Ms": 9,
+      "maxMs": 47.037250000052154,
+      "binWidthMs": 1,
+      "overflowBinMs": 60000
+    },
+    "dispatchWait": {
+      "count": 9527,
+      "totalMs": 259,
+      "meanMs": 0.027,
+      "p50Ms": 1,
+      "p95Ms": 1,
+      "p99Ms": 1,
+      "maxMs": 0.3008339998777956,
+      "binWidthMs": 1,
+      "overflowBinMs": 60000
+    },
+    "dispatchWaitDescription": "Client query handle to postgres onexecute callback; includes client dispatch, connection availability and socket buffering. Callback does not cover every query and is not isolated pool wait.",
+    "dispatchCoverage": 0.16323698233469836,
+    "errors": 0,
+    "inFlight": 0,
+    "peakInFlight": 12
+  },
+  "resources": {
+    "at": "2026-10-06T12:02:12.446Z",
+    "phase": "recovery",
+    "rss": 142278656,
+    "heapTotal": 93945856,
+    "heapUsed": 63851200,
+    "external": 13230807,
+    "arrayBuffers": 8908114,
+    "intervalMs": 273.6902079998981,
+    "cpuPercentOfOneCore": 5.748835559365666,
+    "eventLoopUtilization": 0.07528019164468293,
+    "eventLoopDelayP95Ms": 22.151167,
+    "eventLoopDelayMaxMs": 22.151167,
+    "gcCount": 0,
+    "gcWallDurationMs": 0,
+    "pgActivity": [
+      {
+        "state": "idle",
+        "wait_event_type": "Client",
+        "wait_event": "ClientRead",
+        "connections": 10
+      }
+    ]
+  },
+  "phaseSnapshots": [
+    {
+      "phase": "startup",
+      "startedAt": "2026-10-06T11:39:11.986Z",
+      "endedAt": "2026-10-06T11:39:12.186Z",
+      "queries": {
+        "count": 6,
+        "totalMs": 11,
+        "meanMs": 1.818,
+        "p50Ms": 1,
+        "p95Ms": 8,
+        "p99Ms": 8,
+        "maxMs": 7.795333000000028,
+        "binWidthMs": 1,
+        "overflowBinMs": 60000
+      },
+      "dispatchWait": {
+        "count": 5,
+        "totalMs": 7,
+        "meanMs": 1.416,
+        "p50Ms": 1,
+        "p95Ms": 7,
+        "p99Ms": 7,
+        "maxMs": 6.618040999999948,
+        "binWidthMs": 1,
+        "overflowBinMs": 60000
+      },
+      "dispatchWaitDescription": "Client query handle to postgres onexecute callback; includes client dispatch, connection availability and socket buffering. Callback does not cover every query and is not isolated pool wait.",
+      "dispatchCoverage": 0.8333333333333334,
+      "errors": 0,
+      "inFlight": 0,
+      "peakInFlight": 2
+    },
+    {
+      "phase": "warmup",
+      "startedAt": "2026-10-06T11:39:12.186Z",
+      "endedAt": "2026-10-06T11:41:12.196Z",
+      "queries": {
+        "count": 23349,
+        "totalMs": 22298,
+        "meanMs": 0.955,
+        "p50Ms": 1,
+        "p95Ms": 4,
+        "p99Ms": 12,
+        "maxMs": 19.366124999999556,
+        "binWidthMs": 1,
+        "overflowBinMs": 60000
+      },
+      "dispatchWait": {
+        "count": 3815,
+        "totalMs": 110,
+        "meanMs": 0.029,
+        "p50Ms": 1,
+        "p95Ms": 1,
+        "p99Ms": 1,
+        "maxMs": 0.16641600000002654,
+        "binWidthMs": 1,
+        "overflowBinMs": 60000
+      },
+      "dispatchWaitDescription": "Client query handle to postgres onexecute callback; includes client dispatch, connection availability and socket buffering. Callback does not cover every query and is not isolated pool wait.",
+      "dispatchCoverage": 0.16339029508758404,
+      "errors": 0,
+      "inFlight": 0,
+      "peakInFlight": 8
+    },
+    {
+      "phase": "sustained",
+      "startedAt": "2026-10-06T11:41:12.196Z",
+      "endedAt": "2026-10-06T11:56:12.209Z",
+      "queries": {
+        "count": 880989,
+        "totalMs": 1316312,
+        "meanMs": 1.494,
+        "p50Ms": 1,
+        "p95Ms": 7,
+        "p99Ms": 20,
+        "maxMs": 111.63858300005086,
+        "binWidthMs": 1,
+        "overflowBinMs": 60000
+      },
+      "dispatchWait": {
+        "count": 143417,
+        "totalMs": 9238,
+        "meanMs": 0.064,
+        "p50Ms": 1,
+        "p95Ms": 1,
+        "p99Ms": 2,
+        "maxMs": 87.58258299995214,
+        "binWidthMs": 1,
+        "overflowBinMs": 60000
+      },
+      "dispatchWaitDescription": "Client query handle to postgres onexecute callback; includes client dispatch, connection availability and socket buffering. Callback does not cover every query and is not isolated pool wait.",
+      "dispatchCoverage": 0.16279090885357253,
+      "errors": 0,
+      "inFlight": 0,
+      "peakInFlight": 63
+    },
+    {
+      "phase": "burst",
+      "startedAt": "2026-10-06T11:56:12.209Z",
+      "endedAt": "2026-10-06T11:57:12.234Z",
+      "queries": {
+        "count": 116567,
+        "totalMs": 356553,
+        "meanMs": 3.059,
+        "p50Ms": 1,
+        "p95Ms": 18,
+        "p99Ms": 39,
+        "maxMs": 79.5008749999106,
+        "binWidthMs": 1,
+        "overflowBinMs": 60000
+      },
+      "dispatchWait": {
+        "count": 18915,
+        "totalMs": 23966,
+        "meanMs": 1.267,
+        "p50Ms": 1,
+        "p95Ms": 8,
+        "p99Ms": 30,
+        "maxMs": 69.486375000095,
+        "binWidthMs": 1,
+        "overflowBinMs": 60000
+      },
+      "dispatchWaitDescription": "Client query handle to postgres onexecute callback; includes client dispatch, connection availability and socket buffering. Callback does not cover every query and is not isolated pool wait.",
+      "dispatchCoverage": 0.16226719397428088,
+      "errors": 0,
+      "inFlight": 0,
+      "peakInFlight": 47
+    },
+    {
+      "phase": "recovery",
+      "startedAt": "2026-10-06T11:57:12.234Z",
+      "endedAt": "2026-10-06T12:02:12.446Z",
+      "queries": {
+        "count": 58363,
+        "totalMs": 52411,
+        "meanMs": 0.898,
+        "p50Ms": 1,
+        "p95Ms": 3,
+        "p99Ms": 9,
+        "maxMs": 47.037250000052154,
+        "binWidthMs": 1,
+        "overflowBinMs": 60000
+      },
+      "dispatchWait": {
+        "count": 9527,
+        "totalMs": 259,
+        "meanMs": 0.027,
+        "p50Ms": 1,
+        "p95Ms": 1,
+        "p99Ms": 1,
+        "maxMs": 0.3008339998777956,
+        "binWidthMs": 1,
+        "overflowBinMs": 60000
+      },
+      "dispatchWaitDescription": "Client query handle to postgres onexecute callback; includes client dispatch, connection availability and socket buffering. Callback does not cover every query and is not isolated pool wait.",
+      "dispatchCoverage": 0.16323698233469836,
+      "errors": 0,
+      "inFlight": 0,
+      "peakInFlight": 12
+    }
+  ],
+  "resourceSamples": 278
+}

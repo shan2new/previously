@@ -1,0 +1,19 @@
+{
+  "verifiedAt": "2026-10-06T15:55:08.143366+00:00",
+  "appId": "6818452741",
+  "version": "1.0",
+  "selectedBuild": 14,
+  "action": "Add for Review - required-field validation",
+  "actualState": "Prepare for Submission",
+  "reviewDraftCreated": false,
+  "submittedForReview": false,
+  "validationErrors": [
+    "User name - This field is required",
+    "Password - This field is required"
+  ],
+  "additionalGenericBanner": "An unexpected error was encountered when submitting for review. If the issue persists please contact us",
+  "privateCredentialsEntered": false,
+  "screenshot": "review-required-fields-visible.jpg",
+  "nextStep": "After existing owner authorization for private reviewer credentials to Apple arrives, save only the isolated account credentials and repeat normal validation. Do not infer the generic banner resolves until verified.",
+  "source": "https://developer.apple.com/help/app-store-connect/manage-submissions-to-app-review/submit-an-app"
+}

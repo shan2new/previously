@@ -1,0 +1,24 @@
+{
+  "recordedAt": "2026-10-06T14:41:25.628059+00:00",
+  "candidateBuild": 13,
+  "appConfiguration": "Release",
+  "productionPublicConfigVerified": true,
+  "sealedRuntimeSHA256": "4fc959e277db2e3d317505bcf628491e6fc3995b5aaa0929440c40f149b1b984",
+  "firstProcessId": 3559,
+  "coldProcessId": 5409,
+  "coldPreTapCPUPercent": 0.0,
+  "postTapCPUPercent": 100.0,
+  "reproductions": 2,
+  "trigger": "Ordinary native Sign in button, before credential entry",
+  "visibleResult": "Sign-in screen remains; credentials sheet never becomes visible; runtime AX subtree disappears",
+  "samplePaths": [
+    "signin-hang-sample.txt",
+    "signin-hang-cold-sample.txt"
+  ],
+  "hotStack": "main-thread SwiftUI GraphHost.flushTransactions / DynamicBody.updateValue / ObservationCenter.invalidate / ObservationTracking.cancel; SignInView sheet construction and AuthView/AuthState init",
+  "causeBoundary": "Confirmed view invalidation loop during sheet mount, not a network wait; direct Clerk session observation in the sheet is the first isolation target",
+  "credentialsEntered": false,
+  "sourceEditedAtReceipt": false,
+  "signedArchive13Preserved": true,
+  "sealedQARunPreserved": true
+}

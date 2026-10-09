@@ -12,6 +12,7 @@ export interface AuthConfig {
   devAuthBypass: boolean
   clerkJwtKey?: string
   clerkSecretKey?: string
+  clerkExpectedIssuer?: string
 }
 
 /** The subset of `env` this module reads. Declared structurally so tests can pass a literal. */
@@ -20,6 +21,7 @@ export interface AuthEnvSource {
   DEV_AUTH_BYPASS: boolean
   CLERK_JWT_KEY?: string
   CLERK_SECRET_KEY?: string
+  CLERK_EXPECTED_ISSUER?: string
 }
 
 export function authConfigFromEnv(e: AuthEnvSource = env): AuthConfig {
@@ -28,6 +30,7 @@ export function authConfigFromEnv(e: AuthEnvSource = env): AuthConfig {
     devAuthBypass: e.DEV_AUTH_BYPASS,
     clerkJwtKey: e.CLERK_JWT_KEY,
     clerkSecretKey: e.CLERK_SECRET_KEY,
+    clerkExpectedIssuer: e.CLERK_EXPECTED_ISSUER,
   }
 }
 
@@ -59,5 +62,12 @@ export function assertAuthConfig(c: AuthConfig): void {
       'Refusing to start: APP_ENV=production with neither CLERK_JWT_KEY nor CLERK_SECRET_KEY set. ' +
         'Nothing could verify a session token, so every request would be rejected.',
     )
+  }
+  let issuer: URL
+  try { issuer = new URL(c.clerkExpectedIssuer ?? '') }
+  catch { throw new Error('Production requires CLERK_EXPECTED_ISSUER from its Clerk instance.') }
+  if (issuer.protocol !== 'https:' || issuer.origin !== c.clerkExpectedIssuer
+    || issuer.hostname.endsWith('.clerk.accounts.dev')) {
+    throw new Error('CLERK_EXPECTED_ISSUER must be the exact production HTTPS origin.')
   }
 }

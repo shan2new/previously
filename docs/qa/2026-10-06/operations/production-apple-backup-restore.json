@@ -1,0 +1,30 @@
+{
+  "at": "2026-10-06T12:46:38.328Z",
+  "runtime": "v24.21.0",
+  "artifact": "/Users/shan2new/Infra/previously/releases/20261006T123751Z/server",
+  "ledger": {
+    "records": 0,
+    "pending": 0,
+    "sha256": "be45b3597c3b2b64ba6ce9378b54e52bf0a00f81366952a8f9ac1030cf971d05"
+  },
+  "manifest": "/Users/shan2new/Infra/previously/backups/previously-20261006T124636257Z-f9c0500b7983.manifest.json",
+  "backup": {
+    "bytes": 12127822,
+    "tocEntries": 190,
+    "sha256": "a47700999ee047ddc6a8f78db8dc6107171f8cb235e620eae4d6bf77e84f80da"
+  },
+  "restored": {
+    "scratch": "previously_restore_20261006t124637_50c480854568",
+    "usersBefore": 16,
+    "usersAfter": 16,
+    "deletedUsersSwept": 0,
+    "ledgerRecords": 0,
+    "restoredDeletionRecords": 0,
+    "deletedIdentitiesRemaining": 0,
+    "sha256": "a47700999ee047ddc6a8f78db8dc6107171f8cb235e620eae4d6bf77e84f80da"
+  },
+  "serviceRestarted": false,
+  "restoredOverLiveDatabase": false,
+  "scratchRemoved": true,
+  "cleanupVerifiedAt": "2026-10-06T12:47:21.931Z"
+}

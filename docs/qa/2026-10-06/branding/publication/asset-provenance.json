@@ -1,0 +1,72 @@
+{
+  "checkedAt": "2026-10-06T13:47:47.387152+00:00",
+  "assets": [
+    {
+      "source": "docs/qa/2026-10-06/archive13/native-icon-152.png",
+      "publishedSource": "landing/public/brand/native-icon.png",
+      "width": 152,
+      "height": 152,
+      "bytes": 16793,
+      "sha256": "baf5bdeefe3b0496878e8e4faab834ed5106f88c1298e15c5ced36f56f20bbd5",
+      "byteIdentical": true,
+      "provenance": "Actual archive13 icon, lossless Apple PNG encoding"
+    },
+    {
+      "source": "docs/audits/2026-10-05/home-navigation/proposed-home.png",
+      "publishedSource": "landing/public/app/home-current.png",
+      "width": 1179,
+      "height": 2556,
+      "bytes": 4758772,
+      "sha256": "93c8e7114ee30d34af4fe97589d67593fbe9e385947d439e646da6cc26a2c287",
+      "byteIdentical": true,
+      "provenance": "Actual native iPhone simulator Home capture5Oct; proposal source included releasebuild12; not production-auth proof"
+    },
+    {
+      "source": "design/artwork-2026-10-02/scout/14-library-populated-after.jpg",
+      "publishedSource": "landing/public/app/library-current.jpg",
+      "width": 369,
+      "height": 800,
+      "bytes": 75619,
+      "sha256": "9371c72e1c7f05818e908fd94722eaf72d58ca058fe9339fd5d15f8a4e266a02",
+      "byteIdentical": true,
+      "provenance": "Actual native simulator capture2Oct, current five-tab navigation; not production-auth proof"
+    },
+    {
+      "source": "design/artwork-2026-10-02/scout/06-schedule-populated.jpg",
+      "publishedSource": "landing/public/app/schedule-current.jpg",
+      "width": 369,
+      "height": 800,
+      "bytes": 69661,
+      "sha256": "3f2507a2d4e0d138eecca41bd6cb0c81cf49a811237d2ff7e73ec15528b6e484",
+      "byteIdentical": true,
+      "provenance": "Actual native simulator capture2Oct, current five-tab navigation; not production-auth proof"
+    },
+    {
+      "source": "design/artwork-2026-10-02/scout/09-discover.jpg",
+      "publishedSource": "landing/public/app/search-current.jpg",
+      "width": 369,
+      "height": 800,
+      "bytes": 64530,
+      "sha256": "7b155f19af57e951ef3fdf02178a9b53b9d7a57adc1d41866cff57a5ff41c103",
+      "byteIdentical": true,
+      "provenance": "Actual native simulator capture2Oct, current five-tab navigation; not production-auth proof"
+    }
+  ],
+  "retiredPublicAssets": [
+    "brand/icon.svg",
+    "brand/mark.svg",
+    "brand/mark-tight.svg",
+    "app/today.webp",
+    "app/today-preview.webp",
+    "app/library.webp",
+    "app/library-preview.webp",
+    "app/schedule.webp",
+    "app/schedule-preview.webp",
+    "app/search.webp",
+    "app/search-preview.webp"
+  ],
+  "imageEditing": false,
+  "upscale": false,
+  "syntheticQAFixtureUsed": false,
+  "seasonsCapture": "Existing historical6September native season-picker capture preserved; no brandmark visible"
+}

@@ -1,0 +1,144 @@
+{
+  "schema": "xcodebuildmcp.output.build-result",
+  "schemaVersion": "3",
+  "didError": false,
+  "error": null,
+  "data": {
+    "request": {
+      "scheme": "Previously",
+      "projectPath": "/Users/shan2new/Projects/previously/ios/Previously.xcodeproj",
+      "derivedDataPath": "/Users/shan2new/Projects/previously/ios/build/DerivedData",
+      "configuration": "Release",
+      "platform": "iOS Simulator",
+      "simulatorId": "F3AD17A6-813D-4C7E-8263-6383F952302C"
+    },
+    "summary": {
+      "status": "SUCCEEDED",
+      "durationMs": 150049,
+      "target": "simulator"
+    },
+    "artifacts": {
+      "buildLogPath": "~/Library/Developer/XcodeBuildMCP/workspaces/previously-2bd4c895d527/logs/build_sim_2026-10-06T14-44-48-983Z_pid8418_ea2b9625.log"
+    },
+    "diagnostics": {
+      "warnings": [
+        {
+          "message": "left side of nil coalescing operator '??' has non-optional type 'WatchStatus', so the right side is never used",
+          "location": "/Users/shan2new/Projects/previously/ios/Sources/App/AppModel+Writes.swift:183"
+        },
+        {
+          "message": "main actor-isolated static property 'space' can not be referenced from a Sendable closure",
+          "location": "/Users/shan2new/Projects/previously/ios/Sources/Features/Discover/DiscoverExplore.swift:439"
+        },
+        {
+          "message": "capture of non-Sendable type 'Self.Type' in an isolated closure [#SendableMetatypes]",
+          "location": "/Users/shan2new/Projects/previously/ios/Sources/DesignSystem/FeedComponents.swift:474"
+        },
+        {
+          "message": "capture of non-Sendable type 'Self.Type' in an isolated closure [#SendableMetatypes]",
+          "location": "/Users/shan2new/Projects/previously/ios/Sources/DesignSystem/FeedComponents.swift:489"
+        },
+        {
+          "message": "main actor-isolated static property 'space' can not be referenced from a Sendable closure",
+          "location": "/Users/shan2new/Projects/previously/ios/Sources/Features/Feed/FeedHeader.swift:258"
+        },
+        {
+          "message": "main actor-isolated static property 'pinTop' can not be referenced from a Sendable closure",
+          "location": "/Users/shan2new/Projects/previously/ios/Sources/Features/FranchiseDetail/FranchiseDetailView.swift:1766"
+        },
+        {
+          "message": "main actor-isolated static property 'pinTop' can not be referenced from a Sendable closure",
+          "location": "/Users/shan2new/Projects/previously/ios/Sources/Features/FranchiseDetail/FranchiseDetailView.swift:1918"
+        },
+        {
+          "message": "main actor-isolated property 'reduceMotion' can not be referenced from a nonisolated autoclosure",
+          "location": "/Users/shan2new/Projects/previously/ios/Sources/Features/Home/HomeView.swift:372"
+        },
+        {
+          "message": "main actor-isolated property 'reduceMotion' can not be referenced from a nonisolated autoclosure",
+          "location": "/Users/shan2new/Projects/previously/ios/Sources/Features/Home/HomeView.swift:519"
+        },
+        {
+          "message": "main actor-isolated static property 'preroll' can not be referenced from a nonisolated context",
+          "location": "/Users/shan2new/Projects/previously/ios/Sources/App/LaunchIdent.swift:313"
+        },
+        {
+          "message": "main actor-isolated static property 'revealFor' can not be referenced from a nonisolated context",
+          "location": "/Users/shan2new/Projects/previously/ios/Sources/App/LaunchIdent.swift:314"
+        },
+        {
+          "message": "main actor-isolated static property 'revealFor' can not be referenced from a nonisolated context",
+          "location": "/Users/shan2new/Projects/previously/ios/Sources/App/LaunchIdent.swift:318"
+        },
+        {
+          "message": "main actor-isolated static property 'beadAt' can not be referenced from a nonisolated context",
+          "location": "/Users/shan2new/Projects/previously/ios/Sources/App/LaunchIdent.swift:319"
+        },
+        {
+          "message": "main actor-isolated static property 'strike' can not be referenced from a nonisolated context",
+          "location": "/Users/shan2new/Projects/previously/ios/Sources/App/LaunchIdent.swift:319"
+        },
+        {
+          "message": "main actor-isolated static property 'strike' can not be referenced from a nonisolated context",
+          "location": "/Users/shan2new/Projects/previously/ios/Sources/App/LaunchIdent.swift:320"
+        },
+        {
+          "message": "main actor-isolated static property 'beadAt' can not be referenced from a nonisolated context",
+          "location": "/Users/shan2new/Projects/previously/ios/Sources/App/LaunchIdent.swift:321"
+        },
+        {
+          "message": "main actor-isolated static property 'bloomFor' can not be referenced from a nonisolated context",
+          "location": "/Users/shan2new/Projects/previously/ios/Sources/App/LaunchIdent.swift:321"
+        },
+        {
+          "message": "main actor-isolated static property 'exitFor' can not be referenced from a nonisolated context",
+          "location": "/Users/shan2new/Projects/previously/ios/Sources/App/LaunchIdent.swift:325"
+        },
+        {
+          "message": "main actor-isolated static property 'compositionExitFraction' can not be referenced from a nonisolated context",
+          "location": "/Users/shan2new/Projects/previously/ios/Sources/App/LaunchIdent.swift:325"
+        },
+        {
+          "message": "main actor-isolated static property 'exitScale' can not be referenced from a nonisolated context",
+          "location": "/Users/shan2new/Projects/previously/ios/Sources/App/LaunchIdent.swift:326"
+        },
+        {
+          "message": "main actor-isolated static property 'groundLag' can not be referenced from a nonisolated context",
+          "location": "/Users/shan2new/Projects/previously/ios/Sources/App/LaunchIdent.swift:331"
+        },
+        {
+          "message": "main actor-isolated static property 'exitFor' can not be referenced from a nonisolated context",
+          "location": "/Users/shan2new/Projects/previously/ios/Sources/App/LaunchIdent.swift:331"
+        },
+        {
+          "message": "main actor-isolated static property 'exitFor' can not be referenced from a nonisolated context",
+          "location": "/Users/shan2new/Projects/previously/ios/Sources/App/LaunchIdent.swift:332"
+        },
+        {
+          "message": "main actor-isolated static property 'groundLag' can not be referenced from a nonisolated context",
+          "location": "/Users/shan2new/Projects/previously/ios/Sources/App/LaunchIdent.swift:332"
+        },
+        {
+          "message": "initialization of immutable value 'ambientArtwork' was never used; consider replacing with assignment to '_' or removing it [#NoUsage]",
+          "location": "/Users/shan2new/Projects/previously/ios/Sources/Features/Library/LibraryView.swift:97"
+        },
+        {
+          "message": "left side of nil coalescing operator '??' has non-optional type 'FranchiseVideo?', so the right side is never used",
+          "location": "/Users/shan2new/Projects/previously/ios/Sources/Models/Models+Enrichment.swift:838"
+        },
+        {
+          "message": "main actor-isolated static property 'size' can not be referenced from a nonisolated context",
+          "location": "/Users/shan2new/Projects/previously/ios/Sources/App/Splash/SplashAlign.swift:125"
+        },
+        {
+          "message": "will never be executed",
+          "location": "/Users/shan2new/Projects/previously/ios/Sources/App/Splash/SplashGlass.swift:392"
+        }
+      ],
+      "errors": []
+    }
+  },
+  "nextSteps": [
+    "Get built app path in simulator derived data: xcodebuildmcp simulator get-app-path --simulator-id F3AD17A6-813D-4C7E-8263-6383F952302C --scheme Previously --platform 'iOS Simulator' --derived-data-path /Users/shan2new/Projects/previously/ios/build/DerivedData"
+  ]
+}

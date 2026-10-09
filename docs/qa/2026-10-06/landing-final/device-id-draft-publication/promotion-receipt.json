@@ -1,0 +1,32 @@
+{
+  "promotedAt": "2026-10-06T13:29:30.243883+00:00",
+  "deploymentId": "dpl_7LeP7Y1i3y8F48AJbJpwbLTZqLKB",
+  "deploymentURL": "https://landing-95lgrdsxc-shan2news-projects.vercel.app",
+  "canonical": "https://previously.cognipin.com",
+  "rollbackDeploymentId": "dpl_2BUUc6ZREKY29QVMdaF6zEr4BeGg",
+  "rollbackDeploymentURL": "https://landing-faw02og9j-shan2news-projects.vercel.app",
+  "sourceManifestSHA256": "38b4e8c44c7dc8036801749a9e1bac4dafc9c5ec39e9a25ae63bed19a99d7922",
+  "exactQualifiedCandidatePromoted": true,
+  "qualifiedBeforePromotion": {
+    "anonymousRoutes": 8,
+    "assets": 33,
+    "newPrivacyLayouts": [
+      390,
+      320
+    ]
+  },
+  "draft": true,
+  "effectiveDate": null,
+  "noDNSProjectPlanOrSSOChange": true,
+  "rollbackCommand": [
+    "/opt/homebrew/opt/node@24/bin/node",
+    "/Users/shan2new/.npm/_npx/7ce0ba5f02dd442a/node_modules/vercel/dist/vc.js",
+    "promote",
+    "dpl_2BUUc6ZREKY29QVMdaF6zEr4BeGg",
+    "--yes",
+    "--scope",
+    "shan2news-projects",
+    "--timeout",
+    "1m"
+  ]
+}

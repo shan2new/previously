@@ -1,0 +1,15 @@
+{
+  "startedAt": "2026-10-06T10:37:57.085472+00:00",
+  "database": "previously_qa_deletion_27628e6f465743a8a02f2291f3bc4c07",
+  "host": "127.0.0.1",
+  "databaseCreated": true,
+  "databaseRemoved": true,
+  "productionDatabaseReadOrWritten": false,
+  "dotenvLoaded": false,
+  "sourceRevision": "19649b3748eac6ca7508f86ad96be9f533406fcb",
+  "testExitCode": 0,
+  "cleanupError": "RuntimeError: Refusing drop: scratch database still has 1 active connection(s)",
+  "finishedAt": "2026-10-06T10:37:59.040003+00:00",
+  "cleanupRecoveredAt": "2026-10-06T10:38:44.023795+00:00",
+  "cleanupRecovery": "Owned DB had zero connections after natural drain and was dropped without terminating sessions."
+}

@@ -1,0 +1,20 @@
+{
+  "checkedAtUTC": "2026-10-06T17:08:55.723768+00:00",
+  "node": "v24.21.0",
+  "steps": [
+    {
+      "name": "lint",
+      "exitCode": 0
+    },
+    {
+      "name": "typescript",
+      "exitCode": 0
+    },
+    {
+      "name": "static-build",
+      "exitCode": 0
+    }
+  ],
+  "passed": true,
+  "legalSHA256": "c47601bd0476f7ddd7456f35c415758071e4cf3326a06af2e89350c3b1e86127"
+}

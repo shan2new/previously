@@ -1,0 +1,24 @@
+{
+  "checkedAt": "2026-10-06T13:15:45.064201+00:00",
+  "scope": "Metadata and reversible owner-only mode change; no log contents exported, removed or truncated",
+  "files": [
+    {
+      "path": "/Users/shan2new/Library/Logs/com.shan.previously.out.log",
+      "bytesAtInspection": 8573721,
+      "modeAfter": "0600",
+      "modifiedUTC": "2026-10-06T13:15:00.141656+00:00",
+      "activeLegacyWriter": true,
+      "ownedRollingRetention": false
+    },
+    {
+      "path": "/Users/shan2new/Library/Logs/com.shan.previously.err.log",
+      "bytesAtInspection": 292715,
+      "modeAfter": "0600",
+      "modifiedUTC": "2026-10-06T12:50:00.441727+00:00",
+      "activeLegacyWriter": true,
+      "ownedRollingRetention": false
+    }
+  ],
+  "retirementVerified": false,
+  "followup": "Stop the legacy writer during qualified cutover, then account for these files before making capped sanitized-log retention effective. Retiring them permanently requires a concrete owner decision."
+}

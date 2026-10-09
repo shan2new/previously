@@ -1,0 +1,67 @@
+{
+  "verifiedAt": "2026-10-06T12:43:13.665702+00:00",
+  "appStoreId": "6818452741",
+  "questionnaireSaved": true,
+  "calculatedRating": "18+",
+  "calculatedRatingOverride": null,
+  "regionalRatings": {
+    "defaultCountriesOrRegions": 173,
+    "defaultRating": "18+",
+    "Brazil": "18+",
+    "KoreaRepublicOf": "19+"
+  },
+  "legacyOsEarlierThan26": "17+ with regional exceptions",
+  "consumerAvailabilityVerified": false,
+  "storeSubmissionPending": true,
+  "declarations": {
+    "parentalControls": false,
+    "ageAssurance": false,
+    "unrestrictedWebAccess": false,
+    "userGeneratedContent": true,
+    "messagingChat": false,
+    "advertising": true,
+    "profanityCrudeHumor": "infrequent",
+    "horrorFear": "frequent",
+    "alcoholTobaccoDrugReferences": "infrequent",
+    "medicalTreatment": "none",
+    "healthWellness": false,
+    "matureSuggestiveThemes": "frequent",
+    "sexualContentNudity": "infrequent",
+    "graphicSexualContentNudity": "none",
+    "cartoonFantasyViolence": "frequent",
+    "realisticViolence": "frequent",
+    "prolongedGraphicSadisticRealisticViolence": "none",
+    "weapons": "frequent",
+    "simulatedGambling": "none",
+    "contests": "none",
+    "gambling": false,
+    "lootBoxes": false
+  },
+  "declarationBasis": [
+    "Anonymous numeric user ratings are conservatively declared as UGC; public comments and individual rater identities are off.",
+    "Ordinary mature catalogue information and promotional trailers remain eligible; explicit adult/Hentai catalogue filtering is separate from the age rating.",
+    "Possible YouTube contextual advertisements are declared.",
+    "The app catalogues media; it does not offer full-length prolonged graphic or sadistic realistic depictions."
+  ],
+  "platformNotices": [
+    "The questionnaire states Afghanistan is unavailable for Entertainment category.",
+    "Korea RCN applicability and storefront availability are unverified; see corrected broader published-criteria assessment and inspected form.",
+    "Country age-rating assignment alone does not establish legal storefront availability."
+  ],
+  "screenshots": [
+    "age-rating-saved-details.png"
+  ],
+  "secretsInReceipt": false,
+  "koreaRcnAssessment": {
+    "requiredByPublishedCriteriaForCurrentDeclarations": true,
+    "basis": "App Information also includes frequent realistic violence for Entertainment/17+. Current declarations match; the earlier gambling-only inference was incomplete.",
+    "source": "https://developer.apple.com/help/app-store-connect/reference/app-information/app-information/",
+    "additionalSource": "https://developer.apple.com/help/app-store-connect/reference/app-information/age-ratings-values-and-definitions",
+    "actualStorefrontEligibilityVerified": false,
+    "rcnProvided": false,
+    "liveForm": "If an official GRAC rating was received, enter its RCN/rating. Inspected and cancelled unchanged.",
+    "formScreenshot": "korea-rcn-form-inspected.png",
+    "checkedOn": "2026-10-06",
+    "releaseScope": "Resolve the actual regional availability result without introducing licensing outreach or stopping unrelated launch work."
+  }
+}

@@ -676,11 +676,45 @@ export const notifications = pgTable(
 )
 
 // Cron / sync bookkeeping (single-row keyed values).
+// No FK to users: deletion must survive the account row, process restarts and JWT replay.
+// The raw authentication id exists only while provider cleanup is outstanding.
+export const accountDeletions = pgTable('account_deletions', {
+  identityHash: text('identity_hash').primaryKey(),
+  clerkId: text('clerk_id'),
+  requestedAt: timestamp('requested_at', { withTimezone: true }).defaultNow().notNull(),
+  completedAt: timestamp('completed_at', { withTimezone: true }),
+  attempts: integer('attempts').default(0).notNull(),
+  nextAttemptAt: timestamp('next_attempt_at', { withTimezone: true }).defaultNow().notNull(),
+  // Outcome only. Apple proof/code/access/refresh tokens never enter the database or journal.
+  appleRevocation: text('apple_revocation').$type<'revoked' | 'manual_required' | 'not_applicable'>().default('manual_required').notNull(),
+}, (t) => [index('account_deletions_pending_idx').on(t.nextAttemptAt).where(sql`${t.completedAt} is null`)])
+
 export const syncState = pgTable('sync_state', {
   key: text('key').primaryKey(),
   value: jsonb('value').$type<Record<string, unknown>>(),
   updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
 })
+
+// Retry identity is stored atomically with effects. Resource cursors retain ordering even when
+// an older, never-committed intent first arrives after a newer successful one.
+export const clientMutationOperations = pgTable('client_mutation_operations', {
+  userId: uuid('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+  operationId: uuid('operation_id').notNull(),
+  writerId: uuid('writer_id').notNull(),
+  sequence: bigint('sequence', { mode: 'number' }).notNull(),
+  requestHash: text('request_hash').notNull(),
+  kind: text('kind').notNull(),
+  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+}, (t) => [primaryKey({ columns: [t.userId, t.operationId] }),
+  uniqueIndex('client_mutations_writer_sequence_uq').on(t.userId, t.writerId, t.sequence)])
+
+export const clientMutationResources = pgTable('client_mutation_resources', {
+  userId: uuid('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+  writerId: uuid('writer_id').notNull(),
+  resourceKey: text('resource_key').notNull(),
+  sequence: bigint('sequence', { mode: 'number' }).notNull(),
+  deletedSequence: bigint('deleted_sequence', { mode: 'number' }).default(0).notNull(),
+}, (t) => [primaryKey({ columns: [t.userId, t.writerId, t.resourceKey] })])
 
 // ---------- ORM relations (for query convenience) ----------
 

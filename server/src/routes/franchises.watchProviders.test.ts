@@ -58,6 +58,11 @@ vi.mock('../tmdb/service.js', () => ({
 }))
 vi.mock('../grouping/service.js', () => ({ groupFromSeed: mocks.groupFromSeed }))
 vi.mock('../services/recommendations.js', () => ({ findLocalFranchise: mocks.findLocalFranchise }))
+// This file tests route wiring; the real visibility query is covered by the owned SQL suite.
+vi.mock('../services/consumerContent.js', async (original) => ({
+  ...await original<typeof import('../services/consumerContent.js')>(),
+  consumerFranchiseIds: async (ids: string[]) => new Set(ids),
+}))
 vi.mock('../services/preferences.js', () => ({
   resolveUserPreferences: mocks.resolveUserPreferences,
   applyProviderPreferences: (value: unknown) => value,
@@ -188,6 +193,7 @@ describe('GET /search', () => {
       source: 'https://www.themoviedb.org/tv/87826',
       checked: '2026-09-02T12:00:00.000Z',
     })
+    mocks.getSummaries.mockResolvedValueOnce([{ id: ID, source: 'tmdb', title: 'Selling Sunset' }])
     const app = await appWithUser()
     const res = await app.inject({ method: 'GET', url: '/search?q=Selling%20Sunset' })
 
@@ -266,6 +272,17 @@ describe('GET /search', () => {
     expect(mocks.enqueueAnimeVideoFallback).toHaveBeenCalledWith(ID)
     await app.close()
   })
+  it('does not restore an exact result hidden by its synchronous metadata refresh', async () => {
+    mocks.searchFranchises.mockResolvedValueOnce({ franchises: [{ id: ID, source: 'anilist', title: 'Show', featuredVideo: null }] })
+    mocks.refreshAnimeVideoFallback.mockResolvedValueOnce({ updated: true })
+    mocks.getSummaries.mockResolvedValueOnce([])
+    const app = await appWithUser()
+    const result = await app.inject('/search?q=Show')
+    expect(result.statusCode).toBe(200)
+    expect(result.json().franchises).toEqual([])
+    expect(mocks.enqueueFranchiseNewsRefresh).not.toHaveBeenCalled()
+    await app.close()
+  })
 })
 
 describe('the audience is the default catalogue of trending and search', () => {
@@ -314,6 +331,16 @@ describe('the audience is the default catalogue of trending and search', () => {
 })
 
 describe('GET /franchises/:id', () => {
+  it('does not fall back to an older visible detail after refresh hides the title', async () => {
+    mocks.getFranchise.mockResolvedValueOnce({ id: ID, source: 'anilist', title: 'Show', featuredVideo: null }).mockResolvedValueOnce(null)
+    mocks.refreshAnimeVideoFallback.mockResolvedValueOnce({ updated: true })
+    const app = await appWithUser()
+    const result = await app.inject(`/franchises/${ID}`)
+    expect(result.statusCode).toBe(404)
+    expect(result.json()).toEqual({ error: 'franchise not found' })
+    expect(mocks.enqueueFranchiseNewsRefresh).not.toHaveBeenCalled()
+    await app.close()
+  })
   it('returns immediately and schedules stale-while-revalidate news research', async () => {
     const franchise = { id: ID, title: 'Selling Sunset', upcoming: null }
     mocks.getFranchise.mockResolvedValueOnce(franchise)
@@ -433,8 +460,8 @@ describe('POST /franchises/resolve', () => {
 
     expect(anime.statusCode, anime.body).toBe(200)
     expect(tv.statusCode, tv.body).toBe(200)
-    expect(mocks.groupFromSeed).toHaveBeenCalledWith(20832)
-    expect(mocks.ensureTvFranchise).toHaveBeenCalledWith(63210)
+    expect(mocks.groupFromSeed).toHaveBeenCalledWith(20832, { fetcher: expect.any(Function) })
+    expect(mocks.ensureTvFranchise).toHaveBeenCalledWith(63210, { consumerOnly: true })
     await app.close()
   })
 

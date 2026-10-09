@@ -1,0 +1,31 @@
+{
+  "approvedForDossier": true,
+  "approvedBy": "root visual review of corrected final assets",
+  "approvalScope": "Marketing creative only; exact1179 exports and App Store upload are separate pending steps",
+  "panels": [
+    {
+      "label": "Home / resume",
+      "path": "output/app-store/01-home-hero-final.png",
+      "sha256": "ca2c4a0ee090aa888625bf13d12a4082fee5af7538e3c3456a53d3c9e84aa127"
+    },
+    {
+      "label": "Library / progress",
+      "path": "output/app-store/02-library-final.png",
+      "sha256": "084918e987306167f7bc04f65e5ed886dc521dfb7294dcf7035d94cb614336f3"
+    },
+    {
+      "label": "Schedule / next",
+      "path": "output/app-store/03-schedule-final.png",
+      "sha256": "8e53dc39e018728a61057c0981588b1c52fbe20167c3087f8299c14bd1742eda"
+    },
+    {
+      "label": "Discover / catalogue",
+      "path": "output/app-store/04-discover-final.png",
+      "sha256": "84cfbc979d95906405d4f4a0c07799a3bbe44b5f0e2334f45356833639990d2a"
+    }
+  ],
+  "nativeIcon": {
+    "path": "docs/qa/2026-10-06/archive13/native-icon-152.png",
+    "sha256": "baf5bdeefe3b0496878e8e4faab834ed5106f88c1298e15c5ced36f56f20bbd5"
+  }
+}

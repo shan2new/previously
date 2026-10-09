@@ -36,9 +36,13 @@ export async function resolveIdentity(
     const clerkId = token.slice('dev:'.length)
     return clerkId ? { clerkId } : null
   }
+  // Signature verification with a local PEM alone cannot distinguish a accidentally retained
+  // development-instance key. Bind verified claims to the explicit production issuer as well.
+  if (cfg.appEnv === 'production' && !cfg.clerkExpectedIssuer) return null
   try {
     const claims = await verify(token, { jwtKey: cfg.clerkJwtKey, secretKey: cfg.clerkSecretKey })
-    if (!claims.sub) return null
+    if (typeof claims.sub !== 'string' || !claims.sub) return null
+    if (cfg.clerkExpectedIssuer && claims.iss !== cfg.clerkExpectedIssuer) return null
     const email = (claims as Record<string, unknown>).email as string | undefined
     return { clerkId: claims.sub, email }
   } catch {

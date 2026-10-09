@@ -15,6 +15,7 @@ import { abortableSleep, withTimeout } from '../util/abort.js'
 import { BoundedTaskQueue, type EnqueuedTask } from '../util/taskQueue.js'
 import { getSummaries, getTrendingFranchises } from './franchiseView.js'
 import { makeAniListFetcher, upsertMedia } from './mediaStore.js'
+import { isExcludedContent, consumerFranchiseConditions, consumerAnimeFetcher } from './consumerContent.js'
 import { correctSearchQuery } from './queryCorrect.js'
 
 // Search is interactive typeahead, not a catalogue-ingestion job. These are deliberately tighter
@@ -30,7 +31,7 @@ const TV_ENRICH_CAP = 2
 
 // Capacity includes active work. Excess typeahead cache warming is dropped, never accumulated.
 const enrichment = new BoundedTaskQueue(2, 24, (key, error) => {
-  console.warn(`search enrichment failed (${key}):`, error instanceof Error ? error.message : error)
+  console.warn('[search] enrichment failed')
 })
 
 export interface SearchProfile {
@@ -229,7 +230,7 @@ async function searchProviders(
     (hits) => {
       sources.anilist = 'ok'
       return hits.filter((hit) =>
-        (filters?.year == null || hit.seasonYear === filters.year) &&
+        !isExcludedContent(hit) && (filters?.year == null || hit.seasonYear === filters.year) &&
         (filters?.status == null || hit.status === filters.status),
       )
     },
@@ -251,7 +252,7 @@ async function searchProviders(
           sources.tmdb = 'ok'
           return hits.filter((hit) => {
             const year = Number(hit.first_air_date?.slice(0, 4)) || null
-            return filters?.year == null || year === filters.year
+            return !isExcludedContent(hit) && (filters?.year == null || year === filters.year)
           })
         },
         () => {
@@ -329,7 +330,7 @@ function enqueueEnrichment(
       tasks.push(
         enrichment.enqueue(`anilist:${hit.id}`, async () => {
           await prime()
-          const component = await expandComponent(hit.id, fetcher)
+          const component = await expandComponent(hit.id, consumerAnimeFetcher(hit.id, fetcher))
           if (component.size === 0) return
           // Search warming must not depend on a third provider. The scheduled seed path retains
           // LLM refinement; cold interactive search uses the deterministic relation graph.
@@ -344,6 +345,7 @@ function enqueueEnrichment(
       enrichment.enqueue(`tmdb:${hit.id}`, async () => {
         await ensureTvFranchise(hit.id, {
           hydrateEpisodes: false,
+          consumerOnly: true,
           request: {
             signal: withTimeout(undefined, ENRICHMENT_BUDGET_MS),
             maxRetries: 1,
@@ -361,8 +363,8 @@ function enqueueEnrichment(
  * indexes in schema.ts. Prefix tsquery lexemes keep typeahead index-backed as the catalogue grows.
  */
 function searchFilterConditions(filters?: SearchFilters): SQL[] {
-  if (!filters) return []
-  const conditions: SQL[] = []
+  const conditions = consumerFranchiseConditions()
+  if (!filters) return conditions
   if (filters.source) conditions.push(sql`${franchise.source} = ${filters.source}`)
   if (filters.year != null) conditions.push(sql`exists (
     select 1 from franchise_member sfm

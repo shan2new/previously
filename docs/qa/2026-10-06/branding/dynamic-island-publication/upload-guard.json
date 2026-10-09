@@ -1,0 +1,18 @@
+{
+  "checkedAt": "2026-10-06T13:58:49.913899+00:00",
+  "fileCount": 118,
+  "totalBytes": 8176962,
+  "changed": [
+    "app/experience.tsx",
+    "app/gallery.css"
+  ],
+  "added": [],
+  "removed": [],
+  "allPathsWithinLanding": true,
+  "secretAndGeneratedExclusionPassed": true,
+  "allPublicAssetsByteUnchanged": true,
+  "legalContentUnchanged": true,
+  "onlyHeroHardwareFrameDelta": true,
+  "localBuildRun": false,
+  "sourceManifestSha256": "a7a7dadf8ea6cf930945bb3722d265e23aeb756a4b4b03611ce798e4b1ea6211"
+}

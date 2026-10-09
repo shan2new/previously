@@ -1,0 +1,27 @@
+{
+  "checkedAt": "2026-10-06T13:55:09.357Z",
+  "footer": {
+    "box": {
+      "bottom": 657.609375,
+      "height": 36,
+      "left": 145,
+      "right": 181,
+      "top": 621.609375,
+      "width": 36,
+      "x": 145,
+      "y": 621.609375
+    },
+    "complete": true,
+    "dotColor": "rgb(240, 86, 63)",
+    "naturalHeight": 152,
+    "naturalWidth": 152,
+    "src": "https://previously.cognipin.com/brand/native-icon.png"
+  },
+  "providerSection": {
+    "documentWidth": 390,
+    "section": "04\nServices that receive information\n\nPreviously. uses the following services to provide authentication, catalog information and delivery. Those services also have their own privacy practices.\n\nClerk receives information needed for sign-in, authentication, session management and account security. This includes account information, a vendor device identifier, session and device tokens, device model, operating-system and app information, and technical connection information.\nWhen you choose Apple or Google sign-in, that provider handles authorization and shares the basic identity information you approve with Clerk. Google sign-in requests your name, email address and basic account identity; Previously. does not request permission to read or send Gmail messages. Apple lets you choose whether to share your email address or use Hide My Email.\nAniList and TMDB receive catalog search terms and catalog identifiers when the backend searches or matches shows. A public AniList username is sent to AniList when you request an import from that username. These requests do not deliberately include your Previously. authentication identifier or personal episode counts; importing a MyAnimeList export sends catalog identifiers for matching.\nAI search correction and paid model APIs are disabled in the launch configuration. Search text and personal watching activity are not sent to those services by Previously.\nThe editorial catalog workflow may research public show metadata and announcements using operator tools. This is separate from personal account data and watching activity.\nYour device loads artwork from the image hosts referenced by the catalog. Those hosts receive ordinary image requests, which can expose network information such as an IP address.\nEmbedded YouTube trailers connect directly to YouTube and may play automatically when a trailer enters view. The launch player uses privacy-enhanced embedding and a temporary web data store; YouTube can still receive the video request, IP address and other connection information, and can show non-personalized advertising. Opening an external link involves the destination service and its own privacy practices.\nThe app backend runs on the operator’s Mac Mini. Cloudflare carries and protects the public connection to it. Vercel hosts this static website. These providers process ordinary connection information to deliver and protect their services. This website has no sign-in, advertising SDK or application analytics script.\n\nClerk privacy notice \n\nApple privacy policy \n\nGoogle and YouTube privacy policy \n\nCloudflare privacy policy \n\nVercel privacy notice ",
+    "url": "https://previously.cognipin.com/privacy#section-4",
+    "width": 390
+  },
+  "passed": true
+}

@@ -1,0 +1,42 @@
+{
+  "at": "2026-10-06T12:46:21.377Z",
+  "runtime": "v24.21.0",
+  "artifact": "/Users/shan2new/Infra/previously/releases/20261006T123751Z/server",
+  "migration": "0015_exotic_ezekiel",
+  "migrationSha256": "ebe87bb4ad93828b58fd7156d8fb3d64cefc136b48bf11aa1b170a9df6a7fa6f",
+  "migrationsBefore": {
+    "count": 15,
+    "latest": "1791283329443"
+  },
+  "migrationsAfter": {
+    "count": 16,
+    "latest": "1791289543764"
+  },
+  "column": {
+    "column_name": "apple_revocation",
+    "is_nullable": "NO",
+    "column_default": "'manual_required'::text"
+  },
+  "dataUnchanged": true,
+  "tables": {
+    "users": {
+      "rows": 16,
+      "sha256": "2230bdd5936404d00ef9bb22b95bff75d0ed071cd4a9bd39c51fffd7bfce5cbc"
+    },
+    "subscriptions": {
+      "rows": 109,
+      "sha256": "ac47c0bf2c82cf2c7dded1b1cae9e8bb4a639b9236daa0d04d2197c765b67e6e"
+    },
+    "progress": {
+      "rows": 370,
+      "sha256": "6e1b5d0fd06dffd6e1b09774017d4da2332c7e87fdd071a15048283856bdf0a2"
+    },
+    "watch_sessions": {
+      "rows": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  },
+  "serviceRestarted": false,
+  "clerkProviderCalls": 0,
+  "productionSignInCutover": false
+}

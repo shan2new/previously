@@ -298,7 +298,7 @@ export async function resolveSeriesRoots(
         providerRequests++
         for (const node of await io.fetchRootNodes(remote, options.request)) known.set(node.id, nodeFromAniList(node))
       } catch (error) {
-        console.warn('series-root walk: AniList request failed:', error instanceof Error ? error.message : error)
+        console.warn('series-root walk: AniList request failed:', 'diagnostic details redacted')
       }
     }
     for (const [start, walk] of walks) {

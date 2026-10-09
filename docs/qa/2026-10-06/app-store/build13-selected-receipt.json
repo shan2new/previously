@@ -1,0 +1,15 @@
+{
+  "appId": "6818452741",
+  "version": "1.0",
+  "build": 13,
+  "buildId": "a570f501-67ed-446c-914e-2390f73106a8",
+  "processingCompleteVerified": true,
+  "selectedOnVersionVerified": true,
+  "savedAndReloadVerified": true,
+  "status": "Prepare for Submission",
+  "submittedForReviewVerified": false,
+  "screenshot": "docs/qa/2026-10-06/app-store/build13-selected-visible.png",
+  "verification": "Actual Add Build list exposed production13; selected13, Done, Save, reloaded and verified row13/version1.0. Upload and selection are distinct from submission.",
+  "verifiedOn": "2026-10-06",
+  "receiptRecordedAt": "2026-10-06T13:56:17.999616+00:00"
+}

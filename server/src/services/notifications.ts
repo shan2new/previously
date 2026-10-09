@@ -1,6 +1,6 @@
 import { and, desc, eq, inArray, isNull, notInArray, sql, type SQL } from 'drizzle-orm'
 import { db } from '../db/index.js'
-import { announcements, blocks, comments, notifications, userProfiles } from '../db/schema.js'
+import { announcements, blocks, comments, franchise, notifications, userProfiles } from '../db/schema.js'
 import { AGENT_TEXT_LIMITS, isCleanAgentText, sanitizeAgentText } from '../feed/evidence.js'
 import { installmentName } from '../news/installment.js'
 import type {
@@ -14,6 +14,7 @@ import { resolveReleaseWindow } from './releaseWindow.js'
 import { episodeOpenChecker, type EpisodeOpenCheck } from './episodeGate.js'
 import { parseSubject } from '../social/subjects.js'
 import { cursorAt, encodeCursor, type KeysetCursor } from '../util/cursor.js'
+import { consumerFranchiseConditions } from './consumerContent.js'
 
 // The Activity sheet (GET /me/notifications): news rows written by the research job, plus the
 // social kinds (a reply to you, likes on your comment) written by the comment transactions.
@@ -199,6 +200,10 @@ export function toNotificationsPage(
 function visibleTo(userId: string, includeSocial: boolean): SQL {
   const conditions: SQL[] = [
     eq(notifications.userId, userId),
+    sql`(${notifications.franchiseId} is null or exists (
+      select 1 from ${franchise} where ${franchise.id} = ${notifications.franchiseId}
+        and ${sql.join(consumerFranchiseConditions(), sql` and `)}
+    ))`,
     sql`not exists (select 1 from ${announcements} where ${announcements.id} = ${notifications.announcementId} and ${announcements.status} = 'retracted')`,
     sql`(${notifications.actorUserId} is null or (
       ${notifications.actorUserId} not in (select ${blocks.blockedUserId} from ${blocks} where ${blocks.userId} = ${userId})

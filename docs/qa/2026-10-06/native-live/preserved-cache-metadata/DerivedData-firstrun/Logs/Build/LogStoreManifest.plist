@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>logFormatVersion</key>
+	<integer>13</integer>
+	<key>logs</key>
+	<dict>
+		<key>4AA911B9-C243-45D8-B652-105C48800C2D</key>
+		<dict>
+			<key>className</key>
+			<string>IDECommandLineBuildLog</string>
+			<key>documentTypeString</key>
+			<string>&lt;nil&gt;</string>
+			<key>domainType</key>
+			<string>Xcode.IDEActivityLogDomainType.BuildLog</string>
+			<key>fileName</key>
+			<string>4AA911B9-C243-45D8-B652-105C48800C2D.xcactivitylog</string>
+			<key>hasPrimaryLog</key>
+			<true/>
+			<key>primaryObservable</key>
+			<dict>
+				<key>highLevelStatus</key>
+				<string>S</string>
+				<key>totalNumberOfAnalyzerIssues</key>
+				<integer>0</integer>
+				<key>totalNumberOfErrors</key>
+				<integer>0</integer>
+				<key>totalNumberOfTestFailures</key>
+				<integer>0</integer>
+				<key>totalNumberOfWarnings</key>
+				<integer>0</integer>
+			</dict>
+			<key>schemeIdentifier-containerName</key>
+			<string>Previously project</string>
+			<key>schemeIdentifier-schemeName</key>
+			<string>Previously</string>
+			<key>schemeIdentifier-sharedScheme</key>
+			<integer>1</integer>
+			<key>signature</key>
+			<string>Building project Previously with scheme Previously and configuration Debug</string>
+			<key>timeStartedRecording</key>
+			<real>812816775.15156198</real>
+			<key>timeStoppedRecording</key>
+			<real>812816801.60838997</real>
+			<key>title</key>
+			<string>Building project Previously with scheme Previously and configuration Debug</string>
+			<key>uniqueIdentifier</key>
+			<string>4AA911B9-C243-45D8-B652-105C48800C2D</string>
+		</dict>
+		<key>BBB84726-707F-46D7-8EC9-96116F2C4FFC</key>
+		<dict>
+			<key>className</key>
+			<string>IDECommandLineBuildLog</string>
+			<key>documentTypeString</key>
+			<string>&lt;nil&gt;</string>
+			<key>domainType</key>
+			<string>Xcode.IDEActivityLogDomainType.BuildLog</string>
+			<key>fileName</key>
+			<string>BBB84726-707F-46D7-8EC9-96116F2C4FFC.xcactivitylog</string>
+			<key>hasPrimaryLog</key>
+			<true/>
+			<key>primaryObservable</key>
+			<dict>
+				<key>highLevelStatus</key>
+				<string>S</string>
+				<key>totalNumberOfAnalyzerIssues</key>
+				<integer>0</integer>
+				<key>totalNumberOfErrors</key>
+				<integer>0</integer>
+				<key>totalNumberOfTestFailures</key>
+				<integer>0</integer>
+				<key>totalNumberOfWarnings</key>
+				<integer>0</integer>
+			</dict>
+			<key>schemeIdentifier-containerName</key>
+			<string>Previously project</string>
+			<key>schemeIdentifier-schemeName</key>
+			<string>Previously</string>
+			<key>schemeIdentifier-sharedScheme</key>
+			<integer>1</integer>
+			<key>signature</key>
+			<string>Building project Previously with scheme Previously and configuration Debug</string>
+			<key>timeStartedRecording</key>
+			<real>812816606.45093</real>
+			<key>timeStoppedRecording</key>
+			<real>812816610.04776299</real>
+			<key>title</key>
+			<string>Building project Previously with scheme Previously and configuration Debug</string>
+			<key>uniqueIdentifier</key>
+			<string>BBB84726-707F-46D7-8EC9-96116F2C4FFC</string>
+		</dict>
+		<key>F6E30A2F-62E3-4340-931E-FFC16E4BC057</key>
+		<dict>
+			<key>className</key>
+			<string>IDECommandLineBuildLog</string>
+			<key>documentTypeString</key>
+			<string>&lt;nil&gt;</string>
+			<key>domainType</key>
+			<string>Xcode.IDEActivityLogDomainType.BuildLog</string>
+			<key>fileName</key>
+			<string>F6E30A2F-62E3-4340-931E-FFC16E4BC057.xcactivitylog</string>
+			<key>hasPrimaryLog</key>
+			<true/>
+			<key>primaryObservable</key>
+			<dict>
+				<key>highLevelStatus</key>
+				<string>W</string>
+				<key>totalNumberOfAnalyzerIssues</key>
+				<integer>0</integer>
+				<key>totalNumberOfErrors</key>
+				<integer>0</integer>
+				<key>totalNumberOfTestFailures</key>
+				<integer>0</integer>
+				<key>totalNumberOfWarnings</key>
+				<integer>6</integer>
+			</dict>
+			<key>schemeIdentifier-containerName</key>
+			<string>Previously project</string>
+			<key>schemeIdentifier-schemeName</key>
+			<string>Previously</string>
+			<key>schemeIdentifier-sharedScheme</key>
+			<integer>1</integer>
+			<key>signature</key>
+			<string>Building project Previously with scheme Previously and configuration Debug</string>
+			<key>timeStartedRecording</key>
+			<real>812816184.70229495</real>
+			<key>timeStoppedRecording</key>
+			<real>812816208.25278294</real>
+			<key>title</key>
+			<string>Building project Previously with scheme Previously and configuration Debug</string>
+			<key>uniqueIdentifier</key>
+			<string>F6E30A2F-62E3-4340-931E-FFC16E4BC057</string>
+		</dict>
+	</dict>
+</dict>
+</plist>

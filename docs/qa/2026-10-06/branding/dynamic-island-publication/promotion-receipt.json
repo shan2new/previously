@@ -1,0 +1,13 @@
+{
+  "promotedAt": "2026-10-06T14:00:57.471335+00:00",
+  "deploymentId": "dpl_3nWUk4d8w6tw6Kf3v8VL7qTZv9jB",
+  "deploymentURL": "https://landing-8mkz8v72u-shan2news-projects.vercel.app",
+  "sourceManifestSha256": "a7a7dadf8ea6cf930945bb3722d265e23aeb756a4b4b03611ce798e4b1ea6211",
+  "rollbackDeploymentId": "dpl_9wXk1mXyNzMzXjmTWXTH2iN5KTsM",
+  "rollbackDeploymentURL": "https://landing-9jo84k2v7-shan2news-projects.vercel.app",
+  "qualifiedExactCandidatePromoted": true,
+  "draft": true,
+  "effectiveDate": null,
+  "effectivePolicyPublished": false,
+  "localBuildRun": false
+}

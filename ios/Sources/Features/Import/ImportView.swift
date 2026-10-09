@@ -267,6 +267,7 @@ struct ImportView: View {
                         .contentShape(Rectangle())
                 }
                 .accessibilityLabel(Copy.FirstRun.close)
+                .qaIdentifier("qa.import.cancel")
                 .disabled(model.adding)
             }
         }
@@ -285,6 +286,7 @@ struct ImportView: View {
                 VStack(spacing: ThemeSpace.x2 + 2) {
                     ForEach(model.sources) { source in
                         Button { model.choose(source) } label: { sourceRow(source) }
+                            .qaIdentifier("qa.import.source.\(String(describing: source))")
                             .buttonStyle(OverArtPressStyle())
                     }
                 }
@@ -377,6 +379,7 @@ struct ImportView: View {
                     }
                     .buttonStyle(PrimaryButtonStyle2())
                     .disabled(model.username.trimmingCharacters(in: .whitespaces).isEmpty)
+                    .qaIdentifier("qa.import.preview")
                 } else {
                     Button(Copy.Import.chooseFile) { pickingFile = true }
                         .buttonStyle(PrimaryButtonStyle2())
@@ -390,6 +393,7 @@ struct ImportView: View {
         @Bindable var model = model
         return TextField("", text: $model.username,
                          prompt: Text(Copy.Import.anilistPrompt).foregroundStyle(ThemeColor.textTertiary))
+            .qaIdentifier("qa.import.anilist.username")
             .type(ThemeType.body)
             .foregroundStyle(ThemeColor.textPrimary)
             .tint(ThemeColor.interactive)
@@ -442,7 +446,7 @@ struct ImportView: View {
         if let preview = model.preview {
             if preview.listed == 0 {
                 EmptyState(EmptyStateCopy(symbol: "magnifyingglass", title: Copy.Import.nothingFound,
-                                          supporting: unmatchedLine(preview) ?? Copy.Import.nothingFoundDetail))
+                                          supporting: emptyPreviewSupporting(preview)))
                     .padding(.horizontal, ThemeMetrics.gutter)
             } else {
                 ScrollView {
@@ -475,6 +479,7 @@ struct ImportView: View {
                             if preview.source == "tvtime" { note(Copy.Import.tvProgressNote) }
                             note(Copy.Import.preserved)
                             if let line = unmatchedLine(preview) { note(line) }
+                            if preview.adultSkipped > 0 { note(Copy.Import.adultSkipped(preview.adultSkipped)) }
                             if let failure = model.failure { InlineNotice(failure) }
                         }
                     }
@@ -502,6 +507,12 @@ struct ImportView: View {
 
     private func unmatchedLine(_ preview: ImportPreview) -> String? {
         preview.unmatched.count > 0 ? Copy.Import.unmatched(preview.unmatched.count, titles: preview.unmatched.titles) : nil
+    }
+
+    private func emptyPreviewSupporting(_ preview: ImportPreview) -> String {
+        let lines = [unmatchedLine(preview),
+                     preview.adultSkipped > 0 ? Copy.Import.adultSkipped(preview.adultSkipped) : nil].compactMap { $0 }
+        return lines.isEmpty ? Copy.Import.nothingFoundDetail : lines.joined(separator: "\n")
     }
 
     /// The first few of their shows, as posters: the list, recognised.
@@ -565,6 +576,7 @@ struct ImportView: View {
 
     private var done: some View {
         let progress = model.progress
+        let adultSkipped = progress?.skipped?.adultCount ?? model.preview?.adultSkipped ?? 0
         return VStack(spacing: ThemeSpace.x4) {
             Spacer()
             SelectedBadge(size: 64)
@@ -580,6 +592,13 @@ struct ImportView: View {
                     .foregroundStyle(ThemeColor.textSecondary)
                     .multilineTextAlignment(.center)
                     .contentTransition(.numericText())
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+            if adultSkipped > 0 {
+                Text(Copy.Import.adultSkipped(adultSkipped))
+                    .type(ThemeType.metadata)
+                    .foregroundStyle(ThemeColor.textSecondary)
+                    .multilineTextAlignment(.center)
                     .fixedSize(horizontal: false, vertical: true)
             }
             if progress?.isDone == true {

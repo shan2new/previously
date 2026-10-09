@@ -1,0 +1,61 @@
+{
+  "schemaVersion": 1,
+  "checkedAtUtc": "2026-10-07T15:33:20.610052+00:00",
+  "physicalIPhoneConfirmed": true,
+  "phoneUnlockedObserved": true,
+  "installedAppObserved": {
+    "name": "Previously.",
+    "version": "1.0",
+    "bundleId": "com.cognipin.previously",
+    "exactBuildVerified": false
+  },
+  "deviceHubHomeMenuActionVerified": true,
+  "deviceHubRecordScreenEnabled": false,
+  "coordinateTapAttempts": [
+    {
+      "view": "main Device Hub",
+      "error": "-10005 noWindowsAvailable"
+    },
+    {
+      "view": "compact iPhone window",
+      "error": "-10005 noWindowsAvailable"
+    },
+    {
+      "view": "main Device Hub after explicit exposed Raise action",
+      "error": "-10005 noWindowsAvailable"
+    }
+  ],
+  "quickTimeOpenAttempts": [
+    {
+      "selector": "display name",
+      "error": "-10005 timeoutReached"
+    },
+    {
+      "selector": "bundle identifier",
+      "error": "-10005 timeoutReached"
+    },
+    {
+      "selector": "bundle identifier after app inventory confirmed running",
+      "error": "-10005 timeoutReached"
+    }
+  ],
+  "finderAttemptError": "-10005 cgWindowNotFound",
+  "computerLaunchAppApiAvailable": false,
+  "readOnlyUsbInventoryByAgent": "one iPhone attached; QuickTime installed",
+  "manualHandoffRequested": "Open QuickTime New Movie Recording and select iPhone Camera, or use native iPhone Screen Recording after ending mirroring",
+  "erasureBaselineReceipt": "docs/qa/2026-10-07/native-live/erasure-baseline-preparation-20261007T152657449774Z.json",
+  "erasureReady": false,
+  "disposableAppAccountPresent": false,
+  "disposableLibraryCount": 0,
+  "disposableProgressCount": 0,
+  "protectedAccountsUnchanged": true,
+  "actualRecordingCaptured": false,
+  "accountDeletionPerformed": false,
+  "replySent": false,
+  "resubmitted": false,
+  "sourceOrRuntimeChanged": false,
+  "serialsOrUdidPublishedInReceipt": false,
+  "quickTimeRunningObserved": true,
+  "quickTimeAccessibleCaptureWindowVerified": false,
+  "manualHandoffStillPending": true
+}

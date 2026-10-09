@@ -1,0 +1,13 @@
+{
+  "verifiedAt": "2026-10-07T05:03:48.871127+00:00",
+  "method": "read-only installed wrapper/plist config; values sanitized to allowlisted booleans",
+  "artifact": "/Users/shan2new/Infra/previously/releases/20261006T123751Z/server",
+  "paidGroupingDisabled": true,
+  "paidSearchCorrectionDisabled": true,
+  "editorialNewsAgentDisabled": false,
+  "editorialCodexFallbackEnabled": true,
+  "publicCommentsEnabled": false,
+  "tmdbConfigured": true,
+  "clerkConfigured": true,
+  "note": "Configuration readback; not proof an external editorial agent ran or generated every feed item. No credentials or private config hashes emitted."
+}

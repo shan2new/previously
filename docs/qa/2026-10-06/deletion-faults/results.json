@@ -1,0 +1,102 @@
+{
+  "runAt": "2026-10-06T10:37:58.985Z",
+  "fixtureVersion": "deletion-faults-v1",
+  "boundary": "Real production routes/auth/identity locking/deletion ledger and SQL; dev test issuer; owned fresh DB; loopback-only lost-receipt proxy; provider keys absent; no native or actual Clerk deletion proof.",
+  "database": "previously_qa_deletion_27628e6f465743a8a02f2291f3bc4c07",
+  "cases": [
+    {
+      "name": "missing provider credentials returns truthful 202 and removes account data",
+      "status": "passed",
+      "durationMs": 29,
+      "evidence": {
+        "response": {
+          "status": 202,
+          "body": {
+            "deleted": false,
+            "status": "pending"
+          }
+        },
+        "usersRemaining": 0,
+        "progressRemaining": 0,
+        "ledgerRows": 1
+      }
+    },
+    {
+      "name": "repeated DELETE remains pending without recreating an account or ledger",
+      "status": "passed",
+      "durationMs": 13,
+      "evidence": {
+        "repeatedRequests": 3,
+        "ledgerRows": 1,
+        "usersRemaining": 0
+      }
+    },
+    {
+      "name": "lost receipt after deletion commit reconciles using status without upsert",
+      "status": "passed",
+      "durationMs": 10,
+      "evidence": {
+        "lostResponse": true,
+        "upstreamStatus": 202,
+        "statusReceipt": {
+          "status": 202,
+          "body": {
+            "deleted": false,
+            "status": "pending"
+          }
+        }
+      }
+    },
+    {
+      "name": "persistent tombstone works after memory hold clear and server reconstruction",
+      "status": "passed",
+      "durationMs": 19,
+      "evidence": {
+        "processLocalHoldCleared": true,
+        "fastifyReconstructed": true,
+        "separateProcessRestartTested": false
+      }
+    },
+    {
+      "name": "upsert waiting on deletion identity lock cannot resurrect the account",
+      "status": "passed",
+      "durationMs": 14,
+      "evidence": {
+        "advisoryLockWaitersObserved": 1,
+        "upsertRejected": true
+      }
+    },
+    {
+      "name": "pre-commit failure rolls back deletion ledger and all data changes",
+      "status": "passed",
+      "durationMs": 14,
+      "evidence": {
+        "failureStatus": 500,
+        "userPreserved": true,
+        "ledgerRolledBack": true,
+        "trackingResumed": true
+      }
+    },
+    {
+      "name": "account B survives A deletion with its progress unchanged",
+      "status": "passed",
+      "durationMs": 8,
+      "evidence": {
+        "bUserPreserved": true,
+        "bEpisodes": 8
+      }
+    }
+  ],
+  "faults": [
+    {
+      "path": "/me",
+      "upstreamStatus": 202,
+      "mode": "drop_after_complete_upstream_response"
+    }
+  ],
+  "summary": {
+    "passed": 7,
+    "failed": 0,
+    "total": 7
+  }
+}

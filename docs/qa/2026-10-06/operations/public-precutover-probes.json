@@ -1,0 +1,31 @@
+{
+  "at": "2026-10-06T11:26:16.413Z",
+  "scope": "Single Mac network; anonymous read-only checks of existing live service before final artifact installation",
+  "deployedCandidate": false,
+  "checks": [
+    {
+      "path": "/health",
+      "status": 200,
+      "elapsedMs": 334,
+      "cacheControl": null
+    },
+    {
+      "path": "/ready",
+      "status": 404,
+      "elapsedMs": 85,
+      "cacheControl": null
+    },
+    {
+      "path": "/me/library",
+      "status": 401,
+      "elapsedMs": 32,
+      "cacheControl": null
+    },
+    {
+      "path": "/internal/metrics",
+      "status": 404,
+      "elapsedMs": 34,
+      "cacheControl": null
+    }
+  ]
+}

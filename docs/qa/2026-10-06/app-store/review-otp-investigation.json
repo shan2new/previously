@@ -1,0 +1,85 @@
+{
+  "checkedAtUTC": "2026-10-06T16:06:25.391022+00:00",
+  "purpose": "Fresh reviewer OTP/password investigation",
+  "productionInstanceMatches": true,
+  "reviewIdentityExactMatch": true,
+  "reviewPasswordEnabled": true,
+  "reviewEmailVerified": true,
+  "reviewClientTrustBypass": true,
+  "reviewMFAEnabled": false,
+  "reviewBannedOrLocked": false,
+  "globalTestMode": false,
+  "configuredFirstFactors": [
+    "email_code",
+    "password",
+    "reset_password_email_code",
+    "ticket"
+  ],
+  "signInConfig": {
+    "second_factor": {
+      "required": false
+    }
+  },
+  "authConfigKeyNames": [
+    "object",
+    "id",
+    "first_name",
+    "last_name",
+    "email_address",
+    "phone_number",
+    "username",
+    "password",
+    "identification_requirements",
+    "identification_strategies",
+    "first_factors",
+    "second_factors",
+    "email_address_verification_strategies",
+    "single_session_mode",
+    "enhanced_email_deliverability",
+    "test_mode",
+    "cookieless_dev",
+    "url_based_session_syncing",
+    "claimed_at",
+    "reverification",
+    "native_settings",
+    "session_minter"
+  ],
+  "providerMutationsPerformed": false,
+  "operations": [
+    {
+      "method": "GET",
+      "resource": "/instance"
+    },
+    {
+      "method": "GET",
+      "resource": "production Frontend API /v1/environment"
+    },
+    {
+      "method": "GET",
+      "resource": "/users/{private-review-id}"
+    }
+  ],
+  "nativeBehaviorScope": "Two fresh actual Release14 production password-first authentications passed without OTP; see ../native-live/review-otp-native-recheck.json.",
+  "passwordRequired": true,
+  "preferredSignInStrategy": "password",
+  "passwordPreferenceChangeRequired": false,
+  "currentSimulatorObservedOwner": "permanent_reviewer",
+  "currentSimulatorObservedScreen": "authenticated_Home",
+  "freshReviewerNativeRecheck": "passed_twice_including_cold_launch",
+  "interpretation": "The earlier Device Trust OTP screen belonged to separate disposable erasure QA and was closed. Dedicated reviewer password-first login passed twice without mailbox code or MFA, including cold restart. No provider/security/source change was needed.",
+  "appStorePrivateFieldsReadback": {
+    "checkedAtUTC": "2026-10-06T16:12:43.585327+00:00",
+    "usernamePresent": true,
+    "passwordPresent": true,
+    "usernameMatchesTestedReviewAccount": null,
+    "passwordMatchesTestedReviewAccount": null,
+    "usernameMatchesAfterTrimCaseFold": null,
+    "passwordMatchesAfterTrim": null,
+    "saveDisabled": false,
+    "rawCredentialValuesEmitted": false,
+    "replacementAndSavePerformed": true,
+    "originalMismatchInferenceInvalidated": true,
+    "correctionReason": "Browser privacy filtering returns redacted markers for both credential fields; comparisons against those markers cannot establish actual credential equality or mismatch.",
+    "currentReceipt": "review-credentials-saved-receipt.json"
+  }
+}

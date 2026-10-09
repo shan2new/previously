@@ -1,0 +1,10 @@
+{
+  "id": "prj_osATa26wuWMoLf7yLOEaXvYuiial",
+  "name": "landing",
+  "accountId": "team_WGVvWCwyPJLQHHMvAUdYU9td",
+  "framework": "nextjs",
+  "nodeVersion": "24.x",
+  "rootDirectory": null,
+  "buildCommand": "npm run build",
+  "outputDirectory": "out"
+}

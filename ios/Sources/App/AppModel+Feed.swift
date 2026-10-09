@@ -149,19 +149,13 @@ extension AppModel {
 
     // MARK: - Offline copy
 
-    nonisolated static let feedCacheURL: URL = {
-        let dir = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
-        try? FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
-        return dir.appendingPathComponent("feed-cache.json")
-    }()
-
     /// The last feed this device saw, decoded OFF the main actor (the library cache's pattern), and
     /// applied only where nothing live has landed yet. Every post in it is non-fresh (iD2).
     func loadCachedFeed() {
-        guard !isIsolated else { return }
+        guard !isIsolated, let owner = accountStorage else { return }
         let epoch = accountEpoch
         Task { [weak self] in
-            let url = Self.feedCacheURL
+            let url = owner.file("feed-cache.json")
             let cached = await Task.detached(priority: .userInitiated) { () -> FeedCacheFile? in
                 guard let data = try? Data(contentsOf: url) else { return nil }
                 return try? JSONDecoder().decode(FeedCacheFile.self, from: data)
@@ -169,7 +163,7 @@ extension AppModel {
             // A sign-out (the epoch moved) or an account deletion under way while the copy was
             // decoding: it is the previous account's feed, hides and reminders — never applied.
             guard let self, let cached, cached.version == 1, epoch == self.accountEpoch,
-                  !self.erasing else { return }
+                  !self.erasing, AccountLocalStore.shared.matches(owner) else { return }
             self.applyCachedFeed(cached)
         }
     }
@@ -219,23 +213,19 @@ extension AppModel {
         if applied { feedVersion &+= 1 }
     }
 
-    /// Debounced 1 s; encoded and written atomically off the main actor. Called after every
+    /// Debounced 1 s; the final atomic write is serialized with teardown. Called after every
     /// successful feed, reminders, hides or Activity load and every `markViewed`.
     func scheduleFeedCacheWrite() {
-        guard !isIsolated else { return }
+        guard !isIsolated, !erasing, let owner = accountStorage else { return }
         feedCacheWrite?.cancel()
         let epoch = accountEpoch
         feedCacheWrite = Task { [weak self] in
             try? await Task.sleep(for: .seconds(1))
-            guard !Task.isCancelled, let self, epoch == self.accountEpoch else { return }
+            guard !Task.isCancelled, let self, epoch == self.accountEpoch, !self.erasing,
+                  AccountLocalStore.shared.matches(owner) else { return }
             guard let file = self.makeFeedCacheFile() else { return }
-            let url = Self.feedCacheURL
-            await Task.detached(priority: .utility) {
-                guard let data = try? JSONEncoder().encode(file) else { return }
-                try? data.write(to: url, options: .atomic)
-            }.value
-            // A sign-out that landed while the write was on disk: the copy is not this account's.
-            if epoch != self.accountEpoch { try? FileManager.default.removeItem(at: url) }
+            guard let data = try? JSONEncoder().encode(file) else { return }
+            try? AccountLocalStore.shared.write(data, name: "feed-cache.json", owner: owner)
         }
     }
 
@@ -486,6 +476,7 @@ extension AppModel {
         postDetailLoadedAt = [:]
         socialBase = [:]
         socialPending = [:]
+        socialPendingRestoreFailed = false
         pendingRatings = [:]
         episodeRooms = [:]
         threads = [:]
@@ -512,8 +503,8 @@ extension AppModel {
         hidesVersion &+= 1
         feedDerived = FeedDerivedCache()
 
-        try? FileManager.default.removeItem(at: Self.feedCacheURL)
-        try? FileManager.default.removeItem(at: Self.socialPendingURL)
+        AccountLocalStore.shared.remove("feed-cache.json", owner: accountStorage)
+        AccountLocalStore.shared.remove("social-pending.json", owner: accountStorage)
         SubjectCrop.shared.clear()
         // The retired recap's per-account keys (RecapDigest.swift), so an old install signed out
         // carries nothing of the previous account.

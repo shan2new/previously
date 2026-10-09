@@ -1,0 +1,74 @@
+{
+  "recordedAt": "2026-10-06T16:10:04Z",
+  "scope": "Read-only installed SDK source audit plus sanitized production GET results supplied by root; no independent production request or native recheck by this audit",
+  "package": {
+    "name": "ClerkKitUI",
+    "version": "1.5.8",
+    "revision": "55b70c27ae525b4f49c9bd08e69d8bec35352593",
+    "checkoutHasSourceChanges": false
+  },
+  "productionSettingsReportedByRoot": {
+    "passwordEnabled": true,
+    "passwordRequired": true,
+    "preferredSignInStrategy": "password",
+    "configuredFirstFactors": [
+      "email_code",
+      "password",
+      "reset_password_email_code",
+      "ticket"
+    ],
+    "reviewerPasswordEnabled": true,
+    "reviewerClientTrustBypass": true,
+    "reviewerMFAEnabled": false
+  },
+  "currentNativeWindowReportedByRoot": "Disposable erasure QA account new-device challenge, distinct from the permanent reviewer; fresh reviewer login recheck is pending",
+  "sourceConclusions": {
+    "configuredFactorArrayOrderDoesNotOverridePasswordPreference": true,
+    "passwordChosenForNeedsFirstFactorWhenAvailableAndEnvironmentPrefersPassword": true,
+    "passkeyWouldPrecedePasswordIfAvailable": true,
+    "ordinaryIdentifierContinueUsesExplicitEmailCodeStrategy": false,
+    "clientTrustCodeRouteIsSeparateFromFirstFactorSelection": true,
+    "newDeviceWarningIsClientTrustSpecific": true,
+    "strictEnumerationLocalOverrideFound": false,
+    "publicAuthViewPasswordFirstOverride": false,
+    "configurationPatchIndicatedByReportedValues": false
+  },
+  "emailCodeScreenExplanationsRequiringActualAttemptEvidence": [
+    "Current attempt has needsClientTrust or needsSecondFactor status rather than needsFirstFactor",
+    "The attempt-specific supportedFirstFactors omit password, even if password is enabled on the instance",
+    "An alternative email-code method was explicitly selected",
+    "Cached environment preference is OTP or unavailable when navigation chooses the factor, before successful environment refresh",
+    "The current attempt belongs to the disposable account rather than the permanent reviewer"
+  ],
+  "cacheBoundary": {
+    "environmentHydratedFromSDKKeychain": true,
+    "cachedEnvironmentCannotOverwriteAlreadyLoadedEnvironment": true,
+    "startupAndAuthViewRefreshEnvironmentAsynchronously": true,
+    "ordinaryIdentifierSignInWaitsForEnvironmentRefreshBeforeChoosingFactor": false,
+    "actualDeviceCachedPreferenceRead": false,
+    "staleCacheAsActualCauseVerified": false
+  },
+  "sourceReferences": [
+    {"path": "Sources/ClerkKitUI/Extensions/SignIn+Ext.swift", "lines": "13-17,27-46,49-63"},
+    {"path": "Sources/ClerkKitUI/Components/Auth/AuthNavigation.swift", "lines": "26-49"},
+    {"path": "Sources/ClerkKitUI/Components/Auth/AuthStartView.swift", "lines": "430-440,554-573"},
+    {"path": "Sources/ClerkKit/Core/Auth.swift", "lines": "94-95,118-119"},
+    {"path": "Sources/ClerkKitUI/Components/Auth/SignIn/SignInFactorMode.swift", "lines": "13-23"},
+    {"path": "Sources/ClerkKitUI/Components/Auth/SignIn/SignInClientTrustWarningView.swift", "lines": "10-15"},
+    {"path": "Sources/ClerkKitUI/Components/Auth/SignIn/SignInFactorCodeView.swift", "lines": "64-66,232-238"},
+    {"path": "Sources/ClerkKit/Storage/CacheManager.swift", "lines": "26-32"},
+    {"path": "Sources/ClerkKit/Core/Clerk.swift", "lines": "338-365,597-633,681-685"},
+    {"path": "Sources/ClerkKitUI/Components/Auth/AuthView.swift", "lines": "119-169,216-219"}
+  ],
+  "limits": [
+    "Instance firstFactors are not proof of a particular sign-in attempt's supportedFirstFactors/status",
+    "SDK source contains no local strict-enumeration preference override; server policy and response behavior are not independently verified here",
+    "Fresh reviewer native login must be rechecked before changing qualification flags",
+    "No secret, provider/user identifier, email, token, OTP or private cache content is included"
+  ],
+  "providerRequestsPerformedByThisAudit": 0,
+  "providerOrGlobalSecurityChanges": false,
+  "nativeUIActionsBuildsOrTests": false,
+  "runtimeSourceChanged": false,
+  "productionQualificationFlagsChanged": false
+}

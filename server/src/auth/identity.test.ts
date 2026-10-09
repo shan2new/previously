@@ -52,11 +52,27 @@ describe('resolveIdentity — the dev issuer is non-production', () => {
 
 describe('resolveIdentity — real tokens', () => {
   it('returns the claims subject and email, and passes both Clerk keys through', async () => {
-    const verify = verifySpy({ sub: 'user_real', email: 'a@b.c' })
-    const config = cfg({ appEnv: 'production', clerkJwtKey: 'pem', clerkSecretKey: 'sk' })
+    const verify = verifySpy({ sub: 'user_real', email: 'a@b.c', iss: 'https://clerk.example.com' })
+    const config = cfg({ appEnv: 'production', clerkJwtKey: 'pem', clerkSecretKey: 'sk', clerkExpectedIssuer: 'https://clerk.example.com' })
     const id = await resolveIdentity('eyJhbGciOi.real.jwt', config, verify)
     expect(id).toEqual({ clerkId: 'user_real', email: 'a@b.c' })
     expect(verify).toHaveBeenCalledWith('eyJhbGciOi.real.jwt', { jwtKey: 'pem', secretKey: 'sk' })
+  })
+
+  it.each(['https://test.clerk.accounts.dev', 'https://other.example.com', undefined])(
+    'rejects a signature-verified token from another or missing issuer: %s', async (iss) => {
+      const verify = verifySpy({ sub: 'user_wrong_instance', iss })
+      const config = cfg({ appEnv: 'production', clerkJwtKey: 'leftover-test-pem',
+        clerkSecretKey: 'sk_live_configured', clerkExpectedIssuer: 'https://clerk.example.com' })
+      await expect(resolveIdentity('signature-verified-token', config, verify)).resolves.toBeNull()
+      expect(verify).toHaveBeenCalledOnce()
+    },
+  )
+
+  it('refuses real production tokens without an explicit instance binding', async () => {
+    const verify = verifySpy({ sub: 'user_real', iss: 'https://clerk.example.com' })
+    await expect(resolveIdentity('token', cfg({ appEnv: 'production', clerkSecretKey: 'sk' }), verify)).resolves.toBeNull()
+    expect(verify).not.toHaveBeenCalled()
   })
 
   it('returns null when the claims carry no subject', async () => {
@@ -93,9 +109,17 @@ describe('assertAuthConfig — the boot guard', () => {
   })
 
   it('passes for a correctly configured production process', () => {
-    expect(() => assertAuthConfig(cfg({ appEnv: 'production', clerkJwtKey: 'pem' }))).not.toThrow()
-    expect(() => assertAuthConfig(cfg({ appEnv: 'production', clerkSecretKey: 'sk' }))).not.toThrow()
+    expect(() => assertAuthConfig(cfg({ appEnv: 'production', clerkJwtKey: 'pem', clerkExpectedIssuer: 'https://clerk.example.com' }))).not.toThrow()
+    expect(() => assertAuthConfig(cfg({ appEnv: 'production', clerkSecretKey: 'sk', clerkExpectedIssuer: 'https://clerk.example.com' }))).not.toThrow()
   })
+
+  it.each([undefined, 'http://clerk.example.com', 'https://clerk.example.com/path',
+    'https://test.clerk.accounts.dev', 'https://clerk.example.com/']) (
+    'rejects an absent or incorrectly configured production issuer: %s', (clerkExpectedIssuer) => {
+      expect(() => assertAuthConfig(cfg({ appEnv: 'production', clerkSecretKey: 'sk', clerkExpectedIssuer })))
+        .toThrow(/CLERK_EXPECTED_ISSUER/)
+    },
+  )
 
   it('never blocks a development process, however it is configured', () => {
     expect(() => assertAuthConfig(cfg({ devAuthBypass: true }))).not.toThrow()
@@ -110,12 +134,14 @@ describe('authConfigFromEnv', () => {
       DEV_AUTH_BYPASS: true,
       CLERK_JWT_KEY: 'pem',
       CLERK_SECRET_KEY: 'sk',
+      CLERK_EXPECTED_ISSUER: 'https://clerk.example.com',
     }
     expect(authConfigFromEnv(source)).toEqual({
       appEnv: 'production',
       devAuthBypass: true,
       clerkJwtKey: 'pem',
       clerkSecretKey: 'sk',
+      clerkExpectedIssuer: 'https://clerk.example.com',
     })
   })
 })
