@@ -158,6 +158,7 @@ final class AuthManager: TokenProvider {
     }
 
     private func clearSignedOutCaches() {
+        NextUpSnapshotStore.shared.clear()
         AccountLocalStore.shared.clearCurrent()
         LibraryExport.clearTemporaryFiles()
     }
@@ -201,6 +202,18 @@ final class AuthManager: TokenProvider {
             // that boundary; an action from the previous screen cannot sign out this new session.
             refreshClerkSignInState()
             return !isSignedIn
+        }
+        // End the widget's lease BEFORE the SDK can durably end this session. If the process is
+        // killed during the await, a widget must not retain the account which just signed out.
+        NextUpSnapshotStore.shared.clear()
+        defer {
+            // A failed sign-out can leave the same account valid. Give future library updates a
+            // fresh lease, never revive an erased/uncertain account or replace a newer owner's.
+            if isSignedIn, accountID == owner, let owner,
+               !AccountDeletion.wasAccepted(accountID: owner),
+               !AccountDeletion.hasUnconfirmedRequest(accountID: owner) {
+                try? NextUpSnapshotStore.shared.activate(ownerKey: AccountLocalStore.ownerKey(for: owner))
+            }
         }
         lastError = nil
         switch mode {

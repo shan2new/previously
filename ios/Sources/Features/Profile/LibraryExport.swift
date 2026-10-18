@@ -15,38 +15,29 @@ import UniformTypeIdentifiers
 /// **CSV is the library, made on this device**: one row per part, for spreadsheets.
 struct LibraryExport: Transferable {
     enum Format { case json, csv }
-    let format: Format
     /// Where the account's copy comes from. Nil for a model with no server behind it.
     let api: APIClient?
-    /// The device's copy of the library in `format` — the CSV itself, and the JSON the file falls
-    /// back to when the server has no export route.
+    /// The device's JSON copy, used only when the server has no export route.
     let local: Data
     let owner: AccountLocalStore.Snapshot?
     let isScratch: Bool
+    private let preparation: AccountExportPreparation<Document>
+
+    private struct Document: Sendable { let name: String; let data: Data }
 
     @MainActor
-    init(appModel: AppModel, format: Format) {
-        self.format = format
+    init(appModel: AppModel) {
         self.api = appModel.isIsolated ? nil : appModel.api
         self.owner = appModel.accountStorage
         self.isScratch = appModel.isIsolated
-        // Only the format this row shares: the body that builds the row runs again on every change
-        // the sheet observes, and both encodings walk the whole library.
-        switch format {
-        case .json: self.local = LibraryExport.makeJSON(appModel.library)
-        case .csv: self.local = LibraryExport.makeCSV(appModel.library)
-        }
+        self.local = LibraryExport.makeJSON(appModel.library)
+        self.preparation = AccountExportPreparation()
     }
 
     static var transferRepresentation: some TransferRepresentation {
         FileRepresentation(exportedContentType: .json) { export in
             try await export.accountFile()
         }
-        .exportingCondition { $0.format == .json }
-        FileRepresentation(exportedContentType: .commaSeparatedText) { export in
-            try await export.write(name: "previously-library.csv", data: export.local)
-        }
-        .exportingCondition { $0.format == .csv }
     }
 
     /// Why the account's copy did not arrive, in the words a destination may show. Never a status
@@ -78,19 +69,23 @@ struct LibraryExport: Transferable {
     /// library-only file handed over in place of "everything in your account" would be a quieter
     /// version of the claim the row makes.
     @MainActor private func accountFile() async throws -> SentTransferredFile {
-        guard isScratch || AccountLocalStore.shared.matches(owner) else { throw CancellationError() }
-        guard let api else { return try write(name: "previously-library.json", data: local) }
-        do {
-            let file = try await api.accountExportFile()
-            return try write(name: Self.fileName(suggested: file.suggestedFilename), data: file.data)
-        } catch let error as APIError {
-            if Self.isAccountGone(error) { throw Failure.nothingToExport }
-            if error.status == 404 { return try write(name: "previously-library.json", data: local) }
-            if case .rateLimited = error { throw Failure.rateLimited }
-            throw Failure.unreachable
-        } catch {
-            throw Failure.unreachable
+        let document = try await preparation.value(isCurrent: {
+            isScratch || AccountLocalStore.shared.matches(owner)
+        }) {
+            guard let api else { return Document(name: "previously-library.json", data: local) }
+            do {
+                let file = try await api.accountExportFile()
+                return Document(name: Self.fileName(suggested: file.suggestedFilename), data: file.data)
+            } catch let error as APIError {
+                if Self.isAccountGone(error) { throw Failure.nothingToExport }
+                if error.status == 404 { return Document(name: "previously-library.json", data: local) }
+                if case .rateLimited = error { throw Failure.rateLimited }
+                throw Failure.unreachable
+            } catch {
+                throw Failure.unreachable
+            }
         }
+        return try write(name: document.name, data: document.data)
     }
 
     /// The server's file name, reduced to a bare `.json` name (it arrives from a header, so it is
@@ -130,7 +125,7 @@ struct LibraryExport: Transferable {
         return (try? encoder.encode(rows)) ?? Data()
     }
 
-    private static func makeCSV(_ library: [Franchise]) -> Data {
+    fileprivate static func makeCSV(_ library: [Franchise]) -> Data {
         func q(_ s: String) -> String { "\"" + s.replacingOccurrences(of: "\"", with: "\"\"") + "\"" }
         var lines = ["title,source,status,part,kind,progress,total_episodes"]
         for f in library {
@@ -139,5 +134,30 @@ struct LibraryExport: Transferable {
             }
         }
         return Data(lines.joined(separator: "\n").utf8)
+    }
+}
+
+/// CSV has its own fixed representation, so a destination cannot negotiate the account JSON
+/// representation while the row and preview describe a spreadsheet.
+struct LibraryCSVExport: Transferable {
+    let data: Data
+    let owner: AccountLocalStore.Snapshot?
+    let isScratch: Bool
+
+    @MainActor init(appModel: AppModel) {
+        data = LibraryExport.makeCSV(appModel.library)
+        owner = appModel.accountStorage
+        isScratch = appModel.isIsolated
+    }
+
+    static var transferRepresentation: some TransferRepresentation {
+        FileRepresentation(exportedContentType: .commaSeparatedText) { export in
+            try await export.file()
+        }
+    }
+
+    @MainActor private func file() throws -> SentTransferredFile {
+        SentTransferredFile(try AccountExportStore.write(name: "previously-library.csv", data: data,
+                                                       owner: owner, isScratch: isScratch))
     }
 }

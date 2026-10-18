@@ -109,8 +109,8 @@ struct DiscoverView: View {
         let trending = appModel.trending.filter { appModel.matchesMediaFilter($0.source) }
         let searching = fieldPresented || !query.isEmpty
         return ZStack(alignment: .top) {
-            // Flat, as Today is: no wash behind the title and the field (25 Sep, `flushTopBar`).
-            ThemeColor.canvas.ignoresSafeArea()
+            // The viewer's ground (19 Oct, `AppGround`) — no art wash behind the title and the field.
+            AppGround()
             // AT REST: X's and Instagram's Explore (`DiscoverExplore`) — For you, Trending, Genres.
             // It stays MOUNTED under the search surface (5 Sep: tearing the launchpad down on the
             // first letter and rebuilding it on Cancel was the lag the user felt); the field only

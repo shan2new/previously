@@ -6,14 +6,57 @@ import WidgetKit
 // logo per show, whenever the library changes — debounced, so a burst of marks writes once. The
 // widget (PreviouslyWidgets/NextUpWidget.swift) reads it and re-times itself at each airing.
 extension AppModel {
+    private struct WidgetSnapshotContext {
+        let owner: NextUpSnapshot.Owner
+        let storage: AccountLocalStore.Snapshot
+        let epoch: Int
+    }
+
+    /// Runs before the first library fetch, including an offline cold launch as a different user.
+    func activateWidgetSnapshot() {
+        guard !isIsolated else { return }
+        widgetSnapshotTask?.cancel()
+        widgetSnapshotTask = nil
+        guard !AccountDeletion.hasUnconfirmedRequest(accountID: currentAccountID) else {
+            NextUpSnapshotStore.shared.clear()
+            return
+        }
+        do { try NextUpSnapshotStore.shared.activate(ownerKey: accountStorage?.ownerKey) }
+        catch { Self.log.error("widget storage activation failed") }
+    }
+
+    func clearWidgetSnapshot() {
+        widgetSnapshotTask?.cancel()
+        widgetSnapshotTask = nil
+        if !isIsolated { NextUpSnapshotStore.shared.clear() }
+    }
+
+    func resumeWidgetSnapshot() {
+        activateWidgetSnapshot()
+        scheduleWidgetSnapshot()
+    }
+
+    private var widgetSnapshotContext: WidgetSnapshotContext? {
+        guard !isIsolated, !erasing, currentAccountID != nil, let storage = accountStorage,
+              AccountLocalStore.shared.matches(storage), let owner = NextUpSnapshotStore.shared.current,
+              owner.key == storage.ownerKey else { return nil }
+        return WidgetSnapshotContext(owner: owner, storage: storage, epoch: accountEpoch)
+    }
+
+    private func canWriteWidget(_ context: WidgetSnapshotContext) -> Bool {
+        !Task.isCancelled && !erasing && currentAccountID != nil && accountEpoch == context.epoch
+            && accountStorage == context.storage && AccountLocalStore.shared.matches(context.storage)
+            && NextUpSnapshotStore.shared.matches(context.owner)
+    }
+
     /// The library changed: the widget's snapshot follows, a beat later.
     func scheduleWidgetSnapshot() {
-        guard NextUpSnapshot.directory != nil, !isIsolated else { return }
+        guard let context = widgetSnapshotContext else { return }
         widgetSnapshotTask?.cancel()
         widgetSnapshotTask = Task { [weak self] in
             try? await Task.sleep(for: .milliseconds(800))
-            guard !Task.isCancelled, let self else { return }
-            await self.writeWidgetSnapshot()
+            guard let self, self.canWriteWidget(context) else { return }
+            await self.writeWidgetSnapshot(context: context)
         }
     }
 
@@ -22,8 +65,8 @@ extension AppModel {
     private static let posterPixels: CGFloat = 480
     private static let logoPixels: CGFloat = 480
 
-    func writeWidgetSnapshot() async {
-        guard let directory = NextUpSnapshot.directory else { return }
+    private func writeWidgetSnapshot(context: WidgetSnapshotContext) async {
+        guard canWriteWidget(context) else { return }
         let feed = HomeCompose.feed(self)
         var picks: [(franchise: Franchise, part: FranchisePart, episode: Int, kind: NextUpSnapshot.Item.Kind, behind: Int, airsAt: Int64?)] = []
         for hero in feed.heroes {
@@ -57,6 +100,7 @@ extension AppModel {
 
         var items: [NextUpSnapshot.Item] = []
         for pick in picks.prefix(Self.widgetItems) {
+            guard canWriteWidget(context) else { return }
             let f = pick.franchise
             var item = NextUpSnapshot.Item(id: f.id, title: f.displayTitle,
                                            line: f.watchContext(part: pick.part, episode: pick.episode),
@@ -66,20 +110,22 @@ extension AppModel {
             // The picture Home would draw: the show's pick, else the catalogue's billboard.
             let art = PosterPick.shared.choice(for: f).map { WideArt.billboard(portrait: $0.url, landscape: nil) } ?? f.billboardArt
             if let url = art.url {
-                item.poster = await writeWidgetImage(url, name: "\(f.id).jpg", pixels: Self.posterPixels, png: false, into: directory)
+                item.poster = await writeWidgetImage(url, name: "\(f.id).jpg", pixels: Self.posterPixels, png: false, context: context)
+                guard canWriteWidget(context) else { return }
                 let color = await PaletteCache.shared.resolve(url: url, maxPixel: 360)
+                guard canWriteWidget(context) else { return }
                 var r: CGFloat = 0, g: CGFloat = 0, b: CGFloat = 0, a: CGFloat = 0
                 if UIColor(color).getRed(&r, green: &g, blue: &b, alpha: &a) { item.tint = [Double(r), Double(g), Double(b)] }
             }
             if let logo = f.billboardLogo?.url {
-                item.logo = await writeWidgetImage(logo, name: "\(f.id)-logo.png", pixels: Self.logoPixels, png: true, into: directory)
+                item.logo = await writeWidgetImage(logo, name: "\(f.id)-logo.png", pixels: Self.logoPixels, png: true, context: context)
+                guard canWriteWidget(context) else { return }
             }
             items.append(item)
         }
-        guard !Task.isCancelled else { return }
+        guard canWriteWidget(context) else { return }
         do {
-            try NextUpSnapshot(writtenAt: Date(), items: items).write()
-            WidgetCenter.shared.reloadTimelines(ofKind: NextUpSnapshot.widgetKind)
+            try NextUpSnapshotStore.shared.write(items: items, owner: context.owner)
         } catch {
             // A failed write leaves the widget on its last snapshot; nothing to tell the user.
         }
@@ -87,19 +133,22 @@ extension AppModel {
 
     /// A picture the widget can draw: fetched through the app's one pipeline, bounded, and written
     /// as a file the extension reads at render time. Nil when it could not be had.
-    private func writeWidgetImage(_ string: String, name: String, pixels: CGFloat, png: Bool, into directory: URL) async -> String? {
-        guard let url = URL(string: string), let image = try? await ImageLoader.shared.image(for: url, maxPixel: pixels) else { return nil }
-        let scale = min(1, pixels / max(image.size.width * image.scale, image.size.height * image.scale, 1))
-        let size = CGSize(width: image.size.width * image.scale * scale, height: image.size.height * image.scale * scale)
-        let format = UIGraphicsImageRendererFormat()
-        format.scale = 1
-        format.opaque = !png
-        let drawn = UIGraphicsImageRenderer(size: size, format: format).image { _ in image.draw(in: CGRect(origin: .zero, size: size)) }
-        guard let data = png ? drawn.pngData() : drawn.jpegData(compressionQuality: 0.84) else { return nil }
+    private func writeWidgetImage(_ string: String, name: String, pixels: CGFloat, png: Bool,
+                                  context: WidgetSnapshotContext) async -> String? {
+        guard canWriteWidget(context), let url = URL(string: string) else { return nil }
         do {
-            try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
-            try data.write(to: directory.appendingPathComponent(name), options: .atomic)
-            return name
+            return try await NextUpSnapshotStore.shared.loadArtwork(name: name, owner: context.owner) {
+                let image = try await ImageLoader.shared.image(for: url, maxPixel: pixels)
+                guard canWriteWidget(context) else { throw CancellationError() }
+                let scale = min(1, pixels / max(image.size.width * image.scale, image.size.height * image.scale, 1))
+                let size = CGSize(width: image.size.width * image.scale * scale, height: image.size.height * image.scale * scale)
+                let format = UIGraphicsImageRendererFormat()
+                format.scale = 1
+                format.opaque = !png
+                let drawn = UIGraphicsImageRenderer(size: size, format: format).image { _ in image.draw(in: CGRect(origin: .zero, size: size)) }
+                guard let data = png ? drawn.pngData() : drawn.jpegData(compressionQuality: 0.84) else { throw ImageLoadError.badData }
+                return data
+            }
         } catch {
             return nil
         }

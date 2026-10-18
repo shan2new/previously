@@ -125,7 +125,7 @@ struct AccountSuspendedView: View {
             // shared through Profile's own file (`LibraryExport`) — fetched when a destination is
             // picked, never when this screen opens. A bare `interactive` verb: not a next step the
             // app recommends, so no amber and no capsule.
-            ShareLink(item: LibraryExport(appModel: appModel, format: .json),
+            ShareLink(item: LibraryExport(appModel: appModel),
                       preview: SharePreview(Copy.Account.exportPreviewTitle)) {
                 Text(Copy.Account.exportCommand)
             }

@@ -10,24 +10,20 @@ import Foundation
 
 extension Copy {
     enum Feed {
+        /// Four tabs (`Experience.feedInHome`): the feed's posts as Home's section and its page.
+        static let news = "News"
+        /// The News page's first group: what was posted in the last seven days (19 Oct).
+        static let thisWeek = "This week"
 
-        // MARK: Tabs
+        // MARK: Header
 
-        static let following = "Following"
-        static let forYou = "For you"
-
-        /// The tab bar's word for a feed tab — one place, so the header and VoiceOver agree.
-        static func tab(_ tab: FeedTab) -> String {
-            switch tab {
-            case .following: return following
-            case .forYou: return forYou
-            }
-        }
-
-        // MARK: Header (VoiceOver)
-
-        /// The centred wordmark is a button: it scrolls the feed back to its top. The brand is a
-        /// label here, never a subject.
+        /// The feed's name in its header row (16 Oct: the roots' row, Library's and Schedule's —
+        /// no brand mark, no Following / For you tabs; For you lives in Discover). The tab's word.
+        static let title = "Feed"
+        /// The title is a button: it scrolls the feed back to its top, as X's logo does.
+        static let scrollToTopHint = "Scrolls to the top"
+        /// Home's centred wordmark is a button that scrolls Home to its top. The brand is a label
+        /// here, never a subject.
         static let scrollToTop = "Previously., scroll to top"
         static let profile = "Profile"
         static let activity = "Activity"
@@ -56,8 +52,7 @@ extension Copy {
 
         // MARK: Modules
 
-        static let suggestedTitle = "Suggested for you"
-        /// The module's way to the whole recommendation list — the ForYou shelf's own words.
+        /// A clamped note's "Show more" — the ForYou shelf's own words.
         static let showMore = Copy.ForYou.showMore
         static let trendingTitle = Copy.Label.trending
         /// "1 · Trending in Anime" — a Trending row's context line.
@@ -66,7 +61,6 @@ extension Copy {
         }
         /// A Trending row's fact for a show on air now — the same words as the ForYou tiles.
         static let airingNow = Copy.ForYou.airingNow
-        static let forYouEmpty = "Nothing new from the shows trending right now."
 
         // MARK: Notices
 
@@ -395,13 +389,13 @@ extension Copy {
         /// One sample per constant and per function (spec §1.9), for `Copy.allSampleStrings`.
         static var sampleStrings: [String] {
             var out: [String] = [
-                following, forYou, tab(.following), tab(.forYou),
+                title, scrollToTopHint,
                 scrollToTop, profile, activity, activityUnread(1), activityUnread(3),
                 newPosts(1), newPosts(4), newPostsHint,
                 caughtUpTitle, caughtUpSince(sinceYesterday),
                 sinceMorning, sinceAfternoon, sinceEvening, sinceYesterday,
-                suggestedTitle, showMore, trendingTitle, trendingContext(rank: 1, scope: Copy.Filter.anime),
-                airingNow, forYouEmpty, couldntRefresh, unavailable, officialSource,
+                showMore, trendingTitle, trendingContext(rank: 1, scope: Copy.Filter.anime),
+                airingNow, couldntRefresh, unavailable, officialSource,
                 headlineDated(name: "Season 2", isMovie: false, when: premieresTomorrow),
                 headlineDated(name: "The Movie", isMovie: true, when: premieresThis("Friday")),
                 headlineDatedNoDate(name: "Season 2"),

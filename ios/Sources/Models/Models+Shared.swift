@@ -68,11 +68,6 @@ extension Franchise {
     }
 }
 
-struct FranchiseProgressValue: Codable, Equatable, Sendable {
-    let mediaId: Int
-    let episodes: Int
-}
-
 /// The confirmation, write and Undo use the same released-only snapshot.
 struct WatchedBatch: Sendable {
     let parts: [FranchiseProgressValue]
@@ -82,6 +77,39 @@ struct WatchedBatch: Sendable {
     /// The story's released films the batch marks too (the whole series only, never a season).
     let filmCount: Int
     let status: WatchStatus
+
+    /// A selected episode/range is not "start from episode 1" or "watch the whole series".
+    /// Keep only the requested members, bounded by the same rule as an in-library mark.
+    init?(franchise: Franchise, selectedProgress: [FranchiseProgressValue], now: Int64) {
+        guard !selectedProgress.isEmpty,
+              Set(selectedProgress.map(\.mediaId)).count == selectedProgress.count else { return nil }
+        var values: [FranchiseProgressValue] = []
+        var before: [FranchiseProgressValue] = []
+        var result = franchise
+        var episodes = 0
+        var seasons = 0
+        var films = 0
+        for selection in selectedProgress {
+            guard let part = franchise.parts.first(where: { $0.mediaId == selection.mediaId }) else { return nil }
+            let target = min(max(0, selection.episodes), part.writeCeiling(now: now, anchor: franchise.timeAnchor))
+            guard !part.isUpcoming || target == 0 else { return nil }
+            values.append(.init(mediaId: part.mediaId, episodes: target))
+            before.append(.init(mediaId: part.mediaId, episodes: part.progress))
+            result = result.withUpdatedProgress(mediaId: part.mediaId, episodes: target)
+            if part.kind == .movie {
+                if target != part.progress { films += 1 }
+            } else {
+                episodes += abs(target - part.progress)
+                if part.kind == .season, target != part.progress { seasons += 1 }
+            }
+        }
+        parts = values
+        previous = before
+        episodeCount = episodes
+        seasonCount = seasons
+        filmCount = films
+        status = result.isWatchedThrough ? .completed : .watching
+    }
 
     init(franchise: Franchise, seasonID: Int? = nil, now: Int64) {
         let seasons = franchise.seasonPartsInOrder

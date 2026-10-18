@@ -16,6 +16,11 @@ extension Copy {
                                              supporting: "New episodes land here the moment they air.",
                                              primaryLabel: "See the schedule")
 
+        /// The directions (`Experience.doors`): caught up, Home says so in one line and points at the
+        /// next airing — which is Schedule's to show, never Home's.
+        static let caughtUpLine = "You\u{2019}re all caught up"
+        static func nextAiring(_ show: String, _ when: String) -> String { "Next: \(show) \u{00B7} \(when)" }
+
         static var samples: [String] {
             [title, upNext, recentlyAired, newEpisode,
              caughtUp.title, caughtUp.supporting ?? "", caughtUp.primaryLabel ?? ""]

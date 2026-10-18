@@ -32,6 +32,64 @@ test('requires a bounded control token and listens on IPv4 loopback', async (t) 
   await second.close();
 });
 
+test('parsed synthetic partial MAL entries preview policy omissions and apply exact progress once', async (t) => {
+  const { request, state } = await setup(t);
+  const beforeB = await state('fixture-b');
+  const rows = [{ malId: 900001, title: 'QA Planned', watched: 3, status: 'Watching' },
+    { malId: 900002, title: 'QA Policy Omission', watched: 2, status: 'Completed' }];
+  const preview = (await request('/me/import/preview', { method: 'POST', body: { source: 'mal', rows } })).data;
+  assert.equal(preview.listed, 1);
+  assert.equal(preview.episodes, 3);
+  assert.equal(preview.skipped.reasons.adult_content, 1);
+  assert.equal(preview.unmatched.count, 0);
+  assert.deepEqual((await state()).subscriptions.map((s) => s.franchiseId), ['qa-anime', 'qa-tv']);
+  for (let n = 0; n < 2; n++) {
+    const applied = (await request(`/me/import/${preview.id}/apply`, { method: 'POST' })).data;
+    assert.equal(applied.shows, 1);
+    assert.equal(applied.skipped.count, 1);
+  }
+  const after = await state();
+  assert.equal(after.progress.find((p) => p.mediaId === 3001).episodes, 3);
+  assert.equal(after.subscriptions.find((s) => s.franchiseId === 'qa-plan').status, 'watching');
+  assert.equal(after.importApplications, 1);
+  assert.equal(after.progressCommits, 1);
+  assert.deepEqual(after.importInputs[0].rows, rows.map(({ malId, watched, status }) => ({ malId, watched, status })));
+  assert.deepEqual(await state('fixture-b'), beforeB);
+});
+
+test('all-skipped MAL input has no applyable entries and cannot mutate a library', async (t) => {
+  const { request, state } = await setup(t);
+  const before = await state();
+  const preview = (await request('/me/import/preview', { method: 'POST', body: {
+    source: 'mal', rows: [{ malId: 900002, watched: 2, status: 'Completed' }],
+  } })).data;
+  assert.equal(preview.listed, 0);
+  assert.equal(preview.ready, 0);
+  assert.equal(preview.skipped.count, 1);
+  assert.equal((await request(`/me/import/${preview.id}/apply`, { method: 'POST' })).status, 400);
+  const after = await state();
+  assert.deepEqual(after.progress, before.progress);
+  assert.deepEqual(after.subscriptions, before.subscriptions);
+  assert.equal(after.commits, before.commits);
+});
+
+test('separate multiseason TV fixture can admit only Season 2 without creating Season 1 progress', async (t) => {
+  const { request, state } = await setup(t);
+  const detail = (await request('/franchises/qa-multi-tv', { account: 'fixture-b' })).data;
+  assert.deepEqual(detail.parts.map(({ mediaId, totalEpisodes, progress }) => ({ mediaId, totalEpisodes, progress })),
+    [{ mediaId: 4001, totalEpisodes: 6, progress: 0 }, { mediaId: 4002, totalEpisodes: 4, progress: 0 }]);
+  assert.equal(detail.subscription, null);
+  const result = await request('/me/franchises/qa-multi-tv/progress', { method: 'PUT', account: 'fixture-b',
+    body: { parts: [{ mediaId: 4002, episodes: 4 }], status: 'watching' } });
+  assert.equal(result.status, 200);
+  const after = await state('fixture-b');
+  assert.equal(after.progress.some((p) => p.mediaId === 4001), false);
+  assert.equal(after.progress.find((p) => p.mediaId === 4002).episodes, 4);
+  assert.equal(after.subscriptions.find((s) => s.franchiseId === 'qa-multi-tv').status, 'watching');
+  const library = (await request('/me/library', { account: 'fixture-b' })).data;
+  assert.deepEqual(library.franchises.find((f) => f.id === 'qa-multi-tv').parts.map((p) => p.progress), [0, 4]);
+});
+
 for (const kind of ['proxy-forbidden-after-commit', 'empty-success-after-commit']) {
   test(`${kind} cannot be mistaken for an authoritative deletion receipt`, async (t) => {
     const { url, fault, state, request } = await setup(t);

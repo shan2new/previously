@@ -169,6 +169,34 @@ struct AiringStateControl: View {
     }
 }
 
+/// The directions' trailing slot (`Experience.doors`, 16 Oct): Schedule says WHEN and never marks
+/// — the mark is Home's and the show page's. An aired row says "Out" (amber: the state "you can
+/// watch it now"), a watched one wears a quiet tick, one still to come keeps the slot empty. The
+/// row's tap opens the show on its episode, where the mark lives.
+struct ScheduleOutMark: View {
+    let state: AiringState
+
+    var body: some View {
+        Group {
+            switch state {
+            case .toWatch:
+                Text(Copy.Schedule.outTag)
+                    .type(ThemeType.scheduleCaps)
+                    .textCase(.uppercase)
+                    .foregroundStyle(ThemeColor.accent)
+            case .watched:
+                AppGlyph(systemName: "checkmark")
+                    .font(.system(size: 13, weight: .semibold))
+                    .foregroundStyle(ThemeColor.textTertiary)
+                    .accessibilityHidden(true)
+            case .upcoming:
+                Color.clear
+            }
+        }
+        .frame(width: 44, height: 44)
+    }
+}
+
 // The date RIDES THE ROW (7 Sep, kept by the 25 Sep rebuild — `ScheduleAgendaRow`). "The Schedule
 // page looks good but it is ultra dense and extremely confusing" (user): measured then, six
 // full-width day bands for five rows, ~40 % of the feed's height a banner introducing one row. The
@@ -177,15 +205,25 @@ struct AiringStateControl: View {
 
 // MARK: - The date column
 
-/// "WED" over "9" — the weekday in Schedule's caps, the numeral in the month grid's own face
-/// (`feedDate`), so the column reads as the same instrument the grid does. Today is accent, the one
-/// rule this screen already follows for today. Empty on the second and later airings of a day: the
-/// date is printed once and its rows stack under it, as every agenda does.
+/// "WED" over "9" — the weekday in Schedule's caps, the numeral large and Regular. Today is accent,
+/// the one rule this screen already follows for today. Empty on the second and later airings of a
+/// day: the date is printed once and its rows stack under it, as every agenda does.
+///
+/// 16 Oct ("the way the font is being shown looks really cheapish", owner): the numeral was the
+/// month grid's `feedDate` — SemiBold 18, a point bigger than the name beside it and as heavy, so
+/// the margin read as a second name. Now `scheduleDate`, Regular 22: bigger, and plainly a
+/// different KIND of thing — a calendar's margin. The pair is set close (no gap: Outfit's line box
+/// already holds 0.26 em under the weekday and 0.30 em over the numeral) and sized so that, centred
+/// on the face by its ink, the weekday's capitals stand level with the name's and the numeral's
+/// foot with the caption's baseline. (The month grid keeps `feedDate`: its numerals live in 34-pt
+/// discs.)
 struct ScheduleDateColumn: View {
     let weekday: String?
     let numeral: String?
     let isToday: Bool
     @ScaledMetric(relativeTo: .subheadline) private var scale: CGFloat = 1
+    /// The weekday's capital height at the current text size (`ScheduleInkCentre`).
+    @ScaledMetric(relativeTo: .caption2) private var capsCap: CGFloat = ScheduleTypeScale.caps * ScheduleTypeScale.capHeight
 
     /// Capped: uncapped it reaches ~70 pt at the accessibility sizes and eats the lane the names
     /// need.
@@ -193,20 +231,22 @@ struct ScheduleDateColumn: View {
     private var w: CGFloat { min(Self.width * scale, Self.width + 16) }
 
     var body: some View {
-        VStack(alignment: .center, spacing: 1) {
+        VStack(alignment: .center, spacing: 0) {
             if let weekday, let numeral {
                 Text(weekday)
-                    .type(ThemeType.feedEyebrow)
+                    .type(ThemeType.scheduleCaps)
                     .textCase(.uppercase)
                     .foregroundStyle(isToday ? ThemeColor.accent : ThemeColor.textTertiary)
                 Text(numeral)
-                    .type(ThemeType.feedDate)
+                    .type(ThemeType.scheduleDate)
                     .foregroundStyle(isToday ? ThemeColor.accent : ThemeColor.textSecondary)
             }
         }
         .lineLimit(1)
         .minimumScaleFactor(0.7)
         .frame(width: w, alignment: .center)
+        // An empty column (a day's later rows) has no capitals to centre by.
+        .modifier(ScheduleInkCentre(capHeight: weekday == nil ? 0 : capsCap))
         .accessibilityHidden(true)
     }
 }
@@ -485,5 +525,160 @@ struct CalendarCellPressStyle: ButtonStyle {
             .opacity(configuration.isPressed ? 0.7 : 1)
             .animation(ThemeMotion.pick(ThemeMotion.uiPress, reduceMotion: reduceMotion),
                        value: configuration.isPressed)
+    }
+}
+
+// MARK: - The week strip (19 Oct)
+
+/// THE TOP CALENDAR, as a WEEK (19 Oct: "In schedule I'd like to see a top calendar too right which
+/// works in sync with the list scroll and vice-versa", owner): Apple Calendar's week row under the
+/// title — the weekday's letter over the numeral, today's in the accent, the day at the top of the
+/// list in a filled disc, and a dot under each day that carries something (amber while something on
+/// it is still to come or to watch). It is ALWAYS the week of the day the list is showing, so it can
+/// never point at days the reader is not looking at — the defect that took the day rail out on
+/// 6 Sep, whose capsules had scrolled away from the feed they named. Two ways in, both the list's:
+/// a tap on a day scrolls the list to it, and a swipe across the strip goes to the next or previous
+/// week and takes the list to that week's first day with something on it. The month grid stays
+/// behind the bar's calendar glyph for anything further.
+///
+/// Sunday-first, as the month grid is ("the mental model for anyone in general", 6 Sep). Days
+/// outside the window the list can answer for are drawn as context and take no tap.
+struct ScheduleWeekStrip: View {
+    let todayNoon: Int64
+    /// Day offset from today → how many airings that day carries.
+    let counts: [Int: Int]
+    /// Days with something still to come or still to watch.
+    let live: Set<Int>
+    /// The day at the top of the list.
+    let selected: Int
+    /// The days the list can answer for.
+    let window: ClosedRange<Int>
+    /// Days past the window that the list's Later group lists — known too: the strip follows the
+    /// list onto them, as the month grid does (`ScheduleMonthGrid.extraDays`).
+    var extraDays: Set<Int> = []
+    let onPick: (Int) -> Void
+
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @ScaledMetric(relativeTo: .subheadline) private var scaledDisc: CGFloat = 34
+    /// The week on screen; it follows `selected` on the strip's own animation, so a new week slides
+    /// in from the side it lies on.
+    @State private var shown: Int?
+    @State private var forward = true
+
+    /// Seven columns share the gutter's width: the disc can never be wider than a seventh of it.
+    private var disc: CGFloat { min(scaledDisc, 44) }
+
+    /// Today's weekday, Sunday = 0.
+    private var todayColumn: Int { Formatting.localParts(todayNoon).wd }
+
+    /// The week a day falls in, counted from the week holding today.
+    private func week(of offset: Int) -> Int {
+        let n = offset + todayColumn
+        return n >= 0 ? n / 7 : -((-n + 6) / 7)
+    }
+
+    private func offset(week: Int, column: Int) -> Int { week * 7 + column - todayColumn }
+
+    private func known(_ offset: Int) -> Bool { window.contains(offset) || extraDays.contains(offset) }
+
+    var body: some View {
+        let w = shown ?? week(of: selected)
+        HStack(spacing: 0) {
+            ForEach(0..<7, id: \.self) { col in
+                cell(offset(week: w, column: col), column: col)
+            }
+        }
+        .id(w)
+        .transition(.asymmetric(insertion: .move(edge: forward ? .trailing : .leading).combined(with: .opacity),
+                                removal: .move(edge: forward ? .leading : .trailing).combined(with: .opacity)))
+        .frame(maxWidth: .infinity)
+        .clipped()
+        .contentShape(Rectangle())
+        // A swipe is a WEEK, the platform's way: the list goes to it.
+        .gesture(DragGesture(minimumDistance: 16).onEnded { g in
+            guard abs(g.translation.width) > max(36, abs(g.translation.height)) else { return }
+            go(by: g.translation.width < 0 ? 1 : -1)
+        })
+        .onChange(of: selected, initial: true) { _, day in
+            let next = week(of: day)
+            guard next != shown else { return }
+            guard let current = shown else { shown = next; return }
+            forward = next > current
+            withAnimation(ThemeMotion.pick(ThemeMotion.uiSnappy, reduceMotion: reduceMotion)) { shown = next }
+        }
+        .accessibilityElement(children: .contain)
+        .accessibilityLabel(Copy.Schedule.week)
+        .accessibilityAction(named: Copy.Schedule.nextWeek) { go(by: 1) }
+        .accessibilityAction(named: Copy.Schedule.previousWeek) { go(by: -1) }
+    }
+
+    /// The next or previous week, if the window reaches it: the list goes to its first day with
+    /// something on it — or, with nothing, its first day the list can answer for, which then says
+    /// "Nothing scheduled".
+    private func go(by step: Int) {
+        // Past the window the weeks are sparse (a Later day here and there): the swipe goes to the
+        // next week that holds a day the list can show, never to a week of disabled days.
+        let last = week(of: max(window.upperBound, extraDays.max() ?? window.upperBound))
+        let first = week(of: window.lowerBound)
+        var target = (shown ?? week(of: selected)) + step
+        while target >= first && target <= last {
+            let days = (0..<7).map { offset(week: target, column: $0) }.filter(known)
+            if let day = days.first(where: { (counts[$0] ?? 0) > 0 }) ?? days.first {
+                onPick(day)
+                return
+            }
+            target += step
+        }
+    }
+
+    /// One day: Apple Calendar's anatomy, the month grid's ink (`ScheduleMonthGrid.cell`).
+    private func cell(_ offset: Int, column: Int) -> some View {
+        let ts = todayNoon + Int64(offset) * Formatting.D
+        let isToday = offset == 0
+        let isSelected = offset == selected
+        let known = known(offset)
+        let n = counts[offset] ?? 0
+        return Button {
+            onPick(offset)
+        } label: {
+            VStack(spacing: 4) {
+                Text(Formatting.weekdayLetter(column))
+                    .type(ThemeType.scheduleCaps)
+                    .textCase(.uppercase)
+                    .foregroundStyle(isToday ? ThemeColor.accent : ThemeColor.textTertiary)
+                ZStack {
+                    if isSelected {
+                        Circle().fill(isToday ? ThemeColor.accent : ThemeColor.textPrimary)
+                    }
+                    Text("\(Formatting.localParts(ts).d)")
+                        .type(ThemeType.feedDate)
+                        .foregroundStyle(numeralInk(isToday: isToday, isSelected: isSelected, hasContent: n > 0))
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.6)
+                }
+                .frame(width: disc, height: disc)
+                .animation(ThemeMotion.pick(ThemeMotion.uiMicro, reduceMotion: reduceMotion), value: isSelected)
+                Circle()
+                    .fill(n == 0 ? .clear : (live.contains(offset) ? ThemeColor.accent : ThemeColor.textTertiary))
+                    .frame(width: 5, height: 5)
+            }
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, ThemeSpace.x1)
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(CalendarCellPressStyle())
+        .disabled(!known)
+        .opacity(known ? 1 : 0.3)
+        .accessibilityLabel(Date(timeIntervalSince1970: Double(ts) / 1000)
+            .formatted(.dateTime.weekday(.wide).day().month(.wide)))
+        .accessibilityValue(!known ? Copy.Schedule.beyondHorizon
+                            : (n > 0 ? Copy.episodes(n) : Copy.Schedule.noEpisodes))
+        .accessibilityAddTraits(isSelected ? .isSelected : [])
+    }
+
+    private func numeralInk(isToday: Bool, isSelected: Bool, hasContent: Bool) -> Color {
+        if isSelected { return isToday ? ThemeColor.onAccent : ThemeColor.canvas }
+        if isToday { return ThemeColor.accent }
+        return hasContent ? ThemeColor.textPrimary : ThemeColor.textSecondary
     }
 }

@@ -18,9 +18,9 @@ extension AppModel {
     /// Retry (a mark never rolls back). A show NOT in the library takes the one-call endpoint —
     /// membership, progress and status in one transaction — and a failure rolls the membership
     /// back, as every membership write does.
-    func markWatched(_ f: Franchise, batch: WatchedBatch) {
+    func markWatched(_ f: Franchise, batch: WatchedBatch, receiptMessage: String? = nil) {
         guard !batch.parts.isEmpty else { return }
-        let fact = Copy.Toast.batchWatched(batch.episodeCount, films: batch.filmCount)
+        let fact = receiptMessage ?? Copy.Toast.batchWatched(batch.episodeCount, films: batch.filmCount)
         if isInLibrary(f.id) {
             let previousStatus = f.effectiveStatus
             for value in batch.parts {

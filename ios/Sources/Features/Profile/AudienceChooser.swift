@@ -198,18 +198,9 @@ struct AudienceAmbient: View {
 
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
-    /// The pictures' own lights (read from the art, 4 Oct): the anime sky's crimson and its gold,
-    /// the street's teal and its steel blue.
-    private static let crimson = Color(hex: 0xC2413F), gold = Color(hex: 0xE08A3A)
-    private static let teal = Color(hex: 0x1E8696), steel = Color(hex: 0x2F62AE)
-
-    private var pools: (leading: Color, trailing: Color) {
-        switch audience {
-        case .anime: (Self.crimson, Self.gold)
-        case .tv: (Self.steel, Self.teal)
-        case .both: (Self.crimson, Self.teal)
-        }
-    }
+    /// The pictures' own lights (`AudienceLight`, read from the art on 4 Oct) — the app's ground
+    /// wears the same pair, a tenth as bright (`AppGround`).
+    private var pools: (leading: Color, trailing: Color) { AudienceLight.pools(audience) }
 
     var body: some View {
         ZStack {

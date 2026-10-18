@@ -402,27 +402,42 @@ enum DetailTint {
     /// TONED DOWN (24 Sep, owner: "a bit too shouting… tone it down so the rest of the content is
     /// properly visible without losing the immersive nature"): the hue stays, the voice drops —
     /// less chroma, a ground nearer the canvas, a fainter pool of light. `-detailGround strong |
-    /// medium | subtle` (DEBUG) photographs the three strengths side by side; `medium` ships.
+    /// medium | subtle | quiet` (DEBUG) photographs the strengths side by side.
+    ///
+    /// QUIET since 19 Oct ("the color bleed is a bit too shouting and we need to tone it down so
+    /// that the 'character' stays but it's not distracting", owner): `subtle` was measured first
+    /// and still put Bleach's page at #160806 against the #09090B canvas — a red-brown room. Quiet
+    /// holds the hue at 0.015 chroma (two-fifths of medium's) a breath above the canvas — #120A09
+    /// for Bleach, #080C12 for Re:ZERO: the show's temperature, not its colour — with a pool of
+    /// light a third of medium's and the glow behind the lockup under half the stage's (`glow`).
+    /// `-detailGround subtle|medium|strong` brings the louder ones back, glow and all.
     struct GroundSpec {
         let maxChroma: Double
         let top: Double
         let foot: Double
         let pool: Double
         let barChroma: Double
+        /// The pool of the poster's light under the stage's lockup (`HomeLockupGlow`; the stage's
+        /// own is `HomeLockupGlow.stage`, 0.26).
+        var glow: Double = 0.26
 
         static let strong = GroundSpec(maxChroma: 0.06, top: 0.19, foot: 0.155, pool: 0.14, barChroma: 0.06)
         static let medium = GroundSpec(maxChroma: 0.038, top: 0.172, foot: 0.148, pool: 0.07, barChroma: 0.04)
-        static let subtle = GroundSpec(maxChroma: 0.026, top: 0.162, foot: 0.144, pool: 0.04, barChroma: 0.03)
+        static let subtle = GroundSpec(maxChroma: 0.026, top: 0.162, foot: 0.144, pool: 0.04, barChroma: 0.03,
+                                       glow: 0.12)
+        static let quiet = GroundSpec(maxChroma: 0.015, top: 0.158, foot: 0.146, pool: 0.025, barChroma: 0.022,
+                                      glow: 0.11)
 
         static var current: GroundSpec {
             #if DEBUG
             switch UserDefaults.standard.string(forKey: "detailGround") {
             case "strong": return .strong
+            case "medium": return .medium
             case "subtle": return .subtle
-            default: return .medium
+            default: return .quiet
             }
             #else
-            return .medium
+            return .quiet
             #endif
         }
     }
@@ -430,6 +445,7 @@ enum DetailTint {
     static var groundTopLightness: Double { GroundSpec.current.top }
     static var groundFootLightness: Double { GroundSpec.current.foot }
     static var groundPool: Double { GroundSpec.current.pool }
+    static var groundGlow: Double { GroundSpec.current.glow }
 
     static func ground(_ color: Color?, lightness: Double) -> Color {
         guard let color, let (r, g, b) = components(color) else { return ThemeColor.canvas }
@@ -648,7 +664,9 @@ struct EpisodeList: View {
         .alert(prompt?.title ?? "", isPresented: Binding(get: { prompt != nil }, set: { if !$0 { prompt = nil } }),
                presenting: prompt) { p in
             Button(p.confirm, role: p.destructive ? .destructive : nil) { p.perform() }
-            Button(Copy.Confirm.cancel, role: .cancel) {}
+                .qaIdentifier(p.isProgressAdmission ? "qa.progress.admission.confirm" : "qa.prompt.confirm")
+            Button(Copy.Confirm.cancel, role: .cancel) { p.cancel?() }
+                .qaIdentifier("qa.prompt.cancel")
         } message: { p in
             Text(p.message)
         }
@@ -708,7 +726,9 @@ struct EpisodeList: View {
             && (!part.isReleasing || n <= part.provenAiredCount(now: now) || n <= part.airedEpisodes)
         let isNext = n == progress + 1 && aired
         let spoilerSafe = watched || isNext || revealAll || revealed.contains(n)
-        let interactive = appModel.isInLibrary(f.id) && aired
+        // A catalogue episode is actionable too: the first mark asks to add its show, retaining
+        // this exact episode/range. Unaired episodes stay unavailable on either side of admission.
+        let interactive = aired && !appModel.pendingAdds.contains(f.id)
         let cleanTitle = EpisodeCopy.title(episode?.title, franchise: f.title)
         let canReveal = !spoilerSafe && (cleanTitle != nil || episode?.still != nil)
         let overview = Formatting.stripHtml(episode?.overview)
@@ -945,6 +965,7 @@ struct EpisodeList: View {
     // MARK: Marks
 
     private func tapped(_ f: Franchise, part: FranchisePart, n: Int, watched: Bool) {
+        if confirmLibraryProgress(f, part: part, to: watched ? n - 1 : n) { return }
         if watched {
             if n == part.progress {
                 // The ring's own undo: the last watched episode toggles back — the disc opens
@@ -1017,6 +1038,7 @@ struct EpisodeList: View {
     private func promptMark(_ f: Franchise, part: FranchisePart, through: Int) {
         let count = through - part.progress
         guard count > 0 else { return }
+        if confirmLibraryProgress(f, part: part, to: through) { return }
         prompt = .init(title: Copy.Confirm.batchMarkTitle(count), message: Copy.Confirm.batchMarkMessage(title: f.displayTitle, season: part.canonicalLabel, from: part.progress, to: through),
                        confirm: Copy.Confirm.batchMarkConfirm(count)) {
             let prev = part.progress
@@ -1033,6 +1055,7 @@ struct EpisodeList: View {
     private func promptUnmark(_ f: Franchise, part: FranchisePart, to: Int) {
         let count = part.progress - to
         guard count > 0 else { return }
+        if confirmLibraryProgress(f, part: part, to: to) { return }
         let message = to == 0 ? Copy.Confirm.resetSeason(label: part.canonicalLabel, total: count)
                               : Copy.Confirm.batchMarkMessage(title: f.displayTitle, season: part.canonicalLabel, from: part.progress, to: to)
         prompt = .init(title: to == 0 ? Copy.Confirm.resetSeasonTitle(count) : "Mark \(Copy.episodes(count)) as unwatched?",
@@ -1044,6 +1067,16 @@ struct EpisodeList: View {
             appModel.presentUndo(UndoState(mediaId: part.mediaId, franchiseId: f.id, prevProgress: prev, title: f.title, episode: to, count: count,
                                            customMessage: to == 0 ? Copy.Toast.seasonUnmarked(part.canonicalLabel) : Copy.Toast.batchUnmarked(count)))
         }
+    }
+
+    private func confirmLibraryProgress(_ f: Franchise, part: FranchisePart, to: Int) -> Bool {
+        guard !appModel.isInLibrary(f.id) else { return false }
+        guard let admission = appModel.libraryProgressAdmission(f,
+            parts: [.init(mediaId: part.mediaId, episodes: to)],
+            message: Copy.Confirm.libraryProgressChange(season: part.canonicalLabel,
+                                                        from: part.progress, to: to)) else { return true }
+        prompt = .addingProgress(admission, appModel: appModel)
+        return true
     }
 }
 
@@ -1075,6 +1108,7 @@ struct SeasonPill: View {
                         Text(Self.name(season))
                     }
                 }
+                .qaIdentifier("qa.season.pick.\(season.mediaId)")
             }
         } label: {
             HStack(spacing: 6) {
@@ -1105,5 +1139,6 @@ struct SeasonPill: View {
         }
         .accessibilityLabel("Season, \(Self.name(current))")
         .accessibilityHint("Chooses another season")
+        .qaIdentifier("qa.season.menu.\(current.mediaId)")
     }
 }

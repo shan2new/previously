@@ -8,8 +8,7 @@ import Foundation
 // resting value outside DEBUG, so a call site needs no `#if` of its own and a Release build carries
 // no launch-argument branch at all (the `PerfProbe.flag` pattern).
 //
-//   -feedTab foryou                     open on For you
-//   -feedAnchor top|stories|suggested|caughtup|trending|<post id prefix>
+//   -feedAnchor top|stories|caughtup|trending|<post id prefix>
 //                                       scroll the loaded feed there (1.5 s after content)
 //   -feedSkeleton 1                     hold the skeleton
 //   -feedPinHeader 1                    the header never slides
@@ -27,8 +26,7 @@ import Foundation
 //   -discoverGenre <key>                with -openTab discover, push that genre page
 
 enum FeedCapture {
-    /// `-feedTab foryou`: the tab the feed opens on.
-    static let initialTab: FeedTab = string("feedTab") == FeedTab.forYou.rawValue ? .forYou : .following
+    // `-feedTab foryou` went with the feed's For you page (16 Oct): For you is Discover's.
     /// `-feedAnchor`: where the loaded feed scrolls for a capture.
     static let anchor: String? = string("feedAnchor")
     /// `-feedSkeleton 1`: the skeleton is held, whatever the feed's phase.

@@ -14,7 +14,7 @@ extension View {
             .toolbar {
                 ToolbarItem(placement: .principal) {
                     Text(title)
-                        .type(ThemeType.bodyEmphasis)
+                        .type(ThemeType.barTitle)
                         .foregroundStyle(ThemeColor.textPrimary)
                         .lineLimit(1)
                         .minimumScaleFactor(0.85)

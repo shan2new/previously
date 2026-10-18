@@ -60,9 +60,10 @@ struct PreviouslyApp: App {
                 // chevrons, alert buttons, the search field's Cancel and caret — draws in ink.
                 // The tab bar re-tints itself amber (a selected tab is STATE), see `MainTabView`.
                 .tint(ThemeColor.interactive)
-                // Outfit as the inherited default so any text not already using `.scaledFont`
-                // (and SwiftUI TextField input) still renders in the brand typeface, scaled.
-                .font(.custom("Outfit-Regular", size: 17, relativeTo: .body))
+                // The content face as the inherited default (`ThemeType.body`: Hanken Grotesk since
+                // 19 Oct) so any text without a token — and SwiftUI TextField input — renders in
+                // the app's text face, scaled.
+                .font(ThemeType.body.font)
                 // Scale text for accessibility, but cap before the densest grids break.
                 .dynamicTypeSize(...DynamicTypeSize.accessibility2)
                 .task { await auth.bootstrap() }

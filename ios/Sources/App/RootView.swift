@@ -226,7 +226,7 @@ struct MainTabView: View {
     /// the route pushes is the one on screen.
     @State private var feedDismissals = 0
     /// The feed header's scroll state, held here so the bar can ride it (`AppTabBar.scrollAway`).
-    @State private var feedChrome = FeedChromeState(page: FeedCapture.initialTab)
+    @State private var feedChrome = FeedChromeState()
     /// Discover's Explore header, the same (25 Sep: "Discover also needs the scroll treatment like
     /// in Today", owner).
     @State private var discoverChrome = DiscoverChromeState()
@@ -238,6 +238,9 @@ struct MainTabView: View {
     @State private var homeChrome = HomeChrome()
     /// "Pick your shows" — the empty Home's button: first run's picker, on its own.
     @State private var pickingShows = false
+    /// The account sheet the directions' roots open from their bar's disc (`RootAccountButton`).
+    /// Home and the feed keep their own sheets.
+    @State private var showProfile = false
     /// The transition namespace every card registers its artwork in (`zoomSource(_:)`).
     ///
     /// Nothing consumes it today: Detail is a push again (see `detailDestinations` for the
@@ -284,7 +287,9 @@ struct MainTabView: View {
         if !keyboard.covering {
             AppTabBar(selected: selectedTab,
                       ground: tabGrounds[selectedTab] ?? ThemeColor.canvas,
-                      scrollAway: scrollingHeader) {
+                      scrollAway: scrollingHeader,
+                      tabs: appModel.experience.tabs,
+                      compass: appModel.experience.doors) {
                 selection.wrappedValue = $0
             }
             .transition(.opacity)
@@ -365,6 +370,7 @@ struct MainTabView: View {
                                      selectedTab = .discover
                                  },
                                  onPickShows: { pickingShows = true },
+                                 onOpenDiscover: { selection.wrappedValue = .discover },
                                  topSignal: homePops,
                                  dismissSignal: feedDismissals,
                                  chrome: homeChrome)
@@ -376,6 +382,7 @@ struct MainTabView: View {
                     .pageInTransition(isActive: selectedTab == .home && appModel.surfaceReady, fadeIn: launch?.finished ?? true)
                     .systemTabBarHidden()
                     .environment(\.tabBarGroundChanged, { tabGrounds[.home] = $0 })
+                    .environment(\.rootActive, selectedTab == .home && appModel.surfaceReady)
                 }
                 Tab(AppTab.schedule.titleKey, image: AppTab.schedule.icon, value: AppTab.schedule) {
                     NavigationStack(path: path(.schedule)) {
@@ -391,7 +398,10 @@ struct MainTabView: View {
                     .pageInTransition(isActive: selectedTab == .schedule && appModel.surfaceReady, fadeIn: launch?.finished ?? true)
                     .systemTabBarHidden()
                     .environment(\.tabBarGroundChanged, { tabGrounds[.schedule] = $0 })
+                    .environment(\.rootActive, selectedTab == .schedule && appModel.surfaceReady)
                 }
+                // Four tabs (`Experience.feedInHome`): the feed is Home's News section, not a tab.
+                if !appModel.experience.feedInHome {
                 Tab(AppTab.today.titleKey, image: AppTab.today.icon, value: AppTab.today) {
                     NavigationStack(path: path(.today)) {
                         // Today IS the feed (25 Sep). Profile's only entry is the feed header's
@@ -407,9 +417,6 @@ struct MainTabView: View {
                                      appModel.searchFieldRequested = true
                                      selectedTab = .discover
                                  },
-                                 onOpenRecommendations: {
-                                     push(.today, FranchiseDetailView.DetailPush.recommendations)
-                                 },
                                  topSignal: todayPops,
                                  dismissSignal: feedDismissals,
                                  chrome: feedChrome)
@@ -421,6 +428,8 @@ struct MainTabView: View {
                     .pageInTransition(isActive: selectedTab == .today && appModel.surfaceReady, fadeIn: launch?.finished ?? true)
                     .systemTabBarHidden()
                     .environment(\.tabBarGroundChanged, { tabGrounds[.today] = $0 })
+                    .environment(\.rootActive, selectedTab == .today && appModel.surfaceReady)
+                }
                 }
                 Tab(AppTab.library.titleKey, image: AppTab.library.icon, value: AppTab.library) {
                     NavigationStack(path: path(.library)) {
@@ -437,6 +446,7 @@ struct MainTabView: View {
                     .pageInTransition(isActive: selectedTab == .library && appModel.surfaceReady, fadeIn: launch?.finished ?? true)
                     .systemTabBarHidden()
                     .environment(\.tabBarGroundChanged, { tabGrounds[.library] = $0 })
+                    .environment(\.rootActive, selectedTab == .library && appModel.surfaceReady)
                 }
                 // An ORDINARY tab, not the search role: the field lives under the title on the
                 // screen itself (Apple Music's Search — user reference, 24 Aug).
@@ -455,14 +465,32 @@ struct MainTabView: View {
                     .pageInTransition(isActive: selectedTab == .discover && appModel.surfaceReady, fadeIn: launch?.finished ?? true)
                     .systemTabBarHidden()
                     .environment(\.tabBarGroundChanged, { tabGrounds[.discover] = $0 })
+                    .environment(\.rootActive, selectedTab == .discover && appModel.surfaceReady)
                 }
             }
             .environment(\.zoomNamespace, zoom)
+            .environment(\.openProfile, { showProfile = true })
+            .sheet(isPresented: $showProfile) {
+                ProfileView(onOpenLibrary: { status in
+                                showProfile = false
+                                libraryRequest = .init(status: status)
+                                selectedTab = .library
+                            },
+                            onOpenDetail: { id in
+                                showProfile = false
+                                openDetail(id, zoomID: "profile/\(id)")
+                            })
+                    .perfScreen("Profile")
+            }
             // Back on the feed from a page pushed on it: the header — and the bar with it — are
             // there to meet the reader, not left wherever the feed's scroll had put them.
             // A push or a pop on the tab in front brings its root's bars back: a pushed page keeps
             // the tab bar, and a root is returned to with its header in place.
             .onChange(of: frontDepth) { _, _ in rootChrome(selectedTab).reveal() }
+            // A direction without the tab in front lands on Home.
+            .onChange(of: appModel.experience) { _, next in
+                if !next.tabs.contains(selectedTab) { selectedTab = .home }
+            }
             // No haptic on a tab switch (review, 5 Sep): Music, TV and the App Store are silent
             // on the most frequent gesture in the app; a haptic is a signature for a WRITE.
             // A tapped episode alert opens its show — on Today, above whatever was there.
@@ -482,19 +510,21 @@ struct MainTabView: View {
                 if let launch, !launch.finished { launch.intent = true }
                 appModel.pendingRoute = nil
                 feedDismissals += 1
-                selectedTab = .today
+                // Four tabs: the feed's pages push on Home.
+                let feedTab: AppTab = appModel.experience.feedInHome ? .home : .today
+                selectedTab = feedTab
                 switch route {
                 case .show(let id):
                     // Delivered through `pendingOpen` (PreviouslyApp); handled here for completeness.
-                    paths[.today] = NavigationPath([DetailRoute(id: id, zoomID: "alert/\(id)")])
+                    paths[feedTab] = NavigationPath([DetailRoute(id: id, zoomID: "alert/\(id)")])
                 case .post(let postId, let commentId):
-                    paths[.today] = NavigationPath([FeedRoute.post(id: postId, focusCommentId: commentId)])
+                    paths[feedTab] = NavigationPath([FeedRoute.post(id: postId, focusCommentId: commentId)])
                 case .thread(let subject, let franchiseId, let commentId):
                     if let ep = ThreadSubject.parseEpisode(subject) {
-                        paths[.today] = NavigationPath([FeedRoute.episode(franchiseId: franchiseId, mediaId: ep.mediaId,
+                        paths[feedTab] = NavigationPath([FeedRoute.episode(franchiseId: franchiseId, mediaId: ep.mediaId,
                                                                           episode: ep.episode, focusCommentId: commentId)])
                     } else {
-                        paths[.today] = NavigationPath([FeedRoute.post(id: subject, focusCommentId: commentId)])
+                        paths[feedTab] = NavigationPath([FeedRoute.post(id: subject, focusCommentId: commentId)])
                     }
                 }
             }
@@ -536,6 +566,10 @@ struct MainTabView: View {
                 // `-verifyFeed 1`: the feed's pure rules (composer, counting, routes) against fixtures.
                 if UserDefaults.standard.bool(forKey: "verifyFeed") {
                     FeedRegression.run()
+                }
+                // `-verifyLogos 1`: every library logo's ink reading (dark, plate, neutral).
+                if UserDefaults.standard.bool(forKey: "verifyLogos") {
+                    Task { await LogoRegression.run { appModel.library } }
                 }
                 // `-discoverGenre <key>` (FeedCapture), with `-openTab discover`: a genre page.
                 if let key = FeedCapture.discoverGenre {
@@ -689,6 +723,11 @@ private extension View {
                                    onOpenShow: { push(FranchiseDetailView.DetailPush.detail(franchiseId: $0)) })
                         .pushedScreenChrome()
                         .perfScreen("Saved")
+                case .news:
+                    NewsListView(onOpenPost: { push(FeedRoute.post(id: $0)) },
+                                 onOpenShow: { push(FranchiseDetailView.DetailPush.detail(franchiseId: $0)) })
+                        .pushedScreenChrome()
+                        .perfScreen("News")
                 }
             }
             .navigationDestination(for: DiscoverRoute.self) { route in

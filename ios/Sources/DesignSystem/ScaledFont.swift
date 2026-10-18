@@ -15,7 +15,8 @@ struct ScaledFont: ViewModifier {
     }
 
     func body(content: Content) -> some View {
-        let font = AppFont.font(size: size, weight: weight)
+        // The content face (`Typeface`): Hanken Grotesk since 19 Oct, Outfit under `-typeSet outfit`.
+        let font = Typeface.fixedFont(.text, weight, size)
         return content.font(monospacedDigit ? font.monospacedDigit() : font)
     }
 }

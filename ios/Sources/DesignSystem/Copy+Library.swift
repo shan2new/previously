@@ -50,6 +50,8 @@ extension Copy {
         static let status = "Status"
         /// The Status picker's "no filter" value. A chip never states it: "Any" is not a criterion.
         static let anyStatus = "Any"
+        /// The directions' Library root (`Experience.doors`): the status row's first chip — every show.
+        static let allStatus = "All"
         /// Says unwatched *what* — the identical word on Schedule's menu means episodes.
         static let hasUnwatched = "Has unwatched episodes"
         static let view = "View"

@@ -67,6 +67,11 @@ struct QASnapshot: Codable, Equatable, Sendable {
     struct Progress: Codable, Equatable, Sendable { let mediaId: Int; let episodes: Int }
     struct Subscription: Codable, Equatable, Sendable { let franchiseId: String; let status: String }
     struct Fault: Codable, Equatable, Sendable { let kind: String; let path: String; let remaining: Int; let inFlight: Int }
+    struct ImportInput: Codable, Equatable, Sendable {
+        struct Row: Codable, Equatable, Sendable { let malId: Int; let watched: Int; let status: String }
+        let source: String
+        let rows: [Row]
+    }
     let fixtureVersion: String
     let account: String
     let progress: [Progress]
@@ -80,6 +85,7 @@ struct QASnapshot: Codable, Equatable, Sendable {
     let deletionStatusReads: Int?
     let ordinaryRequestsAfterErasure: Int?
     let mutationAttempts: Int?
+    let importInputs: [ImportInput]?
 
     func episodes(_ mediaID: Int) -> Int? { progress.first { $0.mediaId == mediaID }?.episodes }
     var ownership: Set<String> { Set(subscriptions.map(\.franchiseId)) }
@@ -287,12 +293,17 @@ final class QADriver {
         if identifier == "qa.detail.tab.episodes" {
             let named = app.buttons.matching(identifier: identifier).firstMatch
             if named.exists { return named }
+            let section = app.buttons.matching(identifier: "qa.detail.section.episodes").firstMatch
+            if section.exists { return section }
             let buttons = app.buttons.matching(identifier: "Episodes").allElementsBoundByIndex
             return buttons.first { $0.isHittable } ?? buttons.first ?? named
         }
-        let actionPrefixes = ["qa.tab.", "qa.detail.tab.", "qa.show.", "qa.profile.", "qa.signout", "qa.sync.retry.",
-                              "qa.progress.mark.", "qa.progress.increment.", "qa.search.result."]
+        let actionPrefixes = ["qa.tab.", "qa.detail.tab.", "qa.detail.section.", "qa.show.", "qa.profile.", "qa.signout", "qa.sync.retry.",
+                              "qa.progress.mark.", "qa.progress.increment.", "qa.progress.admission.", "qa.progress.bulk.",
+                              "qa.progress.season.", "qa.progress.series.", "qa.episode.", "qa.season.", "qa.prompt.", "qa.import.source.", "qa.export.", "qa.search.result."]
         if identifier == "qa.undo" || identifier == "qa.signin.dev.submit"
+            || identifier == "qa.detail.more"
+            || ["qa.import.open", "qa.import.choose-file", "qa.import.apply", "qa.import.done", "qa.import.cancel", "qa.import.preview"].contains(identifier)
             || ["qa.delete.open", "qa.delete.confirm", "qa.delete.error.done", "qa.deletion.check", "qa.deletion.signout"].contains(identifier)
             || actionPrefixes.contains(where: { identifier.hasPrefix($0) }) {
             // A SwiftUI identifier can also be inherited by its caption's StaticText. Actions
@@ -326,6 +337,7 @@ final class QADriver {
         let target = try require(identifier)
         if !target.isHittable {
             let inProfile = identifier.hasPrefix("qa.signout") || identifier.hasPrefix("qa.sync.") || identifier.hasPrefix("qa.delete.")
+                || identifier == "qa.import.open" || identifier == "qa.export.open"
             let preferred = element(inProfile ? "qa.scroll.profile" : "qa.scroll.detail")
             if preferred.exists {
                 for _ in 0..<6 where !target.isHittable {
@@ -349,6 +361,20 @@ final class QADriver {
     func isAvailable(_ identifier: String) -> Bool {
         let target = element(identifier)
         return target.exists && target.isHittable && target.isEnabled
+    }
+
+    func openSearchResult(_ franchiseID: String) throws {
+        let identifier = "qa.search.result.\(franchiseID)"
+        let target = try require(identifier)
+        // Tapping the visible result performs the ordinary navigation and dismisses search.
+        // A short results list need not scroll far enough to dismiss its keyboard first.
+        if target.isEnabled && target.isHittable {
+            record("search-result-observed", identifier, "passed", "Enabled and hittable with keyboardVisible=\(app.keyboards.firstMatch.exists).")
+        } else {
+            try dismissKeyboard()
+        }
+        try tap(identifier)
+        try require("qa.detail.\(franchiseID)")
     }
 
     func navigate(_ tab: String) throws {
@@ -541,18 +567,39 @@ final class QADriver {
         record("type", identifier, "completed", "requested=\(text); entered=\((field.value as? String) ?? "")")
     }
 
+    /// Navigation callers no longer need the query; result selection uses openSearchResult
+    /// and never closes its search before tapping the requested show.
+    func leaveSearch() throws {
+        let navigation = app.navigationBars["Discover"].firstMatch
+        let field = navigation.searchFields.firstMatch
+        let close = navigation.buttons["Close"].firstMatch
+        let cancel = navigation.buttons["Cancel"].firstMatch
+        let control = close.exists && close.isHittable ? close : cancel
+        if field.exists && field.isHittable && control.exists && control.isHittable {
+            let target = control.label == "Close" ? "system.discover.close" : "system.discover.cancel"
+            control.tap()
+            record("leave-search", target,
+                   "completed", "Observed dismissal beside the real searchable field; query is no longer needed.")
+            let hidden = NSPredicate(format: "exists == false")
+            let keyboard = app.keyboards.firstMatch
+            if !keyboard.exists
+                || XCTWaiter.wait(for: [XCTNSPredicateExpectation(predicate: hidden, object: keyboard)], timeout: 3) == .completed {
+                checks += 1
+                record("assert-keyboard-absent", "system.keyboard", "passed")
+                return
+            }
+        }
+        try dismissKeyboard()
+    }
+
     func dismissKeyboard() throws {
         guard app.keyboards.firstMatch.exists else { return }
-        let cancel = app.buttons["Cancel"].firstMatch
-        if cancel.exists && cancel.isHittable { cancel.tap(); record("dismiss-keyboard", "system.cancel", "completed") }
-        else {
-            for key in ["Search", "search", "Return", "return", "Done", "done"] {
-                let button = app.keyboards.buttons[key].firstMatch
-                if button.exists && button.isHittable {
-                    button.tap()
-                    record("dismiss-keyboard", "system.keyboard.\(key)", "completed")
-                    break
-                }
+        for key in ["Search", "search", "Return", "return", "Done", "done"] {
+            let button = app.keyboards.buttons[key].firstMatch
+            if button.exists && button.isHittable {
+                button.tap()
+                record("dismiss-keyboard", "system.keyboard.\(key)", "completed")
+                break
             }
         }
         // Submit can leave a searchable field focused. Use the actual named results scroller's

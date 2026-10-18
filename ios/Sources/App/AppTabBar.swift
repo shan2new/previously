@@ -5,7 +5,8 @@ import UIKit
 /// with the content too… We need a deep overhaul of this… Use X's not insta's", owner).
 ///
 /// Measured off X on the owner's iPhone (393 pt wide): a 49-pt band above the home indicator,
-/// FLUSH with the page (X's black; ours is the page's opaque ground), no dividing rule, the tabs
+/// over a veil of the page's own ground (`TabBarVeil` — since 16 Oct, never an opaque band), no
+/// dividing rule, the tabs
 /// in equal slots across the whole width, ICONS ONLY — no labels — every glyph in one ink, and the
 /// selected tab told apart by its glyph alone: filled where the others are outlines (search goes
 /// heavier, having nothing to fill). The glyphs draw ~21 pt at a ~2-pt stroke, centred in the band.
@@ -32,12 +33,16 @@ protocol ScrollAwayChrome: AnyObject {
 
 struct AppTabBar: View {
     let selected: AppTab
-    /// An opaque surface matching the page; artwork never competes with the icons.
+    /// The page's ground, which the bar's veil is painted in (`TabBarVeil`); `.clear` draws none.
     var ground: Color = ThemeColor.canvas
     /// The scrolling header of the page in front — the feed's, Discover's — else nil. The bar rides
     /// the header's own offset — slid down by the same fraction the header has slid up — so the
     /// two leave together, come back together and settle together.
     var scrollAway: (any ScrollAwayChrome)? = nil
+    /// The tabs, in order — the direction's (`Experience.tabs`: Four tabs has no Feed).
+    var tabs: [AppTab] = AppTab.allCases
+    /// Discover wears a compass (the directions, `Experience.doors`): shows to find, not a search box.
+    var compass: Bool = false
     let onSelect: (AppTab) -> Void
 
     @Environment(\.accessibilityVoiceOverEnabled) private var voiceOver
@@ -78,14 +83,21 @@ struct AppTabBar: View {
 
     private var bar: some View {
         HStack(spacing: 0) {
-            ForEach(AppTab.allCases, id: \.self) { tab in
+            ForEach(tabs, id: \.self) { tab in
                 item(tab)
             }
         }
         .frame(maxWidth: .infinity)
         .frame(height: Self.height)
-        .background {
-            ground.ignoresSafeArea(edges: .bottom)
+        .background(alignment: .bottom) {
+            // A page that draws its own window under the bar (Home) reports `.clear`.
+            if ground != .clear {
+                // The band, the home-indicator strip under it (the bar rides `bottomOverlap` of it).
+                EdgeVeil(edge: .bottom, ink: ground,
+                         band: Self.height + ThemeMetrics.bottomSafeInset,
+                         line: ThemeMetrics.bottomSafeInset + Self.height / 2)
+                    .ignoresSafeArea(edges: .bottom)
+            }
         }
         // VoiceOver reads a real tab bar: "Home, tab, 1 of 5, selected".
         .accessibilityElement(children: .contain)
@@ -94,12 +106,14 @@ struct AppTabBar: View {
 
     private func item(_ tab: AppTab) -> some View {
         let on = tab == selected
+        let icon = compass && tab == .discover ? "TabCompass" : tab.icon
         return Button { onSelect(tab) } label: {
-            Image(on ? tab.selectedIcon : tab.icon)
+            Image(on ? icon + "Fill" : icon)
                 .renderingMode(.template)
                 .resizable()
                 .frame(width: Self.glyph, height: Self.glyph)
                 .foregroundStyle(ThemeColor.feedText)
+                .barInk()
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
                 .contentShape(Rectangle())
         }
@@ -110,8 +124,67 @@ struct AppTabBar: View {
         // The bar keeps its size at every text size, as the system's does; at the accessibility
         // sizes a long press shows the tab large (the system bar's large content viewer).
         .accessibilityShowsLargeContentViewer {
-            Label { Text(tab.label) } icon: { Image(tab.icon).renderingMode(.template) }
+            Label { Text(tab.label) } icon: { Image(icon).renderingMode(.template) }
         }
+    }
+}
+
+/// A bar's ground: a VEIL of the page's own ground, not a slab of it (16 Oct: "there is a lot of
+/// top and bottom BLACK bars which are taking visible space", owner). The opaque bands were flush
+/// only where the page was the canvas; over a tinted page — a show page's hue, Schedule's stage —
+/// they printed a black strip across the top and the foot of the screen and hid the content under
+/// them. Now the page runs to both edges: under a bar's controls it is dimmed in its own colour,
+/// strongest at the screen's edge and gone a ramp past the bar, so there is no edge to read as a
+/// bar. NO material: a blur over the dark canvas comes out LIGHTER than the canvas, and the first
+/// cut printed exactly the grey band this replaced ("What is this trash?", owner, same day — the
+/// 25 Sep lesson again). Reduce Transparency keeps the opaque band.
+/// The tab bar's ground (`AppTabBar`) and the roots' headers (`RootHeader`, Schedule's, the feed's)
+/// are all this.
+struct EdgeVeil: View {
+    enum Edge { case top, bottom }
+
+    let edge: Edge
+    var ink: Color = ThemeColor.canvas
+    /// From the screen's edge: the bar itself (the status band or home-indicator strip included).
+    let band: CGFloat
+    /// From the screen's edge: the line the bar's controls sit on.
+    let line: CGFloat
+    /// Past the bar, where the veil runs out.
+    var ramp: CGFloat = ThemeMetrics.barEdgeRamp
+    /// The veil over a PICTURE that runs up under the bar (Schedule's stage at the landing): the
+    /// art shows through the whole bar, dimmed. Otherwise the ground is whole from the edge to the
+    /// controls' line, so a row passing under a title or an icon is gone before it reaches it —
+    /// a ghost of yesterday's row behind "Schedule" was the second thing wrong with the first cut.
+    var overArt = false
+
+    @Environment(\.accessibilityReduceTransparency) private var reduceTransparency
+
+    /// TRANSPARENT (17 Oct: "make the top and bottom bars transparent please! It's heavily
+    /// distracting otherwise!", owner — of the veils above): nothing is drawn behind a bar; its
+    /// glyphs and words carry their own shadow (`barInk`). Reduce Transparency keeps the opaque band.
+    var body: some View {
+        Group {
+            if reduceTransparency {
+                ink.frame(height: band)
+            }
+        }
+        .frame(maxWidth: .infinity)
+        .allowsHitTesting(false)
+        .accessibilityHidden(true)
+    }
+}
+
+extension View {
+    /// What keeps a bar's glyphs and words legible with nothing behind them (17 Oct, transparent
+    /// bars): a soft shadow of their own, none under Reduce Transparency (whose bars are opaque).
+    func barInk() -> some View { modifier(BarInk()) }
+}
+
+private struct BarInk: ViewModifier {
+    @Environment(\.accessibilityReduceTransparency) private var reduceTransparency
+
+    func body(content: Content) -> some View {
+        content.shadow(color: .black.opacity(reduceTransparency ? 0 : 0.5), radius: 6, x: 0, y: 1)
     }
 }
 

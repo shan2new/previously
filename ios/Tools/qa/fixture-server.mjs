@@ -18,9 +18,12 @@ const CATALOGUE = Object.freeze([
   { id: 'qa-anime', mediaId: 1001, title: 'QA Anime', source: 'anilist', total: 12 },
   { id: 'qa-tv', mediaId: 2001, title: 'QA Television', source: 'tmdb', total: 8 },
   { id: 'qa-plan', mediaId: 3001, title: 'QA Planned', source: 'anilist', total: 10 },
+  { id: 'qa-multi-tv', mediaId: 4001, title: 'QA Multiseason', source: 'tmdb', total: 6,
+    seasons: [{ mediaId: 4001, total: 6 }, { mediaId: 4002, total: 4 }] },
 ]);
+const catalogueParts = (f) => f.seasons ?? [{ mediaId: f.mediaId, total: f.total }];
 const catalogueById = new Map(CATALOGUE.map((f) => [f.id, f]));
-const catalogueByMedia = new Map(CATALOGUE.map((f) => [f.mediaId, f]));
+const catalogueByMedia = new Map(CATALOGUE.flatMap((f) => catalogueParts(f).map((p) => [p.mediaId, { ...f, ...p }])));
 const LIVE_TEST_VIDEO = Object.freeze({ id: 'M7lc1UVf-VE', site: 'youtube', kind: 'trailer',
   title: 'YouTube IFrame API demonstration', url: 'https://www.youtube.com/watch?v=M7lc1UVf-VE',
   thumbnail: null, official: true, language: 'en', country: null, publishedAt: null,
@@ -55,7 +58,7 @@ function initialAccount(account) {
     sessions: new Map(), deletedSessions: new Set(),
     preferences: { country: 'US', language: 'en', providerIds: [], audience: 'both' },
     prevOpenedAt: EPOCH - 86_400_000, openedAt: EPOCH,
-    imports: new Map(), nextImport: 1, toggles: new Map(),
+    imports: new Map(), importInputs: [], nextImport: 1, toggles: new Map(),
   };
 }
 
@@ -70,30 +73,31 @@ function snapshot(state) {
     deletionStatus: state.deletionStatus, deletionRequests: state.deletionRequests,
     deletionStatusReads: state.deletionStatusReads, ordinaryRequestsAfterErasure: state.ordinaryRequestsAfterErasure,
     sessions: [...state.sessions.values()].map((s) => structuredClone(s)),
+    importInputs: structuredClone(state.importInputs),
   };
 }
 
 function franchise(f, state, detail = true) {
   const status = state?.subscriptions.get(f.id) ?? null;
-  const progress = state?.progress.get(f.mediaId) ?? 0;
+  const members = catalogueParts(f);
   const result = {
     id: f.id, source: f.source, title: f.title, cover: null, banner: null,
     synopsis: 'Synthetic native QA fixture. All episodes are complete and available.',
-    genres: ['QA'], isReleasing: false, partCount: 1, partCounts: { season: 1, movie: 0, ova: 0, ona: 0, special: 0, music: 0 },
+    genres: ['QA'], isReleasing: false, partCount: members.length, partCounts: { season: members.length, movie: 0, ova: 0, ona: 0, special: 0, music: 0 },
     nextAiringAt: null, year: 2026, studios: [], images: null, artwork: null, themes: [],
     featuredVideo: state?.liveTrailer && f.id === 'qa-anime' ? LIVE_TEST_VIDEO : null, videos: [], audience: null, people: null, related: [],
     upcoming: { status: 'concluded', next: null, release: null, note: null, source: null, checked: '2026-10-06' },
     subscription: status ? { status, addedAt: EPOCH - 7 * 86_400_000 } : null,
     status, behind: 0, newParts: 0,
-    parts: [{
-      mediaId: f.mediaId, kind: 'season', sequence: 1, label: 'Season 1', title: f.title,
+    parts: members.map((member, index) => ({
+      mediaId: member.mediaId, kind: 'season', sequence: index + 1, label: `Season ${index + 1}`, title: f.title,
       cover: null, banner: null, format: 'TV', relationship: null, status: 'FINISHED',
-      isReleasing: false, totalEpisodes: f.total, airedEpisodes: f.total, progress,
+      isReleasing: false, totalEpisodes: member.total, airedEpisodes: member.total, progress: state?.progress.get(member.mediaId) ?? 0,
       nextEpisodeNumber: null, nextAiringAt: null, lastAiredAt: EPOCH - 30 * 86_400_000,
       synopsis: null, genres: ['QA'], year: 2026, studios: [], nextAiringCount: 0,
       release: { precision: 'unknown', at: null, date: null }, airings: [], images: null, artwork: null, videos: [],
-      episodes: detail ? Array.from({ length: f.total }, (_, i) => ({ number: i + 1, title: `QA Episode ${i + 1}`, airDate: null, overview: null, still: null, runtime: 24 })) : [],
-    }],
+      episodes: detail ? Array.from({ length: member.total }, (_, i) => ({ number: i + 1, title: `QA Episode ${i + 1}`, airDate: null, overview: null, still: null, runtime: 24 })) : [],
+    })),
   };
   return result;
 }
@@ -284,9 +288,10 @@ export function createFixtureServer({ controlToken, log = () => {} } = {}) {
       if (!f) return fail(404, 'franchise not found');
       if (body.status !== undefined && !STATUSES.has(body.status)) return fail(400, 'invalid status');
       let parts = body.parts;
-      if (['caught_up', 'completed', 'reset'].includes(body.mode)) parts = [{ mediaId: f.mediaId, episodes: body.mode === 'reset' ? 0 : f.total }];
-      if (!Array.isArray(parts) || parts.some((p) => p.mediaId !== f.mediaId || !number(p.episodes))) return fail(400, 'invalid parts');
-      const values = parts.map((p) => ({ mediaId: p.mediaId, episodes: Math.min(p.episodes, f.total) }));
+      const members = catalogueParts(f);
+      if (['caught_up', 'completed', 'reset'].includes(body.mode)) parts = members.map((p) => ({ mediaId: p.mediaId, episodes: body.mode === 'reset' ? 0 : p.total }));
+      if (!Array.isArray(parts) || parts.some((p) => !members.some((member) => member.mediaId === p.mediaId) || !number(p.episodes))) return fail(400, 'invalid parts');
+      const values = parts.map((p) => ({ mediaId: p.mediaId, episodes: Math.min(p.episodes, members.find((member) => member.mediaId === p.mediaId).total) }));
       changed(state, () => {
         values.forEach((p) => state.progress.set(p.mediaId, p.episodes));
         if (body.status !== undefined) state.subscriptions.set(f.id, body.status);
@@ -322,7 +327,8 @@ export function createFixtureServer({ controlToken, log = () => {} } = {}) {
       changed(state, () => { if (!equal(state.sessions.get(id), session)) state.sessions.set(id, session); });
       return ok(undefined, 204);
     }
-    if (method === 'GET' && path === '/me/export') return ok(snapshot(state));
+    if (method === 'GET' && path === '/me/export') return { ...ok(snapshot(state)),
+      headers: { 'Content-Disposition': 'attachment; filename="previously-qa-export.json"' } };
     if (method === 'GET' && path === '/me/profile') return ok({ userId: state.account, handle: null, displayName: null, termsAcceptedAt: null, termsVersion: null, currentTermsVersion: 'fixture-1', canComment: false });
     if (path.startsWith('/social/comments') || path === '/me/terms' || path === '/me/profile/handle' || (path === '/me/profile' && method !== 'GET')) return fail(404, 'comments disabled');
     if (method === 'GET' && path === '/me/feed') return ok({ tab: url.searchParams.get('tab') ?? 'following', generatedAt: EPOCH, prevOpenedAt: state.prevOpenedAt, capabilities: { comments: false }, franchises: [], posts: [], trending: [] });
@@ -363,8 +369,23 @@ export function createFixtureServer({ controlToken, log = () => {} } = {}) {
       if (!['anilist', 'mal', 'tvtime'].includes(body.source)) return fail(400, 'invalid import source');
       const id = `fixture-import-${state.account}-${state.nextImport++}`;
       const f = catalogueById.get('qa-plan');
-      const preview = { id, source: body.source, listed: 1, ready: 1, toFetch: 0, episodes: 0, byStatus: { planned: 1 }, unmatched: { count: 0, titles: [] }, sample: [franchise(f, state, false)] };
-      state.imports.set(id, { preview, applied: false });
+      let ready = 1, watched = 0, status = 'planned', adult = 0, unmatched = 0;
+      if (body.source === 'mal') {
+        if (!Array.isArray(body.rows) || body.rows.length < 1 || body.rows.length > 20
+            || body.rows.some((r) => !number(r.malId) || !number(r.watched) || typeof r.status !== 'string')) return fail(400, 'invalid synthetic MAL rows');
+        const safe = body.rows.find((r) => r.malId === 900001);
+        ready = safe ? 1 : 0;
+        watched = safe ? Math.min(safe.watched, f.total) : 0;
+        status = ({ Watching: 'watching', Completed: 'completed', 'Plan to Watch': 'planned', 'On-Hold': 'paused', Dropped: 'dropped' })[safe?.status] ?? 'planned';
+        adult = body.rows.filter((r) => r.malId === 900002).length;
+        unmatched = body.rows.filter((r) => ![900001, 900002].includes(r.malId)).length;
+        state.importInputs.push({ source: 'mal', rows: body.rows.map(({ malId, watched, status }) => ({ malId, watched, status })) });
+      }
+      const skipped = { count: adult, reasons: { adult_content: adult } };
+      const preview = { id, source: body.source, listed: ready, ready, toFetch: 0, episodes: watched,
+        byStatus: ready ? { [status]: 1 } : {}, unmatched: { count: unmatched, titles: [] },
+        sample: ready ? [franchise(f, state, false)] : [], skipped };
+      state.imports.set(id, { preview, watched, status, applied: false });
       return url.searchParams.get('async') === '1' ? ok({ id, state: 'ready', preview, error: null }) : ok(preview);
     }
     match = /^\/me\/import\/([^/]+)(\/(preview|apply))?$/.exec(path);
@@ -374,14 +395,15 @@ export function createFixtureServer({ controlToken, log = () => {} } = {}) {
       if (method === 'GET' && match[3] === 'preview') return ok({ id: match[1], state: 'ready', preview: job.preview, error: null });
       if (method === 'DELETE') { state.imports.delete(match[1]); return ok(undefined, 204); }
       if (method === 'POST' && match[3] === 'apply') {
+        if (job.preview.ready === 0) return fail(400, 'no importable synthetic entries');
         if (!job.applied) changed(state, () => {
           job.applied = true; state.importApplications += 1;
-          if (!state.subscriptions.has('qa-plan')) state.subscriptions.set('qa-plan', 'planned');
-          if (!state.progress.has(3001)) state.progress.set(3001, 0);
+          if (!state.subscriptions.has('qa-plan')) state.subscriptions.set('qa-plan', job.status);
+          state.progress.set(3001, Math.max(state.progress.get(3001) ?? 0, job.watched));
         });
-        return ok({ id: match[1], state: 'done', shows: 1, remaining: 0, failed: 0 });
+        return ok({ id: match[1], state: 'done', shows: 1, remaining: 0, failed: 0, skipped: job.preview.skipped });
       }
-      if (method === 'GET' && !match[3]) return ok({ id: match[1], state: job.applied ? 'done' : 'ready', shows: job.applied ? 1 : 0, remaining: 0, failed: 0 });
+      if (method === 'GET' && !match[3]) return ok({ id: match[1], state: job.applied ? 'done' : 'ready', shows: job.applied ? 1 : 0, remaining: 0, failed: 0, skipped: job.preview.skipped });
     }
     return fail(404, 'fixture route not found');
   }

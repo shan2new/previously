@@ -198,9 +198,7 @@ enum FeedRow: Identifiable, Equatable, Sendable {
     case post(FeedPostModel)
     case folded(postId: String, fold: FeedFold)
     case caughtUp(since: Int64)
-    /// ≤ 3 `RecommendationItem` keys; the view reads `appModel.visibleRecommendations`.
-    case suggested(keys: [String])
-    /// ≤ 8 untracked shows.
+    /// ≤ 8 untracked shows — under an empty account's state, and an older server's notice.
     case trending([FranchiseSummary])
     case empty(FeedEmptyKind)
     /// A one-line `InlineNotice` inside the list.
@@ -211,7 +209,6 @@ enum FeedRow: Identifiable, Equatable, Sendable {
         case .post(let m): return "post/\(m.id)"
         case .folded(let postId, _): return "fold/\(postId)"
         case .caughtUp: return "caughtup"
-        case .suggested: return "suggested"
         case .trending: return "trending"
         case .empty(let kind): return "empty/\(kind.rawValue)"
         case .notice(let kind): return "notice/\(kind.rawValue)"
@@ -223,7 +220,6 @@ enum FeedRow: Identifiable, Equatable, Sendable {
         case let (.post(x), .post(y)): return x == y
         case let (.folded(p1, f1), .folded(p2, f2)): return p1 == p2 && f1 == f2
         case let (.caughtUp(s1), .caughtUp(s2)): return s1 == s2
-        case let (.suggested(k1), .suggested(k2)): return k1 == k2
         case let (.trending(t1), .trending(t2)): return t1.map(\.id) == t2.map(\.id)
         case let (.empty(e1), .empty(e2)): return e1 == e2
         case let (.notice(n1), .notice(n2)): return n1 == n2
@@ -232,7 +228,7 @@ enum FeedRow: Identifiable, Equatable, Sendable {
     }
 }
 
-enum FeedEmptyKind: String, Sendable { case emptyAccount, noPosts, forYouEmpty }
+enum FeedEmptyKind: String, Sendable { case emptyAccount, noPosts }
 enum FeedNoticeKind: String, Sendable { case refreshFailed, unavailable, offlineCached }
 
 enum FeedSurfacePhase: Equatable, Sendable {
@@ -247,28 +243,24 @@ enum FeedSurfacePhase: Equatable, Sendable {
 // MARK: - The composer
 
 enum FeedComposer {
-    /// Suggested sits after this many post rows (or after the last one).
-    static let suggestedAfter = 3
-    /// For you's Trending module sits after this many post rows (or after the last one).
-    static let trendingAfter = 5
     static let maxTrending = 8
-    static let maxSuggested = 3
 
-    /// The rows of one tab. Modules are placed BY RULE, never by a fixed index — Suggested appears
-    /// with 0, 1, 2 or 200 posts (spec §1.7).
+    /// The rows of one tab, placed BY RULE, never by a fixed index (spec §1.7). The feed draws
+    /// Following only (16 Oct: "Feed screen doesn't need For You as it is already present in the
+    /// search", owner) — and with it went the modules that were Discover's For you again: Suggested
+    /// for you (the recommender's picks, Discover's shelves) between the posts, and For you's own
+    /// Trending and empty row. For you is still composed — posts only — because a trending show's
+    /// page reads its posts from it (`showPosts`).
     static func rows(tab: FeedTab, state: FeedTabState, library: [Franchise], libraryIndex: (String) -> Franchise?,
                      now: Int64, folds: [String: FeedFold], hidden: Set<String>,
-                     muted: Set<String>, recommendationKeys: [String], untrackedTrending: [FranchiseSummary],
+                     muted: Set<String>, untrackedTrending: [FranchiseSummary],
                      libraryEmpty: Bool, online: Bool,
                      allows: (MediaSource) -> Bool = { _ in true }) -> [FeedRow] {
-        let suggestedRow: FeedRow? = recommendationKeys.isEmpty
-            ? nil : .suggested(keys: Array(recommendationKeys.prefix(maxSuggested)))
         let trendingList = Array(untrackedTrending.prefix(maxTrending))
 
-        // An older server (iD8): the notice, then the modules that do not need it.
+        // An older server (iD8): the notice, then the chart, which does not need it.
         if state.unavailable {
             var rows: [FeedRow] = [.notice(.unavailable)]
-            if let suggestedRow { rows.append(suggestedRow) }
             if !trendingList.isEmpty { rows.append(.trending(trendingList)) }
             return rows
         }
@@ -314,25 +306,14 @@ enum FeedComposer {
             // `since`, else its stored visit) — never the device's own, which can disagree with the
             // block boundary it labels (a failed stamp, another device's stamp).
             let anchor = response.prevOpenedAt
-            var caughtUpIndex: Int?
             if anchor > 0, freshCount > 0, freshCount < postRows,
                let firstStale = freshFlags.firstIndex(of: false) {
                 body.insert(.caughtUp(since: anchor), at: firstStale)
-                caughtUpIndex = firstStale
             }
             if postRows == 0 { body.append(.empty(.noPosts)) }
-            if let suggestedRow {
-                var at = insertionIndex(in: body, afterPostRows: suggestedAfter)
-                // The fresh block is never split: a point inside it moves to just after the marker.
-                if let caughtUpIndex, at <= caughtUpIndex { at = caughtUpIndex + 1 }
-                body.insert(suggestedRow, at: min(at, body.count))
-            }
         case .forYou:
-            if postRows == 0 { body.append(.empty(.forYouEmpty)) }
-            let chart = Array(response.trending.filter { libraryIndex($0.id) == nil }.prefix(maxTrending))
-            if !chart.isEmpty {
-                body.insert(.trending(chart), at: insertionIndex(in: body, afterPostRows: trendingAfter))
-            }
+            // Posts only: nothing draws For you's rows as a feed any more (see above).
+            break
         }
 
         // One notice at most, first: offline explains a failed refresh better than "couldn't refresh".
@@ -342,26 +323,6 @@ enum FeedComposer {
             body.insert(.notice(.refreshFailed), at: 0)
         }
         return body
-    }
-
-    /// The index just after the `n`th post/folded row — or after the last one when there are fewer,
-    /// or after the empty row when there are none (the end of `rows` either way).
-    private static func insertionIndex(in rows: [FeedRow], afterPostRows n: Int) -> Int {
-        var seen = 0
-        var lastPostEnd: Int?
-        for (i, row) in rows.enumerated() {
-            switch row {
-            case .post, .folded:
-                seen += 1
-                lastPostEnd = i + 1
-                if seen == n { return i + 1 }
-            default:
-                continue
-            }
-        }
-        if let lastPostEnd { return lastPostEnd }
-        if let empty = rows.firstIndex(where: { if case .empty = $0 { return true }; return false }) { return empty + 1 }
-        return rows.count
     }
 
     /// One post, composed. Every word goes through `Copy.Feed` / `TemporalCopy`.

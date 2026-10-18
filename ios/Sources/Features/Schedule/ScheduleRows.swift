@@ -14,6 +14,11 @@ import SwiftUI
 //     day once, in the date column, amber only on today; the show's face; its name; "Episode 14 ·
 //     4:30 PM" in grey; the state ladder's slot (`AiringStateControl`). No day banners, no rules —
 //     a day's break is the only space.
+//   · since 16 Oct ("the way the font is being shown looks really cheapish", owner) the rows' TYPE
+//     is their own, four styles on one scale (`ScheduleTypeScale`): the weekday in caps 11, the line
+//     in Regular 14, the name in SemiBold 17, the numeral in Regular 22 — each block centred on the
+//     face by its ink (`ScheduleInkCentre`), so the weekday's capitals sit level with the name's
+//     and the numeral's foot with the caption's.
 
 /// The agenda's columns, shared by the airing row and the empty day's row so the two line up. (Not
 /// on the row: it is generic over its trailing view, and a generic type may not carry statics.)
@@ -23,7 +28,30 @@ enum AgendaMetrics {
     static var avatar: CGFloat { 56 }
     static var leading: CGFloat { ThemeMetrics.gutter - ThemeSpace.x1 }
     static var trailing: CGFloat { ThemeSpace.x3 }
-    static var vertical: CGFloat { ThemeSpace.x1 + 2 }
+    /// 8 above and below (was 6, 16 Oct): two 56-pt faces 12 pt apart read as one stack of tiles;
+    /// at 16 each row is its own object, and a day's break (`ScheduleView.Metrics.dayGap`) is still
+    /// twice that.
+    static var vertical: CGFloat { ThemeSpace.x2 }
+    /// The name → its line. Tight — they are one thought, and Outfit's line box already carries
+    /// 0.30 em of air above the caption's capitals.
+    static var titleGap: CGFloat { ThemeSpace.x0_5 }
+}
+
+/// Centres a block of text on its row by its INK — the first line's capitals to the last line's
+/// baseline — rather than by its line boxes (16 Oct). Outfit's line box is 1.26 em, with 0.30 em of
+/// air above its capitals and 0.26 em below its baseline, so a block centred by its boxes sits a
+/// point or two off the face beside it, and off by a different amount for every size: the date
+/// column (a big numeral with no descenders, all that air under it) rode two points higher than
+/// the name and caption it stands beside.
+struct ScheduleInkCentre: ViewModifier {
+    /// The first line's capital height, in points at the current text size (`@ScaledMetric`).
+    let capHeight: CGFloat
+
+    func body(content: Content) -> some View {
+        content.alignmentGuide(VerticalAlignment.center) { d in
+            (d[VerticalAlignment.firstTextBaseline] - capHeight + d[VerticalAlignment.lastTextBaseline]) / 2
+        }
+    }
 }
 
 /// One airing in the agenda: the date (on a day's first row only), the show's face, its name, what
@@ -47,6 +75,8 @@ struct ScheduleAgendaRow<Trailing: View>: View {
     let onOpen: () -> Void
     @ViewBuilder var trailing: () -> Trailing
     @Environment(\.dynamicTypeSize) private var typeSize
+    /// The name's capital height at the current text size — what the words centre on the face by.
+    @ScaledMetric(relativeTo: .headline) private var titleCap: CGFloat = ScheduleTypeScale.title * ScheduleTypeScale.capHeight
     /// The show's palette colour, once resolved (the cache answers at once on a later visit).
     @State private var resolvedHue: Color?
 
@@ -79,8 +109,11 @@ struct ScheduleAgendaRow<Trailing: View>: View {
             Button(action: onOpen) {
                 HStack(spacing: ThemeSpace.x3) {
                     face
+                    // The lane runs to the ladder (a trailing `Spacer` took 12 pt of the name's
+                    // width for nothing), and the words centre on the face by their ink.
                     words
-                    Spacer(minLength: 0)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .modifier(ScheduleInkCentre(capHeight: titleCap))
                 }
                 .contentShape(Rectangle())
             }
@@ -139,18 +172,30 @@ struct ScheduleAgendaRow<Trailing: View>: View {
             }
     }
 
+    /// The name, then its line — and the part under the line where it must be named, at the line's
+    /// size in the quieter ink, so the column holds two sizes, not three. Three inks down the
+    /// column: the name in the text ink, the line a step under it, the part a step under that. A
+    /// watched row gives the name and the line up to the quietest ink (the face gives up its light
+    /// with them); size and weight still part the name from its line.
+    ///
+    /// The name takes two lines before an ellipsis (it took one): in the old 183-pt lane "That Time
+    /// I Got Reincarnated as a Slime" was "That Time I Got Re…" — a row may grow; it may not lose
+    /// the show.
     private var words: some View {
-        VStack(alignment: .leading, spacing: 2) {
+        VStack(alignment: .leading, spacing: AgendaMetrics.titleGap) {
             Text(franchise.displayTitle)
-                .type(ThemeType.feedName)
-                .foregroundStyle(state.isWatched ? ThemeColor.feedSecondary : ThemeColor.feedText)
-                .lineLimit(typeSize.isAccessibilitySize ? 3 : 1)
-            caption
-            if let sub {
-                Text(sub)
-                    .type(ThemeType.feedSmall)
-                    .foregroundStyle(ThemeColor.feedSecondary)
-                    .lineLimit(1)
+                .type(ThemeType.scheduleTitle)
+                .foregroundStyle(state.isWatched ? ThemeColor.textTertiary : ThemeColor.textPrimary)
+                .lineLimit(typeSize.isAccessibilitySize ? 3 : 2)
+            // The line and the part are one block, on their own leading.
+            VStack(alignment: .leading, spacing: 0) {
+                caption
+                if let sub {
+                    Text(sub)
+                        .type(ThemeType.scheduleMeta)
+                        .foregroundStyle(ThemeColor.textTertiary)
+                        .lineLimit(1)
+                }
             }
         }
         .multilineTextAlignment(.leading)
@@ -160,8 +205,8 @@ struct ScheduleAgendaRow<Trailing: View>: View {
     /// accent where it counts ("Episode 14 · in 2h 14m").
     private var caption: some View {
         captionText
-            .type(ThemeType.feedMeta)
-            .foregroundStyle(ThemeColor.feedSecondary)
+            .type(ThemeType.scheduleMeta)
+            .foregroundStyle(state.isWatched ? ThemeColor.textTertiary : ThemeColor.textSecondary)
             // Two lines before an ellipsis: a premiere's long caption wraps rather than losing its time.
             .lineLimit(typeSize.isAccessibilitySize ? 3 : 2)
     }
@@ -182,14 +227,18 @@ struct ScheduleEmptyDayRow: View {
     let isToday: Bool
     let text: String
     let spoken: String
+    /// The line's capital height at the current text size (`ScheduleInkCentre`).
+    @ScaledMetric(relativeTo: .subheadline) private var metaCap: CGFloat = ScheduleTypeScale.meta * ScheduleTypeScale.capHeight
 
     var body: some View {
         HStack(spacing: ThemeSpace.x3) {
             ScheduleDateColumn(weekday: weekday, numeral: numeral, isToday: isToday)
             Color.clear.frame(width: AgendaMetrics.avatar, height: 1)
+            // The airing row's line, in the quietest ink: an absence, not a fact.
             Text(text)
-                .type(ThemeType.feedMeta)
-                .foregroundStyle(ThemeColor.feedSecondary)
+                .type(ThemeType.scheduleMeta)
+                .foregroundStyle(ThemeColor.textTertiary)
+                .modifier(ScheduleInkCentre(capHeight: metaCap))
             Spacer(minLength: 0)
         }
         .frame(minHeight: AgendaMetrics.avatar)
@@ -227,13 +276,14 @@ struct ScheduleMarkPill: View {
     }
 }
 
-/// A label over the agenda — the month it crosses into, "LATER" — in Schedule's caps.
+/// A label over the agenda — the month it crosses into, "LATER" — in Schedule's caps: the date
+/// column's weekday style (one caps style in the list, 16 Oct), a step brighter, as it heads rows.
 struct ScheduleEyebrow: View {
     let text: String
 
     var body: some View {
         Text(text)
-            .type(ThemeType.feedEyebrow)
+            .type(ThemeType.scheduleCaps)
             .textCase(.uppercase)
             .foregroundStyle(ThemeColor.textSecondary)
             .lineLimit(1)

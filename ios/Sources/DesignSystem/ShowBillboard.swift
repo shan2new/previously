@@ -36,9 +36,12 @@ struct HomeArrival: ViewModifier {
     let reduceMotion: Bool
 
     func body(content: Content) -> some View {
-        content
-            .opacity(shown || reduceMotion ? 1 : 0)
-            .offset(y: shown || reduceMotion ? 0 : 10)
+        let visible = shown || reduceMotion
+        return content
+            .opacity(visible ? 1 : 0)
+            .offset(y: visible ? 0 : 10)
+            .allowsHitTesting(visible)
+            .accessibilityHidden(!visible)
             .animation(reduceMotion ? nil : ThemeMotion.uiGentle.delay(delay), value: shown)
     }
 }
@@ -71,6 +74,8 @@ struct ShowBillboard<Lockup: View>: View {
     /// (Schedule's, with the past above it) sits below the scroll view's top at rest, which the
     /// stretch would read as a pull.
     var pullStretch: Bool = true
+    /// How bright the pool of the poster's light under the lockup is (`HomeLockupGlow`).
+    var glow: Double = HomeLockupGlow.stage
     /// The share of the poster that shows above the words, for `PosterPick.billboardName(visible:)`
     /// — a shorter card shows less of the poster, and a logotype in the hidden band is not in view.
     var visibleBand: ClosedRange<Double>? = nil
@@ -131,6 +136,9 @@ struct ShowBillboard<Lockup: View>: View {
         PerfProbe.mark("billboard-settled", pick == nil ? "catalogue" : "pick")
         settled = next
         onArt?(next.art.url)
+        // The fallback is already on screen. ArtHeader has no image load callback when
+        // its URL is nil or empty, so there is no artwork arrival left to wait for.
+        if (next.art.url ?? "").isEmpty { artLoaded() }
     }
 
     /// The picture is on screen (the launch waits for this). Its arrival — into focus, then the
@@ -186,7 +194,7 @@ struct ShowBillboard<Lockup: View>: View {
                 // billboard's): as a circle wider than its frame, cut again by the billboard, it
                 // ended on two straight lines under the mark ("the seam looks ugly", owner, 4 Oct).
                 .overlay(alignment: .bottom) {
-                    HomeLockupGlow(tint: tint, lighting: lighting)
+                    HomeLockupGlow(tint: tint, lighting: lighting, strength: glow)
                         .offset(y: HomeLockupGlow.height / 2 - lighting.bottomInset)
                 }
 

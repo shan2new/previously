@@ -8,7 +8,10 @@ import SwiftUI
 // MARK: - Shelf scaffold
 
 struct DetailShelf<Content: View>: View {
-    let title: String
+    /// Nil where the section's own header already names the shelf.
+    let title: String?
+    /// A part of a section (19 Oct): its name a step under the section's header (`ShowSubheader`).
+    var subheader = false
     var count: Int? = nil
     var action: (() -> Void)? = nil
     /// Where the first card starts. The gutter, except for a shelf whose cards centre their art in
@@ -18,7 +21,13 @@ struct DetailShelf<Content: View>: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: ThemeMetrics.labelGap) {
-            SectionHeaderRow(title, count: count, action: action)
+            if let title {
+                if subheader {
+                    ShowSubheader(title)
+                } else {
+                    SectionHeaderRow(title, count: count, action: action)
+                }
+            }
             // LAZY (5 Sep): a show page carries up to 13 trailers, 16 people and 12 related
             // titles, and an eager row built every one of them on the push — most of a 400-ms
             // stall on the simulator for cards three screens off to the right.
@@ -352,22 +361,28 @@ struct WatchProvidersRow: View {
 /// One provider's mark: its logo on a raised square, or its initials where it has none.
 struct ProviderMark: View {
     let provider: WatchProvider
+    /// The shelf's 56 pt; the stage's line draws it small (`StageWatchLine.markSide`), its corner
+    /// scaled with it so a small mark is the same shape, not a rounder one.
+    var side: CGFloat = ProviderMark.size
 
     static let size: CGFloat = 56
 
     var body: some View {
-        let shape = RoundedRectangle(cornerRadius: ThemeRadius.compactControl, style: .continuous)
+        let small = side < Self.size
+        let shape = RoundedRectangle(cornerRadius: ThemeRadius.compactControl * side / Self.size, style: .continuous)
         ZStack {
             shape.fill(ThemeColor.surfaceRaised)
             if provider.logo != nil {
-                RemoteImageView(url: provider.logo, contentMode: .fill, maxPixel: 156, placeholderHidden: true)
+                RemoteImageView(url: provider.logo, contentMode: .fill, maxPixel: side * 2.8, placeholderHidden: true)
             } else {
                 Text(initials)
-                    .type(ThemeType.metadataEmphasis)
+                    .type(small ? ThemeType.caption : ThemeType.metadataEmphasis)
+                    .fontWeight(.semibold)
                     .foregroundStyle(ThemeColor.textSecondary)
+                    .minimumScaleFactor(0.6)
             }
         }
-        .frame(width: Self.size, height: Self.size)
+        .frame(width: side, height: side)
         .clipShape(shape)
         .overlay(shape.strokeBorder(ThemeColor.posterEdge, lineWidth: 1))
         .accessibilityLabel("\(provider.name), \(Copy.Watch.access(provider.access))")
@@ -375,6 +390,88 @@ struct ProviderMark: View {
 
     private var initials: String {
         provider.name.split(separator: " ").prefix(2).compactMap { $0.first.map(String.init) }.joined().uppercased()
+    }
+}
+
+/// WHERE TO WATCH on the show's stage (16 Oct: "where to watch has been removed which adds to the
+/// chaos", owner — the stage had filed it in About, two sections under Episodes and Trailers for a
+/// tracked show). One quiet line under the lockup's action row, centred on its axis the way Apple
+/// TV names the channel beside Play: up to three services' marks, "Watch on Netflix and
+/// Crunchyroll", a chevron, the WHOLE line opening the data's one link (the options page, where
+/// each service is a tap on — `WatchProvidersRow`'s rule); the attribution the data requires as a
+/// footnote beneath it. Both lines are one line at every size, so the line is exactly as tall as
+/// its `room` — the answer fades in where the room was held, and the lockup never moves.
+struct StageWatchLine: View {
+    let availability: WatchAvailability
+    let open: () -> Void
+
+    @Environment(\.dynamicTypeSize) private var typeSize
+
+    /// Small enough to sit in a line of type, large enough to read as the brand.
+    static let markSide: CGFloat = 22
+    /// The rest are counted in the words ("and 2 more").
+    static let markLimit = 3
+    /// The line is drawn mark-tall; its target is a finger tall (the 44-pt floor) without the
+    /// layout growing — the action row is a spacing step above, so the two targets only touch.
+    static let target: CGFloat = 44
+
+    /// The line's room, held while the read is out: the same view, hidden, so its height is the
+    /// line's at any text size.
+    static var room: some View {
+        StageWatchLine(availability: WatchAvailability(country: "", status: .available,
+                                                       providers: [WatchProvider(id: 0, name: "", logo: nil, access: .subscription)],
+                                                       link: nil),
+                       open: {})
+            .hidden()
+            .accessibilityHidden(true)
+    }
+
+    var body: some View {
+        let services = WatchProvidersRow.distinct(availability.providers)
+        let names = services.map(WatchProvidersRow.displayName)
+        let linked = availability.linkURL != nil
+        let slop = max(0, (Self.target - Self.markSide) / 2)
+        VStack(spacing: ThemeSpace.x1) {
+            Button(action: open) {
+                HStack(spacing: ThemeSpace.x2) {
+                    HStack(spacing: ThemeSpace.x1) {
+                        ForEach(services.prefix(Self.markLimit)) { provider in
+                            ProviderMark(provider: provider, side: Self.markSide)
+                        }
+                    }
+                    .accessibilityHidden(true)
+                    // The count form at the accessibility sizes: one line, never cut mid-name.
+                    Text(Copy.Watch.watchOn(names, compact: typeSize.isAccessibilitySize))
+                        .type(ThemeType.feedSubhead)
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.85)
+                        .shadow(.art)
+                    if linked {
+                        AppGlyph(systemName: "chevron.forward")
+                            .font(ThemeType.feedSmall.font.weight(.bold))
+                            .foregroundStyle(ThemeColor.textPrimary.opacity(0.66))
+                            .accessibilityHidden(true)
+                    }
+                }
+                .foregroundStyle(ThemeColor.interactive)
+                .frame(minHeight: Self.markSide)
+                .padding(.vertical, slop)
+                .contentShape(Rectangle())
+                .padding(.vertical, -slop)
+            }
+            .buttonStyle(OverArtPressStyle())
+            .disabled(!linked)
+            .qaIdentifier("qa.detail.watch")
+            .accessibilityLabel(Copy.Watch.watchOnSpoken(names))
+            .accessibilityHint(linked ? Copy.Accessibility.opensStreamingOptionsHint : "")
+            Text(Copy.Watch.attribution(availability.attribution))
+                .type(ThemeType.feedSmall)
+                .foregroundStyle(ThemeColor.textTertiary)
+                .lineLimit(1)
+                .minimumScaleFactor(0.85)
+                .shadow(.art)
+        }
+        .multilineTextAlignment(.center)
     }
 }
 

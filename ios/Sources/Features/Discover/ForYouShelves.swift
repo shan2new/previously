@@ -90,6 +90,9 @@ struct ForYouShelves: View {
     /// Under the top pick, never over it (the notification primer after an add): above it, it put
     /// the card's buttons under the tab bar on the first screen.
     var afterTopPick: AnyView? = nil
+    /// Stage (`Experience.stage`): the top pick is the page's STAGE — edge to edge, its foot easing
+    /// into the canvas — rather than a card in the gutter.
+    var stageTopPick: Bool = false
 
     /// The Library shelf's card width, so a poster is the same size on both tabs.
     static func tileWidth(_ typeSize: DynamicTypeSize) -> CGFloat { typeSize.isAccessibilitySize ? 210 : 150 }
@@ -102,15 +105,17 @@ struct ForYouShelves: View {
         let trend = Array(trending.filter { !recommended.contains($0.id) }.prefix(Self.trendingLimit))
         VStack(alignment: .leading, spacing: ThemeSpace.x8) {
             if let lead {
-                ForYouTopPick(item: lead, reason: reason(lead)) { onOpenRecommendation(lead) }
+                ForYouTopPick(item: lead, reason: reason(lead), fullBleed: stageTopPick) { onOpenRecommendation(lead) }
+                    .rootArrival(0)
             }
             if let afterTopPick { afterTopPick }
-            ForEach(groups) { g in
+            ForEach(Array(groups.enumerated()), id: \.element.id) { i, g in
                 shelf(g.title) {
                     ForEach(g.items) { r in
                         ForYouShelfTile(item: r, reason: reason(r)) { onOpenRecommendation(r) }
                     }
                 }
+                .rootArrival(1 + i)
             }
             if !trend.isEmpty {
                 shelf(Copy.Search.trendingNow) {
@@ -154,6 +159,8 @@ struct ForYouShelves: View {
 struct ForYouTopPick: View {
     let item: RecommendationItem
     let reason: RecommendationItem.Reason
+    /// Stage: edge to edge with no corners, the art's foot landing on the canvas.
+    var fullBleed: Bool = false
     let onOpen: () -> Void
 
     @Environment(AppModel.self) private var appModel
@@ -161,9 +168,10 @@ struct ForYouTopPick: View {
     private static let aspect: CGFloat = 1.32
 
     var body: some View {
-        let width = ThemeMetrics.windowWidth - 2 * ThemeMetrics.gutter
-        let height = (width * Self.aspect).rounded()
-        let shape = RoundedRectangle(cornerRadius: ThemeRadius.card, style: .continuous)
+        let width = ThemeMetrics.windowWidth - (fullBleed ? 0 : 2 * ThemeMetrics.gutter)
+        let height = (width * (fullBleed ? 1.18 : Self.aspect)).rounded()
+        let shape = RoundedRectangle(cornerRadius: fullBleed ? 0 : ThemeRadius.card, style: .continuous)
+        let foot = fullBleed ? ThemeColor.canvas : Color.black
         ZStack(alignment: .bottom) {
             Button(action: onOpen) {
                 RemoteImageView(url: item.stub?.billboardArt.url ?? item.posterURL, contentMode: .fill,
@@ -173,8 +181,8 @@ struct ForYouTopPick: View {
                     .overlay {
                         LinearGradient(stops: [
                             .init(color: .clear, location: 0.42),
-                            .init(color: .black.opacity(0.5), location: 0.66),
-                            .init(color: .black.opacity(0.9), location: 1),
+                            .init(color: foot.opacity(0.5), location: 0.66),
+                            .init(color: foot.opacity(fullBleed ? 1 : 0.9), location: 1),
                         ], startPoint: .top, endPoint: .bottom)
                     }
             }
@@ -201,10 +209,10 @@ struct ForYouTopPick: View {
         }
         .frame(width: width, height: height)
         .clipShape(shape)
-        .overlay(shape.strokeBorder(ThemeColor.posterEdge, lineWidth: 1))
-        .cardShadow(.art, shape: shape)
+        .overlay { if !fullBleed { shape.strokeBorder(ThemeColor.posterEdge, lineWidth: 1) } }
+        .cardShadow(fullBleed ? .none : .art, shape: shape)
         .contextMenu { ForYouMenu(item: item, reason: reason, onOpen: onOpen) }
-        .padding(.horizontal, ThemeMetrics.gutter)
+        .padding(.horizontal, fullBleed ? 0 : ThemeMetrics.gutter)
     }
 
     /// The show's logo, else its name in type. A NAME IS ALWAYS DRAWN (the billboards' rule): an
@@ -215,7 +223,7 @@ struct ForYouTopPick: View {
         let billboardName = item.stub?.billboardName ?? .type
         switch billboardName {
         case .logo where billboardName.hasGraphicLogo:
-            ArtworkLogo(name: billboardName, title: item.displayTitle, height: 76)
+            ArtworkLogo(name: billboardName, title: item.displayTitle, height: 76, hug: true)
                 .padding(.horizontal, ThemeSpace.x8)
         default:
             Text(item.tileTitle)

@@ -60,16 +60,17 @@ enum StoryStyle {
     static let segmentGap: CGFloat = 3
     static let segmentTop: CGFloat = 8
 
-    // Layout. The type is the app's Outfit, like every other surface's words.
+    // Layout. The type is the app's, by role (`Typeface`): Outfit for the caption's title, the
+    // sticker's label and the countdown; the content face for the rest.
     static let pageInset: CGFloat = 8
     static let lockupInset: CGFloat = ThemeSpace.x2
     static let headerTop: CGFloat = 6
     static let headerAvatar: CGFloat = 32
-    static let headerName = TypeToken(font: .custom("Outfit-SemiBold", size: 15, relativeTo: .subheadline), tracking: -0.10)
-    static let headerMeta = TypeToken(font: .custom("Outfit-Regular", size: 15, relativeTo: .subheadline), tracking: -0.05)
+    static let headerName = TypeToken(.title, .semibold, 15, .subheadline, tracking: -0.10)
+    static let headerMeta = TypeToken(.text, .regular, 15, .subheadline, tracking: -0.05)
     /// The caption at the card's foot: the episode, then when.
-    static let captionTitle = TypeToken(font: .custom("Outfit-SemiBold", size: 24, relativeTo: .title2), tracking: -0.35)
-    static let captionMeta = TypeToken(font: .custom("Outfit-Medium", size: 15, relativeTo: .subheadline), tracking: -0.05)
+    static let captionTitle = TypeToken(.display, .semibold, 24, .title2, tracking: -0.35)
+    static let captionMeta = TypeToken(.text, .medium, 15, .subheadline, tracking: -0.05)
     static let captionShadow = ShadowToken(color: .black.opacity(0.45), radius: 10, y: 1)
     static let captionInset: CGFloat = 16
     static let captionBottom: CGFloat = 20
@@ -81,12 +82,12 @@ enum StoryStyle {
     /// Instagram's link sticker: a white tag, 44 tall, a 12-pt corner.
     static let tagHeight: CGFloat = 44
     static let tagRadius: CGFloat = 12
-    static let tagLabel = TypeToken(font: .custom("Outfit-SemiBold", size: 16, relativeTo: .callout), tracking: -0.15)
+    static let tagLabel = TypeToken(.display, .semibold, 16, .callout, tracking: -0.15)
     static let tagShadow = ShadowToken(color: .black.opacity(0.28), radius: 14, y: 4)
     /// The countdown sticker.
     static let countdownRadius: CGFloat = 18
-    static let countdownDigits = TypeToken(font: .custom("Outfit-Bold", size: 34, relativeTo: .largeTitle).monospacedDigit(), tracking: -0.60)
-    static let countdownTitle = TypeToken(font: .custom("Outfit-SemiBold", size: 13, relativeTo: .footnote), tracking: 0.6)
+    static let countdownDigits = TypeToken(.display, .bold, 34, .largeTitle, tracking: -0.60, monospacedDigits: true)
+    static let countdownTitle = TypeToken(.text, .semibold, 13, .footnote, tracking: 0.6)
     // The reply row under the card.
     static let replyRowHeight: CGFloat = 44
     static let replyRowPadding: CGFloat = ThemeSpace.x2

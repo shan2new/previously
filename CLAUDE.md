@@ -183,6 +183,73 @@ to `news:` with every social row, in one transaction, when research adopts the p
 
 ## iOS conventions
 
+- **THE ROOTS ARE CALM; only the show page is a stage (19 Oct: "I think we have made a mistake
+  making everything immersive in Home and Schedule screens. In the Details screen it makes total
+  sense. For major announcements (feed) they can be full screen banner… but not an immersive view
+  as it is very distracting on a day to day use", owner).** The app draws one of four DIRECTIONS
+  (`App/Experience.swift`, 16 Oct; DEBUG builds switch them in Profile › Settings › Version or with
+  `-previously.experience current|stage|calm|fourTabs`); Release draws `fourTabs`, which is now the
+  CALM language with the Feed folded into Home (it was Stage's until 19 Oct). What that means:
+  Home has no billboard, no page in a picture's hue, no glow — the week's drops lead as Recently
+  aired's 16:9 cards (`HomeDropCard(lit: false)`: no pool of colour under them), then Up next, News
+  and For you on the canvas; Schedule has no stage card and no colour under the rows' faces
+  (`ScheduleRowDecor.hueURL` unset); Discover's top pick is a card inside the gutters. Read
+  `experience.calm` / `.stage`, never the case. **News is a reader's list, not X's timeline**
+  (same day, second pass: "News UI looks like utter shit", owner — the morning's banner-between-X-
+  rows mixed two anatomies): Home's News is a SHELF of `NewsCard`s (NewsListView.swift — Recently
+  aired's 300-pt 16:9 card: the picture with the logo and a NEW tag, then "Wednesday ✓ · 2d" and
+  the headline, `newsHeadline`); the News page leads with ONE gutter-to-gutter `NewsCard` (the newest
+  official announcement, `FeedPostModel.isMajorAnnouncement` = `announced`/`dated`/`window` + the
+  gold check) and lists the rest as `NewsRow`s (a 120×68 thumbnail, the byline, the headline) under
+  "This week" / a month. NO action bar in either — like, save, remind, share and hide are the
+  long-press menu (`PostMenuItems`) and the post page's. **Schedule has a WEEK STRIP under its title
+  (`ScheduleWeekStrip`, ScheduleParts.swift — "a top calendar… which works in sync with the list
+  scroll and vice-versa", owner), superseding "at rest the screen has no date chrome" below:** the
+  selected disc is the day at the top of the list, moved LIVE by `onScrollTargetVisibilityChange`
+  (whole days, never per frame; ignored while `steering` — a scroll the app is making); a tap
+  scrolls the list (`pick`), a swipe goes a week and takes the list to that week's first day with
+  something on it. It is always the week the reader is in, which is what the 6 Sep rail got wrong.
+  Later's days past the window are known (`extraDays`) and the strip follows the list onto them.
+  Rows fade under it (`ScheduleUnderBarFade(extra:)`). The month grid stays behind the bar's glyph.
+  **Coming back is a poster SHELF** (`ScheduleComingBackTile`, the Library card with its window in
+  the caption — `ReturnFact.text`, accent when `soon`), not agenda rows with an empty date column.
+  **Type sets (`DesignSystem/Typeface.swift`):** every token names a ROLE (display · text · reading
+  · paragraph · annotation · headline) and `TypeSet` says which face draws it; Outfit is DISPLAY in
+  every set (wordmark, screen and section titles, bar titles — `barTitle` —, stage names, buttons),
+  and so is every TITLE — the `title` role: a show's name on a row, card or shelf, an episode line,
+  a headline, a post's account (`rowTitle`, `shelfTitle`, `showTitleM`, `bodyEmphasis`, `cardFact`,
+  `scheduleTitle`, `feedName`, `feedPostName`, the news headlines) — "I think Titles should've kept
+  Outfit" (owner, same day). **HANKEN GROTESK SHIPS as the content face** (19 Oct: "Ship Hanken Grotesk as the content font
+  (Outfit stays display)", owner; `TypeSet.chosen`; OFL, from the Kestrel project, licence in
+  Resources/Fonts): rows, cards, captions, metadata, the synopsis, post words, the app's default
+  font (`PreviouslyApp`, `ThemeType.body`). `-typeSet outfit|sf` (DEBUG) draws the old or the SF
+  set for a comparison. A serif set (Newsreader) was photographed and rejected the same day ("What
+  is this ugly piece of shit?", owner): no serif anywhere. Add a token with `TypeToken(.role,
+  .weight, size, .style)`, never a bare `.custom("Outfit-…")`; the widget extension still draws
+  Outfit (it cannot see `Typeface`). **The roots stand on the viewer's GROUND (`AppGround`,
+  DesignSystem/AppGround.swift — "slight background gradient… anime mode different", then "needs
+  more personality without competing with everything", owner):** the audience's own lights
+  (`AudienceLight`, the "What you watch" pictures' pairs: anime crimson + gold, TV steel + teal,
+  both crimson + teal) as an AURORA across the top 58 % — a 3×3 `MeshGradient`, the first light
+  deep at the leading corner, the second at the trailing one, their blend between, its lower edge a
+  curve — with FILM GRAIN in it (one fixed noise tile in overlay, so it shows only in the light)
+  and a faint HORIZON of the second light behind the tab bar; rows and posters sit on near-canvas
+  through the middle. Static, fixed behind the scroll view of Home, Schedule, Library, Discover and
+  the News page; the show page keeps its own ground. (Two round corner pools came first, the same
+  day: liked, but generic.) **The show page's HIERARCHY (same day: "too
+  busy due to poor visual hierarchy… bucket load of confusion for seeking various information",
+  owner):** sections in the order a reader looks — Episodes, About, Trailers, Posts, Similar last (a
+  show you do not own: About first); every section but the first carries ONE `SectionHeaderRow` in
+  the index's own word, faded out under the pinned index (`UnderIndexFade`) and skipped by a jump
+  (the anchor sits under it), so "Episodes" never stands over "Episodes"; sub-parts ("Movies &
+  extras", "Cast & crew", Similar's two shelves when both exist) are `ShowSubheader`s a step
+  smaller; About is the synopsis, then a labelled `ShowInfoList` (Type, Genres, Themes, Seasons,
+  Next episode); Episodes drops the stage's repeated bar and keeps its batch link on the season
+  pill's row only where it says more than the stage's pill; Posts are `NewsRow`s. **The show page keeps its stage, quieter:** the
+  ground ships at `GroundSpec.quiet` — chroma 0.015 a breath above the canvas (Bleach's page
+  #120A09, where `subtle` still measured #160806 and `medium` #1A0705), a fainter pool, and `glow`
+  0.11 under the lockup (the stage's 0.26 is the Stage direction's); `-detailGround
+  subtle|medium|strong` brings the louder ones back for comparison.
 - **Franchise detail actions are independent of entry point (4 Oct, build 11).** Home/Schedule
   episode context chooses a season only when Episodes is opened; every show starts at its header
   with Posts selected. All generic Add buttons (Search, Trending, Feed, Detail) use Detail's same
@@ -380,11 +447,20 @@ to `news:` with every social row, in one transaction, when research adopts the p
     Lock Screen's depth effect): striking on One Punch Man, but it hid "Shadow" behind heads on The
     Eminence in Shadow and had nowhere to go on key visuals whose characters fill the top. The
     simulator cannot run that model ("Could not create inference context").
-  - **A dark logo is drawn white** (`LogoImage` + `LogoInk` behind `ArtworkLogo`, so app-wide): the
-    app draws logos only on dark grounds (a scrim, a tile's foot gradient, a scene's shade), and a
-    logo whose opaque ink is less than a third LEGIBLE there (OKLab L ≥ 0.6, or a saturated colour
-    from L 0.45) becomes a white silhouette of itself — The Eminence in Shadow's only English logo
-    is black type, Mushoku Tensei's bronze; One Punch Man's red and Slime's blue keep their colour.
+  - **A dark logo is drawn as its NEGATIVE** (`LogoImage` + `LogoInk` behind `ArtworkLogo`, so
+    app-wide): the app draws logos only on dark grounds (a scrim, a tile's foot gradient, a scene's
+    shade), and a logo whose opaque ink is less than a third LEGIBLE there (OKLab L ≥ 0.6, or a
+    saturated colour from L 0.45) is drawn as its grey luminance negative (`LogoInk.negative`: dark
+    ink light, light strokes dark) — The Eminence in Shadow's black type, Mushoku Tensei's bronze,
+    ONE PIECE, DAN DA DAN, Jujutsu Kaisen; One Punch Man's red and Slime's blue keep their colour.
+    It was a flat white SILHOUETTE until 19 Oct, and that was the "white patch" in the hero
+    ("sometimes the logo becomes too white that it just appears like a white patch", owner):
+    ONE PIECE's mostly-dark logo with its inner detail became one white shape under a white glow
+    of the same silhouette. Two more rules came with it: a PLATE (three opaque corners, or nine
+    tenths opaque — a logo with its own background) is not drawn as a logo at all, the name is set
+    in type (`ArtworkLogo.typedName`); and a white, grey or darkened logo stands in a dark SHADE
+    halo (`LogoHalo.Kind.shade`), only coloured ink keeps its glow. `-verifyLogos 1` (DEBUG) prints
+    every library logo's reading (`LOGO … | DARK|PLATE|NEUTRAL|COLOUR`).
   - **The page sits in the show's hue** ("maybe add subtle gradient too", owner): `HomeGround` — the
     scrim lands on `DetailTint.ground(tint, groundTopLightness)` and the page eases to canvas over
     520 pt, one faint pool of the tint; both bars' grounds are WINDOWS onto that ground
@@ -465,9 +541,9 @@ to `news:` with every social row, in one transaction, when research adopts the p
 - **Today is the feed (25 Sep — the build brief's decisions are final; ios-spec's iD1–iD21 are the
   ones this build added; since 26 Sep it is the FEED tab, not the landing — see Home above).** `FeedView` (Features/Feed) is the Today root: `FeedHeader` (the leading
   account disc → the Profile sheet, which is the ONLY way into Profile — settings, sign-out and
-  account deletion live there; the centred wordmark → scroll to top; the bell → `ActivitySheet`),
-  the Following / For you tabs, the stories tray, then the server's posts (`GET /me/feed`) with
-  Suggested, `CaughtUpMarker` and Trending inserted by RULE in the memoised composer
+  account deletion live there; the centred title "Feed" → scroll to top; the bell → `ActivitySheet`),
+  the stories tray, then the server's Following posts (`GET /me/feed`) with `CaughtUpMarker` (and,
+  for an empty account or an older server, Trending) inserted by RULE in the memoised composer
   (`FeedComposer`, `AppModel.feedRows` / `feedPhase` / `freshPosts` / `storyReels` — never composed
   in a body). TodayView, `RecapDigest` and the Recap, the billboard hero, the Up next shelf and the
   calm / trending openings are DELETED (git keeps them); `ForYouViews` moved to Discover, now its
@@ -524,8 +600,8 @@ to `news:` with every social row, in one transaction, when research adopts the p
     `"today.heroTint"` so the stored value carries over, iD18).
   - Sign-out (`clearFeedAndSocial`) deletes `feed-cache.json`, `social-pending.json`, the persisted
     focal rects (`subject-focus-v1.json`) and the retired recap's two `UserDefaults` keys.
-  - Capture flags (DEBUG, read once per screen in `Features/Feed/FeedCapture.swift`): `-feedTab
-    foryou`, `-feedAnchor top|stories|suggested|caughtup|trending|<post id prefix>`, `-feedSkeleton 1`,
+  - Capture flags (DEBUG, read once per screen in `Features/Feed/FeedCapture.swift`):
+    `-feedAnchor top|stories|caughtup|trending|<post id prefix>`, `-feedSkeleton 1`,
     `-feedPinHeader 1`, `-feedStory first|<franchiseId>` + `-feedStoryFrame N` (clock frozen),
     `-feedMedia first`, `-feedTrailer inline|full` (the first trailer post, played as a tap does,
     then full screen), `-feedThread first|<postId>` + `-feedThreadAnchor replies|sources`,
@@ -535,10 +611,27 @@ to `news:` with every social row, in one transaction, when research adopts the p
     select, open, anchor or freeze — never fabricate. `-todayDemo` still shapes the library in
     `DemoLibrary` (useful for stories); `-todayAnchor`, `-calmDemo`, `-recapDemo`, `-deckPage`,
     `-forYouStage` and `-toastDemo upnext` went with TodayView. `Tools/perf/flow.py` drives the feed
-    (the tray, the scroll, the Suggested anchor, the story viewer at rest).
+    (the tray, the scroll, the story viewer at rest).
+  - **The feed is FOLLOWING ONLY, with no logo, and it breathes (16 Oct: "Feed screen doesn't need
+    For You as it is already present in the search. Also the Feed screen feels denser and not as
+    airy and pleasing to scroll through as X… We also don't need to show the previously logo in the
+    feed screen", owner).** For you lives in Discover alone: the pager of two pages, `FeedTabsRow`,
+    `pageProgress` / `activate`, `-feedTab foryou` and the For you `tab:` / Add path on
+    `FeedPostRow` are gone, and so is **Suggested for you** between the posts (it was the
+    recommender's picks — Discover's For you again); For you is still LOADED behind Following,
+    posts only, because a trending show's page reads its posts from it (`showPosts`). The header is
+    ONE row in the roots' family (`RootHeaderRow`'s anatomy: the account disc, "Feed" centred in
+    `bodyEmphasis` — a tap scrolls to the top — and the bell) over the roots' veil (`EdgeVeil`), no
+    rule; `FeedHeader.height` = `headerRow` (44, was 88 + a pixel). The air, before → after:
+    `FeedMetrics.inset` 10 → 16 (the gutter — the media ran to 10 pt of the glass), `avatar` 44 →
+    40, `gap` 8 → 10 (the column at 66, 311 wide), `rowTop` 12 → 16, `rowBottom` 10 → 12;
+    `FeedPostLayout.sentenceTop` 1 → 2, `noteTop` 6 → 8, `mediaTop` 12 → 14, `barTop` 6 → 8; the
+    tray 8 / 12 → 12 / 12, module titles 14 / 6 → 20 / 10, the chart's foot 16 → 20, CaughtUp 30 →
+    36, a notice 8 → 12, a folded row 4 → 8. These metrics are shared by the post page, replies,
+    Activity, Saved and the show page's posts, which open with them.
   - **The X pass (25 Sep, after the owner used the build: "the battle tested UX of X is not
-    replicated properly"; X was explored on the owner's iPhone).** Following / For you are PAGES of
-    a real pager (a horizontal paging `ScrollView` of two vertical feeds, `.ignoresSafeArea` on the
+    replicated properly"; X was explored on the owner's iPhone; the pager and its tabs went on
+    16 Oct, above).** Following / For you were PAGES of a real pager (a horizontal paging `ScrollView` of two vertical feeds, `.ignoresSafeArea` on the
     pager and `safeAreaPadding` per page): each keeps its place, the tab underline and ink ride
     `FeedChromeState.pageProgress` while the finger drags (`FeedTabsRow`, the only reader), For you
     prefetches 1.2 s after Following has content, and `scrollPosition(id:)` does NOT place a pager
@@ -560,10 +653,10 @@ to `news:` with every social row, in one transaction, when research adopts the p
     post page's rule and the thread's sort row were both "replies", so the thread never loaded.
     On the feed the bottom bar scrolls away WITH the header, as X's does (see "The bottom bar is
     the APP'S"); everywhere else it stays. **The feed's bars are
-    FLUSH** — the header (`FeedHeaderGround`) and the post page's reply bar are opaque canvas, the
-    one exception to "bars are material": a material under canvas at 0.74 read as a lighter band
-    over the canvas with nothing under it ("the header area in both X and Instagram is flush",
-    owner). The story ring is Instagram's, measured off the owner's screenshot: 92 pt, a 3.4-pt
+    FLUSH** — the post page's reply bar is opaque canvas (the header was too, until 16 Oct: it is
+    the roots' `EdgeVeil` now, still with NO material), the one exception to "bars are material":
+    a material under canvas at 0.74 read as a lighter band over the canvas with nothing under it
+    ("the header area in both X and Instagram is flush", owner). The story ring is Instagram's, measured off the owner's screenshot: 92 pt, a 3.4-pt
     stroke, a 2.4-pt gap, an 80-pt photo (`FeedAvatar.ringWidth/ringGap`). **Every rule and
     border in the feed's surfaces is ONE PHYSICAL PIXEL** (`FeedMetrics.hairline` =
     `ThemeMetrics.pixel`; "The separator and borders are thicker than X. Everywhere") — 0.5 pt is a
@@ -675,7 +768,7 @@ to `news:` with every social row, in one transaction, when research adopts the p
     lines with "Show more"** (`FeedPostModel.note`, `ClampedNote`; the post page still draws the
     whole body) — "the Feed feels utterly cramped unlike X" (owner): every post was a
     280-character two-paragraph essay over a picture. The foot opened with it: `mediaTop` 12,
-    `barTop` 6, `rowBottom` 10 (were 9 / 2 / 6). A glyph sized to the text reads `feedMeta.font`.
+    `barTop` 6, `rowBottom` 10 (were 9 / 2 / 6; opened again on 16 Oct, above). A glyph sized to the text reads `feedMeta.font`.
   - **For you, drawn (4 Oct: "For you visuals look poorly built", owner).** The reason sits over the
     post as X's social-context line (`FeedPostRow.contextLine`, `Copy.Feed.context` → Discover's own
     `Copy.ForYou.reason`, the shows named as the library names them, a name that fits leading: "Like
@@ -692,6 +785,26 @@ to `news:` with every social row, in one transaction, when research adopts the p
   The bullets below that describe Today's billboard, its Up next shelf or its recap are the history
   of a retired screen; their rules still bind where the same view lives on (Detail's billboard and
   `HeroLockup`, `HeroBadge` on a story frame, `ProgressBanner` in Library).
+- **Bars are VEILS of the page's own ground, never slabs, and never a blur (16 Oct: "there is a
+  lot of top and bottom BLACK bars which are taking visible space", owner).** The tab bar's ground
+  and the roots' headers (Library's `RootHeader`, Schedule's band, the feed's header) are one view,
+  `EdgeVeil` (App/AppTabBar.swift): the page's ground (the reported `TabBarGroundKey` colour at the
+  foot, canvas at the top) whole from the screen's edge to the controls' line, about half where
+  the bar ends, gone `barEdgeRamp` past it — content runs to both edges and fades out before it
+  reaches a title or an icon; Reduce Transparency keeps the opaque band. **No material in it:** the
+  first cut blurred under the veil, and a blur over the dark canvas comes out LIGHTER than the
+  canvas — a grey band across the foot of every screen ("What is this trash?", owner, same day; the
+  25 Sep lesson). `overArt: true` is the light veil for a bar with a picture under it (Schedule's
+  header: the art shows through, dimmed). **Schedule's stage runs up under its bar at the
+  landing** (`ScheduleStageCard.bleed` = status band + row; the card is that much taller, pulled
+  up by a negative padding over an empty spacer the feed leaves before it, so its block's id still
+  lands where it did); scrolled back to the past, the bleed melts into the canvas
+  (`ScheduleCardTopFade`, opacity read in the render pass — its height includes the 32 pt the
+  picture stands above its frame, the lean and the settle) and the rows fade as they pass under
+  the bar (`ScheduleUnderBarFade`) instead of printing through the light veil. A page whose ground
+  is not the canvas must report the colour at its foot (the show page's `groundFoot`); Home draws
+  its own windows (`.clear`). Discover's header and `flushTopBar` (a search state) are still
+  opaque canvas over a canvas page.
 - **The bottom bar is the APP'S, and it is X's (25 Sep: "iOS nav is too large and it competes with
   the content too… We need a deep overhaul of this… Use X's not insta's", owner).** `AppTabBar`
   (App/AppTabBar.swift), measured off X on the owner's iPhone: a 49-pt band above the home
@@ -771,6 +884,16 @@ to `news:` with every social row, in one transaction, when research adopts the p
     Start rewatch; `pinnedAction`) beside the status capsule (`followPill`); a show you do not own
     gets the Add pill alone, and TRENDING on the badge when it is on the chart. The stage's height
     is Home's measure from the bar less the index row and the first section's title, which peek.
+  - **Where to watch is the lockup's last line (16 Oct: "where to watch has been removed which
+    adds to the chaos", owner)** — the stage had filed it in About, under Episodes and Trailers.
+    `stageWatch` → `StageWatchLine` (DetailEnrichment.swift), under the action row: up to three
+    services' 22-pt marks, "Watch on Netflix and Crunchyroll" (the count form "… and 2 more"
+    past two, and from the second at AX sizes), a chevron, the whole line opening `linkURL`; the
+    JustWatch attribution as its footnote. Only for `.available` with a service; once — not in
+    About, not in its facts row. Its read runs BESIDE the franchise's, and until it answers the
+    line's ROOM is held (the same view, hidden), so the answer fades in place and the lockup, the
+    index and the page never move; an empty answer that lands after the words are up keeps the
+    room empty rather than slide the lockup down. `-detailAnchor watch` lands on it at rest.
   - **ONE page, one scroll, an INDEX that pins** (`ShowIndexRow` — X's tab anatomy, but a tap
     SCROLLS to the section; the underline follows the section in view, written by the sections'
     geometry probes into `ShowIndexState` on change only, never per frame). **The index is the
@@ -778,7 +901,7 @@ to `news:` with every social row, in one transaction, when research adopts the p
     me?", owner, 9 Oct). Sections for a tracked show: Episodes (the season pill, the bar, "Mark
     all N…", the anchored list, Movies & extras) · Trailers (a headerless shelf of 300-pt cards
     playing in place; absent when there are none) · About (identity line, synopsis, themes, facts,
-    watch history, Because you finished, where to watch, cast, related) · Posts (the feed's rows,
+    watch history, Because you finished, cast, related) · Posts (the feed's rows,
     else one grey line). An untracked show: Trailers · About · Episodes · Posts. A push from Home
     or Schedule lands with the next episode's row in view under the billboard — no second screen,
     no scroll. **A `scrollTo` with a `UnitPoint` applies it to the TARGET's height too**: the
@@ -811,6 +934,17 @@ to `news:` with every social row, in one transaction, when research adopts the p
   short week ahead the card and its few rows were shorter than the screen, so the feed could not
   bring today to the top and the previous row's foot showed under the bar — room is added after
   the last row for the landing day to reach the top, and no more. `ScheduleLitCard` is deleted.
+  **The rows' TYPE is their own (16 Oct: "the way the font is being shown looks really cheapish",
+  owner):** they wore X's one-line name-and-handle pair (`feedName`/`feedMeta`, both 16) on two
+  lines, so the caption was as big as the name, a third size (`feedSmall` 13) carried the season and
+  the date's SemiBold 18 out-sized the name. Now four styles on one scale (`ScheduleTypeScale`,
+  ThemeTokens): `scheduleCaps` 11 (weekday, month, LATER), `scheduleMeta` Outfit Regular 14 (the line
+  in `textSecondary`, the part under it in `textTertiary`, a watched row's name and line in
+  `textTertiary`), `scheduleTitle` Outfit SemiBold 17 (two lines before an ellipsis), `scheduleDate`
+  Outfit Regular 22. Figures stay PROPORTIONAL (Outfit's `tnum` sets a 1 at 590 units against 347 —
+  "1 4"). Each block centres on the face by its INK, cap top to last baseline (`ScheduleInkCentre`):
+  the weekday's capitals stand level with the name's, the numeral's foot with the caption's baseline.
+  Rows are 8 pt above and below, a day's break 16. The month grid keeps `feedEyebrow`/`feedDate`.
 - **The Next up WIDGET (9 Oct, PreviouslyWidgets/NextUpWidget.swift).** The app writes
   `NextUpSnapshot` (Shared/NextUpSnapshot.swift, a member of both targets) into the App Group
   `group.com.cognipin.previously` — up to four shows: Home's drops, the quiet card's show, the
@@ -1685,8 +1819,9 @@ to `news:` with every social row, in one transaction, when research adopts the p
   pins share one. **The pairing (D in light mode) is not wired:** this Mac's ictool ignores every
   appearance specialisation (fill, image, hidden), so it cannot be rendered or verified here — do
   it in Icon Composer's editor. D's letter is printed ink (not glass), and D still washes out in
-  TINTED light — tinted must come from A. The feed header draws the glyph where the name was (X's
-  logo in the middle of the bar). The ribbon (`RibbonShape`, `RibbonFill`, `MarkGeometry`) is the
+  TINTED light — tinted must come from A. Home's header draws the glyph (X's logo in the middle of
+  the bar); the feed's did until 16 Oct ("we also don't need to show the previously logo in the
+  feed screen", owner) and now says "Feed". The ribbon (`RibbonShape`, `RibbonFill`, `MarkGeometry`) is the
   retired mark, kept only for the films behind `-splashDirection` and the old ident.
 - **The launch is the board FLIPPING to "P." (26 Sep — `SplashFlapFilm`, App/Splash/SplashFlap.swift; the
   default `SplashDirection.flap`).** Pure Core Animation, every move a keyframe track built once in
@@ -1756,7 +1891,7 @@ to `news:` with every social row, in one transaction, when research adopts the p
   `-detailTrailer inline|full` plays the first trailer in its card (then full screen) and `-detailOpenRelated N` opens the Nth
   related title — the way to photograph the show page when the simulator cannot be touched (on
   3 Sep System Events saw no Simulator window and `screencapture` was refused, so cliclick had
-  nothing to hit; `xcrun simctl io screenshot` still works). The feed's capture flags (`-feedTab`, `-feedAnchor`,
+  nothing to hit; `xcrun simctl io screenshot` still works). The feed's capture flags (`-feedAnchor`,
   `-feedStory`, `-feedThread`, …) are listed under "Today is the feed" — they are how the feed is
   photographed and scrolled when the input MCP is dead (`simctl` cannot scroll); `-recapDemo`,
   `-calmDemo` and `-todayAnchor` went with TodayView (25 Sep);

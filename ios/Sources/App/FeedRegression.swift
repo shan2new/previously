@@ -2,8 +2,8 @@
 import Foundation
 
 /// `-verifyFeed 1` (DEBUG): the feed's pure rules against fixtures shaped like the server's wire —
-/// the row composer (the caught-up marker, Suggested and Trending placed by rule, folds, hides,
-/// mutes, the notices, the offline copy), the post model's words, the reply length as the server
+/// the row composer (the caught-up marker and Trending placed by rule, folds, hides, mutes, the
+/// notices, the offline copy), the post model's words, the reply length as the server
 /// counts it, the notification routes, the window phrase, the stamp and the episode gate. No
 /// network, no account writes. Prints `FEED_VERIFY_PASS` or `FEED_VERIFY_FAIL <cases>`.
 ///
@@ -31,7 +31,7 @@ enum FeedRegression {
         func compose(_ res: FeedResponse?, tab: FeedTab = .following, fromCache: Bool = false,
                      failed: Bool = false, unavailable: Bool = false,
                      folds: [String: FeedFold] = [:], hidden: Set<String> = [], muted: Set<String> = [],
-                     recs: [String] = ["r1", "r2", "r3", "r4"], trending: [FranchiseSummary] = [],
+                     trending: [FranchiseSummary] = [],
                      libraryEmpty: Bool = false, online: Bool = true,
                      allows: @escaping (MediaSource) -> Bool = { _ in true }) -> [FeedRow] {
             var state = FeedTabState(response: res, fromCache: fromCache, loadedAt: now)
@@ -40,7 +40,7 @@ enum FeedRegression {
             if fromCache { state.response = res?.asCached() }
             return FeedComposer.rows(tab: tab, state: state, library: [], libraryIndex: { _ in nil },
                                      now: now, folds: folds, hidden: hidden,
-                                     muted: muted, recommendationKeys: recs, untrackedTrending: trending,
+                                     muted: muted, untrackedTrending: trending,
                                      libraryEmpty: libraryEmpty, online: online, allows: allows)
         }
         let f1 = { (id: String, fresh: Bool) in Self.post(id, fid: "fa", fresh: fresh, time: now - hour) }
@@ -60,18 +60,14 @@ enum FeedRegression {
         check(Audience.anime.filter == .anime && Audience.tv.filter == .tv && Audience.both.filter == .all,
               "a single audience fixes the scope")
 
-        // Two fresh, three not: the marker sits between the blocks; Suggested after the 3rd post.
+        // Two fresh, three not: the marker sits between the blocks. No module between the posts
+        // (16 Oct: Suggested for you left the feed with For you — Discover shelves the picks).
         let mixed = following([f1("n1", true), f1("n2", true), f1("o1", false), f1("o2", false), f1("o3", false)])
         check(mixed != nil, "fixture decodes")
         check(mixed?.posts.count == 5 && mixed?.franchises.count == 2, "posts and franchises decode")
         let a = compose(mixed)
-        check(ids(a) == ["post/n1", "post/n2", "caughtup", "post/o1", "suggested", "post/o2", "post/o3"],
-              "caught-up between the blocks, Suggested after the 3rd post: \(ids(a))")
-        if case .suggested(let keys)? = a.first(where: { $0.id == "suggested" }) {
-            check(keys == ["r1", "r2", "r3"], "Suggested carries at most three keys")
-        } else {
-            check(false, "Suggested present")
-        }
+        check(ids(a) == ["post/n1", "post/n2", "caughtup", "post/o1", "post/o2", "post/o3"],
+              "caught-up between the blocks, nothing else between the posts: \(ids(a))")
         if case .caughtUp(let since)? = a.first(where: { $0.id == "caughtup" }) {
             check(since == prev, "the marker is dated by the real previous visit")
         }
@@ -81,17 +77,17 @@ enum FeedRegression {
               } == ["n1", "n2"],
               "only the server's fresh posts are fresh")
 
-        // Four fresh, two not: the 3rd post is inside the fresh block, so Suggested moves after the marker.
+        // Four fresh, two not: the marker after the fourth, the fresh block whole.
         let longFresh = following([f1("n1", true), f1("n2", true), f1("n3", true), f1("n4", true),
                                    f1("o1", false), f1("o2", false)])
-        check(ids(compose(longFresh)) == ["post/n1", "post/n2", "post/n3", "post/n4", "caughtup", "suggested",
+        check(ids(compose(longFresh)) == ["post/n1", "post/n2", "post/n3", "post/n4", "caughtup",
                                           "post/o1", "post/o2"], "the fresh block is never split")
 
         // Everything fresh, or nothing: no marker.
         let allFresh = following([f1("n1", true), f1("n2", true), f1("n3", true)])
-        check(ids(compose(allFresh)) == ["post/n1", "post/n2", "post/n3", "suggested"], "all fresh: no marker")
+        check(ids(compose(allFresh)) == ["post/n1", "post/n2", "post/n3"], "all fresh: no marker")
         let noneFresh = following([f1("o1", false), f1("o2", false)])
-        check(ids(compose(noneFresh)) == ["post/o1", "post/o2", "suggested"], "none fresh: no marker, Suggested after the last")
+        check(ids(compose(noneFresh)) == ["post/o1", "post/o2"], "none fresh: no marker")
         let mixedNoVisit = response(tab: "following", posts: [f1("n1", true), f1("n2", true), f1("o1", false),
                                                               f1("o2", false), f1("o3", false)], prevOpenedAt: 0)
         check(ids(compose(mixedNoVisit)).contains("caughtup") == false, "no previous visit: no marker")
@@ -116,46 +112,47 @@ enum FeedRegression {
         check(compose(mixed, fromCache: true, online: true).first?.id != "notice/offlineCached", "online cache: no offline notice")
         check(compose(mixed, failed: true).first?.id == "notice/refreshFailed", "a failed refresh over content says so first")
 
-        // One post, none: Suggested still appears.
-        check(ids(compose(following([f1("o1", false)]))) == ["post/o1", "suggested"], "one post: Suggested after it")
-        check(ids(compose(following([]))) == ["empty/noPosts", "suggested"], "no posts: the empty row, then Suggested")
-        check(ids(compose(following([]), recs: [])) == ["empty/noPosts"], "no recommendations: no Suggested")
+        // One post, none.
+        check(ids(compose(following([f1("o1", false)]))) == ["post/o1"], "one post: the post alone")
+        check(ids(compose(following([]))) == ["empty/noPosts"], "no posts: the empty row alone")
 
         // The empty account: the empty state and the chart.
         let chart = summaries(["t1", "t2"])
         check(chart.count == 2, "trending fixture decodes")
         check(ids(compose(following([]), trending: chart, libraryEmpty: true)) == ["empty/emptyAccount", "trending"],
               "empty account: empty state, then Trending")
-        check(ids(compose(following([]), recs: [], libraryEmpty: true)) == ["empty/emptyAccount"],
+        check(ids(compose(following([]), libraryEmpty: true)) == ["empty/emptyAccount"],
               "empty account with no chart: the empty state alone")
 
         // Folds keep their place; hides and mutes leave.
         let three = following([f1("o1", false), f1("o2", false), post("o3", fid: "fb", time: now - 2 * hour)])
-        let folded = compose(three, folds: ["o1": .notInterested], hidden: ["o1", "o2"], recs: [])
+        let folded = compose(three, folds: ["o1": .notInterested], hidden: ["o1", "o2"])
         check(ids(folded) == ["fold/o1", "post/o3"], "a fold stays in place, a hidden post leaves: \(ids(folded))")
-        check(ids(compose(three, muted: ["fa"], recs: [])) == ["post/o3"], "a muted show's posts leave")
-        check(ids(compose(three, folds: ["o2": .muted(show: "Alpha")], muted: ["fa"], recs: [])) == ["fold/o2", "post/o3"],
+        check(ids(compose(three, muted: ["fa"])) == ["post/o3"], "a muted show's posts leave")
+        check(ids(compose(three, folds: ["o2": .muted(show: "Alpha")], muted: ["fa"])) == ["fold/o2", "post/o3"],
               "the post a mute came from folds in place")
 
-        // An older server (iD8): the notice and the modules, never a blank Today.
-        check(ids(compose(nil, unavailable: true, trending: chart)) == ["notice/unavailable", "suggested", "trending"],
-              "unavailable: notice, Suggested, Trending")
+        // An older server (iD8): the notice and the chart, never a blank Today.
+        check(ids(compose(nil, unavailable: true, trending: chart)) == ["notice/unavailable", "trending"],
+              "unavailable: notice, Trending")
         check(compose(nil).isEmpty, "no response yet: no rows")
 
         // MARK: Composer — For you
 
+        // Posts only (16 Oct): no screen draws For you as a feed any more — a trending show's page
+        // reads its posts — so its chart and its empty row are not composed.
         let forYouPosts = (1...6).map { Self.post("y\($0)", fid: "fa", fresh: true, time: now - Int64($0) * hour) }
         let forYou = response(tab: "foryou", posts: forYouPosts, prevOpenedAt: prev, trending: ["t1", "t2", "t3"])
         let fy = compose(forYou, tab: .forYou)
-        check(ids(fy) == ["post/y1", "post/y2", "post/y3", "post/y4", "post/y5", "trending", "post/y6"],
-              "For you: Trending after the 5th post, no Suggested: \(ids(fy))")
+        check(ids(fy) == ["post/y1", "post/y2", "post/y3", "post/y4", "post/y5", "post/y6"],
+              "For you: its posts and nothing else: \(ids(fy))")
         check(!fy.contains { row -> Bool in
                   if case .post(let m) = row { return m.fresh }
                   return false
               }, "For you has no fresh post")
         check(!ids(fy).contains("caughtup"), "For you has no marker")
         let fyEmpty = response(tab: "foryou", posts: [], prevOpenedAt: prev, trending: ["t1"])
-        check(ids(compose(fyEmpty, tab: .forYou)) == ["empty/forYouEmpty", "trending"], "For you empty: the empty row, then Trending")
+        check(compose(fyEmpty, tab: .forYou).isEmpty, "For you with no posts: no rows")
         check(Set(ids(fy)).count == fy.count, "row ids are unique")
 
         // MARK: The post model

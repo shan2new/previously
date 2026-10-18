@@ -79,6 +79,8 @@ TABS = [
     ("TabSchedule", "calendar"), ("TabScheduleFill", "calendar-filled"),
     ("TabLibrary", "library"), ("TabLibraryFill", "library-filled"),
     ("TabDiscover", "search"), ("TabDiscoverFill", "search-filled"),
+    # The directions' Discover (16 Oct, `Experience`): a compass — shows to find, not a search box.
+    ("TabCompass", "compass"), ("TabCompassFill", "compass-filled"),
 ]
 
 

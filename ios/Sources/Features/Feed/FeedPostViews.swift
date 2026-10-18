@@ -16,21 +16,25 @@ import UIKit
 // likes the post with Instagram's heart. Every post carries its menu on a long press (iD20).
 
 /// X's measured spacings inside a post, in one place.
+///
+/// 16 Oct, opened again ("the Feed screen feels denser and not as airy and pleasing to scroll
+/// through as X", owner — after 9 Oct's "utterly cramped" had opened the media and the foot): every
+/// gap in the column opens a step, with the row's own (`FeedMetrics.rowTop`/`rowBottom`) and its
+/// sides (`FeedMetrics.inset` 16, the app's gutter — the media ran to 10 pt of the glass).
 enum FeedPostLayout {
     /// The name line rises by Outfit's room above its capitals, so the name's top meets the
     /// avatar's top, as X's does (it sat 4⅓ pt under it).
     static let nameLift: CGFloat = 4
-    /// Name line → words.
-    static let sentenceTop: CGFloat = 1
-    /// Words → media (or the rumour's note). 9 Oct: 12 (was 9), with the bar and the row's foot
-    /// opened too — "the Feed feels utterly cramped unlike X" (owner); the packed foot (bar 2 pt
-    /// under the picture, 6 pt to the rule) read as one block from picture to picture.
-    static let mediaTop: CGFloat = 12
-    /// Media → action bar.
-    static let barTop: CGFloat = 6
-    /// Sentence → the research's note, and the lines the note gets in the timeline before "Show
-    /// more" (the post page draws it whole).
-    static let noteTop: CGFloat = 6
+    /// Name line → words: 2 (was 1), X's.
+    static let sentenceTop: CGFloat = 2
+    /// Words → media (or the rumour's note): 14 (12 since 9 Oct, 9 before).
+    static let mediaTop: CGFloat = 14
+    /// Media → action bar: 8 (6 since 9 Oct, 2 before). The bar's 44-pt targets centre its 17-pt
+    /// glyphs, so the picture's foot sits 21½ pt over the glyphs and the rule 25½ under them.
+    static let barTop: CGFloat = 8
+    /// Sentence → the research's note (8, was 6: a paragraph's break, not a wrapped line), and the
+    /// lines the note gets in the timeline before "Show more" (the post page draws it whole).
+    static let noteTop: CGFloat = 8
     static let noteLines = 2
     /// Inside the name line.
     static let nameSpacing: CGFloat = 4
@@ -41,10 +45,9 @@ enum FeedPostLayout {
     static let lineHeightLarge: CGFloat = 24.0 / 17.0
     /// The `···` sits 6 pt into the row's trailing inset, as X's does.
     static let menuTrailingPull: CGFloat = 6
-    /// The For you "Add" capsule: 26 pt tall, 14 pt of side padding (X's follow pill). It rides the
-    /// name line without growing it — 3 pt over it and under it — so a For you post's name, like a
-    /// Following one's, meets the avatar's top and its words sit where theirs do (at 30 it pushed
-    /// the line to 30 and both 5 and 10 pt down).
+    /// The "Add" capsule (`ShowAddCapsule`, the post page's author row): 26 pt tall, 14 pt of side
+    /// padding (X's follow pill). It rides its line without growing it — 3 pt over it and under it
+    /// (at 30 it pushed the line to 30).
     static let addHeight: CGFloat = 26
     static let addPadding: CGFloat = 14
     /// The double-tap heart over a picture.
@@ -56,14 +59,11 @@ enum FeedPostLayout {
 
 // MARK: - The row
 
-/// One post in a list. `Equatable` on what it shows (the model and the tab), applied with
-/// `.equatable()`, so a minute tick, a like elsewhere or the list re-composing does not rebuild a
-/// row whose post did not change. The action bar inside reads the social overlay itself, so a like
-/// re-evaluates one bar.
+/// One post in a list. `Equatable` on what it shows (the model), applied with `.equatable()`, so a
+/// minute tick, a like elsewhere or the list re-composing does not rebuild a row whose post did not
+/// change. The action bar inside reads the social overlay itself, so a like re-evaluates one bar.
 struct FeedPostRow: View, @MainActor Equatable {
     let model: FeedPostModel
-    /// For you's posts are about shows you do not track: the name line offers Add instead of `···`.
-    var tab: FeedTab = .following
     /// The feed's zoom namespace: the picture viewer and a trailer's full screen grow out of the post.
     var zoom: Namespace.ID? = nil
     let onOpen: () -> Void
@@ -76,7 +76,7 @@ struct FeedPostRow: View, @MainActor Equatable {
     var onMediaLoaded: (() -> Void)? = nil
 
     static func == (a: Self, b: Self) -> Bool {
-        a.model == b.model && a.tab == b.tab && a.zoom == b.zoom
+        a.model == b.model && a.zoom == b.zoom
     }
 
     var body: some View {
@@ -86,8 +86,8 @@ struct FeedPostRow: View, @MainActor Equatable {
             .accessibilityElement(children: .contain)
     }
 
-    /// X's social-context line: why this post is in For you, a small glyph under the avatar's
-    /// column and the reason on the words' axis.
+    /// X's social-context line: why a For you post is there (a trending show's page lists them), a
+    /// small glyph under the avatar's column and the reason on the words' axis.
     @ViewBuilder private var contextLine: some View {
         if let line = model.contextLine {
             HStack(spacing: FeedMetrics.gap) {
@@ -160,7 +160,7 @@ struct FeedPostRow: View, @MainActor Equatable {
     /// actions (the buttons below stay reachable by swiping too).
     private var textColumn: some View {
         VStack(alignment: .leading, spacing: 0) {
-            PostNameLine(model: model, suggested: tab == .forYou, onOpenShow: onOpenShow)
+            PostNameLine(model: model, onOpenShow: onOpenShow)
             Text(model.sentence)
                 .type(ThemeType.feedBody)
                 .foregroundStyle(ThemeColor.feedText)
@@ -177,8 +177,7 @@ struct FeedPostRow: View, @MainActor Equatable {
         .accessibilityLabel(model.accessibilityLabel)
         .accessibilityAddTraits(.isButton)
         .accessibilityAction(.default) { onOpen() }
-        .modifier(PostAccessibilityActions(model: model, suggested: tab == .forYou,
-                                           onComment: onComment, onOpenShow: onOpenShow))
+        .modifier(PostAccessibilityActions(model: model, onComment: onComment, onOpenShow: onOpenShow))
     }
 }
 
@@ -223,10 +222,9 @@ struct ClampedNote: View {
 }
 
 /// The row's named VoiceOver actions (spec §5.5): Like/Unlike, Save, Remind me, Reply (comments
-/// on), Share, Go to <show>, Not interested — and Add on a For you post.
+/// on), Share, Go to <show>, Not interested.
 private struct PostAccessibilityActions: ViewModifier {
     let model: FeedPostModel
-    let suggested: Bool
     let onComment: () -> Void
     let onOpenShow: () -> Void
 
@@ -248,16 +246,12 @@ private struct PostAccessibilityActions: ViewModifier {
             .accessibilityAction(named: Copy.Feed.share) {
                 SystemShare.present(model.shareURL.map { [$0 as Any, model.shareText as Any] } ?? [model.shareText as Any])
             }
-            .modifier(OptionalAction(name: Copy.Search.add,
-                                     enabled: suggested && !appModel.isInLibrary(model.post.franchiseId)) {
-                addFromFeed(model, appModel: appModel, onOpenShow: onOpenShow)
-            })
             .accessibilityAction(named: Copy.Feed.goTo(model.showName), onOpenShow)
             .accessibilityAction(named: Copy.Feed.notInterested) { appModel.hidePost(model) }
     }
 }
 
-/// For you's Add and its VoiceOver action open the same library choices as Search and Detail.
+/// Every Add on a post (`ShowAddCapsule`) opens the same library choices as Search and Detail.
 @MainActor
 func addFromFeed(_ model: FeedPostModel, appModel: AppModel, onOpenShow: () -> Void) {
     let id = model.post.franchiseId
@@ -297,9 +291,6 @@ struct FeedHairline: View {
 /// lines: the name, then installment · time.
 struct PostNameLine: View {
     let model: FeedPostModel
-    /// A For you post: a trailing Add capsule instead of the `···` menu (iD20 — the menu stays on
-    /// the long press).
-    let suggested: Bool
     let onOpenShow: () -> Void
 
     @Environment(AppModel.self) private var appModel
@@ -339,14 +330,10 @@ struct PostNameLine: View {
             .buttonStyle(.plain)
             .layoutPriority(1)
             Spacer(minLength: FeedPostLayout.nameSpacing)
-            if suggested {
-                ShowAddCapsule(model: model, onOpenShow: onOpenShow)
-            } else {
-                // Hosted: in a list that installs `postMenuHost` the `···` is a plain button and
-                // the list presents the one menu.
-                PostMenuButton(model: model, onOpenShow: onOpenShow, hosted: true)
-                    .padding(.trailing, -FeedPostLayout.menuTrailingPull)
-            }
+            // Hosted: in a list that installs `postMenuHost` the `···` is a plain button and the
+            // list presents the one menu.
+            PostMenuButton(model: model, onOpenShow: onOpenShow, hosted: true)
+                .padding(.trailing, -FeedPostLayout.menuTrailingPull)
         }
     }
 
@@ -580,7 +567,8 @@ struct FoldedPostRow: View {
             }
             .padding(.leading, ThemeMetrics.gutter)
             .padding(.trailing, ThemeSpace.x2)
-            .padding(.vertical, ThemeSpace.x1)
+            // 8 around the Undo's 44-pt target (4 until 16 Oct's air).
+            .padding(.vertical, ThemeSpace.x2)
             FeedHairline()
         }
         .transition(.opacity)

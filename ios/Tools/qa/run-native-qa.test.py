@@ -4,12 +4,14 @@ import importlib.util
 import io
 import json
 from pathlib import Path
+import plistlib
 import signal
 import subprocess
 import sys
 import tempfile
 import unittest
 from unittest.mock import patch
+from types import SimpleNamespace
 
 SOURCE = Path(__file__).with_name('run-native-qa.py')
 spec = importlib.util.spec_from_file_location('native_qa_runner', SOURCE)
@@ -46,6 +48,23 @@ class FakeProcess:
 
 
 class RunnerGuards(unittest.TestCase):
+    def test_files_exposure_is_limited_to_generated_qa_info(self):
+        with tempfile.TemporaryDirectory() as folder:
+            root = Path(folder)
+            resources = root / 'ios/Resources'
+            resources.mkdir(parents=True)
+            production = {'CFBundleDisplayName': 'Previously.', 'APIBaseURL': '$(API_BASE_URL)'}
+            source = resources / 'Info.plist'
+            source.write_bytes(plistlib.dumps(production))
+            original = source.read_bytes()
+            runner.prepare_qa_info(root)
+            self.assertEqual(source.read_bytes(), original)
+            qa = plistlib.loads((resources / 'QA-Info.plist').read_bytes())
+            self.assertTrue(qa['UIFileSharingEnabled'])
+            self.assertTrue(qa['LSSupportsOpeningDocumentsInPlace'])
+            self.assertEqual(qa['CFBundleDisplayName'], 'Previously QA')
+            self.assertEqual(qa['APIBaseURL'], '$(API_BASE_URL)')
+
     def test_native_write_log_requires_stable_operation_and_unique_sequence(self):
         with tempfile.TemporaryDirectory() as folder:
             log = Path(folder) / 'fixture.log'
@@ -91,10 +110,41 @@ class RunnerGuards(unittest.TestCase):
             app.write_text('changed source')
             self.assertNotEqual(runner.source_fingerprint(root), before)
 
+    def test_source_fingerprint_includes_shared_widget_storage_and_extension(self):
+        with tempfile.TemporaryDirectory() as folder:
+            root = Path(folder)
+            for name in ['ios/project.yml', 'ios/Tools/qa/fixture-server.mjs',
+                         'ios/Shared/NextUpSnapshot.swift', 'ios/Widgets/NextUpWidget.swift',
+                         'ios/Widgets/PreviouslyWidgets.entitlements']:
+                path = root / name
+                path.parent.mkdir(parents=True, exist_ok=True)
+                path.write_text('original')
+            for name in ['ios/Shared/NextUpSnapshot.swift', 'ios/Widgets/NextUpWidget.swift',
+                         'ios/Widgets/PreviouslyWidgets.entitlements']:
+                with self.subTest(path=name):
+                    path = root / name
+                    before = runner.source_fingerprint(root)
+                    path.write_text('changed privacy-critical input')
+                    self.assertNotEqual(runner.source_fingerprint(root), before)
+                    path.write_text('original')
+
+    def test_source_fingerprint_detects_dependency_pin_changes(self):
+        with tempfile.TemporaryDirectory() as folder:
+            root = Path(folder)
+            for name in ['ios/project.yml', 'ios/Tools/qa/fixture-server.mjs',
+                         'ios/Previously.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/Package.resolved']:
+                path = root / name
+                path.parent.mkdir(parents=True, exist_ok=True)
+                path.write_text('original')
+            before = runner.source_fingerprint(root)
+            path.write_text('changed SDK revision')
+            self.assertNotEqual(runner.source_fingerprint(root), before)
+
     def test_directed_qualification_includes_account_privacy_suites(self):
         suites = {selector.split('/')[-1] for selector in runner.DIRECTED_SUITES}
         self.assertEqual(suites, {'QAHarnessTests', 'AccountLocalStoreTests', 'RewatchStoreTests', 'PreviouslyDirectedTests',
-                                 'PreviouslyDeletionTests', 'PreviouslyAccountIsolationTests', 'MutationJournalTests', 'PreviouslyDurabilityTests', 'AccountDeletionRequestTests', 'ImportModelTests'})
+                                 'PreviouslyDeletionTests', 'PreviouslyAccountIsolationTests', 'MutationJournalTests', 'PreviouslyDurabilityTests', 'AccountDeletionRequestTests', 'ImportModelTests',
+                             'WidgetSnapshotTests', 'PreviouslyWidgetTests', 'ProgressAdmissionTests', 'PreviouslyAdmissionTests', 'AccountExportPreparationTests', 'PreviouslyFilesTests'})
         expected = runner.selected_test_cases(runner.DIRECTED_SUITES)
         for suite in suites:
             self.assertTrue(any(case[0] == suite for case in expected), suite)
@@ -120,6 +170,33 @@ class RunnerGuards(unittest.TestCase):
         self.assertFalse(runner.classify_result(receipt(cases), 0, set())['passed'])
         self.assertFalse(runner.classify_result('{"didError":false}', 0, expected)['passed'])
 
+    def test_primary_result_supplies_swift_testing_names_missing_from_cli(self):
+        expected = {('PreviouslyWidgetTests', 'testLogout'), ('WidgetSnapshotTests', 'testOwnerFence')}
+        body = receipt([('PreviouslyWidgetTests', 'testLogout', 'passed')], passed=2)
+        self.assertFalse(runner.classify_result(body, 0, expected)['passed'])
+        primary = [{'suite': suite, 'test': name, 'status': 'passed'} for suite, name in expected]
+        self.assertTrue(runner.classify_result(body, 0, expected, primary)['passed'])
+        primary[1]['status'] = 'failed'
+        self.assertFalse(runner.classify_result(body, 0, expected, primary)['passed'])
+
+    def test_primary_and_cli_result_disagreement_fails_closed(self):
+        expected = {('PreviouslyWidgetTests', 'testLogout')}
+        body = receipt([('PreviouslyWidgetTests', 'testLogout', 'passed')])
+        primary = [{'suite': 'PreviouslyWidgetTests', 'test': 'testLogout', 'status': 'failed'}]
+        self.assertFalse(runner.classify_result(body, 0, expected, primary)['passed'])
+
+    def test_primary_tree_requires_unique_named_case_nodes(self):
+        case = {'nodeType': 'Test Case', 'nodeIdentifier': 'WidgetSnapshotTests/testOwnerFence()',
+                'result': 'Passed', 'durationInSeconds': 0.004}
+        tree = {'testNodes': [{'nodeType': 'Unit test bundle', 'children': [case]}]}
+        with patch.object(runner.subprocess, 'run', return_value=SimpleNamespace(stdout=json.dumps(tree))):
+            cases = runner.result_bundle_cases(Path('owned.xcresult'))
+        self.assertEqual(cases, [{'suite': 'WidgetSnapshotTests', 'test': 'testOwnerFence', 'status': 'passed', 'durationMs': 4}])
+        tree['testNodes'][0]['children'].append(case)
+        with patch.object(runner.subprocess, 'run', return_value=SimpleNamespace(stdout=json.dumps(tree))):
+            with self.assertRaises(ValueError):
+                runner.result_bundle_cases(Path('owned.xcresult'))
+
     def test_skip_or_failure_cannot_pass_despite_green_summary(self):
         expected = {('PreviouslyMonkeyTests', 'testSeededMonkey')}
         for status in ['skipped', 'failed']:
@@ -136,6 +213,16 @@ class RunnerGuards(unittest.TestCase):
             self.assertEqual(expected, {('PreviouslyDirectedTests', 'testFirst'), ('PreviouslyDirectedTests', 'testNewFault')})
             result = runner.classify_result(receipt([('PreviouslyDirectedTests', 'testFirst', 'passed')]), 0, expected)
             self.assertFalse(result['passed'])
+
+    def test_swift_testing_methods_are_required_in_named_receipt(self):
+        with tempfile.TemporaryDirectory() as folder:
+            root = Path(folder)
+            source = root / 'ios/UITests/WidgetSnapshotTests.swift'
+            source.parent.mkdir(parents=True)
+            source.write_text('@Suite struct WidgetSnapshotTests {\n @Test func testOwnerFence() async throws {}\n}\n')
+            expected = runner.selected_test_cases(['PreviouslyStorageTests/WidgetSnapshotTests'], root=root)
+            self.assertEqual(expected, {('WidgetSnapshotTests', 'testOwnerFence')})
+            self.assertFalse(runner.classify_result(receipt([]), 0, expected)['passed'])
 
     def test_cleanup_handles_process_exit_race_and_escalates_own_group(self):
         with patch.object(runner.os, 'killpg', side_effect=ProcessLookupError) as kill:
@@ -171,10 +258,12 @@ class RunnerGuards(unittest.TestCase):
         captured = io.StringIO()
         with tempfile.TemporaryDirectory() as folder:
             root = Path(folder)
+            (root / 'ios').mkdir()
+            (root / 'ios/project.yml').write_text('    CURRENT_PROJECT_VERSION: "17"\n')
             with patch.object(runner, 'ROOT', root), patch.object(sys, 'argv', ['runner', '--simulator-id', 'synthetic-simulator']):
                 with patch.object(runner.secrets, 'token_urlsafe', return_value=token), patch.object(runner.os, 'killpg'):
                     with patch.object(runner.subprocess, 'Popen', side_effect=fake_popen), patch.object(runner, 'source_fingerprint', return_value={'sha256': 'test', 'fileCount': 1}):
-                        with patch.object(runner.subprocess, 'run'), patch.object(runner.subprocess, 'check_output', side_effect=['revision', '']):
+                        with patch.object(runner.subprocess, 'run'), patch.object(runner, 'prepare_qa_info'), patch.object(runner.subprocess, 'check_output', side_effect=['revision', '']):
                             with patch.object(runner.urllib.request, 'urlopen', return_value=io.StringIO('{"fixtureVersion":"1"}')):
                                 with contextlib.redirect_stdout(captured), contextlib.redirect_stderr(captured):
                                     self.assertEqual(runner.main(), 1)
@@ -183,6 +272,8 @@ class RunnerGuards(unittest.TestCase):
             self.assertEqual(ledger['status'], 'failed')
             self.assertTrue(ledger['fixtureStopped'])
             self.assertEqual(ledger['runs'][0]['exitCode'], 124)
+            self.assertEqual(ledger['invocation']['sourceBuildNumber'], '17')
+            self.assertEqual(ledger['invocation']['requestedSuite'], 'smoke')
             self.assertNotIn(token, captured.getvalue())
             for evidence in root.rglob('*.json'):
                 self.assertNotIn(token, evidence.read_text())
@@ -194,10 +285,12 @@ class RunnerGuards(unittest.TestCase):
         processes = iter([fixture, native])
         with tempfile.TemporaryDirectory() as folder:
             root = Path(folder)
+            (root / 'ios').mkdir()
+            (root / 'ios/project.yml').write_text('    CURRENT_PROJECT_VERSION: "17"\n')
             with patch.object(runner, 'ROOT', root), patch.object(sys, 'argv', ['runner', '--simulator-id', 'synthetic-simulator']):
                 with patch.object(runner.secrets, 'token_urlsafe', return_value=token), patch.object(runner.os, 'killpg') as kill:
                     with patch.object(runner.subprocess, 'Popen', side_effect=lambda *args, **kwargs: next(processes)), patch.object(runner, 'source_fingerprint', return_value={'sha256': 'test', 'fileCount': 1}):
-                        with patch.object(runner.subprocess, 'run'), patch.object(runner.subprocess, 'check_output', side_effect=['revision', '']):
+                        with patch.object(runner.subprocess, 'run'), patch.object(runner, 'prepare_qa_info'), patch.object(runner.subprocess, 'check_output', side_effect=['revision', '']):
                             with patch.object(runner.urllib.request, 'urlopen', return_value=io.StringIO('{"fixtureVersion":"1"}')):
                                 with contextlib.redirect_stdout(io.StringIO()), self.assertRaises(SystemExit) as raised:
                                     runner.main()

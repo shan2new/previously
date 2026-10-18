@@ -7,6 +7,7 @@ import json
 import math
 import os
 from pathlib import Path
+import plistlib
 import re
 import secrets
 import signal
@@ -22,6 +23,7 @@ CLI_PACKAGE = 'xcodebuildmcp@2.7.0'  # Verified installed CLI and structured tes
 DIRECTED_SUITES = [
     'PreviouslyUITests/QAHarnessTests',
     'PreviouslyUITests/AccountLocalStoreTests',
+    'PreviouslyUITests/AccountExportPreparationTests',
     'PreviouslyUITests/AccountDeletionRequestTests',
     'PreviouslyUITests/ImportModelTests',
     'PreviouslyUITests/MutationJournalTests',
@@ -30,21 +32,41 @@ DIRECTED_SUITES = [
     'PreviouslyUITests/PreviouslyDeletionTests',
     'PreviouslyUITests/PreviouslyAccountIsolationTests',
     'PreviouslyUITests/PreviouslyDurabilityTests',
+    'PreviouslyStorageTests/WidgetSnapshotTests',
+    'PreviouslyUITests/PreviouslyWidgetTests',
+    'PreviouslyUITests/ProgressAdmissionTests',
+    'PreviouslyUITests/PreviouslyAdmissionTests',
+    'PreviouslyUITests/PreviouslyFilesTests',
 ]
 
 
 def source_fingerprint(root=ROOT):
-    paths = [path for directory in ['ios/Sources', 'ios/UITests']
+    paths = [path for directory in ['ios/Sources', 'ios/Shared', 'ios/Widgets', 'ios/UITests']
              for path in (root / directory).rglob('*') if path.is_file()]
     paths.extend(root / name for name in ['ios/project.yml', 'ios/Tools/qa/fixture-server.mjs'])
-    manifest = root / 'ios/Resources/PrivacyInfo.xcprivacy'
-    if manifest.is_file():
-        paths.append(manifest)
+    for name in ['ios/Resources/PrivacyInfo.xcprivacy', 'ios/Resources/Info.plist',
+                 'ios/Resources/QA-Info.plist',
+                 'ios/Previously.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/Package.resolved']:
+        manifest = root / name
+        if manifest.is_file():
+            paths.append(manifest)
     digest = hashlib.sha256()
     for path in sorted(paths):
         digest.update(str(path.relative_to(root)).encode() + b'\0')
         digest.update(path.read_bytes() + b'\0')
     return {'sha256': digest.hexdigest(), 'fileCount': len(paths)}
+
+
+def prepare_qa_info(root=ROOT):
+    """Expose only the disposable QA app's Documents to the real system Files picker."""
+    resources = root / 'ios/Resources'
+    with (resources / 'Info.plist').open('rb') as source:
+        info = plistlib.load(source)
+    info.update(CFBundleDisplayName='Previously QA', UIFileSharingEnabled=True,
+                LSSupportsOpeningDocumentsInPlace=True)
+    # XcodeGen owns the production source. Never add sharing flags to its normal plist.
+    with (resources / 'QA-Info.plist').open('wb') as destination:
+        plistlib.dump(info, destination, sort_keys=False)
 
 
 def coverage_summaries(body):
@@ -157,11 +179,11 @@ def selected_test_cases(selected, root=ROOT):
     expected = set()
     for selector in selected:
         parts = selector.split('/')
-        if len(parts) != 2 or parts[0] != 'PreviouslyUITests':
-            raise RuntimeError('QA selection must name an explicit PreviouslyUITests class.')
+        if len(parts) != 2 or parts[0] not in ['PreviouslyUITests', 'PreviouslyStorageTests']:
+            raise RuntimeError('QA selection must name an explicit QA test target and suite.')
         suite = parts[1]
         source = root / 'ios/UITests' / f'{suite}.swift'
-        methods = re.findall(r'^\s*func\s+(test\w+)\s*\(', source.read_text(), re.MULTILINE)
+        methods = re.findall(r'^\s*(?:@Test\s+)?func\s+(test\w+)\s*\(', source.read_text(), re.MULTILINE)
         if not methods:
             raise RuntimeError(f'No explicit tests were discovered for {suite}.')
         expected.update((suite, method) for method in methods)
@@ -170,7 +192,35 @@ def selected_test_cases(selected, root=ROOT):
     return expected
 
 
-def classify_result(body, exit_code, expected):
+def result_bundle_cases(path):
+    """Read named cases from Apple's result artifact, including Swift Testing unit bundles.
+
+    The pinned MCP CLI's summary counts Swift Testing but its flattened case list currently
+    omits that bundle. Reading the primary artifact preserves the per-case requirement.
+    """
+    developer = Path(os.environ.get('DEVELOPER_DIR', '/Applications/Xcode.app/Contents/Developer'))
+    command = [str(developer / 'usr/bin/xcresulttool'), 'get', 'test-results', 'tests',
+               '--path', str(path), '--compact']
+    result = subprocess.run(command, check=True, capture_output=True, text=True, timeout=30)
+    tree = json.loads(result.stdout)
+    cases = []
+    def visit(node):
+        if node.get('nodeType') == 'Test Case':
+            identifier = node['nodeIdentifier']
+            suite, method = identifier.rsplit('/', 1)
+            cases.append({'suite': suite, 'test': method.removesuffix('()'),
+                          'status': node.get('result', 'unknown').lower(),
+                          'durationMs': round(node.get('durationInSeconds', 0) * 1000)})
+        for child in node.get('children', []):
+            visit(child)
+    for node in tree['testNodes']:
+        visit(node)
+    if not cases or len({(item['suite'], item['test']) for item in cases}) != len(cases):
+        raise ValueError('Primary result has no cases or repeats a case identifier.')
+    return cases
+
+
+def classify_result(body, exit_code, expected, primary_cases=None):
     """Fail closed unless every selected test has a named, passed receipt."""
     answer = {'passed': False, 'counts': {}, 'testCases': [],
               'expectedTests': sorted('/'.join(case) for case in expected)}
@@ -182,6 +232,13 @@ def classify_result(body, exit_code, expected):
         cases = data['testCases']
         if not isinstance(counts, dict) or not isinstance(cases, list):
             raise TypeError('invalid structured fields')
+        if primary_cases is not None:
+            primary = {(c['suite'], c['test']): c['status'] for c in primary_cases}
+            for case in cases:
+                key = (case['suite'].split('/')[-1].split('.')[-1], case['test'].removesuffix('()'))
+                if primary.get(key) != case['status']:
+                    raise ValueError('Tool and primary result disagree about a case.')
+            cases = primary_cases
         if any(type(counts.get(key)) is not int or counts[key] < 0 for key in ['passed', 'failed', 'skipped']):
             raise TypeError('invalid count')
         answer.update(counts=counts, testCases=cases)
@@ -241,7 +298,9 @@ def main():
 
     if args.only_suite and args.suite != 'directed':
         parser.error('--only-suite is valid only with --suite directed.')
-    directed_selection = ['PreviouslyUITests/' + name for name in args.only_suite] if args.only_suite else DIRECTED_SUITES
+    targets_by_suite = {item.split('/')[-1]: item for item in DIRECTED_SUITES}
+    targets_by_suite['PreviouslyTrailerTests'] = 'PreviouslyUITests/PreviouslyTrailerTests'
+    directed_selection = [targets_by_suite[name] for name in args.only_suite] if args.only_suite else DIRECTED_SUITES
 
     stamp = dt.datetime.now(dt.timezone.utc).strftime('%Y%m%dT%H%M%S%fZ')
     output = ROOT / 'ios/Tools/qa/.runs' / stamp
@@ -276,8 +335,18 @@ def main():
         if not ready:
             raise RuntimeError('Owned fixture did not become ready.')
         subprocess.run(['xcodegen', 'generate'], cwd=ROOT / 'ios', check=True)
+        prepare_qa_info(ROOT)
         ledger['revision'] = subprocess.check_output(['git', 'rev-parse', 'HEAD'], cwd=ROOT, text=True).strip()
         ledger['dirty'] = bool(subprocess.check_output(['git', 'status', '--porcelain'], cwd=ROOT, text=True))
+        build_numbers = re.findall(r'^\s*CURRENT_PROJECT_VERSION:\s*"?(\d+)"?\s*$',
+                                   (ROOT / 'ios/project.yml').read_text(), re.MULTILINE)
+        if len(build_numbers) != 1:
+            raise RuntimeError('The native project must declare one unambiguous source build number.')
+        ledger['invocation'] = {'requestedSuite': args.suite, 'onlySuites': args.only_suite or [],
+                                'seeds': seeds, 'durationSeconds': args.duration,
+                                'maxActions': args.max_actions, 'scheme': 'PreviouslyQA',
+                                'configuration': 'QA', 'bundleID': 'com.cognipin.previously.qa',
+                                'sourceBuildNumber': build_numbers[0]}
         ledger['sourceFingerprint'] = source_fingerprint()
         plans = []
         if args.suite in ('directed', 'all'):
@@ -297,7 +366,9 @@ def main():
                 'testRunnerEnv': {'PREVIOUSLY_QA_CONTROL_TOKEN': token, 'PREVIOUSLY_QA_BASE_URL': base,
                                   'PREVIOUSLY_QA_SEED': str(seed), 'PREVIOUSLY_QA_DURATION_SECONDS': str(duration),
                                   'PREVIOUSLY_QA_MAX_ACTIONS': str(args.max_actions)},
-                'extraArgs': ['-parallel-testing-enabled', 'NO', '-resultBundlePath', str(output / f'{name}.xcresult')]
+                'extraArgs': ['-jobs', '2', '-parallel-testing-enabled', 'NO',
+                              '-disableAutomaticPackageResolution', '-onlyUsePackageVersionsFromResolvedFile',
+                              '-resultBundlePath', str(output / f'{name}.xcresult')]
                              + ['-only-testing:' + item for item in selected]
             }
             # Keep tool output off the console and redact the ephemeral control token before saving.
@@ -307,8 +378,18 @@ def main():
                 raw.seek(0)
                 body = raw.read().replace(token, '[redacted-control-token]')
             (output / f'{name}.json').write_text(body)
-            classification = classify_result(body, exit_code, expected)
+            primary_error = None
+            try:
+                primary_cases = result_bundle_cases(output / f'{name}.xcresult')
+                (output / f'{name}-named-cases.json').write_text(json.dumps(primary_cases, indent=2) + '\n')
+            except (OSError, ValueError, KeyError, TypeError, subprocess.SubprocessError) as error:
+                primary_cases = None
+                primary_error = 'Primary result cases could not be verified.'
+            classification = classify_result(body, exit_code, expected, primary_cases)
             passed = classification.pop('passed')
+            if primary_error:
+                passed = False
+                classification['primaryResultError'] = primary_error
             coverage = coverage_summaries(body)
             mutation_audit = mutation_log_audit(output / 'fixture.log')
             fingerprint = source_fingerprint()

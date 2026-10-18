@@ -7,3 +7,5 @@ DerivedData/
 *.xcuserstate
 xcuserdata/
 .swiftpm/
+# Generated QA-only plist; production Info.plist stays owned by XcodeGen.
+Resources/QA-Info.plist

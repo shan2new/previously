@@ -35,7 +35,7 @@ final class PreviouslyMonkeyTests: XCTestCase {
                     try driver.navigate(tab)
                 } else {
                     driver.record("navigate", "qa.tab.\(tab)", "unavailable", "No counted coverage for a hidden control.")
-                    try driver.dismissKeyboard()
+                    try driver.leaveSearch()
                     if let scroller = driver.visibleScroller() { scroller.swipeDown() }
                 }
             } else if bucket < 70 {
@@ -65,13 +65,13 @@ final class PreviouslyMonkeyTests: XCTestCase {
                     let fieldID = "qa.search.field"
                     if driver.isAvailable(fieldID) || driver.isAvailable("qa.search.open") {
                         try driver.replaceText(query, in: fieldID)
-                        try driver.dismissKeyboard()
+                        try driver.leaveSearch()
                     } else {
                         driver.record("search", fieldID, "unavailable", "Search selector was not ready; query was not typed.")
                     }
                 } else {
                     driver.record("search", "qa.tab.discover", "unavailable", "Discover was obscured.")
-                    try driver.dismissKeyboard()
+                    try driver.leaveSearch()
                 }
             } else {
                 if driver.isAvailable("qa.profile.open") {
@@ -86,7 +86,7 @@ final class PreviouslyMonkeyTests: XCTestCase {
             try driver.require("qa.account.fixture-a")
         }
 
-        try driver.dismissKeyboard()
+        try driver.leaveSearch()
         try driver.openAnime()
         try driver.assertProgress(expectedProgress)
         let final = try await driver.oracle.state("fixture-a")

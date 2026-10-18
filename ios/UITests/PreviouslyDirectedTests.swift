@@ -223,7 +223,7 @@ final class PreviouslyDirectedTests: XCTestCase {
         try driver.replaceText("QA", in: "qa.search.field")
         try driver.require("qa.search.result.qa-anime")
         driver.record("assert-long-query-replacement", "qa.search.field", "passed", "120 characters entered exactly twice, then explicitly cleared for QA.")
-        try driver.dismissKeyboard()
+        try driver.leaveSearch()
         try driver.navigate("library")
         let after = try await driver.oracle.state("fixture-a")
         XCTAssertEqual(after.progress, before.progress)

@@ -1,15 +1,15 @@
 import SwiftUI
 
-/// Today is the feed (brief §1–2): X's header and tabs, the stories tray, the posts the server
-/// composed (`GET /me/feed`), Suggested for you, "You're all caught up", and For you's Trending.
+/// Today is the feed (brief §1–2): the header, the stories tray, the posts the server composed for
+/// Following (`GET /me/feed`) and "You're all caught up". ONE timeline since 16 Oct — "Feed screen
+/// doesn't need For You as it is already present in the search" (owner): Discover's For you is the
+/// only one, and the pager of two rooms, its tab row and Suggested for you went with this one.
 ///
 /// The rules this screen keeps (spec §2.2, §5.1):
-///   • the two rooms are PAGES of a real pager, X's: the finger drags a page and the tab underline
-///     rides with it, and each page keeps its own place (the list never swaps its rows);
-///   • each page is a `LazyVStack` of `FeedRow`s the MODEL composed and memoised — this body never
-///     filters, sorts or formats a post;
-///   • the scroll offset is never screen state — `FeedChromeState` is written by the probes and
-///     read only by the header, the tab row and the pill;
+///   • the timeline is a `LazyVStack` of `FeedRow`s the MODEL composed and memoised — this body
+///     never filters, sorts or formats a post;
+///   • the scroll offset is never screen state — `FeedChromeState` is written by the probe and
+///     read only by the header, the pill and the app's bar;
 ///   • every cover and sheet is dismissed by the re-tap and the notification route, and none can
 ///     appear after the reader has left (the story's load is a cancellable task);
 ///   • the launch hands off on the first post's picture (`LaunchHandoff.artReady`), never on the
@@ -19,7 +19,6 @@ struct FeedView: View {
     let onOpenRoute: (FeedRoute) -> Void
     let onOpenLibrary: (WatchStatus) -> Void
     let onAddShow: () -> Void
-    let onOpenRecommendations: () -> Void
     /// Bumped when Today is re-selected: every cover and sheet goes, and the feed goes to its top.
     let topSignal: Int
     /// Bumped by the notification route: every cover and sheet goes (the route then pushes).
@@ -39,12 +38,8 @@ struct FeedView: View {
     /// The feed is the screen in front (not under a push, not on another tab).
     @State private var onScreen = false
 
-    /// The page in front — where the pager has settled.
-    @State private var tab: FeedTab = FeedCapture.initialTab
-    /// The pager's own position (`scrollPosition(id:)`): a tab tap writes it, a swipe settles it.
-    @State private var pagerTab: FeedTab? = FeedCapture.initialTab
-    /// Each page's scroll proxy (the wordmark and the re-tap scroll the page in front to its top).
-    @State private var proxies: [FeedTab: ScrollViewProxy] = [:]
+    /// The timeline's scroll proxy (the title, the re-tap and the pill scroll it to its top).
+    @State private var proxy: ScrollViewProxy?
     /// The fresh posts the pill has already been dismissed for (by its tap, or by a pull): it comes
     /// back only for posts that were not among them.
     @State private var pillDismissedFor: Set<String> = []
@@ -72,7 +67,7 @@ struct FeedView: View {
     @State private var afterCover: AfterCover?
     @State private var artMarked = false
     /// The skeleton's minimum hold (SkeletonGate's 240 ms delay + 320 ms floor), kept here because
-    /// the gate itself would wrap the rows in an eager ZStack. The page in front's only.
+    /// the gate itself would wrap the rows in an eager ZStack.
     @State private var skeletonHeld = false
     @State private var loadingSince: ContinuousClock.Instant?
     @State private var captureLanded = false
@@ -87,7 +82,7 @@ struct FeedView: View {
     }
 
     /// Scroll anchors that are not rows (the rows' own ids are anchors too: "post/<id>",
-    /// "caughtup", "suggested", "trending").
+    /// "caughtup", "trending").
     private enum Anchor {
         static let top = "top"
         static let stories = "stories"
@@ -102,26 +97,27 @@ struct FeedView: View {
     private static let storySpinFloor: Duration = .milliseconds(260)
     /// The beat between the close flight landing in a seen reel's bubble and the bubble leaving.
     private static let trayReleaseBeat: Duration = .milliseconds(220)
-    /// X keeps the other room warm: once Following is on screen, For you loads behind it.
+    /// Once Following is on screen, For you loads behind it — not for this screen (Discover owns
+    /// For you), for a trending show's page, which reads that show's posts from it (`showPosts`).
     private static let prefetchDelay: Duration = .milliseconds(1200)
 
     // MARK: - Body
 
     var body: some View {
-        let phase = appModel.feedPhase(tab)
+        let phase = appModel.feedPhase(.following)
         GeometryReader { geo in
             let insets = geo.safeAreaInsets
             ZStack(alignment: .top) {
                 // Flat, as X's is: the posts' pictures are the only colour on screen.
                 ThemeColor.canvas.ignoresSafeArea()
 
-                pager(size: geo.size, insets: insets)
+                timeline(height: geo.size.height, insets: insets)
 
                 newPostsPill
 
-                FeedHeader(selected: tab, chrome: chrome, unread: appModel.activityUnread,
+                FeedHeader(chrome: chrome, unread: appModel.activityUnread,
                            onProfile: { showProfile = true }, onActivity: openActivity, onTop: scrollToTop,
-                           onSelect: select, topInset: insets.top)
+                           topInset: insets.top)
             }
         }
         .background(ThemeColor.canvas.ignoresSafeArea())
@@ -138,10 +134,6 @@ struct FeedView: View {
         }
         // Nothing plays behind a cover, under a push, on another tab or in the background.
         .onChange(of: autoplayHeld, initial: true) { _, held in autoplay.suspend(held) }
-        .onChange(of: pagerTab) { _, next in
-            if let next, next != tab { tab = next }
-        }
-        .onChange(of: tab) { _, next in tabChanged(to: next) }
         .onChange(of: topSignal) { _, _ in
             dismissAll()
             scrollToTop()
@@ -156,14 +148,11 @@ struct FeedView: View {
         .task(id: isContent(appModel.feedPhase(.following))) { await prefetchForYou() }
         .onAppear {
             onScreen = true
-            appModel.currentFeedTab = tab
-            // Following's empty account and For you's Trending both draw the chart.
+            // The empty account draws the chart under its state.
             appModel.loadTrendingIfNeeded()
             if FeedCapture.openProfile { showProfile = true }
         }
-        // Following is loaded by the model after the visit stamp (iD3); a capture that opens on
-        // For you loads it here.
-        .task { if tab == .forYou { await appModel.loadFeed(.forYou) } }
+        // Following itself is loaded by the model, after the visit stamp (iD3).
         .onChange(of: appModel.libraryEmpty) { _, empty in
             if empty { appModel.loadTrendingIfNeeded() }
         }
@@ -182,60 +171,20 @@ struct FeedView: View {
         overlayOpen || !onScreen || scenePhase != .active
     }
 
-    // MARK: - The pager
+    // MARK: - The timeline
 
-    /// X's two rooms side by side. The pages run under the status band and the tab bar; each page
-    /// insets its own content (`safeAreaPadding`), so a page's rows scroll under both as one list
-    /// did.
-    private func pager(size: CGSize, insets: EdgeInsets) -> some View {
-        ScrollViewReader { reader in
-            ScrollView(.horizontal) {
-                HStack(spacing: 0) {
-                    ForEach(FeedTab.allCases, id: \.self) { t in
-                        page(t, height: size.height, insets: insets)
-                            .frame(width: size.width)
-                            .id(t)
-                    }
-                }
-                .scrollTargetLayout()
-                // The pager's probe: WRITES the tab row's progress, never screen state.
-                .background {
-                    Color.clear.onGeometryChange(for: CGFloat.self) { proxy in
-                        proxy.frame(in: .global).minX
-                    } action: { minX in
-                        guard size.width > 0 else { return }
-                        chrome.setPageProgress(-minX / size.width)
-                    }
-                }
-            }
-            .scrollTargetBehavior(.paging)
-            .scrollPosition(id: $pagerTab)
-            .scrollIndicators(.hidden)
-            .onScrollPhaseChange { _, next in autoplay.scrollMoving(next != .idle) }
-            .onAppear {
-                // `scrollPosition` does not place a pager on its first layout: a launch on For you
-                // (`-feedTab foryou`) is put there by hand, without motion.
-                guard tab != FeedTab.allCases.first else { return }
-                var still = Transaction()
-                still.disablesAnimations = true
-                withTransaction(still) { reader.scrollTo(tab, anchor: .leading) }
-            }
-        }
-        .ignoresSafeArea(.container, edges: .vertical)
-        .environment(\.feedAutoplay, autoplay)
-    }
-
-    /// One room: its own vertical list, its own place, its own pull.
-    private func page(_ t: FeedTab, height: CGFloat, insets: EdgeInsets) -> some View {
-        let phase = appModel.feedPhase(t)
-        let showSkeleton = phase == .loading || (t == tab && skeletonHeld) || FeedCapture.holdSkeleton
+    /// The one list. It runs under the status band and the tab bar and insets its own content
+    /// (`safeAreaPadding`), so the rows scroll on under the header's veil and the app's bar.
+    private func timeline(height: CGFloat, insets: EdgeInsets) -> some View {
+        let phase = appModel.feedPhase(.following)
+        let showSkeleton = phase == .loading || skeletonHeld || FeedCapture.holdSkeleton
         return ScrollViewReader { reader in
             ScrollView {
                 LazyVStack(alignment: .leading, spacing: 0) {
                     Color.clear.frame(height: FeedHeader.height).id(Anchor.top)
                     // Instagram's tray runs straight into the feed — no rule under it ("the
                     // bottom border after story is kind of bothering me", owner, 25 Sep).
-                    if t == .following { storiesTray }
+                    storiesTray
                     if showSkeleton {
                         SkeletonGate(isLoading: true) { FeedSkeletonStack() } content: { EmptyView() }
                     } else {
@@ -244,10 +193,10 @@ struct FeedView: View {
                             EmptyView()
                         case .errorNoCache(let offline):
                             EmptyState(offline ? .feedOfflineNoData : .feedServerNoCache, prominence: .major,
-                                       primary: { Task { await appModel.refreshFeed(t) } })
+                                       primary: { Task { await appModel.refreshFeed(.following) } })
                                 .centredState(contentH: max(0, height - FeedHeader.height))
                         case .content:
-                            rowList(t)
+                            rowList
                         }
                     }
                 }
@@ -256,7 +205,7 @@ struct FeedView: View {
                     Color.clear.onGeometryChange(for: CGFloat.self) { proxy in
                         proxy.frame(in: .global).minY
                     } action: { minY in
-                        chrome.track(insets.top - minY, page: t)
+                        chrome.track(insets.top - minY)
                     }
                 }
             }
@@ -267,11 +216,13 @@ struct FeedView: View {
             .laneClearance(appModel)
             .onScrollPhaseChange { _, next in
                 autoplay.scrollMoving(next != .idle)
-                if next == .idle { chrome.settle(page: t) }
+                if next == .idle { chrome.settle() }
             }
-            .previouslyRefreshable { await pullToRefresh(t) }
-            .onAppear { proxies[t] = reader }
+            .previouslyRefreshable { await pullToRefresh() }
+            .onAppear { proxy = reader }
         }
+        .ignoresSafeArea(.container, edges: .vertical)
+        .environment(\.feedAutoplay, autoplay)
     }
 
     // MARK: - Pieces
@@ -283,10 +234,14 @@ struct FeedView: View {
     @ViewBuilder
     private var storiesTray: some View {
         let reels = trayList
-        if !reels.isEmpty {
+        // The directions (`Experience.doors`): the feed is news. "Episode N is out" is Home's fact,
+        // and the tray was the sixth place it was drawn.
+        if !reels.isEmpty, !appModel.experience.doors {
+            // Air above and below (16 Oct, "denser and not as airy… as X", owner): 12 under the
+            // header (was 8), 12 over the first post, whose own top adds 16 more.
             StoryTray(reels: reels, loadingReelId: storyLoading, origins: storyOrigins, onOpen: openStory)
-                .padding(.top, ThemeSpace.x2)
-                .padding(.bottom, ThemeSpace.x3)
+                .padding(.top, TimelineLayout.trayTop)
+                .padding(.bottom, TimelineLayout.trayBottom)
                 .id(Anchor.stories)
                 .transition(.opacity)
         }
@@ -295,20 +250,20 @@ struct FeedView: View {
     /// The composed rows, each a direct child of the lazy stack (so only the realised ones are
     /// built). Keyed by `FeedRow.id`.
     @ViewBuilder
-    private func rowList(_ t: FeedTab) -> some View {
-        let rows = appModel.feedRows(t)
+    private var rowList: some View {
+        let rows = appModel.feedRows(.following)
         let firstPostId = rows.first { if case .post = $0 { return true } else { return false } }?.id
         ForEach(rows) { row in
-            rowView(row, in: t, isFirstPost: t == tab && row.id == firstPostId)
+            rowView(row, isFirstPost: row.id == firstPostId)
                 .transition(rowTransition)
         }
     }
 
     @ViewBuilder
-    private func rowView(_ row: FeedRow, in t: FeedTab, isFirstPost: Bool) -> some View {
+    private func rowView(_ row: FeedRow, isFirstPost: Bool) -> some View {
         switch row {
         case .post(let m):
-            FeedPostRow(model: m, tab: t, zoom: mediaZoom,
+            FeedPostRow(model: m, zoom: mediaZoom,
                         // An episode's post opens its show (where the episode is marked); every
                         // other post opens its page.
                         onOpen: {
@@ -327,12 +282,6 @@ struct FeedView: View {
             FoldedPostRow(fold: fold) { appModel.undoFold(postId: postId) }
         case .caughtUp(let since):
             CaughtUpMarker(since: since)
-        case .suggested(let keys):
-            let recs = appModel.visibleRecommendations
-            SuggestedModule(items: keys.compactMap { k in recs.first { $0.key == k } },
-                            reason: { appModel.spokenReason($0) },
-                            onOpen: openRecommendation,
-                            onSeeAll: onOpenRecommendations)
         case .trending(let items):
             TrendingModule(items: items) { id in onOpenDetail(id, "trending/\(id)") }
         case .empty(.emptyAccount):
@@ -346,29 +295,21 @@ struct FeedView: View {
                     .padding(.horizontal, ThemeMetrics.gutter)
                 FeedHairline()
             }
-        case .empty(.forYouEmpty):
-            Text(Copy.Feed.forYouEmpty)
-                .type(ThemeType.feedSubhead)
-                .foregroundStyle(ThemeColor.feedSecondary)
-                .multilineTextAlignment(.center)
-                .frame(maxWidth: .infinity)
-                .padding(.horizontal, ThemeMetrics.gutter)
-                .padding(.vertical, ThemeSpace.x8 + ThemeSpace.x2)
         case .notice(let kind):
             VStack(spacing: 0) {
-                notice(kind, in: t)
+                notice(kind)
                     .padding(.horizontal, ThemeMetrics.gutter)
-                    .padding(.vertical, ThemeSpace.x2)
+                    .padding(.vertical, TimelineLayout.noticeVertical)
                 FeedHairline()
             }
         }
     }
 
     @ViewBuilder
-    private func notice(_ kind: FeedNoticeKind, in t: FeedTab) -> some View {
+    private func notice(_ kind: FeedNoticeKind) -> some View {
         switch kind {
         case .refreshFailed:
-            InlineNotice(Copy.Feed.couldntRefresh, retry: { Task { await appModel.refreshFeed(t) } })
+            InlineNotice(Copy.Feed.couldntRefresh, retry: { Task { await appModel.refreshFeed(.following) } })
         case .unavailable:
             InlineNotice(Copy.Feed.unavailable, kind: .info)
         case .offlineCached:
@@ -376,7 +317,7 @@ struct FeedView: View {
         }
     }
 
-    /// Rows only fade in and out (a fold, a refresh); a page change is the pager's own motion.
+    /// Rows only fade in and out (a fold, a refresh).
     private var rowTransition: AnyTransition {
         if reduceMotion { return .opacity.animation(ThemeMotion.uiReduced) }
         return .asymmetric(insertion: .opacity, removal: .opacity.animation(ThemeMotion.uiDismiss))
@@ -386,37 +327,23 @@ struct FeedView: View {
     /// fresh posts it has not already been dismissed for.
     @ViewBuilder
     private var newPostsPill: some View {
-        if tab == .following {
-            let fresh = appModel.freshPosts(.following)
-            if !fresh.isEmpty, !fresh.allSatisfy({ pillDismissedFor.contains($0.id) }) {
-                FeedPillSlot(chrome: chrome) {
-                    NewPostsPill(posts: Array(fresh.prefix(3)), count: fresh.count) {
-                        dismissPill()
-                        scrollToTop()
-                    }
+        let fresh = appModel.freshPosts(.following)
+        if !fresh.isEmpty, !fresh.allSatisfy({ pillDismissedFor.contains($0.id) }) {
+            FeedPillSlot(chrome: chrome) {
+                NewPostsPill(posts: Array(fresh.prefix(3)), count: fresh.count) {
+                    dismissPill()
+                    scrollToTop()
                 }
-                .padding(.top, FeedHeader.height + ThemeSpace.x3)
-                .zIndex(2)
             }
+            .padding(.top, FeedHeader.height + ThemeSpace.x3)
+            .zIndex(2)
         }
     }
 
-    // MARK: - Pages
+    // MARK: - For you, behind
 
-    /// A tab tapped: the pager slides to it (and the underline rides the same motion).
-    private func select(_ t: FeedTab) {
-        withAnimation(ThemeMotion.pick(ThemeMotion.uiSnappy, reduceMotion: reduceMotion)) { pagerTab = t }
-    }
-
-    private func tabChanged(to next: FeedTab) {
-        appModel.currentFeedTab = next
-        chrome.activate(next)
-        if pagerTab != next { pagerTab = next }
-        Task { await appModel.loadFeed(next) }
-    }
-
-    /// Once Following has content, For you loads behind it — the finger can drag it into view at
-    /// any moment, and X's never opens on a skeleton. `loadFeed` skips a fresh or in-flight tab.
+    /// Once Following has content, For you loads behind it (`prefetchDelay` says why: a trending
+    /// show's page). `loadFeed` skips a fresh or in-flight tab.
     private func prefetchForYou() async {
         guard isContent(appModel.feedPhase(.following)) else { return }
         try? await Task.sleep(for: Self.prefetchDelay)
@@ -429,7 +356,7 @@ struct FeedView: View {
     private func scrollToTop() {
         chrome.reveal()
         withAnimation(ThemeMotion.pick(ThemeMotion.uiSnappy, reduceMotion: reduceMotion)) {
-            proxies[tab]?.scrollTo(Anchor.top, anchor: .top)
+            proxy?.scrollTo(Anchor.top, anchor: .top)
         }
     }
 
@@ -438,10 +365,10 @@ struct FeedView: View {
     }
 
     /// The pull: the pill goes (the reader is at the top, with the new posts in front of them),
-    /// then the library, the tab, Activity, reminders and hides refresh together.
-    private func pullToRefresh(_ t: FeedTab) async {
-        if t == .following { dismissPill() }
-        await appModel.refreshFeed(t)
+    /// then the library, the feed, Activity, reminders and hides refresh together.
+    private func pullToRefresh() async {
+        dismissPill()
+        await appModel.refreshFeed(.following)
     }
 
     // MARK: - Skeleton
@@ -486,7 +413,7 @@ struct FeedView: View {
     /// or no post among the first three rows.
     private func handOffIfNoArt(phase: FeedSurfacePhase) {
         guard phase != .loading, !artMarked else { return }
-        let firstRows = appModel.feedRows(tab).prefix(3)
+        let firstRows = appModel.feedRows(.following).prefix(3)
         let hasPost = firstRows.contains { if case .post = $0 { return true } else { return false } }
         if !hasPost { markArtReady() }
     }
@@ -535,10 +462,6 @@ struct FeedView: View {
                 onOpenRoute(.post(id: subject, focusCommentId: commentId))
             }
         }
-    }
-
-    private func openRecommendation(_ r: RecommendationItem) {
-        Task { if let id = await appModel.franchiseId(for: r) { onOpenDetail(id, "foryou/\(r.key)") } }
     }
 
     fileprivate func composeTarget(_ m: FeedPostModel) -> ComposeTarget {
@@ -641,7 +564,7 @@ struct FeedView: View {
         captureLanded = true
         try? await Task.sleep(for: FeedCapture.landingDelay)
         guard !Task.isCancelled else { return }
-        let posts: [FeedPostModel] = appModel.feedRows(tab).compactMap {
+        let posts: [FeedPostModel] = appModel.feedRows(.following).compactMap {
             if case .post(let m) = $0 { return m } else { return nil }
         }
         if let key = FeedCapture.story {
@@ -665,7 +588,7 @@ struct FeedView: View {
            let m = posts.first(where: { if case .trailer = $0.media { return true } else { return false } }),
            case .trailer(_, let video) = m.media {
             // On screen first — a trailer scrolled away stops — then the reader's tap.
-            proxies[tab]?.scrollTo("post/\(m.id)", anchor: UnitPoint(x: 0.5, y: 0.2))
+            proxy?.scrollTo("post/\(m.id)", anchor: UnitPoint(x: 0.5, y: 0.2))
             try? await Task.sleep(for: .seconds(1))
             autoplay.engage(m.id, video: video)
             if mode == "full" {
@@ -686,10 +609,10 @@ struct FeedView: View {
         if let key = FeedCapture.anchor {
             let target: String
             switch key {
-            case Anchor.top, Anchor.stories, "suggested", "caughtup", "trending": target = key
+            case Anchor.top, Anchor.stories, "caughtup", "trending": target = key
             default: target = posts.first(where: { $0.id.hasPrefix(key) }).map { "post/\($0.id)" } ?? key
             }
-            proxies[tab]?.scrollTo(target, anchor: UnitPoint(x: 0.5, y: 0.125))
+            proxy?.scrollTo(target, anchor: UnitPoint(x: 0.5, y: 0.125))
         }
     }
 
@@ -729,6 +652,19 @@ struct FeedView: View {
             onOpenRoute(route)
         }
     }
+}
+
+// MARK: - The timeline's air
+
+/// The timeline's spacing outside the posts (16 Oct: "the Feed screen feels denser and not as airy
+/// and pleasing to scroll through as X", owner). The posts' own is `FeedMetrics` / `FeedPostLayout`.
+private enum TimelineLayout {
+    /// Header → the tray's rings (was 8), and the tray's names → the first post's rule-less top
+    /// (the post adds its own 16).
+    static let trayTop: CGFloat = ThemeSpace.x3
+    static let trayBottom: CGFloat = ThemeSpace.x3
+    /// A notice's line between its rules (was 8).
+    static let noticeVertical: CGFloat = ThemeSpace.x3
 }
 
 // MARK: - Covers and sheets

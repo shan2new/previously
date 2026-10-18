@@ -2,136 +2,27 @@ import SwiftUI
 import UserNotifications
 
 // The feed's modules — each one a thing the references already taught people, placed BY RULE in the
-// memoised composer (§1.7), never at a fixed index: X's "Who to follow" (Suggested for you), X's
-// "What's happening" (Trending), Instagram's "You're all caught up", the skeleton the feed breathes
-// under while it loads, and the alerts primer a reminder needs.
+// memoised composer (§1.7), never at a fixed index: the chart (under an empty account), Instagram's
+// "You're all caught up", the skeleton the feed breathes under while it loads, and the alerts primer
+// a reminder needs. X's "Who to follow" (Suggested for you) left the feed on 16 Oct with For you:
+// it was the recommender's picks, which Discover's For you already shelves.
 
-/// X's module grid: a heavy title, rows on the feed's 16-pt gutter, 10-pt row padding.
+/// X's module grid: a heavy title on the feed's 16-pt gutter. 16 Oct, with the posts' air: 20 over
+/// the title and 10 under it (were 14 and 6).
 private enum ModuleLayout {
-    static let titleTop: CGFloat = 14
-    static let titleBottom: CGFloat = 6
-    static let rowVertical: CGFloat = 10
-    /// "Show more": X's 48-pt link row.
-    static let moreHeight: CGFloat = 48
-    /// The Suggested row's add control: 32 pt, 16 pt of side padding (X's follow pill).
-    static let addHeight: CGFloat = 32
-    static let addPadding: CGFloat = 16
-}
-
-// MARK: - Suggested for you
-
-/// X's "Who to follow", for shows: a heavy title, rows of show · reason, each with its own add
-/// control (never inside the row's button), and "Show more" to the whole recommendation list.
-struct SuggestedModule: View {
-    let items: [RecommendationItem]
-    let reason: (RecommendationItem) -> RecommendationItem.Reason
-    let onOpen: (RecommendationItem) -> Void
-    var onSeeAll: (() -> Void)? = nil
-
-    @Environment(AppModel.self) private var appModel
-
-    var body: some View {
-        if !items.isEmpty {
-            VStack(alignment: .leading, spacing: 0) {
-                FeedModuleTitle(text: Copy.Feed.suggestedTitle)
-                ForEach(items) { r in
-                    HStack(spacing: FeedMetrics.gap + ThemeSpace.x1) {
-                        Button { onOpen(r) } label: {
-                            HStack(spacing: FeedMetrics.gap + ThemeSpace.x1) {
-                                SubjectCropImage(urls: r.stub.map(FeedAvatar.candidates)
-                                                 ?? [r.images?.portrait].compactMap { $0 })
-                                    .frame(width: FeedMetrics.avatar, height: FeedMetrics.avatar)
-                                    .clipShape(ShowAvatar.shape(FeedMetrics.avatar))
-                                    .overlay(ShowAvatar.shape(FeedMetrics.avatar)
-                                        .strokeBorder(ThemeColor.avatarEdge, lineWidth: FeedMetrics.hairline))
-                                    .accessibilityHidden(true)
-                                VStack(alignment: .leading, spacing: 1) {
-                                    Text(r.displayTitle)
-                                        .type(ThemeType.feedName)
-                                        .foregroundStyle(ThemeColor.feedText)
-                                        .lineLimit(1)
-                                    Text(Copy.ForYou.reason(reason(r)))
-                                        .type(ThemeType.feedSubhead)
-                                        .foregroundStyle(ThemeColor.feedSecondary)
-                                        .lineLimit(1)
-                                }
-                                Spacer(minLength: 0)
-                            }
-                            .contentShape(Rectangle())
-                        }
-                        .buttonStyle(.plain)
-                        .accessibilityElement(children: .combine)
-                        addControl(r)
-                    }
-                    .padding(.horizontal, ThemeMetrics.gutter)
-                    .padding(.vertical, ModuleLayout.rowVertical)
-                }
-                if let onSeeAll {
-                    Button(action: onSeeAll) {
-                        Text(Copy.Feed.showMore)
-                            .type(ThemeType.feedSubhead)
-                            .foregroundStyle(ThemeColor.interactive)
-                            .frame(maxWidth: .infinity, alignment: .leading)
-                            .padding(.horizontal, ThemeMetrics.gutter)
-                            .frame(minHeight: ModuleLayout.moreHeight)
-                            .contentShape(Rectangle())
-                    }
-                    .buttonStyle(FeedRowPressStyle())
-                }
-                FeedHairline()
-            }
-        }
-    }
-
-    /// The row's own add — X's white pill. Owned: "In Planned" with a check, disabled. Resolving
-    /// (a recommendation not yet in the catalogue): a spinner in the pill. The add signs itself
-    /// (`addRecommendation` → the library's haptic and lane receipt).
-    @ViewBuilder
-    private func addControl(_ r: RecommendationItem) -> some View {
-        let owned = appModel.isOwned(r)
-        let resolving = appModel.resolvingRecommendations.contains(r.key)
-        Button {
-            appModel.addRecommendation(r)
-        } label: {
-            Group {
-                if resolving {
-                    ProgressView()
-                        .controlSize(.small)
-                        .tint(ThemeColor.onAccent)
-                } else if owned {
-                    AppGlyphLabel(Copy.ForYou.addedToPlanned, systemName: "checkmark")
-                        .labelStyle(.titleAndIcon)
-                } else {
-                    Text(Copy.Search.add)
-                }
-            }
-            .type(ThemeType.feedSmall)
-            .fontWeight(.bold)
-            .foregroundStyle(owned ? ThemeColor.feedText : ThemeColor.onAccent)
-            .lineLimit(1)
-            .fixedSize()
-            .padding(.horizontal, ModuleLayout.addPadding)
-            .frame(minHeight: ModuleLayout.addHeight)
-            .background(owned ? AnyShapeStyle(Color.clear) : AnyShapeStyle(ThemeGradient.ivory), in: Capsule())
-            .overlay(Capsule().strokeBorder(owned ? ThemeColor.feedSeparator : .clear, lineWidth: FeedMetrics.hairline))
-            .frame(minHeight: FeedMetrics.actionHitHeight)
-            .contentShape(Rectangle())
-        }
-        .buttonStyle(FeedIconPressStyle())
-        .disabled(owned || resolving)
-        .accessibilityHint(owned ? "" : Copy.ForYou.addHint)
-        .animation(ThemeMotion.uiMicro, value: owned)
-        .animation(ThemeMotion.uiMicro, value: resolving)
-    }
+    static let titleTop: CGFloat = 20
+    static let titleBottom: CGFloat = 10
+    /// The chart's shelf → its rule: 20 (was 16).
+    static let shelfBottom: CGFloat = ThemeSpace.x5
 }
 
 // MARK: - Trending
 
-/// The chart, under For you (and under an empty account), as a SHELF OF POSTERS — the Library's
-/// card, as Discover's "Trending now" draws it. It was X's "What's happening": eight rows of type,
-/// a rank, a truncated name and one grey fact each — six hundred points of text in the middle of
-/// a feed of pictures, in an app whose subject is the pictures ("For you visuals look poorly
-/// built", owner, 4 Oct). The rank is the order; VoiceOver says it.
+/// The chart, under an empty account (and an older server's notice), as a SHELF OF POSTERS — the
+/// Library's card, as Discover's "Trending now" draws it. It was X's "What's happening": eight rows
+/// of type, a rank, a truncated name and one grey fact each — six hundred points of text in the
+/// middle of a feed of pictures, in an app whose subject is the pictures ("For you visuals look
+/// poorly built", owner, 4 Oct). The rank is the order; VoiceOver says it.
 struct TrendingModule: View {
     let items: [FranchiseSummary]
     let onOpen: (String) -> Void
@@ -162,7 +53,7 @@ struct TrendingModule: View {
                 .scrollTargetBehavior(.viewAligned)
                 .scrollIndicators(.hidden)
                 .padding(.top, ThemeSpace.x1)
-                .padding(.bottom, ThemeSpace.x4)
+                .padding(.bottom, ModuleLayout.shelfBottom)
                 FeedHairline()
             }
         }
@@ -208,8 +99,8 @@ struct CaughtUpMarker: View {
 
     private static let ringWidth: CGFloat = 3
     private static let draw = Animation.timingCurve(0.3, 0, 0.2, 1, duration: 0.8).delay(0.15)
-    /// Instagram's block: 30 pt above and below, 24 pt at the sides.
-    private static let vertical: CGFloat = 30
+    /// Instagram's block: 36 pt above and below (30 until 16 Oct's air), 24 pt at the sides.
+    private static let vertical: CGFloat = 36
     private static let horizontal: CGFloat = 24
 
     var body: some View {
@@ -269,7 +160,10 @@ struct FeedPostSkeleton: View {
     private static let actionWidth: CGFloat = 26
     private static let actionHeight: CGFloat = 10
     private static let actionGap: CGFloat = 44
-    private static let vertical: CGFloat = 14
+    /// The post's foot, in placeholders (16 Oct's air): picture → the action marks 23 with the
+    /// stack's own gap (a post's picture → its glyphs: 21½), the marks → the rule 24 (25½).
+    private static let actionsTop: CGFloat = 14
+    private static let foot: CGFloat = 24
 
     var body: some View {
         VStack(spacing: 0) {
@@ -288,11 +182,12 @@ struct FeedPostSkeleton: View {
                             SkeletonBlock(width: Self.actionWidth, height: Self.actionHeight)
                         }
                     }
-                    .padding(.top, ThemeSpace.x1 + ThemeSpace.x0_5)
+                    .padding(.top, Self.actionsTop)
                 }
             }
             .padding(.horizontal, FeedMetrics.inset)
-            .padding(.vertical, Self.vertical)
+            .padding(.top, FeedMetrics.rowTop)
+            .padding(.bottom, Self.foot)
             FeedHairline()
         }
         .accessibilityHidden(true)

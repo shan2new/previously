@@ -73,6 +73,9 @@ fileprivate extension KeyedDecodingContainer {
 
 // MARK: - Feed
 
+/// `GET /me/feed?tab=`. The feed screen draws `following` only (16 Oct — For you is Discover's);
+/// `forYou` is still loaded, behind it, for a trending show's page (`showPosts`) and kept in the
+/// offline copy.
 enum FeedTab: String, Codable, Sendable, CaseIterable, Hashable {
     case following
     /// The server's query value (iD7).

@@ -20,6 +20,12 @@ import SwiftUI
 /// The profile's tabs, in X's order.
 enum ShowTab: Int, CaseIterable, Hashable {
     case posts, episodes, media, about
+    /// The directions' stage page only (`Experience.doors`): "More like this" and "Because you
+    /// finished", named in the index instead of buried at About's foot under the cast.
+    case similar
+
+    /// The profile direction's tabs (it never had Similar).
+    static var profileTabs: [ShowTab] { [.posts, .episodes, .media, .about] }
 
     var title: String {
         switch self {
@@ -27,6 +33,7 @@ enum ShowTab: Int, CaseIterable, Hashable {
         case .episodes: return Copy.Heading.episodes
         case .media: return Copy.ShowPage.media
         case .about: return Copy.ShowPage.about
+        case .similar: return Copy.ShowPage.similar
         }
     }
 
@@ -58,7 +65,7 @@ struct ShowTabsRow: View {
     var body: some View {
         VStack(spacing: 0) {
             HStack(spacing: 0) {
-                ForEach(ShowTab.allCases, id: \.self) { tab in
+                ForEach(ShowTab.profileTabs, id: \.self) { tab in
                     Button {
                         withAnimation(ThemeMotion.pick(ThemeMotion.uiSnappy, reduceMotion: reduceMotion)) { selected = tab }
                     } label: {
@@ -422,5 +429,104 @@ struct ShowStageSkeleton: View {
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         .ignoresSafeArea(edges: .top)
         .accessibilityHidden(true)
+    }
+}
+
+// MARK: - The page's hierarchy (19 Oct)
+
+/// A PART of a show-page section — "Movies & extras" under Episodes, "Cast & crew" under About: the
+/// row title's size in the title face, a step under the section's header (`SectionHeaderRow`), so a
+/// part never reads as a section of its own (it did: both were the same 20-pt header).
+struct ShowSubheader: View {
+    let title: String
+
+    init(_ title: String) { self.title = title }
+
+    var body: some View {
+        Text(title)
+            .type(ThemeType.showTitleM)
+            .foregroundStyle(ThemeColor.textPrimary)
+            .lineLimit(2)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .accessibilityAddTraits(.isHeader)
+    }
+}
+
+/// About's facts as a labelled list — the App Store's Information block: each fact under its name
+/// in a column of its own, one hairline between rows, so a reader looking for the seasons or the
+/// next episode finds the word, not a middot run. At the accessibility sizes the name sits above
+/// its value.
+struct ShowInfoList: View {
+    struct Row: Identifiable {
+        let label: String
+        let value: String
+        var id: String { label }
+    }
+
+    let rows: [Row]
+
+    @Environment(\.dynamicTypeSize) private var typeSize
+
+    static let labelColumn: CGFloat = 108
+
+    var body: some View {
+        if !rows.isEmpty {
+            VStack(alignment: .leading, spacing: 0) {
+                ForEach(Array(rows.enumerated()), id: \.element.id) { i, r in
+                    if i > 0 {
+                        Rectangle().fill(ThemeColor.hairline).frame(height: ThemeMetrics.pixel)
+                    }
+                    Group {
+                        if typeSize.isAccessibilitySize {
+                            VStack(alignment: .leading, spacing: ThemeSpace.x1) { label(r); value(r) }
+                        } else {
+                            HStack(alignment: .firstTextBaseline, spacing: ThemeSpace.x3) {
+                                label(r).frame(width: Self.labelColumn, alignment: .leading)
+                                value(r)
+                            }
+                        }
+                    }
+                    .padding(.vertical, ThemeSpace.x3)
+                    .accessibilityElement(children: .combine)
+                }
+            }
+        }
+    }
+
+    private func label(_ r: Row) -> some View {
+        Text(r.label)
+            .type(ThemeType.metadata)
+            .foregroundStyle(ThemeColor.textTertiary)
+            .lineLimit(1)
+    }
+
+    private func value(_ r: Row) -> some View {
+        Text(r.value)
+            .type(ThemeType.callout)
+            .foregroundStyle(ThemeColor.textPrimary)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .fixedSize(horizontal: false, vertical: true)
+    }
+}
+
+/// A section's header fades out as it rises toward the pinned index (19 Oct): the index already
+/// says which section this is, so the two words never stand stacked — a jump from the index lands
+/// with the header under the row, and a scroll brings it in only where it divides two sections.
+/// Read in the render pass (`visualEffect`): no body re-runs on scroll.
+struct UnderIndexFade: ViewModifier {
+    /// The pinned index's foot, in the window.
+    let foot: CGFloat
+
+    /// Gone until its foot is this far under the index's…
+    private static let clear: CGFloat = 16
+    /// …whole this much further down.
+    private static let ramp: CGFloat = 20
+
+    func body(content: Content) -> some View {
+        let foot = foot, clear = Self.clear, ramp = Self.ramp
+        return content.visualEffect { c, proxy in
+            let below = proxy.frame(in: .global).maxY - foot - clear
+            return c.opacity(Double(min(1, max(0, below / ramp))))
+        }
     }
 }

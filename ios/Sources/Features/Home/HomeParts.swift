@@ -170,7 +170,7 @@ enum HomeCompose {
         if heroes.isEmpty {
             if let item = queue.first {
                 quiet = heroFor(item, now: now)
-            } else if let next = days.filter({ $0.id >= 0 && $0.id < 7 })
+            } else if !m.experience.doors, let next = days.filter({ $0.id >= 0 && $0.id < 7 })
                         .lazy.flatMap({ d in d.entries.filter { !$0.aired } }).first {
                 quiet = HomeHero(franchise: next.franchise, part: next.part,
                                  episode: next.episode, kind: .airing(at: next.at))
@@ -196,6 +196,13 @@ enum HomeCompose {
             }
         }
         #endif
+
+        // Calm (`Experience.calm`): no root opens full bleed — the drops lead as Recently aired's cards
+        // and the top of the queue is Up next's first poster.
+        if m.experience.calm {
+            out.heroes = []
+            out.quiet = nil
+        }
 
         // Each show once, in the first place that carries it: the billboard, then Recently aired,
         // then Up next. What airs next is the Schedule tab's (26 Sep: the calendar is a tab again).
@@ -254,6 +261,9 @@ enum HomeCompose {
 @MainActor
 final class HomeFeedBox {
     var key: AppModel.ScheduleFeedKey?
+    /// The direction it was composed for (the directions drop the future quiet card; Calm draws no
+    /// billboard at all).
+    var experience: Experience = .current
     var value = HomeFeed()
 }
 
@@ -355,6 +365,9 @@ struct HomeHeader: View {
     /// protection (`HeroProtection`), nil with no billboard. PINNED here: on the billboard it
     /// scrolled away with the page, and the picture, moving slower, slid bare under the clock.
     var veil: Double? = nil
+    /// Four tabs (`Experience.feedInHome`): the feed's bell lives here, with its unread dot.
+    var onActivity: (() -> Void)? = nil
+    var unread: Int = 0
     let onProfile: () -> Void
     let onTop: () -> Void
 
@@ -381,10 +394,31 @@ struct HomeHeader: View {
                 .accessibilityLabel(Copy.Feed.profile)
                 .qaIdentifier("qa.profile.open")
                 Spacer(minLength: 0)
+                if let onActivity {
+                    Button(action: onActivity) {
+                        AppGlyph(systemName: "bell")
+                            .font(.title3)
+                            .foregroundStyle(ThemeColor.feedText)
+                            .overlay(alignment: .topTrailing) {
+                                if unread > 0 {
+                                    Circle().fill(ThemeColor.unreadDot)
+                                        .frame(width: 8, height: 8)
+                                        .overlay(Circle().strokeBorder(ThemeColor.canvas, lineWidth: 1.5))
+                                        .offset(x: 1.5, y: -1)
+                                }
+                            }
+                            .frame(width: FeedMetrics.actionHitHeight, height: FeedMetrics.actionHitHeight,
+                                   alignment: .trailing)
+                            .contentShape(Rectangle())
+                    }
+                    .buttonStyle(FeedIconPressStyle())
+                    .accessibilityLabel(unread > 0 ? Copy.Feed.activityUnread(unread) : Copy.Feed.activity)
+                }
             }
         }
         .padding(.horizontal, ThemeMetrics.gutter)
         .frame(height: FeedMetrics.headerRow)
+        .barInk()
         // The row leaves with the scroll (and the tab bar with it); the veil and the status
         // band's ground stay for the clock.
         .modifier(RootChromeFade(chrome: chrome))
@@ -399,9 +433,16 @@ private struct HomeHeaderGround: View {
     let ground: HomePageGround
     let veil: Double?
 
+    @Environment(\.accessibilityReduceTransparency) private var reduceTransparency
+
     private var band: CGFloat { ThemeMetrics.topSafeInset + FeedMetrics.headerRow }
 
+    /// The bars are transparent (17 Oct): this draws only under Reduce Transparency.
     var body: some View {
+        if reduceTransparency { ground_ }
+    }
+
+    @ViewBuilder private var ground_: some View {
         // The solid ground goes up with the row, down to the status band alone.
         let away = chrome.offset
         ZStack(alignment: .top) {
@@ -506,7 +547,7 @@ struct HomeBillboard: View {
                 }
                 if case .logo = name, name.hasGraphicLogo, !typeSize.isAccessibilitySize {
                     // The title card: a halo of its own light, resolving out of a blur.
-                    ArtworkLogo(name: name, title: f.displayTitle, height: quiet ? 72 : 96, halo: 0.55)
+                    ArtworkLogo(name: name, title: f.displayTitle, height: quiet ? 72 : 96, halo: 0.55, hug: true)
                         .padding(.horizontal, ThemeSpace.x8)
                         .padding(.vertical, ThemeSpace.x1)
                         .modifier(arrival.logo)
@@ -695,12 +736,17 @@ struct HomeLockupLighting: Equatable {
 struct HomeLockupGlow: View {
     let tint: Color?
     let lighting: HomeLockupLighting
+    /// The pool's opacity at its centre.
+    var strength: Double = HomeLockupGlow.stage
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     static let height: CGFloat = 400
+    /// Home's and Schedule's stage (the Stage direction): the glow the owner called "sick". The
+    /// show page's follows its ground (`DetailTint.groundGlow`, 0.12 since 19 Oct).
+    static let stage: Double = 0.26
 
     var body: some View {
-        EllipticalGradient(colors: [(HeroLight.glow(tint) ?? .clear).opacity(0.26), .clear],
+        EllipticalGradient(colors: [(HeroLight.glow(tint) ?? .clear).opacity(strength), .clear],
                            center: .center, startRadiusFraction: 0, endRadiusFraction: 0.5)
             .frame(width: ThemeMetrics.windowWidth * 1.5, height: Self.height)
             .blendMode(.plusLighter)
@@ -764,7 +810,14 @@ struct HomeFootGround: View {
     /// The tab bar's top edge at rest, in the window.
     let barTop: CGFloat
 
+    @Environment(\.accessibilityReduceTransparency) private var reduceTransparency
+
+    /// The bars are transparent (17 Oct): this draws only under Reduce Transparency.
     var body: some View {
+        if reduceTransparency { window }
+    }
+
+    @ViewBuilder private var window: some View {
         let away = chrome.awayFraction * ThemeMetrics.tabBarVisualHeight
         HomeGroundWindow(chrome: chrome, ground: ground, top: barTop + away,
                          height: ThemeMetrics.tabBarVisualHeight)

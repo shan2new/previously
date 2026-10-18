@@ -227,6 +227,9 @@ struct DiscoverExplore: View {
     private func exploreHeader(topInset: CGFloat) -> some View {
         VStack(spacing: 0) {
             HStack(spacing: ThemeSpace.x1) {
+                // The directions: every root's bar opens with the account disc (X's Explore has it
+                // beside the pill too).
+                if appModel.experience.doors { RootAccountButton() }
                 searchCapsule
                 scope
                     .frame(width: FeedMetrics.actionHitHeight, height: FeedMetrics.actionHitHeight)
@@ -234,6 +237,7 @@ struct DiscoverExplore: View {
             .padding(.leading, ThemeMetrics.gutter)
             .padding(.trailing, ThemeSpace.x1)
             .frame(height: FeedMetrics.headerRow)
+            .barInk()
             ExploreTabs(selected: section, progress: progress) { next in
                 if next == section {
                     chrome.reveal()
@@ -357,7 +361,7 @@ struct DiscoverExplore: View {
         } else {
             ForYouShelves(recommendations: recommendations, trending: trending, reason: reason, spoken: spoken,
                           trendAdd: trendAdd, onOpenRecommendation: onOpenRecommendation, onOpenShow: onOpenShow,
-                          afterTopPick: header)
+                          afterTopPick: header, stageTopPick: appModel.experience.stage)
         }
     }
 
@@ -420,6 +424,7 @@ struct ExploreTabs: View {
     let onSelect: (DiscoverSection) -> Void
 
     @State private var words: [DiscoverSection: CGRect] = [:]
+    @Environment(\.accessibilityReduceTransparency) private var reduceTransparency
 
     private static let underlineHeight: CGFloat = 3
     private static let underlineOverhang: CGFloat = 11
@@ -450,9 +455,12 @@ struct ExploreTabs: View {
             }
             .overlay(alignment: .bottomLeading) { underline(p, tabs: tabs) }
             .coordinateSpace(.named(Self.space))
-            FeedHairline()
+            .barInk()
+            // Transparent since 17 Oct, as every bar: no rule, no ground (Reduce Transparency
+            // keeps both).
+            if reduceTransparency { FeedHairline() }
         }
-        .background(ThemeColor.canvas)
+        .background(reduceTransparency ? ThemeColor.canvas : Color.clear)
     }
 
     private func word(_ t: DiscoverSection, ink: Color) -> some View {

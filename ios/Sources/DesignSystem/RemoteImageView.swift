@@ -539,58 +539,132 @@ struct ArtworkLogo: View {
     let title: String
     var height: CGFloat = 66
     var alignment: Alignment = .center
-    /// A soft halo of the logo's own light (`LogoImage.halo`) — the billboard's.
+    /// A soft halo behind the logo (`LogoImage.halo`) — the billboard's.
     var halo: Double = 0
+    /// The box HUGS the logo (a lockup's, centred): `height` is a ceiling, and a wide, thin wordmark
+    /// gets a box its own shape. A fixed box centred Solo Leveling's 30-pt-tall wordmark in 96 pt,
+    /// ~33 pt of nothing above and below it (17 Oct: "so much space between the logo and the
+    /// season", owner). Off for the slots that pin a logo to a corner (tiles, cards).
+    var hug: Bool = false
+
+    /// The logo turned out to be a PLATE (`LogoInk.Reading.plate`): its name is set in type instead.
+    @State private var plated = false
 
     var body: some View {
         if case .logo(let logo) = name, name.hasGraphicLogo {
-            LogoImage(url: logo.url, alignment: alignment, halo: halo)
-                .frame(minWidth: 0, maxWidth: .infinity, alignment: alignment)
-                .frame(height: height)
-                .accessibilityElement(children: .ignore)
-                .accessibilityLabel(title)
-                .accessibilityAddTraits(.isImage)
+            Group {
+                if plated || LogoInk.known(logo.url)?.plate == true {
+                    typedName
+                } else if hug, let w = logo.width, let h = logo.height {
+                    LogoImage(url: logo.url, alignment: alignment, halo: halo, onPlate: { plated = true })
+                        .layoutPriority(1)
+                        .modifier(LogoBox(aspect: CGFloat(w) / CGFloat(h), maxHeight: height))
+                } else {
+                    LogoImage(url: logo.url, alignment: alignment, halo: halo, onPlate: { plated = true })
+                        .frame(minWidth: 0, maxWidth: .infinity, alignment: alignment)
+                        .frame(height: height)
+                }
+            }
+            .accessibilityElement(children: .ignore)
+            .accessibilityLabel(title)
+            .accessibilityAddTraits(.isImage)
+        }
+    }
+
+    /// A plate's stand-in: the show's name in the display face, sized to the logo's slot.
+    private var typedName: some View {
+        Text(title)
+            .font(Typeface.fixedFont(.display, .bold, min(34, max(17, height * 0.36))))
+            .foregroundStyle(ThemeColor.textPrimary)
+            .multilineTextAlignment(alignment.horizontal == .leading ? .leading : .center)
+            .lineLimit(2)
+            .minimumScaleFactor(0.7)
+            .shadow(.art)
+            .frame(maxWidth: .infinity, alignment: alignment)
+            .frame(maxHeight: height, alignment: alignment)
+    }
+}
+
+/// A logo's box at its own aspect: as wide as offered, as tall as the logo is at that width, never
+/// taller than `maxHeight` (then narrower, centred).
+private struct LogoBox: ViewModifier {
+    let aspect: CGFloat
+    let maxHeight: CGFloat
+
+    func body(content: Content) -> some View {
+        LogoBoxLayout(aspect: aspect, maxHeight: maxHeight) { content }
+    }
+}
+
+private struct LogoBoxLayout: Layout {
+    let aspect: CGFloat
+    let maxHeight: CGFloat
+
+    func sizeThatFits(proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) -> CGSize {
+        let natural = maxHeight * aspect
+        let width = proposal.width.flatMap { $0.isFinite ? $0 : nil } ?? natural
+        return CGSize(width: width, height: min(maxHeight, width / max(aspect, 0.01)).rounded())
+    }
+
+    func placeSubviews(in bounds: CGRect, proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) {
+        let height = bounds.height
+        let size = CGSize(width: min(bounds.width, height * aspect), height: height)
+        for subview in subviews {
+            subview.place(at: CGPoint(x: bounds.midX, y: bounds.midY), anchor: .center,
+                          proposal: ProposedViewSize(size))
         }
     }
 }
 
 /// A show's logo, legible on the dark grounds this app always draws logos on (a billboard's scrim,
-/// a tile's foot gradient, a scene card's shade): a DARK logo — black ink; The Eminence in Shadow's
-/// only English logo is black type on nothing, and on its dark poster it was a shadow of a word
-/// (26 Sep) — is drawn as a white silhouette of itself. A light or coloured logo is drawn as it is.
+/// a tile's foot gradient, a scene card's shade).
+///
+/// A DARK logo — black ink; The Eminence in Shadow's only English logo is black type on nothing, and
+/// on its dark poster it was a shadow of a word (26 Sep) — is drawn as its LUMINANCE NEGATIVE: dark
+/// ink becomes light, light ink becomes dark. Until 19 Oct it was a flat white SILHOUETTE of every
+/// opaque pixel, and that was the "white patch" in the hero ("sometimes the logo becomes too white
+/// that it just appears like a white patch", owner): a logo drawn on a plate of its own turned into a
+/// white rectangle, and dark letters with light outlines merged with them into one white shape —
+/// under a white glow made of the same silhouette. Now a PLATE (an opaque background, not a cut-out)
+/// is not drawn as a logo at all — the name is set in type (`ArtworkLogo`); and a white, grey or
+/// darkened logo stands in a soft SHADE rather than a glow, which only coloured ink keeps.
+/// A light or coloured logo is drawn as it is.
 struct LogoImage: View {
     let url: String
     var alignment: Alignment = .center
-    /// A soft halo of the logo's own light behind it (0 = none) — Home's billboard (GLOW).
+    /// A soft halo behind the logo (0 = none) — Home's billboard and the show page's stage.
     var halo: Double = 0
+    /// The logo is a plate: the caller sets the name in type.
+    var onPlate: (() -> Void)? = nil
 
     @State private var image: UIImage?
-    @State private var dark: Bool
+    @State private var reading: LogoInk.Reading?
     @State private var glow: LogoHalo.Glow?
 
     static let decodePixels: CGFloat = 800
 
-    init(url: String, alignment: Alignment = .center, halo: Double = 0) {
+    init(url: String, alignment: Alignment = .center, halo: Double = 0, onPlate: (() -> Void)? = nil) {
         self.url = url
         self.alignment = alignment
         self.halo = halo
-        // A logo decoded earlier this session is on screen from the first frame, in its final ink.
+        self.onPlate = onPlate
+        // A logo decoded and read earlier this session is on screen from the first frame, in its final ink.
         let hit = URL(string: url).flatMap { ImageCache.shared.image(for: $0, atLeast: Self.decodePixels) }
-        _image = State(initialValue: hit)
-        let dark = LogoInk.known(url) ?? hit.map { LogoInk.measure(url, $0) } ?? false
-        _dark = State(initialValue: dark)
-        _glow = State(initialValue: halo > 0 ? LogoHalo.cached(url, dark: dark) : nil)
+        let reading = LogoInk.known(url)
+        _reading = State(initialValue: reading)
+        if let hit, let reading {
+            _image = State(initialValue: reading.dark ? LogoInk.cachedNegative(url) : hit)
+            _glow = State(initialValue: halo > 0 ? LogoHalo.cached(url, kind: LogoHalo.kind(reading)) : nil)
+        }
     }
 
     var body: some View {
         ZStack {
-            if let image {
+            if let image, reading?.plate != true {
                 Image(uiImage: image)
-                    .renderingMode(dark ? .template : .original)
                     .resizable()
                     .interpolation(.high)
                     .scaledToFit()
-                    .foregroundStyle(Color.white)
                     .background {
                         if halo > 0, let glow {
                             GeometryReader { g in
@@ -598,7 +672,7 @@ struct LogoImage: View {
                                     .resizable()
                                     .frame(width: g.size.width * glow.scale.width, height: g.size.height * glow.scale.height)
                                     .position(x: g.size.width / 2, y: g.size.height / 2)
-                                    .opacity(halo)
+                                    .opacity(halo * glow.strength)
                             }
                             .allowsHitTesting(false)
                             .transition(.opacity)
@@ -612,54 +686,78 @@ struct LogoImage: View {
     }
 
     private func load() async {
+        guard image == nil || (halo > 0 && glow == nil) else { return }
         guard let address = URL(string: url) else { return }
         let picture: UIImage
-        if let image {
-            picture = image
+        if let cached = ImageCache.shared.image(for: address, atLeast: Self.decodePixels) {
+            picture = cached
         } else {
             guard let loaded = try? await ImageLoader.shared.image(for: address, maxPixel: Self.decodePixels) else { return }
             picture = loaded
         }
         let key = url
-        let isDark = await Task.detached(priority: .userInitiated) { LogoInk.measure(key, picture) }.value
-        dark = isDark
-        if image == nil { withAnimation(ThemeMotion.uiPoster) { image = picture } }
+        let read = await Task.detached(priority: .userInitiated) { () -> (LogoInk.Reading, UIImage?) in
+            let reading = LogoInk.measure(key, picture)
+            return (reading, reading.dark ? LogoInk.negative(key, picture) : nil)
+        }.value
+        reading = read.0
+        if read.0.plate {
+            onPlate?()
+            return
+        }
+        if image == nil {
+            let shown = read.0.dark ? (read.1 ?? picture) : picture
+            withAnimation(ThemeMotion.uiPoster) { image = shown }
+        }
         if halo > 0, glow == nil {
-            let made = await Task.detached(priority: .utility) { LogoHalo.make(key, picture, dark: isDark) }.value
+            let kind = LogoHalo.kind(read.0)
+            let made = await Task.detached(priority: .utility) { LogoHalo.make(key, picture, kind: kind) }.value
             withAnimation(ThemeMotion.uiPoster) { glow = made }
         }
     }
 }
 
-/// A logo's halo: its own light — the logo, or its white silhouette where it is drawn white —
-/// blurred ONCE into a bitmap with room around it (a blur is a property of the image, never of a
-/// layer: the performance rule of 5 Sep), kept beside the decodes.
+/// A logo's halo, blurred ONCE into a bitmap with room around it (a blur is a property of the image,
+/// never of a layer: the performance rule of 5 Sep), kept beside the decodes. Two kinds:
+///   · `glow` — the logo's own colours, for coloured ink (One Punch Man's red, Slime's blue): the
+///     billboard's GLOW of 26 Sep;
+///   · `shade` — a dark silhouette, for white, grey or darkened ink: a white glow behind white letters
+///     only spread them into a haze, and a shade is what makes them stand off a bright picture.
 enum LogoHalo {
+    enum Kind: String, Sendable { case glow, shade }
+
     struct Glow {
         let image: UIImage
         /// The halo's size over the logo's: the blur's room on each side.
         let scale: CGSize
+        /// How much of the caller's `halo` this kind takes.
+        let strength: Double
+    }
+
+    static func kind(_ reading: LogoInk.Reading) -> Kind {
+        reading.dark || reading.neutral ? .shade : .glow
     }
 
     /// Room around the logo for the blur to spread into, as a share of its longer side.
     private static let room: CGFloat = 0.22
 
-    private static func key(_ url: String, dark: Bool) -> String { "logo-halo|\(dark ? "w" : "c")|\(url)" }
+    private static func key(_ url: String, kind: Kind) -> String { "logo-halo|\(kind.rawValue)|\(url)" }
 
-    static func cached(_ url: String, dark: Bool) -> Glow? {
-        guard let image = ImageCache.shared.derived(key(url, dark: dark)), let cg = image.cgImage else { return nil }
-        return glow(image, cg.width, cg.height)
+    static func cached(_ url: String, kind: Kind) -> Glow? {
+        guard let image = ImageCache.shared.derived(key(url, kind: kind)), let cg = image.cgImage else { return nil }
+        return glow(image, cg.width, cg.height, kind: kind)
     }
 
-    private static func glow(_ image: UIImage, _ width: Int, _ height: Int) -> Glow {
+    private static func glow(_ image: UIImage, _ width: Int, _ height: Int, kind: Kind) -> Glow {
         // The stored bitmap is the logo plus `pad` pixels a side; `pad` follows from its size.
         let long = CGFloat(max(width, height)) / (1 + 2 * room)
         let pad = long * room
         let w = CGFloat(width) - 2 * pad, h = CGFloat(height) - 2 * pad
-        return Glow(image: image, scale: CGSize(width: CGFloat(width) / max(1, w), height: CGFloat(height) / max(1, h)))
+        return Glow(image: image, scale: CGSize(width: CGFloat(width) / max(1, w), height: CGFloat(height) / max(1, h)),
+                    strength: kind == .shade ? 0.85 : 1)
     }
 
-    static func make(_ url: String, _ picture: UIImage, dark: Bool) -> Glow? {
+    static func make(_ url: String, _ picture: UIImage, kind: Kind) -> Glow? {
         guard let cg = picture.cgImage else { return nil }
         // Small: a halo is soft by nature, and a 256-px bitmap blurs in a moment.
         let fit = min(1, 256 / CGFloat(max(cg.width, cg.height)))
@@ -670,12 +768,12 @@ enum LogoHalo {
               let ctx = CGContext(data: nil, width: W, height: H, bitsPerComponent: 8, bytesPerRow: 0, space: space,
                                   bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue) else { return nil }
         let rect = CGRect(x: pad, y: pad, width: w, height: h)
-        if dark {
-            // Its white silhouette, as the logo itself is drawn.
+        switch kind {
+        case .shade:
             ctx.clip(to: rect, mask: cg)
-            ctx.setFillColor(UIColor.white.cgColor)
+            ctx.setFillColor(UIColor.black.cgColor)
             ctx.fill(rect)
-        } else {
+        case .glow:
             ctx.draw(cg, in: rect)
         }
         guard let drawn = ctx.makeImage() else { return nil }
@@ -683,39 +781,57 @@ enum LogoHalo {
         let blurred = input.applyingGaussianBlur(sigma: Double(max(w, h)) * 0.045).cropped(to: input.extent)
         guard let out = CIContext(options: [.useSoftwareRenderer: false]).createCGImage(blurred, from: input.extent) else { return nil }
         let image = UIImage(cgImage: out)
-        ImageCache.shared.storeDerived(image, key: key(url, dark: dark))
-        return glow(image, out.width, out.height)
+        ImageCache.shared.storeDerived(image, key: key(url, kind: kind))
+        return glow(image, out.width, out.height, kind: kind)
     }
 }
 
-/// Whether a logo's ink is too dark for the dark grounds it is drawn on: less than a third of its
-/// opaque pixels are LEGIBLE there — OKLab L 0.6 and up, or a saturated colour from L 0.45 (chroma
-/// 0.12 and up: One Punch Man's red). Black type (The Eminence in Shadow) and Mushoku Tensei's
-/// bronze lettering fail it and are drawn white; Slime's blue bubble letters — dark-outlined, but
-/// mostly bright — keep their colour. Measured once per logo (a 32×32 sample), remembered.
+/// How a logo's ink sits on the dark grounds it is drawn on, read once per logo from a 48×48 sample
+/// and remembered:
+///   · `dark` — less than a third of its opaque pixels are LEGIBLE there (OKLab L 0.6 and up, or a
+///     saturated colour from L 0.45, chroma 0.12 and up: One Punch Man's red). Black type (The
+///     Eminence in Shadow) and Mushoku Tensei's bronze lettering are dark; Slime's blue bubble
+///     letters — dark-outlined, but mostly bright — are not. A dark logo is drawn as its negative.
+///   · `plate` — not a cut-out: three of its four corners are opaque, or nine tenths of it is. Its
+///     own background would be drawn as a box on the picture (and, made white, as the white patch),
+///     so it is set in type instead.
+///   · `neutral` — its legible ink is achromatic (white or grey): its halo is a shade.
 enum LogoInk {
-    private static let lock = NSLock()
-    nonisolated(unsafe) private static var answers: [String: Bool] = [:]
-
-    static func known(_ url: String) -> Bool? { lock.withLock { answers[url] } }
-
-    static func measure(_ url: String, _ image: UIImage) -> Bool {
-        if let known = known(url) { return known }
-        let dark = isDark(image)
-        lock.withLock { answers[url] = dark }
-        return dark
+    struct Reading: Sendable, Equatable {
+        let dark: Bool
+        let plate: Bool
+        let neutral: Bool
+        /// The shares behind the verdicts, for `-verifyLogos 1`.
+        let legible: Double
+        let coverage: Double
+        let chroma: Double
     }
 
-    static func isDark(_ image: UIImage) -> Bool {
-        guard let cg = image.cgImage else { return false }
-        let w = 32, h = 32
+    private static let lock = NSLock()
+    nonisolated(unsafe) private static var answers: [String: Reading] = [:]
+
+    static func known(_ url: String) -> Reading? { lock.withLock { answers[url] } }
+
+    static func measure(_ url: String, _ image: UIImage) -> Reading {
+        if let known = known(url) { return known }
+        let reading = read(image)
+        lock.withLock { answers[url] = reading }
+        return reading
+    }
+
+    static func read(_ image: UIImage) -> Reading {
+        let none = Reading(dark: false, plate: false, neutral: false, legible: 1, coverage: 0, chroma: 0)
+        guard let cg = image.cgImage else { return none }
+        let w = 48, h = 48
         var px = [UInt8](repeating: 0, count: w * h * 4)
         guard let space = CGColorSpace(name: CGColorSpace.sRGB),
               let ctx = CGContext(data: &px, width: w, height: h, bitsPerComponent: 8, bytesPerRow: w * 4,
                                   space: space, bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue)
-        else { return false }
+        else { return none }
         ctx.draw(cg, in: CGRect(x: 0, y: 0, width: w, height: h))
-        var bright = 0.0, n = 0.0
+        func alpha(_ x: Int, _ y: Int) -> Double { Double(px[(y * w + x) * 4 + 3]) / 255 }
+        let corners = [alpha(0, 0), alpha(w - 1, 0), alpha(0, h - 1), alpha(w - 1, h - 1)].filter { $0 > 0.5 }.count
+        var bright = 0.0, n = 0.0, chroma = 0.0, lit = 0.0
         for i in stride(from: 0, to: px.count, by: 4) {
             let a = Double(px[i + 3]) / 255
             guard a > 0.5 else { continue }
@@ -723,11 +839,53 @@ enum LogoInk {
             let (l, ca, cb) = PaletteCache.oklab(r: min(1, Double(px[i]) / 255 / a),
                                                  g: min(1, Double(px[i + 1]) / 255 / a),
                                                  b: min(1, Double(px[i + 2]) / 255 / a))
-            if l >= 0.6 || (l >= 0.45 && (ca * ca + cb * cb).squareRoot() >= 0.12) { bright += 1 }
+            let c = (ca * ca + cb * cb).squareRoot()
+            if l >= 0.6 || (l >= 0.45 && c >= 0.12) {
+                bright += 1
+                chroma += c
+                lit += 1
+            }
             n += 1
         }
-        guard n >= 8 else { return false }
-        return bright / n < 0.33
+        guard n >= 8 else { return none }
+        let coverage = n / Double(w * h)
+        let legible = bright / n
+        let meanChroma = lit > 0 ? chroma / lit : 0
+        let dark = legible < 0.33
+        return Reading(dark: dark, plate: corners >= 3 || coverage >= 0.9,
+                       neutral: !dark && meanChroma < 0.04, legible: legible, coverage: coverage, chroma: meanChroma)
+    }
+
+    private static func negativeKey(_ url: String) -> String { "logo-negative|\(url)" }
+
+    static func cachedNegative(_ url: String) -> UIImage? { ImageCache.shared.derived(negativeKey(url)) }
+
+    /// A dark logo's LUMINANCE NEGATIVE, in grey, alpha kept: dark ink becomes light (0.25 + 0.75 ×
+    /// (1 − L)), so black type is near-white and a light outline round it goes dark — the letters
+    /// keep their shapes instead of merging with their strokes into one white form. Made once,
+    /// kept beside the decodes.
+    static func negative(_ url: String, _ image: UIImage) -> UIImage? {
+        if let cached = cachedNegative(url) { return cached }
+        guard let cg = image.cgImage else { return nil }
+        let w = cg.width, h = cg.height
+        var px = [UInt8](repeating: 0, count: w * h * 4)
+        guard let space = CGColorSpace(name: CGColorSpace.sRGB),
+              let ctx = CGContext(data: &px, width: w, height: h, bitsPerComponent: 8, bytesPerRow: w * 4,
+                                  space: space, bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue)
+        else { return nil }
+        ctx.draw(cg, in: CGRect(x: 0, y: 0, width: w, height: h))
+        for i in stride(from: 0, to: px.count, by: 4) {
+            let a = Int(px[i + 3])
+            guard a > 0 else { continue }
+            let r = Double(px[i]) / Double(a), g = Double(px[i + 1]) / Double(a), b = Double(px[i + 2]) / Double(a)
+            let l = min(1, 0.2126 * r + 0.7152 * g + 0.0722 * b)
+            let v = UInt8(max(0, min(255, (0.25 + 0.75 * (1 - l)) * Double(a))))
+            px[i] = v; px[i + 1] = v; px[i + 2] = v
+        }
+        guard let out = ctx.makeImage() else { return nil }
+        let negative = UIImage(cgImage: out, scale: image.scale, orientation: .up)
+        ImageCache.shared.storeDerived(negative, key: negativeKey(url))
+        return negative
     }
 }
 
@@ -1041,3 +1199,23 @@ struct Thumb: View {
             .background(ThemeColor.surfaceRaised)
     }
 }
+
+#if DEBUG
+/// `-verifyLogos 1` (DEBUG): every library logo, loaded through the app's own pipeline, with the ink
+/// reading `LogoImage` draws it by — one `LOGO` line each, then `LOGO_VERIFY_DONE`.
+@MainActor
+enum LogoRegression {
+    static func run(_ library: @escaping @MainActor () -> [Franchise]) async {
+        for _ in 0..<40 where library().isEmpty { try? await Task.sleep(for: .milliseconds(500)) }
+        for f in library() {
+            guard let logo = f.billboardLogo, let url = URL(string: logo.url),
+                  let image = try? await ImageLoader.shared.image(for: url, maxPixel: LogoImage.decodePixels) else { continue }
+            let r = LogoInk.measure(logo.url, image)
+            let verdict = r.plate ? "PLATE" : (r.dark ? "DARK" : (r.neutral ? "NEUTRAL" : "COLOUR"))
+            print(String(format: "LOGO %@ | %@ | legible %.2f coverage %.2f chroma %.3f", f.title, verdict,
+                         r.legible, r.coverage, r.chroma))
+        }
+        print("LOGO_VERIFY_DONE")
+    }
+}
+#endif

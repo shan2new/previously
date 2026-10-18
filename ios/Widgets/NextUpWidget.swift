@@ -36,8 +36,12 @@ private enum WidgetType {
 struct NextUpEntry: TimelineEntry {
     let date: Date
     let items: [NextUpSnapshot.Item]
+    var owner: NextUpSnapshot.Owner? = nil
     /// The gallery's placeholder: redacted, no real show.
     var placeholder = false
+
+    /// Cached timeline entries must not become a second copy of the account that signed out.
+    var hasCurrentOwner: Bool { placeholder || NextUpSnapshot.isCurrent(owner) }
 }
 
 struct NextUpProvider: TimelineProvider {
@@ -47,7 +51,7 @@ struct NextUpProvider: TimelineProvider {
 
     func getSnapshot(in context: Context, completion: @escaping (NextUpEntry) -> Void) {
         if context.isPreview {
-            completion(NextUpEntry(date: Date(), items: NextUpSnapshot.sample.items))
+            completion(NextUpEntry(date: Date(), items: NextUpSnapshot.sample.items, placeholder: true))
         } else {
             completion(entry(at: Date(), from: NextUpSnapshot.read()))
         }
@@ -81,7 +85,7 @@ struct NextUpProvider: TimelineProvider {
         // A drop first, then what airs next, then the queue — the snapshot's order, with a struck
         // airing promoted.
         let ordered = items.sorted { a, b in rank(a) < rank(b) }
-        return NextUpEntry(date: date, items: ordered)
+        return NextUpEntry(date: date, items: ordered, owner: snapshot?.owner)
     }
 
     private func rank(_ item: NextUpSnapshot.Item) -> Int {
@@ -112,7 +116,7 @@ struct NextUpWidgetView: View {
     @Environment(\.widgetFamily) private var family
 
     var body: some View {
-        if let lead = entry.items.first {
+        if entry.hasCurrentOwner, let lead = entry.items.first {
             switch family {
             case .accessoryRectangular:
                 rectangle(lead)
@@ -319,7 +323,7 @@ struct NextUpWidgetView: View {
     }
 
     private func file(_ name: String?) -> UIImage? {
-        guard !entry.placeholder, let name, let dir = NextUpSnapshot.directory else { return nil }
-        return UIImage(contentsOfFile: dir.appendingPathComponent(name).path)
+        guard !entry.placeholder, let data = NextUpSnapshot.artwork(name, owner: entry.owner) else { return nil }
+        return UIImage(data: data)
     }
 }

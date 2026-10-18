@@ -19,6 +19,8 @@ enum FeedRoute: Hashable, Sendable {
     /// An episode discussion as a page (a notification about an `ep:` reply lands here).
     case episode(franchiseId: String, mediaId: Int, episode: Int, focusCommentId: String? = nil)
     case saved
+    /// Four tabs (`Experience.feedInHome`): the feed's posts as a page, from Home's News section.
+    case news
 }
 
 /// Discover's own pages, pushed as values on the Discover tab's path.

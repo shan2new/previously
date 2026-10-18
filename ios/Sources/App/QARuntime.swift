@@ -24,6 +24,7 @@ enum QARuntime {
             preconditionFailure("QA controls require the isolated QA application bundle")
         }
         _ = baseURL // Validate before any state is touched.
+        stageFileSamples(resetExports: ProcessInfo.processInfo.environment["PREVIOUSLY_QA_RESET_LOCAL"] == "1")
         guard ProcessInfo.processInfo.environment["PREVIOUSLY_QA_RESET_LOCAL"] == "1" else { return }
         UserDefaults.standard.removePersistentDomain(forName: "com.cognipin.previously.qa")
         // These are the QA sandbox's directories, never the installed user's app container.
@@ -32,6 +33,45 @@ enum QARuntime {
                 try? FileManager.default.removeItem(at: directory)
             }
         }
+    }
+
+    /// Files stay inside the explicitly enabled QA bundle. The tests must select them through
+    /// the system document picker; staging never invokes an import or creates a server job.
+    private static func stageFileSamples(resetExports: Bool) {
+        guard let documents = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first else {
+            preconditionFailure("QA Documents directory is unavailable")
+        }
+        let samples = documents.appendingPathComponent("QA Samples", isDirectory: true)
+        func entry(id: Int, title: String, watched: Int, status: String) -> String {
+            "<anime><series_animedb_id>\(id)</series_animedb_id><series_title>\(title)</series_title><my_watched_episodes>\(watched)</my_watched_episodes><my_status>\(status)</my_status></anime>"
+        }
+        let allowed = entry(id: 900001, title: "QA Planned", watched: 3, status: "Watching")
+        let skipped = entry(id: 900002, title: "QA Policy Omission", watched: 2, status: "Completed")
+        do {
+            try FileManager.default.createDirectory(at: samples, withIntermediateDirectories: true)
+            for (name, entries) in [("qa-partial.xml", allowed + skipped), ("qa-all-skipped.xml", skipped)] {
+                try Data("<?xml version=\"1.0\" encoding=\"UTF-8\"?><myanimelist>\(entries)</myanimelist>".utf8)
+                    .write(to: samples.appendingPathComponent(name), options: .atomic)
+            }
+            if resetExports {
+                for name in ["previously-qa-export.json", "previously-library.csv"] {
+                    let file = documents.appendingPathComponent(name)
+                    if FileManager.default.fileExists(atPath: file.path) { try FileManager.default.removeItem(at: file) }
+                }
+            }
+        } catch { preconditionFailure("Synthetic QA Files staging failed") }
+    }
+
+    /// Read-only filesystem oracle after a real Save to Files action. Only the known synthetic
+    /// export names in this QA app's Documents are exposed, bounded to 256KiB; never temp staging.
+    static func savedExport(_ format: String) -> String {
+        guard enabled, Bundle.main.bundleIdentifier == "com.cognipin.previously.qa",
+              let documents = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first else { return "unavailable" }
+        let name = format == "json" ? "previously-qa-export.json" : "previously-library.csv"
+        let url = documents.appendingPathComponent(name)
+        guard let size = try? url.resourceValues(forKeys: [.fileSizeKey]).fileSize,
+              size > 0, size <= 256 * 1024, let data = try? Data(contentsOf: url) else { return "missing" }
+        return data.base64EncodedString()
     }
 
     @MainActor static func bootstrap(_ auth: AuthManager) {
@@ -53,6 +93,26 @@ enum QARuntime {
 #endif
 
 extension View {
+    @ViewBuilder func qaFilesEvidence() -> some View {
+        #if PREVIOUSLY_QA
+        if QARuntime.enabled {
+            overlay(alignment: .topLeading) {
+                TimelineView(.periodic(from: .now, by: 1)) { _ in
+                    VStack(spacing: 0) {
+                        Text("QA saved JSON copy").accessibilityIdentifier("qa.files.saved.json")
+                            .accessibilityValue(QARuntime.savedExport("json"))
+                        Text("QA saved CSV copy").accessibilityIdentifier("qa.files.saved.csv")
+                            .accessibilityValue(QARuntime.savedExport("csv"))
+                    }
+                    .font(.system(size: 1)).foregroundStyle(.clear).allowsHitTesting(false)
+                }
+            }
+        } else { self }
+        #else
+        self
+        #endif
+    }
+
     @ViewBuilder func qaIdentifier(_ identifier: String) -> some View {
         #if PREVIOUSLY_QA
         accessibilityIdentifier(identifier)
@@ -80,6 +140,26 @@ extension View {
                 Text("QA recorded failures")
                     .accessibilityIdentifier("qa.sync.failure.count")
                     .accessibilityValue(String(SyncCenter.shared.failedChanges.count))
+                Text("QA widget snapshot owner")
+                    .accessibilityIdentifier("qa.widget.owner")
+                    .accessibilityValue(NextUpSnapshotStore.shared.snapshot?.owner.key ?? "none")
+                Text("QA widget snapshot shows")
+                    .accessibilityIdentifier("qa.widget.shows")
+                    .accessibilityValue(NextUpSnapshotStore.shared.snapshot?.items.map(\.id).joined(separator: ",") ?? "none")
+                Text("QA widget snapshot generation")
+                    .accessibilityIdentifier("qa.widget.generation")
+                    .accessibilityValue(NextUpSnapshotStore.shared.snapshot?.owner.generation.uuidString ?? "none")
+                Text("QA widget active owner")
+                    .accessibilityIdentifier("qa.widget.activeOwner")
+                    .accessibilityValue(NextUpSnapshotStore.shared.current?.key ?? "none")
+                Text("QA widget stored files")
+                    .accessibilityIdentifier("qa.widget.files")
+                    .accessibilityValue({
+                        _ = NextUpSnapshotStore.shared.revision
+                        guard let directory = NextUpSnapshot.directory,
+                              let files = try? FileManager.default.contentsOfDirectory(atPath: directory.path) else { return "0" }
+                        return String(files.count)
+                    }())
                 Text("QA durable tracking intents")
                     .accessibilityIdentifier("qa.journal.count")
                     .accessibilityValue(String(SyncCenter.shared.qaJournalCount))
@@ -101,6 +181,7 @@ extension View {
             .foregroundStyle(.clear)
             .allowsHitTesting(false)
         }
+        .qaFilesEvidence()
         #else
         self
         #endif

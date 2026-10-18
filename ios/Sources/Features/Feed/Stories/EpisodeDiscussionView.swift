@@ -171,7 +171,9 @@ struct EpisodeDiscussionView: View {
                 .padding(.top, ThemeSpace.x1)
                 .padding(.bottom, ThemeSpace.x4)
         }
-        .padding(.horizontal, FeedMetrics.inset + ThemeSpace.x1 + ThemeSpace.x0_5)
+        // The replies' own inset (16 since 16 Oct — it was 10, and this header 10 + 6 to reach the
+        // gutter), so the show's face and the repliers' share a column.
+        .padding(.horizontal, FeedMetrics.inset)
         .padding(.top, ThemeSpace.x3)
     }
 

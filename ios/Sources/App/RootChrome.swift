@@ -96,7 +96,7 @@ struct RootHeaderRow<Leading: View, Trailing: View>: View {
     var body: some View {
         ZStack {
             Text(title)
-                .type(ThemeType.bodyEmphasis)
+                .type(ThemeType.barTitle)
                 .foregroundStyle(ThemeColor.textPrimary)
                 .lineLimit(1)
                 .accessibilityAddTraits(.isHeader)
@@ -108,13 +108,15 @@ struct RootHeaderRow<Leading: View, Trailing: View>: View {
         }
         .padding(.horizontal, ThemeMetrics.gutter)
         .frame(height: FeedMetrics.headerRow)
+        .barInk()
         .modifier(RootChromeFade(chrome: chrome))
     }
 }
 
-/// A root's bar: the row on the canvas, flush with the page (no rule, no material — `flushTopBar`'s
-/// look), its ground running up through the status band so nothing prints under the clock once the
-/// row has gone. For a page's top safe-area inset.
+/// A root's bar: the row over a veil of the canvas (`EdgeVeil`, 16 Oct — it was an opaque slab, the
+/// owner's "black bars… taking visible space"), no rule, the veil running up through the status
+/// band so the clock stays legible over whatever passes under it once the row has gone. For a
+/// page's top safe-area inset.
 struct RootHeader<Leading: View, Trailing: View>: View {
     let title: String
     let chrome: RootChromeState
@@ -123,11 +125,11 @@ struct RootHeader<Leading: View, Trailing: View>: View {
 
     var body: some View {
         RootHeaderRow(title: title, chrome: chrome, leading: leading, trailing: trailing)
-            .background(alignment: .bottom) {
-                ThemeColor.canvas
-                    .frame(height: FeedMetrics.headerRow + ThemeMetrics.topSafeInset)
-                    .allowsHitTesting(false)
-                    .accessibilityHidden(true)
+            .background(alignment: .top) {
+                EdgeVeil(edge: .top,
+                         band: ThemeMetrics.topSafeInset + FeedMetrics.headerRow,
+                         line: ThemeMetrics.topSafeInset + FeedMetrics.headerRow / 2)
+                    .offset(y: -ThemeMetrics.topSafeInset)
             }
             .modifier(RootChromeSlide(chrome: chrome))
     }
@@ -169,5 +171,77 @@ extension View {
                 chrome.track(rest - minY)
             }
         }
+    }
+}
+
+// MARK: - The directions' one header (`Experience.doors`)
+
+private struct OpenProfileKey: EnvironmentKey {
+    static var defaultValue: (() -> Void)? { nil }
+}
+
+extension EnvironmentValues {
+    /// Opens the account sheet — set once by the tab shell, so every root's bar can carry the same
+    /// disc (the directions: one header grammar on every tab — the disc, the title, its action).
+    var openProfile: (() -> Void)? {
+        get { self[OpenProfileKey.self] }
+        set { self[OpenProfileKey.self] = newValue }
+    }
+}
+
+/// The account disc in a root's bar — Home's and the feed's, on every root (the directions).
+struct RootAccountButton: View {
+    @Environment(\.openProfile) private var openProfile
+    @Environment(AuthManager.self) private var auth
+
+    var body: some View {
+        Button { openProfile?() } label: {
+            AccountDisc(identity: auth.identity, diameter: 32, quiet: true)
+                .frame(width: FeedMetrics.actionHitHeight, height: FeedMetrics.actionHitHeight, alignment: .leading)
+                .contentShape(Rectangle())
+        }
+        .buttonStyle(FeedIconPressStyle())
+        .accessibilityLabel(Copy.Feed.profile)
+    }
+}
+
+/// A root's own search field (the directions' Library): Discover's pill, but a real field — the
+/// list it searches is right under it, so there is nothing to hand over to.
+struct RootSearchField: View {
+    @Binding var text: String
+    let prompt: String
+    @FocusState private var focused: Bool
+
+    var body: some View {
+        HStack(spacing: ThemeSpace.x2) {
+            AppGlyph(systemName: "magnifyingglass")
+                .font(ThemeType.feedMeta.font.weight(.medium))
+                .foregroundStyle(ThemeColor.feedSecondary)
+            TextField("", text: $text, prompt: Text(prompt).foregroundStyle(ThemeColor.feedSecondary))
+                .type(ThemeType.feedMeta)
+                .foregroundStyle(ThemeColor.textPrimary)
+                .focused($focused)
+                .submitLabel(.search)
+                .textInputAutocapitalization(.never)
+                .autocorrectionDisabled()
+            if !text.isEmpty {
+                Button { text = "" } label: {
+                    AppGlyph(systemName: "xmark.circle.fill")
+                        .font(.system(size: 15, weight: .medium))
+                        .foregroundStyle(ThemeColor.feedSecondary)
+                        .frame(width: 32, height: 32)
+                        .contentShape(Rectangle())
+                }
+                .buttonStyle(.plain)
+                .accessibilityLabel(Copy.Action.clear)
+            }
+        }
+        .padding(.leading, ThemeSpace.x3)
+        .padding(.trailing, text.isEmpty ? ThemeSpace.x3 : ThemeSpace.x1)
+        .frame(height: DiscoverHeader.fieldHeight)
+        .background(ThemeColor.surfaceRaised, in: Capsule())
+        .contentShape(Capsule())
+        .onTapGesture { focused = true }
+        .accessibilityElement(children: .contain)
     }
 }

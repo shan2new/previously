@@ -602,6 +602,23 @@ enum Copy {
 
     enum Confirm {
         static let notNow = "Not now"
+        static let addBeforeProgressTitle = "Add to Library?"
+        static func addBeforeProgressMessage(_ title: String, action: String) -> String {
+            "Add \(title) to your library and save this progress.\n\n\(action)"
+        }
+        static func libraryProgressChange(season: String, from: Int, to: Int) -> String {
+            let action: String
+            if to > from {
+                action = to == from + 1 ? Copy.Action.markEpisodeWatched(to)
+                    : Copy.Action.markThrough(from: from + 1, to: to)
+            } else if to < from {
+                action = to == from - 1 ? "Mark \(Copy.episode(from)) as unwatched"
+                    : "Mark episodes \(to + 1)–\(from) as unwatched"
+            } else {
+                action = "Keep your current progress"
+            }
+            return season.isEmpty ? action + "." : season + ". " + action + "."
+        }
         /// Stopping a rewatch that remembers where the show stood before it.
         static func stopRewatchRestores(at episode: Int) -> String {
             "The session stays in your history, stopped at \(Copy.episodeInSentence(episode)). Your progress goes back to where it was before the rewatch."

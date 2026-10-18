@@ -31,6 +31,8 @@ struct HomeView: View {
     let onAddShow: () -> Void
     /// The empty account's button: first run's picker (a wall of shows to tap), not a bare field.
     var onPickShows: (() -> Void)? = nil
+    /// The Discover tab — the For you shelves' way to more (the directions).
+    var onOpenDiscover: () -> Void = {}
     /// Bumped when Home is re-selected: every sheet goes, and the page goes to its top.
     let topSignal: Int
     /// Bumped by the notification route: every sheet goes (the route then pushes).
@@ -44,6 +46,9 @@ struct HomeView: View {
     let chrome: HomeChrome
     @State private var box = HomeFeedBox()
     @State private var showProfile = false
+    /// Four tabs: the feed's Activity, from Home's bell; a picked row opens once the sheet has gone.
+    @State private var showActivity = false
+    @State private var pendingActivityRoute: OpenRoute?
     /// A feed page asked for from inside Profile (Saved → a post): opened once the sheet has gone.
     @State private var pendingRouteAfterSheet: FeedRoute?
     /// A mark that covers more than one episode waits for its exact count to be confirmed.
@@ -176,9 +181,11 @@ struct HomeView: View {
     /// Composed once per library and minute — never in a body.
     private var feed: HomeFeed {
         let key = appModel.scheduleFeedKey
-        if box.key == key { return box.value }
+        let experience = appModel.experience
+        if box.key == key, box.experience == experience { return box.value }
         let value = HomeCompose.feed(appModel)
         box.key = key
+        box.experience = experience
         box.value = value
         return value
     }
@@ -224,6 +231,8 @@ struct HomeView: View {
                 HomeHeader(chrome: chrome,
                            ground: ground,
                            veil: veil(feed),
+                           onActivity: appModel.experience.feedInHome ? { showActivity = true } : nil,
+                           unread: appModel.activityUnread,
                            onProfile: { showProfile = true },
                            onTop: { scrollToTop(proxy) })
             }
@@ -239,7 +248,7 @@ struct HomeView: View {
                 scrollToTop(proxy)
             }
             #if DEBUG
-            // `-homeAnchor recent|upnext` (DEBUG): a capture scrolled to a section.
+            // `-homeAnchor recent|upnext|news` (DEBUG): a capture scrolled to a section.
             .task(id: appModel.library.isEmpty) {
                 guard !appModel.library.isEmpty, let anchor = UserDefaults.standard.string(forKey: "homeAnchor") else { return }
                 try? await Task.sleep(for: .milliseconds(1200))
@@ -247,7 +256,7 @@ struct HomeView: View {
             }
             #endif
         }
-        .background(ThemeColor.canvas.ignoresSafeArea())
+        .background(AppGround())
         .preference(key: TabBarGroundKey.self, value: Color.clear)
         // The bar is Home's own; no system edge effect and no system navigation bar under it.
         .chromeScrollEdgeHidden(.all)
@@ -260,6 +269,13 @@ struct HomeView: View {
                         },
                         onClose: { closeStory() })
                 .presentationBackground(.clear)
+        }
+        .sheet(isPresented: $showActivity, onDismiss: activityDismissed) {
+            ActivitySheet(onOpen: { route in
+                pendingActivityRoute = route
+                showActivity = false
+            })
+            .perfScreen("Activity")
         }
         .sheet(isPresented: $showProfile, onDismiss: profileDismissed) {
             ProfileView(onOpenLibrary: { status in
@@ -335,7 +351,32 @@ struct HomeView: View {
                 .padding(.horizontal, ThemeMetrics.gutter)
                 .padding(.top, band + ThemeSpace.x10 * 2)
         } else if feed.isEmpty {
-            caughtUp
+            if appModel.experience.doors {
+                // The directions: caught up is one line and the way to Schedule, then shows for you —
+                // the moment someone most needs a next show is the moment Home has nothing of theirs.
+                // Stage's language leads with a picture (17 Oct: "the home looks really shitty in
+                // this state", owner — a card for tonight, then nothing): with nothing of yours out,
+                // the stage is the show you would most likely start, edge to edge. Calm has none.
+                let lead = appModel.experience.stage ? HomeForYou.lead(appModel) : nil
+                if let lead {
+                    ForYouTopPick(item: lead, reason: appModel.spokenReason(lead), fullBleed: true) {
+                        openRecommendation(lead)
+                    }
+                    .rootArrival(0)
+                }
+                caughtUpDoors(afterLead: lead != nil).rootArrival(1)
+                if appModel.experience.feedInHome {
+                    HomeNews(onOpenPost: { onOpenRoute(.post(id: $0)) },
+                             onOpenShow: { onOpenDetail($0, "home-news/\($0)", nil) },
+                             onSeeAll: { onOpenRoute(.news) })
+                        .id("home/news")
+                        .rootArrival(2)
+                }
+                HomeForYou(leading: false, excluding: lead?.key, onOpen: openRecommendation, onSeeAll: onOpenDiscover)
+                    .rootArrival(3)
+            } else {
+                caughtUp
+            }
         } else {
             if feed.heroes.count > 1 {
                 // The week's drops, paged (9 Oct). The pager is keyed on its SHOWS: a mark rolls a
@@ -382,8 +423,63 @@ struct HomeView: View {
             // The first section under the billboard sits close to its mark (the old Today's x4: the
             // pill to the next header ≈ 36 pt), the rest a section's gap apart.
             let lead = feed.hero != nil
-            if !feed.recent.isEmpty { recent(feed.recent, leading: lead) }
-            if !feed.queue.isEmpty { upNext(feed.queue, leading: lead && feed.recent.isEmpty) }
+            if !feed.recent.isEmpty { recent(feed.recent, leading: lead).rootArrival(1) }
+            if !feed.queue.isEmpty { upNext(feed.queue, leading: lead && feed.recent.isEmpty).rootArrival(2) }
+            if appModel.experience.feedInHome {
+                // Four tabs: the feed is Home's News section (its page is "News ›").
+                HomeNews(onOpenPost: { onOpenRoute(.post(id: $0)) },
+                         onOpenShow: { onOpenDetail($0, "home-news/\($0)", nil) },
+                         onSeeAll: { onOpenRoute(.news) })
+                    .id("home/news")
+                    .rootArrival(3)
+            }
+            if appModel.experience.doors {
+                // The directions: your shows first, then two shelves of shows for you.
+                HomeForYou(leading: !lead && feed.recent.isEmpty && feed.queue.isEmpty,
+                           onOpen: openRecommendation, onSeeAll: onOpenDiscover)
+                    .rootArrival(4)
+            }
+        }
+    }
+
+    /// The directions' caught-up line (`Experience.doors`): said once, with the next airing as the way
+    /// to Schedule — Home never draws the future itself.
+    private func caughtUpDoors(afterLead: Bool) -> some View {
+        VStack(alignment: .leading, spacing: ThemeSpace.x2) {
+            Text(Copy.Home.caughtUpLine)
+                .type(ThemeType.sectionTitle)
+                .foregroundStyle(ThemeColor.textPrimary)
+            if let next = nextAiring {
+                Button(action: onOpenSchedule) {
+                    HStack(spacing: ThemeSpace.x1) {
+                        Text(Copy.Home.nextAiring(next.franchise.displayTitle,
+                                                  TemporalCopy.airs(at: next.at, now: appModel.nowMinute,
+                                                                    source: next.franchise.source)))
+                            .lineLimit(2)
+                        AppGlyph(systemName: "chevron.forward")
+                            .font(.system(size: 12, weight: .semibold))
+                    }
+                    .type(ThemeType.metadata)
+                    .foregroundStyle(ThemeColor.textSecondary)
+                    .frame(minHeight: 44, alignment: .leading)
+                    .contentShape(Rectangle())
+                }
+                .buttonStyle(.plain)
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(.horizontal, ThemeMetrics.gutter)
+        .padding(.top, afterLead ? ThemeSpace.x4 : band + ThemeSpace.x6)
+    }
+
+    /// The next airing on the calendar, for the caught-up line.
+    private var nextAiring: AppModel.ScheduleEntry? {
+        appModel.scheduleDays.filter { $0.id >= 0 }.lazy.flatMap { $0.entries.filter { !$0.aired } }.first
+    }
+
+    private func openRecommendation(_ r: RecommendationItem) {
+        Task {
+            if let id = await appModel.franchiseId(for: r) { onOpenDetail(id, "home-foryou/\(r.key)", nil) }
         }
     }
 
@@ -412,7 +508,8 @@ struct HomeView: View {
     /// card runs gutter to gutter.
     private func recentDrops(_ items: [HomeAiring], leading: Bool) -> some View {
         VStack(alignment: .leading, spacing: ThemeMetrics.labelGap) {
-            SectionHeaderRow(Copy.Home.recentlyAired, action: onOpenSchedule)
+            // The directions: the week behind is Home's alone; Schedule starts at today.
+            SectionHeaderRow(Copy.Home.recentlyAired, action: appModel.experience.doors ? nil : onOpenSchedule)
                 .padding(.horizontal, ThemeMetrics.gutter)
             if items.count == 1, let item = items.first {
                 dropCard(item, width: ThemeMetrics.windowWidth - 2 * ThemeMetrics.gutter)
@@ -449,6 +546,7 @@ struct HomeView: View {
         let run = max(1, e.episode - e.part.progress)
         return HomeDropCard(entry: e, run: run, line: dropLine(e, run: run), now: appModel.nowMinute, width: width,
                             committing: committingRows.contains(item.id),
+                            lit: !appModel.experience.calm,
                             onOpen: {
                                 onOpenDetail(e.franchise.id, "home-drop/\(item.id)",
                                              EpisodeFocus(mediaId: e.part.mediaId, episode: e.part.progress + 1))
@@ -633,8 +731,36 @@ struct HomeView: View {
 
     // MARK: - Loading
 
-    /// The loading frame in the screen's own shape: the billboard's ground, then a shelf of posters.
+    /// The loading frame in the screen's own shape: the billboard's ground (Calm: the first drop's
+    /// card under its title, below the bar), then a shelf of posters.
+    @ViewBuilder
     private var skeleton: some View {
+        if appModel.experience.calm {
+            calmSkeleton
+        } else {
+            stageSkeleton
+        }
+    }
+
+    private var calmSkeleton: some View {
+        let width = ThemeMetrics.windowWidth - 2 * ThemeMetrics.gutter
+        return VStack(alignment: .leading, spacing: ThemeMetrics.labelGap) {
+            SkeletonLine(width: 132, height: 19)
+            SkeletonBlock(width: width, height: (width * 9 / 16).rounded(), radius: ThemeRadius.card)
+            SkeletonLine(width: 96, height: 19)
+                .padding(.top, ThemeMetrics.sectionGap)
+            HStack(spacing: ThemeMetrics.shelfGap) {
+                ForEach(0..<3, id: \.self) { _ in
+                    SkeletonPoster(width: 150, height: 225, radius: ThemeRadius.poster)
+                }
+            }
+        }
+        .padding(.horizontal, ThemeMetrics.gutter)
+        .padding(.top, band + ThemeMetrics.sectionGap)
+        .accessibilityHidden(true)
+    }
+
+    private var stageSkeleton: some View {
         VStack(alignment: .leading, spacing: ThemeSpace.x3) {
             SkeletonBlock(width: nil, height: billboardHeight, radius: 0)
             SkeletonLine(width: 96, height: 19)
@@ -749,6 +875,26 @@ struct HomeView: View {
         pendingRouteAfterSheet = nil
         prompt = nil
         showProfile = false
+    }
+
+    /// Four tabs: Activity closed — read, and the row it was closed for opens.
+    private func activityDismissed() {
+        appModel.markActivityRead()
+        guard let route = pendingActivityRoute else { return }
+        pendingActivityRoute = nil
+        switch route {
+        case .show(let id):
+            onOpenDetail(id, "activity/\(id)", nil)
+        case .post(let postId, let commentId):
+            onOpenRoute(.post(id: postId, focusCommentId: commentId))
+        case .thread(let subject, let franchiseId, let commentId):
+            if let ep = ThreadSubject.parseEpisode(subject) {
+                onOpenRoute(.episode(franchiseId: franchiseId, mediaId: ep.mediaId, episode: ep.episode,
+                                     focusCommentId: commentId))
+            } else {
+                onOpenRoute(.post(id: subject, focusCommentId: commentId))
+            }
+        }
     }
 
     private func profileDismissed() {

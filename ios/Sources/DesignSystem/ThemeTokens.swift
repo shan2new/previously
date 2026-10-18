@@ -575,14 +575,14 @@ struct TypeToken {
 }
 
 enum ThemeType {
-    static let brandWordmark = TypeToken(font: .custom("Outfit-SemiBold", size: 20, relativeTo: .headline), tracking: -0.30)
-    static let displayXL = TypeToken(font: .custom("Outfit-Bold", size: 34, relativeTo: .largeTitle), tracking: -0.80)
+    static let brandWordmark = TypeToken(.display, .semibold, 20, .headline, tracking: -0.30)
+    static let displayXL = TypeToken(.display, .bold, 34, .largeTitle, tracking: -0.80)
     /// The name at display size, in the wordmark's own weight: where the brand is the subject (the
     /// launch and the sign-in gate), "Previously." is SemiBold like the header's `Wordmark`.
-    static let brandDisplay = TypeToken(font: .custom("Outfit-SemiBold", size: 34, relativeTo: .largeTitle), tracking: -0.60)
-    static let displayL = TypeToken(font: .custom("Outfit-Bold", size: 28, relativeTo: .title), tracking: -0.60)
-    static let showTitleL = TypeToken(font: .custom("Outfit-SemiBold", size: 22, relativeTo: .title2), tracking: -0.35)
-    static let showTitleM = TypeToken(font: .custom("Outfit-SemiBold", size: 17, relativeTo: .headline), tracking: -0.20)
+    static let brandDisplay = TypeToken(.display, .semibold, 34, .largeTitle, tracking: -0.60)
+    static let displayL = TypeToken(.display, .bold, 28, .title, tracking: -0.60)
+    static let showTitleL = TypeToken(.display, .semibold, 22, .title2, tracking: -0.35)
+    static let showTitleM = TypeToken(.title, .semibold, 17, .headline, tracking: -0.20)
     /// THE section header (2 Sep). Every shelf and list section in the app is headed by this —
     /// mixed case, the app's voice, with a trailing chevron when the header is the way into the
     /// section. It replaces the 11-pt small-caps `SectionLabel` as the header family: Apple TV,
@@ -591,21 +591,21 @@ enum ThemeType {
     /// caps stay for EYEBROWS (`OverArtLabel`, a grouped list's header) — the two levels now
     /// split cleanly instead of one token doing both jobs.
     /// (`showTitleS` and `screenTitle` are gone, 30 Aug: no call sites.)
-    static let sectionTitle = TypeToken(font: .custom("Outfit-SemiBold", size: 20, relativeTo: .title3), tracking: -0.30)
-    static let body = TypeToken(font: .custom("Outfit-Regular", size: 17, relativeTo: .body), tracking: -0.10)
-    static let bodyEmphasis = TypeToken(font: .custom("Outfit-SemiBold", size: 17, relativeTo: .body), tracking: -0.20)
-    static let button = TypeToken(font: .custom("Outfit-SemiBold", size: 16, relativeTo: .callout), tracking: -0.15)
-    static let callout = TypeToken(font: .custom("Outfit-Regular", size: 16, relativeTo: .callout), tracking: -0.10)
-    static let metadata = TypeToken(font: .footnote, tracking: 0)
-    static let metadataEmphasis = TypeToken(font: .system(.footnote, weight: .semibold), tracking: 0)
-    static let sectionLabel = TypeToken(font: .system(.caption2, weight: .semibold), tracking: 1.0)
+    static let sectionTitle = TypeToken(.display, .semibold, 20, .title3, tracking: -0.30)
+    static let body = TypeToken(.text, .regular, 17, .body, tracking: -0.10)
+    static let bodyEmphasis = TypeToken(.title, .semibold, 17, .body, tracking: -0.20)
+    static let button = TypeToken(.display, .semibold, 16, .callout, tracking: -0.15)
+    static let callout = TypeToken(.text, .regular, 16, .callout, tracking: -0.10)
+    static let metadata = TypeToken(.annotation, .regular, 13, .footnote)
+    static let metadataEmphasis = TypeToken(.annotation, .semibold, 13, .footnote)
+    static let sectionLabel = TypeToken(.annotation, .semibold, 11, .caption2, tracking: 1.0)
     /// The BILLBOARD's badge — "NEW EPISODE", "4 EPISODES BEHIND", "TRENDING" — the streaming
     /// apps' filled tag (Prime Video's and Disney+'s "NEW EPISODE"), 11-pt bold caps on an amber
     /// ground (`HeroBadge`, 4 Sep). A ground, so no amber word is drawn.
-    static let heroBadge = TypeToken(font: .system(.caption2, weight: .bold), tracking: 0.6)
-    static let caption = TypeToken(font: .caption2, tracking: 0)
-    static let numberXL = TypeToken(font: .system(.largeTitle, weight: .bold).monospacedDigit(), tracking: -0.50)
-    static let time = TypeToken(font: .system(.subheadline, weight: .semibold).monospacedDigit(), tracking: 0)
+    static let heroBadge = TypeToken(.annotation, .bold, 11, .caption2, tracking: 0.6)
+    static let caption = TypeToken(.annotation, .regular, 11, .caption2)
+    static let numberXL = TypeToken(.annotation, .bold, 34, .largeTitle, tracking: -0.50, monospacedDigits: true)
+    static let time = TypeToken(.annotation, .semibold, 15, .subheadline, monospacedDigits: true)
 }
 
 // MARK: - Type by context
@@ -642,9 +642,9 @@ enum ThemeType {
 //     action     listAction    Outfit SemiBold 13 / interactive  ← an inline link ("Clear"); never amber
 extension ThemeType {
     /// Detail hero. Identity gets the biggest cut in the app after the wordmark.
-    static let heroTitle = TypeToken(font: .custom("Outfit-Bold", size: 28, relativeTo: .title), tracking: -0.55)
+    static let heroTitle = TypeToken(.display, .bold, 28, .title, tracking: -0.55)
     /// The genre/network/year line under a hero title.
-    static let heroMeta = TypeToken(font: .custom("Outfit-Regular", size: 15, relativeTo: .subheadline), tracking: -0.05)
+    static let heroMeta = TypeToken(.text, .regular, 15, .subheadline, tracking: -0.05)
     /// Long-form reading text — Detail's synopsis, the one paragraph in the app. Subheadline, with
     /// the call site opening the leading (`lineSpacing(5)`). It was `body`: 17-pt default-leading
     /// grey — visually an unstyled SwiftUI `Text` — and TWO POINTS LARGER than the hero's own
@@ -652,23 +652,68 @@ extension ThemeType {
     /// step down (user device, 30 Aug: "the description font looks plain wrong").
     /// Deliberately still SF under the "Outfit speaks" rule: a synopsis is quoted CONTENT, not
     /// the app's voice, and SF reads better than a geometric sans over a full paragraph.
-    static let prose = TypeToken(font: .system(.subheadline), tracking: 0)
+    static let prose = TypeToken(.reading, .regular, 15, .subheadline)
     /// The single load-bearing fact on a card ("Season 7 · Episode 2"). Primary, not secondary:
     /// a fact the whole card exists to deliver may not be rendered in the same grey as its footnote.
-    static let cardFact = TypeToken(font: .custom("Outfit-SemiBold", size: 15, relativeTo: .subheadline), tracking: -0.10)
+    static let cardFact = TypeToken(.title, .semibold, 15, .subheadline, tracking: -0.10)
     /// Repeating media row title.
-    static let rowTitle = TypeToken(font: .custom("Outfit-SemiBold", size: 17, relativeTo: .headline), tracking: -0.20)
+    static let rowTitle = TypeToken(.title, .semibold, 17, .headline, tracking: -0.20)
     /// Repeating media row metadata.
-    static let rowMeta = TypeToken(font: .footnote, tracking: 0)
+    static let rowMeta = TypeToken(.annotation, .regular, 13, .footnote)
     /// A row's forward-looking fact — "Returns Oct 2", "Episode 19 next". Rendered in accent.
-    static let rowMetaLead = TypeToken(font: .system(.footnote, weight: .semibold), tracking: 0)
+    static let rowMetaLead = TypeToken(.annotation, .semibold, 13, .footnote)
     /// Shelf caption under a poster.
-    static let shelfTitle = TypeToken(font: .custom("Outfit-Medium", size: 14, relativeTo: .subheadline), tracking: -0.10)
-    static let shelfCaption = TypeToken(font: .system(.caption, weight: .medium), tracking: 0)
+    static let shelfTitle = TypeToken(.title, .medium, 14, .subheadline, tracking: -0.10)
+    static let shelfCaption = TypeToken(.annotation, .medium, 12, .caption)
+    /// A screen's title in its bar — `brandNavigationTitle` and the roots' own header row. DISPLAY:
+    /// the title is the app's identity, in Outfit whatever face the content is set in (19 Oct).
+    static let barTitle = TypeToken(.display, .semibold, 17, .body, tracking: -0.20)
+    /// A news story's headline (19 Oct, `NewsCard` / `NewsRow`): the row title's cut, and the News
+    /// page's lead a step larger, in the set's text face.
+    static let newsHeadline = TypeToken(.headline, .semibold, 17, .headline, tracking: -0.20)
+    static let newsLeadHeadline = TypeToken(.headline, .semibold, 22, .title2, tracking: -0.35)
     /// An inline text action in a section header ("See all", "Clear"). Deliberately smaller than
     /// `button`: a 16-pt semibold word beside an 11-pt grey label wins a fight it should lose.
     /// Rendered in `ThemeColor.interactive` — a link is an action, and actions are not amber.
-    static let listAction = TypeToken(font: .custom("Outfit-SemiBold", size: 13, relativeTo: .footnote), tracking: 0)
+    static let listAction = TypeToken(.text, .semibold, 13, .footnote)
+}
+
+// MARK: - Schedule's agenda rows (16 Oct)
+//
+// "The Schedule screen list items needs rework and polish as the way the font is being shown looks
+// really cheapish" (owner, 16 Oct). The rows wore X's ONE-line pairing — a name and its handle at
+// the same 16 pt (`feedName` SemiBold / `feedMeta` Regular) — stacked on TWO lines, so the caption
+// was as big as the name and the row read as a paragraph in two weights; a third size (`feedSmall`
+// 13) carried the season under it, and the date column's numeral (`feedDate`, SemiBold 18) was
+// bigger than the name and as heavy, a second name in the margin. Five styles in one row, three of
+// them fighting for the first read. Now four, one step apart on one scale (11 · 14 · 17 · 22), each
+// with one job, and the hierarchy said three ways at once — size, weight and ink.
+enum ScheduleTypeScale {
+    static let caps: CGFloat = 11
+    static let meta: CGFloat = 14
+    static let title: CGFloat = 17
+    static let date: CGFloat = 22
+    /// Outfit's capital height as a fraction of its size (OS/2 sCapHeight 694–706 of 1000) — what
+    /// the rows centre their words by (`ScheduleInkCentre`).
+    static let capHeight: CGFloat = 0.70
+}
+
+extension ThemeType {
+    /// The show's name on an agenda row — the app's row title (`rowTitle`'s cut), not X's 16.
+    static let scheduleTitle = TypeToken(.title, .semibold, ScheduleTypeScale.title, .headline, tracking: -0.20)
+    /// What airs and when — "Episode 14 · 7:30 PM", and the season under it — three points under the
+    /// name, Regular, a hair open (light type on a dark ground reads tighter than it is set).
+    /// PROPORTIONAL figures, deliberately: Outfit's tabular set (`tnum`) draws every digit 590 units
+    /// wide against a proportional 1 of 347, so "Episode 14" read "1 4" — and nothing on the row
+    /// stacks in a column; the countdown's minute only moves the end of its own line.
+    static let scheduleMeta = TypeToken(.text, .regular, ScheduleTypeScale.meta, .subheadline, tracking: 0.10)
+    /// Schedule's caps in the agenda — the date column's weekday ("WED", a Later row's "OCT"), the
+    /// month the feed crosses into, "LATER". One caps style in the list, a size under the old 12.
+    static let scheduleCaps = TypeToken(.text, .semibold, ScheduleTypeScale.caps, .caption2, tracking: 0.80)
+    /// The date column's numeral: large and REGULAR — a calendar's margin (Fantastical's, Google
+    /// Calendar's schedule), never a second name beside the SemiBold one. Proportional, as it is
+    /// centred in its column and a tabular "11" is two digits with a gap.
+    static let scheduleDate = TypeToken(.text, .regular, ScheduleTypeScale.date, .subheadline, tracking: -0.30)
 }
 
 extension View {

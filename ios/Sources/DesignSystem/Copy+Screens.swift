@@ -189,6 +189,14 @@ extension Copy {
         static let posts = "Posts"
         static let media = "Media"
         static let about = "About"
+        /// The directions' show-page section (`Experience.doors`): what to watch after this.
+        static let similar = "Similar"
+        /// About's facts (19 Oct, `ShowInfoList`), each under its name.
+        static let infoType = "Type"
+        static let infoGenres = "Genres"
+        static let infoThemes = "Themes"
+        static let infoSeasons = "Seasons"
+        static let infoNext = "Next episode"
         /// X's label over a pinned post — here, the next episode.
         static let pinned = "Pinned"
         /// X's empty timeline: a bold line and one grey sentence.
@@ -240,6 +248,10 @@ extension Copy {
         static let calendarHidden = "Hidden"
         static let previousMonth = "Previous month"
         static let nextMonth = "Next month"
+        /// The week strip under the bar (19 Oct) and its VoiceOver actions.
+        static let week = "Week"
+        static let previousWeek = "Previous week"
+        static let nextWeek = "Next week"
         /// A day in the grid past the end of the feed's window. Not "no episodes" — the app does
         /// not know yet, and saying it does is a different claim.
         static let beyondHorizon = "Not scheduled yet"
@@ -258,6 +270,12 @@ extension Copy {
         /// The group under the closing line: each show's next dated airing past the window, one row
         /// per show — for the shows the window goes quiet on (Bleach resuming after a break).
         static let later = "Later"
+        /// The directions (`Experience.doors`): an aired row's state where the mark was — Schedule
+        /// says when; the mark lives on Home and the show page.
+        static let outTag = "Out"
+        /// The directions: Library's Returning and Announced shelves, moved to the end of the
+        /// calendar — a show's next installment is a fact about what is coming.
+        static let comingBack = "Coming back"
         /// The card's eyebrow for an episode that has aired and is unwatched: the next thing to watch
         /// is out. Otherwise the eyebrow is the moment in the app's one ladder (`TemporalCopy.airs`).
         static let outNow = "Out now"
@@ -339,6 +357,21 @@ extension Copy {
             }
         }
         static func attribution(_ provider: String) -> String { "Streaming availability by \(provider)" }
+        /// The show page's line under the action row (16 Oct): the services by name, the rest
+        /// counted — "Watch on Netflix", "… on Netflix and Crunchyroll", "… on Netflix and 2 more";
+        /// `compact` (the accessibility sizes) counts from the second.
+        static func watchOn(_ names: [String], compact: Bool = false) -> String {
+            guard let first = names.first else { return Copy.Heading.whereToWatch }
+            switch names.count {
+            case 1: return "Watch on \(first)"
+            case 2 where !compact: return "Watch on \(first) and \(names[1])"
+            default: return "Watch on \(first) and \(names.count - 1) more"
+            }
+        }
+        /// VoiceOver hears every service, not the count.
+        static func watchOnSpoken(_ names: [String]) -> String {
+            names.isEmpty ? Copy.Heading.whereToWatch : "Watch on \(names.formatted(.list(type: .and)))"
+        }
     }
 }
 

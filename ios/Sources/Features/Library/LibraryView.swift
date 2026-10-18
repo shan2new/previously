@@ -88,7 +88,33 @@ struct LibraryView: View {
         var id: String { "\(status?.rawValue ?? "-")/\(returning?.rawValue ?? "-")/\(unwatchedOnly)/\(sort?.rawValue ?? "-")" }
     }
 
+    /// The directions' root list's seed: a route another screen asked for ("Up next ›" → Watching).
+    @State private var rootRoute = AllTitlesRoute()
+
     var body: some View {
+        if appModel.experience.doors {
+            doorsRoot
+        } else {
+            shelvesRoot
+        }
+    }
+
+    /// The directions (`Experience.doors`): the Library tab IS the list — every show you own,
+    /// findable. Continue watching is Home's, Returning and Announced are Schedule's.
+    private var doorsRoot: some View {
+        LibraryAllView(initialStatus: rootRoute.status, initialReturning: rootRoute.returning,
+                       initialSort: rootRoute.sort ?? .title, initialUnwatchedOnly: rootRoute.unwatchedOnly,
+                       root: true, chrome: chrome, onOpenDetail: onOpenDetail, onAddShow: onAddShow)
+            // A new route re-seeds the list (its filters live in the list's own state).
+            .id(rootRoute.id)
+            .onChange(of: requestedAll, initial: true) { _, route in
+                guard let route else { return }
+                rootRoute = route
+                requestedAll = nil
+            }
+    }
+
+    private var shelvesRoot: some View {
         // One pass over the shelves per render.
         let sections = rootSections()
         // `watchingShelf` also contains titles that are caught up and merely waiting. The hero is
@@ -96,8 +122,9 @@ struct LibraryView: View {
         let heroItems = appModel.watchingShelf.filter { $0.resumePart != nil }
         let ambientArtwork = washArtwork(sections, heroItems: heroItems)
         return ZStack(alignment: .top) {
-            // Flat, as Today is: no wash behind the title (25 Sep, `flushTopBar`).
-            ThemeColor.canvas.ignoresSafeArea()
+            // The viewer's ground (19 Oct, `AppGround`): the canvas with a breath of their kind's
+            // light — no art wash behind the title (25 Sep).
+            AppGround()
             ScrollView {
                 VStack(alignment: .leading, spacing: 0) {
                     // The refresh indicator and the stale strip, composed by the shared modifier
@@ -566,6 +593,12 @@ struct LibraryAllView: View {
     var onAddShow: () -> Void = {}
     /// The artwork the ROOT's wash is lit by, handed through the push.
     var washArt: String? = nil
+    /// The directions (`Experience.doors`): this list IS the Library tab — the field always there,
+    /// the status a row of chips with counts, the posters as one grid. Retrieval first: the
+    /// shelves it replaces showed two and a half cards of each bucket and hid the rest.
+    var root: Bool = false
+    /// The root's bar (the tab bar rides it), as every root's.
+    var chrome = RootChromeState()
     /// The incoming filter is seeded into `@State` at INIT, not applied in `onAppear`. Applied
     /// late, the screen builds once unfiltered and once filtered — the user sees the whole library
     /// flash past on the way to the six rows they asked for, and the rows that survive both passes
@@ -576,9 +609,12 @@ struct LibraryAllView: View {
     /// was how the list could disagree with the count that opened it.
     init(initialStatus: WatchStatus? = nil, initialReturning: ReturnScope? = nil,
          initialSort: Sort = .title, initialUnwatchedOnly: Bool = false,
-         washArt: String? = nil,
+         washArt: String? = nil, root: Bool = false, chrome: RootChromeState = RootChromeState(),
          onOpenDetail: @escaping (_ franchiseId: String, _ zoomID: String) -> Void,
          onAddShow: @escaping () -> Void = {}) {
+        self.root = root
+        self.chrome = chrome
+        _display = State(initialValue: root ? .posters : .list)
         self.onOpenDetail = onOpenDetail
         self.onAddShow = onAddShow
         self.washArt = washArt
@@ -751,9 +787,11 @@ struct LibraryAllView: View {
         // Resolved ONCE per render, top to bottom: the rows, their sections, and the two facts
         // the chrome derives from them.
         let results = filtered()
-        let sections = titleSections(results)
-        let sectioned = isSectioned(results)
-        let rail = showsRail(results)
+        // The root (the directions) is ONE grid: letter sections left holes at every letter's last
+        // row, and the field above it is the way to a name, so it carries no index rail.
+        let sections = root ? [TitleSection(key: "", items: results)] : titleSections(results)
+        let sectioned = !root && isSectioned(results)
+        let rail = !root && showsRail(results)
         // The reader wraps the SCROLL VIEW. It used to sit inside the content, around the lazy
         // stack — which then had no scroll container to size against, reported zero height, and
         // drew its rows over the footer count that followed it ("30 titles" under the first row).
@@ -771,6 +809,14 @@ struct LibraryAllView: View {
                         .padding(.horizontal, ThemeMetrics.gutter).padding(.top, ThemeSpace.x3)
                 }
 
+                if root && !appModel.library.isEmpty {
+                    RootSearchField(text: $query, prompt: Copy.Library.searchPrompt)
+                        .padding(.horizontal, ThemeMetrics.gutter)
+                        .padding(.top, ThemeSpace.x1)
+                        .padding(.bottom, ThemeSpace.x3)
+                        .rootArrival(0)
+                    statusRow.rootArrival(1)
+                }
                 if !activeChips.isEmpty { chipRow }
 
                 SkeletonGate(isLoading: appModel.loading && appModel.library.isEmpty) {
@@ -798,6 +844,7 @@ struct LibraryAllView: View {
                             .centredState(contentH: contentHeight)
                     } else if display == .posters && !typeSize.isAccessibilitySize {
                         grid(sections, sectioned: sectioned, rail: rail).padding(.top, ThemeSpace.x2)
+                            .rootArrival(root ? 2 : 0)
                     } else {
                         // No lead-in: the search drawer already carries its own margin, and the
                         // first row's own 8-pt padding is the gap iOS lists keep under a field.
@@ -815,6 +862,8 @@ struct LibraryAllView: View {
                 }
             }
             .onGeometryChange(for: CGFloat.self) { $0.size.width } action: { contentWidth = $0 }
+            // The root's bar leaves with a reader's scroll, as every root's (the directions).
+            .rootChromeProbe(chrome, rest: ThemeMetrics.topSafeInset + FeedMetrics.headerRow)
             // The raised-edge probe (geometry-based; `onScrollGeometryChange` is dead on the
             // iOS 27 simulator). The drawer sits under the title, so content starts lower here —
             // the same status-band threshold still only trips once it has really scrolled.
@@ -828,14 +877,14 @@ struct LibraryAllView: View {
             }
         }
         .scrollIndicators(.hidden)
+        .onScrollPhaseChange { _, phase in chrome.phase(phase) }
         .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { contentHeight = $0 }
         .onChange(of: railScroll) { _, key in
             guard let key else { return }
             proxy.scrollTo("sec-\(key)", anchor: .top)
         }
-        // Flat, as the root and Today are (25 Sep, `flushTopBar`).
-        .background(ThemeColor.canvas.ignoresSafeArea())
-        .flushTopBar(searchChromeBottom)
+        // The root's ground (19 Oct, `AppGround`).
+        .background(AppGround())
         .toolbarBackground(.hidden, for: .navigationBar)
         .chromeScrollEdgeHidden(.top)
         .laneClearance(appModel, base: ThemeMetrics.tabBarClearance)
@@ -845,30 +894,11 @@ struct LibraryAllView: View {
         // artwork, and a tap near a poster's right edge could be swallowed by the rail's gesture.
         .environment(\.listTrailingInset, rail ? LibraryAllView.railLane : 0)
         .overlay(alignment: .trailing) { if rail { indexRail(sections) } }
-        .brandNavigationTitle(Copy.Heading.allTitles)
-        .navigationBarTitleDisplayMode(.inline)
-        .toolbar(.visible, for: .navigationBar)
-        .searchable(text: $query, isPresented: $searchPresented,
-                    placement: .navigationBarDrawer(displayMode: .always),
-                    prompt: Copy.Library.searchPrompt)
-        // The same field discipline as Search: titles are names, not sentences, and the keyboard
-        // follows the finger down. This one auto-capitalised and sat over its own results.
-        .textInputAutocapitalization(.never)
-        .autocorrectionDisabled()
-        .scrollDismissesKeyboard(.interactively)
+        .modifier(LibraryChrome(root: root, chrome: chrome, query: $query, searchPresented: $searchPresented,
+                                hasFilters: hasFilters, showArrange: $showArrange,
+                                searchChromeBottom: searchChromeBottom))
         // It drew the catalogue's stale strip with no gesture to answer it.
         .previouslyRefreshable { await appModel.reload() }
-        .toolbar {
-            ToolbarItem(placement: .topBarTrailing) {
-                Button { showArrange = true } label: {
-                    AppGlyph(systemName: "line.3.horizontal.decrease")
-                }
-                // Accent is selection here, and only here: an idle filter control is not the
-                // screen's primary action and has no business being the loudest thing on it.
-                .tint(hasFilters ? ThemeColor.accent : ThemeColor.textPrimary)
-                .accessibilityLabel(ArrangeSheet.title)
-            }
-        }
         .sheet(isPresented: $showArrange) {
             ArrangeSheet(sort: $sort, ascending: $sortAscending, status: $status,
                          unwatchedOnly: $unwatchedOnly, display: $display, onReset: resetFilters)
@@ -920,7 +950,8 @@ struct LibraryAllView: View {
     /// `Clear` beside it that reset four unrelated things at once, none of them on screen.
     private var activeChips: [Chip] {
         var chips: [Chip] = []
-        if let text = status.chip {
+        // The root's status is its own row of chips (`statusRow`), never a removable token.
+        if !root, let text = status.chip {
             chips.append(Chip(id: "status", text: text) { self.status = .any })
         }
         if unwatchedOnly {
@@ -973,6 +1004,42 @@ struct LibraryAllView: View {
         .scrollIndicators(.hidden)
         .scrollClipDisabled()
         .padding(.bottom, ThemeSpace.x2)
+    }
+
+    /// The root's status, always on screen (`root`): "All 58 · Watching 12 · Planned 30 · …", the
+    /// one chosen lit as STATE — the instrument's first axis, where the old root needed a shelf per
+    /// bucket and a "See all" behind each.
+    private var statusRow: some View {
+        let counts = Dictionary(grouping: appModel.library, by: \.effectiveStatus).mapValues(\.count)
+        let order: [WatchStatus] = [.watching, .planned, .completed, .paused, .dropped]
+        let options: [(StatusFilter, String, Int)] = [(.any, Copy.Library.allStatus, appModel.library.count)]
+            + order.compactMap { s in counts[s].map { (.status(s), Copy.Status(s), $0) } }
+        return ScrollView(.horizontal) {
+            HStack(spacing: ThemeSpace.x2) {
+                ForEach(options, id: \.0.id) { option in
+                    let selected = status == option.0
+                    Button {
+                        guard !selected else { return }
+                        withAnimation(ThemeMotion.pick(ThemeMotion.uiSnappy, reduceMotion: reduceMotion)) {
+                            status = option.0
+                        }
+                    } label: {
+                        HStack(spacing: 5) {
+                            Text(option.1)
+                            Text("\(option.2)").opacity(0.62).monospacedDigit()
+                        }
+                        .lineLimit(1)
+                    }
+                    .buttonStyle(ChipButtonStyle(selected: selected))
+                    .accessibilityLabel("\(option.1), \(Copy.titles(option.2))")
+                    .accessibilityAddTraits(selected ? .isSelected : [])
+                }
+            }
+            .padding(.horizontal, ThemeMetrics.gutter)
+        }
+        .scrollIndicators(.hidden)
+        .scrollClipDisabled()
+        .padding(.bottom, ThemeSpace.x1)
     }
 
     private func resetFilters() {
@@ -1343,6 +1410,64 @@ struct LibraryAllView: View {
 /// `.presentationDetents([.height(h)])`, so the sheet grew 68 pt under the user's eye on first open
 /// and only looked right the second time. A custom detent computes from what the sheet actually
 /// contains — five rows, two groups, a header — scaled by the type size, and is correct on frame 1.
+/// All titles' bar, or — the directions' Library root — the root's own: the disc, "Library", the
+/// filter, over the canvas veil every root wears, with the field in the page (`RootSearchField`).
+private struct LibraryChrome: ViewModifier {
+    let root: Bool
+    let chrome: RootChromeState
+    @Binding var query: String
+    @Binding var searchPresented: Bool
+    let hasFilters: Bool
+    @Binding var showArrange: Bool
+    let searchChromeBottom: CGFloat
+
+    func body(content: Content) -> some View {
+        if root {
+            content
+                .safeAreaInset(edge: .top, spacing: 0) {
+                    RootHeader(title: Copy.Library.title, chrome: chrome) {
+                        RootAccountButton()
+                    } trailing: {
+                        RootHeaderGlyph(systemName: "line.3.horizontal.decrease",
+                                        tint: hasFilters ? ThemeColor.accent : ThemeColor.textPrimary) {
+                            showArrange = true
+                        }
+                        .accessibilityLabel(ArrangeSheet.title)
+                    }
+                }
+                .navigationTitle(Copy.Library.title)
+                .toolbar(.hidden, for: .navigationBar)
+                .scrollDismissesKeyboard(.immediately)
+        } else {
+            content
+                .flushTopBar(searchChromeBottom)
+                .brandNavigationTitle(Copy.Heading.allTitles)
+                .navigationBarTitleDisplayMode(.inline)
+                .toolbar(.visible, for: .navigationBar)
+                .searchable(text: $query, isPresented: $searchPresented,
+                            placement: .navigationBarDrawer(displayMode: .always),
+                            prompt: Copy.Library.searchPrompt)
+                // The same field discipline as Search: titles are names, not sentences, and the
+                // keyboard follows the finger down. This one auto-capitalised and sat over its own
+                // results.
+                .textInputAutocapitalization(.never)
+                .autocorrectionDisabled()
+                .scrollDismissesKeyboard(.interactively)
+                .toolbar {
+                    ToolbarItem(placement: .topBarTrailing) {
+                        Button { showArrange = true } label: {
+                            AppGlyph(systemName: "line.3.horizontal.decrease")
+                        }
+                        // Accent is selection here, and only here: an idle filter control is not the
+                        // screen's primary action and has no business being the loudest thing on it.
+                        .tint(hasFilters ? ThemeColor.accent : ThemeColor.textPrimary)
+                        .accessibilityLabel(ArrangeSheet.title)
+                    }
+                }
+        }
+    }
+}
+
 private enum ArrangeGeometry {
     /// What the detent measures: four rows in the first group, one in the second.
     static let rowCount: CGFloat = 5

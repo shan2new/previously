@@ -964,6 +964,34 @@ struct ProfileView: View {
             }
 
             #if DEBUG
+            // DEBUG ONLY. The whole-app direction (`Experience`, 16 Oct): the owner compares the
+            // directions by USING them, so the switch is here, live, and kept across launches.
+            ProfileRowLabel(symbol: "square.stack", title: "Version") {
+                Menu {
+                    ForEach(Experience.allCases) { e in
+                        // A toggle per direction: the menu draws its check, and the second text as
+                        // the item's subtitle.
+                        Toggle(isOn: Binding(get: { appModel.experience == e },
+                                             set: { if $0 { appModel.setExperience(e) } })) {
+                            Text(e.label)
+                            Text(e.summary)
+                        }
+                    }
+                } label: {
+                    HStack(spacing: ThemeSpace.x2) {
+                        Text(appModel.experience.label)
+                            .type(ThemeType.metadata)
+                            .foregroundStyle(ThemeColor.textTertiary)
+                        trailingGlyph("chevron.up.chevron.down", tint: ThemeColor.textTertiary)
+                    }
+                    .frame(minHeight: 44)
+                    .contentShape(Rectangle())
+                }
+                .alignmentGuide(.firstTextBaseline) { $0[VerticalAlignment.center] + 6 }
+            }
+            .accessibilityValue(appModel.experience.label)
+            .qaIdentifier("qa.experience")
+
             // DEBUG ONLY. The QA account is permanently caught up, so the states Today exists to
             // serve cannot be reached on a real device by tapping the icon — and a launch
             // argument (`-demoBusy 1`) is not something you can pass from the Home screen. This
@@ -995,6 +1023,7 @@ struct ProfileView: View {
                     trailingGlyph("chevron.forward", tint: ThemeColor.textDisabled, scale: 0.86)
                 }
             }
+            .qaIdentifier("qa.export.open")
             .buttonStyle(GroupedRowPressStyle())
         }
         .onChange(of: hapticsOn) { _, on in
@@ -1387,23 +1416,34 @@ private struct ExportOptionsView: View {
 
     private func exportRow(format: LibraryExport.Format, title: String, subtitle: String,
                            symbol: String, separator: Bool = true) -> some View {
-        ShareLink(item: LibraryExport(appModel: appModel, format: format),
-                  preview: SharePreview("Previously library (\(title))")) {
-            ProfileRowLabel(symbol: symbol,
-                            title: title,
-                            subtitle: subtitle,
-                            separator: separator,
-                            indicateWait: false) {
-                AppGlyph(systemName: "square.and.arrow.up")
-                    .font(.system(size: indicatorSize, weight: .semibold))
-                    .foregroundStyle(ThemeColor.textTertiary)
-                    .frame(width: 28, height: 44)
-                    .alignmentGuide(.firstTextBaseline) { $0[VerticalAlignment.center] + 6 }
+        Group {
+            if format == .json {
+                ShareLink(item: LibraryExport(appModel: appModel),
+                          preview: SharePreview("Previously library (\(title))")) {
+                    exportRowLabel(title: title, subtitle: subtitle, symbol: symbol, separator: separator)
+                }
+            } else {
+                ShareLink(item: LibraryCSVExport(appModel: appModel),
+                          preview: SharePreview("Previously library (\(title))")) {
+                    exportRowLabel(title: title, subtitle: subtitle, symbol: symbol, separator: separator)
+                }
             }
         }
         .buttonStyle(GroupedRowPressStyle())
         .accessibilityLabel("Export as \(title)")
         .accessibilityHint(subtitle)
+        .qaIdentifier(format == .json ? "qa.export.json" : "qa.export.csv")
+    }
+
+    private func exportRowLabel(title: String, subtitle: String, symbol: String, separator: Bool) -> some View {
+        ProfileRowLabel(symbol: symbol, title: title, subtitle: subtitle,
+                        separator: separator, indicateWait: false) {
+            AppGlyph(systemName: "square.and.arrow.up")
+                .font(.system(size: indicatorSize, weight: .semibold))
+                .foregroundStyle(ThemeColor.textTertiary)
+                .frame(width: 28, height: 44)
+                .alignmentGuide(.firstTextBaseline) { $0[VerticalAlignment.center] + 6 }
+        }
     }
 }
 

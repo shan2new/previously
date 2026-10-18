@@ -82,6 +82,12 @@ struct ScheduleView: View {
     @State private var monthOpen = ScheduleDebug.monthOpen
     /// Once a finger has moved the feed it belongs to the reader; the landing stops correcting.
     @State private var userScrolled = false
+    /// The app is moving the feed (a tap on the week strip or the grid, "Today"): the days it passes
+    /// on the way are not the reader's, so the strip does not follow them.
+    @State private var steering = false
+    @State private var steerToken = 0
+    /// The week strip's height — the bar's foot, for the rows that fade under it.
+    @State private var stripHeight: CGFloat = 0
     @State private var viewportH: CGFloat = 720
     /// Where the chrome band (the bar + any filter chips) ends, in screen space — the height its
     /// canvas ground is drawn at. MEASURED, not composed: the chips come and go, and the ground is
@@ -107,8 +113,10 @@ struct ScheduleView: View {
 
     private enum Metrics {
         /// A day's break: the space above its first row (the rows' own padding adds to it). The
-        /// only thing between two days — no banner, no rule.
-        static let dayGap: CGFloat = ThemeSpace.x3
+        /// only thing between two days — no banner, no rule. 16 since 16 Oct (was 12): the rows
+        /// opened to 16 pt between faces (`AgendaMetrics.vertical`), and a day's break stays twice
+        /// a row's — 32 pt face to face.
+        static let dayGap: CGFloat = ThemeSpace.x4
         /// How far past today a Later date may be, in days: the date column prints no year.
         static let laterReach = 365
     }
@@ -191,6 +199,8 @@ struct ScheduleView: View {
         let feed: AppModel.ScheduleFeedKey
         let type: MediaFilter
         let unwatched: Bool
+        /// The directions drop the past (`Experience.doors`).
+        let doors: Bool
     }
 
     @MainActor private final class DerivedBox {
@@ -199,7 +209,8 @@ struct ScheduleView: View {
     }
 
     private var derived: Derived {
-        let key = DerivedKey(feed: appModel.scheduleFeedKey, type: typeFilter, unwatched: unwatchedOnly)
+        let key = DerivedKey(feed: appModel.scheduleFeedKey, type: typeFilter, unwatched: unwatchedOnly,
+                             doors: appModel.experience.doors)
         if box.key == key { return box.value }
         let value = computeDerived()
         box.key = key
@@ -223,14 +234,18 @@ struct ScheduleView: View {
         }
         out.allEmpty = all.allSatisfy(\.isEmpty) && later.isEmpty
         out.shownEmpty = shown.allSatisfy(\.isEmpty) && out.later.isEmpty
-        out.earlier = shown.filter { $0.id < 0 && !$0.isEmpty }
+        // The directions (`Experience.doors`): Schedule is what is COMING. The week behind is Home's
+        // Recently aired, so the calendar starts at today.
+        out.earlier = appModel.experience.doors ? [] : shown.filter { $0.id < 0 && !$0.isEmpty }
         // `|| $0.id == 0`: today survives its own emptiness. `AppModel.buildScheduleDays` keeps
         // an empty today in the feed on purpose, as the anchor; dropping it here threw that away.
         out.ahead = shown.filter { $0.id >= 0 && (!$0.isEmpty || $0.id == 0) }
         out.todayFiltered = (shown.first { $0.id == 0 }?.isEmpty ?? true)
             && !(all.first { $0.id == 0 }?.isEmpty ?? true)
-        out.counts = Dictionary(shown.map { ($0.id, $0.count) }, uniquingKeysWith: { a, _ in a })
-        out.live = Set(shown.filter { $0.rows.contains { !$0.watched } }.map(\.id))
+        // The directions answer only for today onward (`earlier` is empty there).
+        let answered = appModel.experience.doors ? shown.filter { $0.id >= 0 } : shown
+        out.counts = Dictionary(answered.map { ($0.id, $0.count) }, uniquingKeysWith: { a, _ in a })
+        out.live = Set(answered.filter { $0.rows.contains { !$0.watched } }.map(\.id))
         out.feedKey = (out.earlier + out.ahead).map { $0.id * 1000 + $0.count } + [1_000_000 + out.later.count]
         if ScheduleDebug.demoStates {
             // The two most recent aired rows, so both sit near the landing: the last unwatched,
@@ -333,7 +348,8 @@ struct ScheduleView: View {
     var body: some View {
         ScrollViewReader { proxy in
             ZStack(alignment: .top) {
-            ThemeColor.canvas.ignoresSafeArea()
+            // The viewer's ground (19 Oct, `AppGround`): the canvas with a breath of their kind's light.
+            AppGround()
             ScrollView {
                 // NOT pinned: a pinned header has to occlude the rows passing under it, which means
                 // an opaque plate — and there is no header any more; the date rides the row.
@@ -378,27 +394,30 @@ struct ScheduleView: View {
             .onScrollPhaseChange { _, phase in
                 rootChrome.phase(phase)
                 if phase == .interacting { userScrolled = true }
-                // At rest, the calendar's selection moves to the day that was read — and only at
-                // rest: every automatic movement of a date control while the feed was moving was
-                // read as "bouncing" (five rounds of it, 6 Sep).
-                if phase == .idle, readingDay != selectedDay {
-                    withAnimation(ThemeMotion.pick(ThemeMotion.uiGentle, reduceMotion: reduceMotion)) {
-                        selectedDay = readingDay
-                        // The calendar follows the feed across a month boundary, so opening it
-                        // never shows a month the reader has scrolled away from.
-                        monthAnchor = readingDay
-                    }
+                // At rest, the month grid follows the feed across a month boundary, so opening it
+                // never shows a month the reader has scrolled away from; the way back to today
+                // comes up with the bar once there is somewhere to go back from — at rest, never
+                // under the finger that is scrolling the bar away.
+                if phase == .idle {
+                    if readingDay != selectedDay, !steering { selectedDay = readingDay }
+                    monthAnchor = selectedDay
+                    if awayFromToday { rootChrome.reveal() }
                 }
             }
             // The system says which targets are on screen; the earliest day among them is the one
             // at the top. No coordinate spaces, no pin-line arithmetic.
             .onScrollTargetVisibilityChange(idType: AgendaID.self, threshold: 0.2) { ids in
-                // Only RECORDED here; the calendar's selection reads it when the feed comes to
-                // rest (see above).
                 guard let day = ids.map(\.day).min() else { return }
-                // The Later group's ids reach past the window; the grid stays on the window's
-                // own months rather than turning to a month of disabled days.
-                readingDay = min(day, AppModel.scheduleAhead)
+                // A Later row's day is past the window but known (the calendars dot it); anything
+                // else is held to the window, never a week of disabled days.
+                readingDay = derived.laterCounts[day] != nil
+                    ? day : min(max(day, stripWindow.lowerBound), stripWindow.upperBound)
+                // The week strip FOLLOWS the list as it scrolls (19 Oct, "works in sync with the
+                // list scroll", owner): the disc moves the moment another day reaches the top. It
+                // moves by whole days, never per frame, and it is always the week the reader is in —
+                // the 6 Sep rail bounced because its selection jumped among days that were not on
+                // screen. A scroll the app is making passes days the reader did not pick: ignored.
+                if !steering, readingDay != selectedDay { selectedDay = readingDay }
             }
             // The calendar OVERLAYS the feed (Google Calendar's month dropdown), it does not push
             // it: 500 pt of grid inserted above a lazy stack threw the reader's place three
@@ -439,11 +458,6 @@ struct ScheduleView: View {
         .onDisappear { heldHero = nil }
         // The title stays for VoiceOver and for the back button of what this root pushes.
         .navigationTitle(Copy.Schedule.title)
-        // The way back to today is in the bar: it returns the moment there is somewhere to go back
-        // from, even with the bar scrolled away.
-        .onChange(of: awayFromToday) { _, away in
-            if away { rootChrome.reveal() }
-        }
         // An alert, not a popover pinned under the bar 180 pt from the ring (interactive review):
         // a batch changes a number the user did not type, and it always offers Cancel.
         .alert(prompt?.title ?? "", isPresented: Binding(get: { prompt != nil }, set: { if !$0 { prompt = nil } }),
@@ -571,6 +585,14 @@ struct ScheduleView: View {
         userScrolled = true
         selectedDay = day
         readingDay = day
+        // The days the scroll passes on its way are not picks: the strip holds the one that was.
+        steering = true
+        steerToken += 1
+        let token = steerToken
+        Task { @MainActor in
+            try? await Task.sleep(for: .milliseconds(650))
+            if steerToken == token { steering = false }
+        }
         // The calendar follows an explicit move as well as a scroll, so pressing Today with the
         // grid open does not leave it on a month the feed has left.
         monthAnchor = day
@@ -605,7 +627,8 @@ struct ScheduleView: View {
                 ScheduleMonthGrid(todayNoon: appModel.scheduleTodayNoon,
                                   counts: derived.counts.merging(derived.laterCounts) { a, _ in a },
                                   live: derived.live.union(derived.laterCounts.keys), selected: selectedDay,
-                                  window: AppModel.scheduleBack...AppModel.scheduleAhead,
+                                  // The directions start the calendar at today: the past is Home's.
+                                  window: (appModel.experience.doors ? 0 : AppModel.scheduleBack)...AppModel.scheduleAhead,
                                   extraDays: Set(derived.laterCounts.keys),
                                   monthAnchor: $monthAnchor,
                                   maxHeight: max(260, viewportH - ThemeMetrics.tabBarClearance)) { day in
@@ -639,6 +662,12 @@ struct ScheduleView: View {
         }
     }
 
+    /// The days the calendars answer for: today onward in the directions (the past is Home's), the
+    /// whole feed otherwise.
+    private var stripWindow: ClosedRange<Int> {
+        (appModel.experience.doors ? 0 : AppModel.scheduleBack)...AppModel.scheduleAhead
+    }
+
     /// The band's height under the status band (the bar's row, and the filter chips when there
     /// are any) — what the calendar hangs under.
     private var bandHeight: CGFloat { max(FeedMetrics.headerRow, chromeBottom - ThemeMetrics.topSafeInset) }
@@ -646,7 +675,7 @@ struct ScheduleView: View {
     // MARK: - Chrome
 
     /// The band under the title: the active filters as removable tokens, and otherwise nothing —
-    /// there is no date chrome at rest. Opaque canvas, flush with the feed, as Today's bar is.
+    /// there is no date chrome at rest. A veil of the canvas (`EdgeVeil`), as every root's bar is.
     ///
     /// The BAR is here too (4 Oct, "the top and bottom header and nav are there even when
     /// scrolling", owner): the title, the way back to today, the calendar's switch and the filter,
@@ -656,6 +685,8 @@ struct ScheduleView: View {
     private func chrome(_ proxy: ScrollViewProxy) -> some View {
         VStack(alignment: .leading, spacing: 0) {
             RootHeaderRow(title: Copy.Schedule.title, chrome: rootChrome) {
+                // The directions: every root's bar opens with the account disc.
+                if appModel.experience.doors { RootAccountButton() }
                 // The way back once the reader has scrolled away from today. Ink, not amber: a
                 // command.
                 if awayFromToday {
@@ -682,18 +713,39 @@ struct ScheduleView: View {
                     .frame(width: FeedMetrics.actionHitHeight, height: FeedMetrics.actionHitHeight)
                     .contentShape(Rectangle())
             }
+            if !showsWholeScreenState {
+                // The top calendar: the week the list is in, in sync with it both ways.
+                ScheduleWeekStrip(todayNoon: appModel.scheduleTodayNoon,
+                                  counts: derived.counts.merging(derived.laterCounts) { a, _ in a },
+                                  live: derived.live.union(derived.laterCounts.keys),
+                                  selected: selectedDay, window: stripWindow,
+                                  extraDays: Set(derived.laterCounts.keys)) { day in
+                    pick(day, count: derived.counts[day] ?? derived.laterCounts[day] ?? 0, proxy: proxy)
+                }
+                .padding(.horizontal, ThemeSpace.x2)
+                .padding(.top, ThemeSpace.x1)
+                .onGeometryChange(for: CGFloat.self, of: { $0.size.height + ThemeSpace.x1 }) { h in
+                    if abs(h - stripHeight) > 0.5 { stripHeight = h }
+                }
+                .transition(.opacity)
+            }
             filterChips
         }
         // Only the filter chips can give this band height, so only they earn its padding.
         .padding(.bottom, filterActive ? ThemeSpace.x2 : 0)
         .animation(ThemeMotion.pick(ThemeMotion.uiGentle, reduceMotion: reduceMotion), value: filterActive)
-        // Drawn at a STATED height, bottom-aligned, so a short band never lets the feed print
-        // through the status bar (6 Sep).
+        .onChange(of: showsWholeScreenState) { _, whole in if whole { stripHeight = 0 } }
+        // Drawn at a STATED height, bottom-aligned, so a short band never leaves the status bar
+        // bare (6 Sep). A veil of the canvas, not a slab of it (16 Oct, `EdgeVeil` — "black bars
+        // which are taking visible space", owner): its ramp runs `barEdgeRamp` past the band.
         .background(alignment: .bottom) {
-            ThemeColor.canvas
-                .frame(height: max(chromeBottom, ThemeMetrics.topChromeHeight))
-                .allowsHitTesting(false)
-                .accessibilityHidden(true)
+            // Over ART: the stage runs up under it at the landing; the rows fade on their own as
+            // they pass under it (`ScheduleUnderBarFade`).
+            EdgeVeil(edge: .top,
+                     band: max(chromeBottom, ThemeMetrics.topChromeHeight),
+                     line: ThemeMetrics.topSafeInset + FeedMetrics.headerRow / 2,
+                     overArt: true)
+                .offset(y: ThemeMetrics.barEdgeRamp)
         }
         .onGeometryChange(for: CGFloat.self, of: { $0.frame(in: .global).maxY },
                           action: { chromeBottom = $0 })
@@ -815,7 +867,11 @@ struct ScheduleView: View {
                 let counting = countdownRow(d, hero: hero)
                 let drawn = blocks(d, hero: hero)
                 ForEach(drawn) { b in dayBlock(b, counting: counting) }
-                laterGroup(d.later, order: (drawn.last?.order ?? 0) + (drawn.last?.rows.count ?? 0))
+                let laterOrder = (drawn.last?.order ?? 0) + (drawn.last?.rows.count ?? 0)
+                laterGroup(d.later, order: laterOrder)
+                if appModel.experience.doors {
+                    comingBackGroup(d, order: laterOrder + d.later.count)
+                }
             }
         }
     }
@@ -835,7 +891,9 @@ struct ScheduleView: View {
                     }
                     .frame(width: 38)
                     .opacity(i == 1 ? 0 : 1)
-                    SkeletonBlock(width: AgendaMetrics.avatar, height: AgendaMetrics.avatar, radius: AgendaMetrics.avatar / 2)
+                    // The face's own rounded square (`ShowAvatar.shape`), not a disc, so it lands in place.
+                    SkeletonBlock(width: AgendaMetrics.avatar, height: AgendaMetrics.avatar,
+                                  radius: AgendaMetrics.avatar * FeedMetrics.showCornerRatio)
                     VStack(alignment: .leading, spacing: ThemeSpace.x1) {
                         SkeletonLine(width: 132, height: 13)
                         SkeletonLine(width: 96, height: 11)
@@ -898,6 +956,16 @@ struct ScheduleView: View {
     /// first. A card the reader just marked holds (`heldHero`). Nothing past the window: Later is
     /// not next.
     private func pickHero(_ d: Derived) -> Hero? {
+        if appModel.experience.doors {
+            // The directions: the card is the NEXT AIRING — never a drop already out, which is
+            // Home's billboard (one fact, one door). Calm has no card at all.
+            guard appModel.experience.stage else { return nil }
+            if let r = d.ahead.first(where: { $0.isToday })?.rows.first(where: { !$0.aired }) { return hero(r, day: 0) }
+            if let next = d.ahead.first(where: { $0.id > 0 && !$0.isEmpty }), let r = next.rows.first {
+                return hero(r, day: next.id)
+            }
+            return nil
+        }
         if let held = heldHero {
             for day in d.earlier + d.ahead {
                 if let r = day.rows.first(where: { $0.id == held }) { return hero(r, day: day.id) }
@@ -980,16 +1048,25 @@ struct ScheduleView: View {
                 .accessibilityHidden(true)
                 .id(AgendaID.day(b.day.id))
         } else {
+            // The card's picture runs `ScheduleStageCard.bleed` above its block (under the bar at
+            // the landing), so the feed leaves that much room before it, plus the gap the card
+            // used to keep from the row above. A hero block never opens a month (`blocks`).
+            if b.hero != nil {
+                Color.clear
+                    .frame(height: ScheduleStageCard.bleed + ThemeSpace.x2)
+                    .accessibilityHidden(true)
+            }
             VStack(alignment: .leading, spacing: 0) {
                 if let month = b.month {
                     ScheduleEyebrow(text: month)
                         .padding(.top, ThemeSpace.x6)
                         .padding(.bottom, ThemeSpace.x1)
                         .modifier(riseIn(b.order))
+                        .modifier(ScheduleUnderBarFade(chrome: rootChrome, extra: stripHeight))
                 }
                 if let hero = b.hero {
                     heroCard(hero)
-                        .padding(.top, ThemeSpace.x2)
+                        .padding(.top, -ScheduleStageCard.bleed)
                         .padding(.bottom, b.rows.isEmpty ? 0 : ThemeSpace.x3)
                 }
                 ForEach(Array(b.rows.enumerated()), id: \.element.id) { i, r in
@@ -1002,6 +1079,7 @@ struct ScheduleView: View {
                                         text: empty,
                                         spoken: "\(Formatting.formatted(b.day.noon, skeleton: "EEEEdMMMM", anchor: .local)), \(empty)")
                         .modifier(riseIn(b.order))
+                        .modifier(ScheduleUnderBarFade(chrome: rootChrome, extra: stripHeight))
                 }
             }
             .padding(.top, b.hero == nil && b.month == nil ? Metrics.dayGap : 0)
@@ -1009,7 +1087,7 @@ struct ScheduleView: View {
             // `HomeGround` under its billboard): the page under the stage is the picture's.
             .background(alignment: .top) {
                 if b.hero != nil {
-                    HomeGround(tint: cardTintNow, top: cardGroundTop, billboard: ScheduleStageCard.height + ThemeSpace.x2)
+                    HomeGround(tint: cardTintNow, top: cardGroundTop, billboard: ScheduleStageCard.height)
                         .animation(ThemeMotion.uiPoster, value: cardTintNow == nil)
                 }
             }
@@ -1049,10 +1127,12 @@ struct ScheduleView: View {
         return next.id
     }
 
-    /// What a lit row wears: its show's colour under its face, and today's countdown.
+    /// What a lit row wears: its show's colour under its face, and today's countdown. Calm
+    /// (`Experience.calm`, 19 Oct) keeps the countdown and drops the colour: no root is lit by its
+    /// pictures there, and a halo of a poster's colour under every face is the same bleed.
     private func decor(_ r: Row, counting: Bool) -> ScheduleRowDecor {
         var d = ScheduleRowDecor()
-        d.hueURL = r.franchise.portraitArt
+        if !appModel.experience.calm { d.hueURL = r.franchise.portraitArt }
         if counting { d.accentTail = Copy.Schedule.countdown(Formatting.fmtCountdown(target: r.at, now: now)) }
         return d
     }
@@ -1074,6 +1154,7 @@ struct ScheduleView: View {
                 .padding(.top, ThemeSpace.x8)
                 .padding(.bottom, ThemeSpace.x1)
                 .modifier(riseIn(order))
+                .modifier(ScheduleUnderBarFade(chrome: rootChrome, extra: stripHeight))
             ForEach(Array(rows.enumerated()), id: \.element.id) { i, r in
                 let day = laterDay(r)
                 let firstOfDay = i == 0 || laterDay(rows[i - 1]) != day
@@ -1083,6 +1164,57 @@ struct ScheduleView: View {
                     .padding(.top, firstOfDay && i > 0 ? Metrics.dayGap : 0)
                     .id(firstOfDay ? AgendaID.day(day) : AgendaID.row(day, r.id))
             }
+        }
+    }
+
+    /// COMING BACK (the directions, `Experience.doors`): Library's Returning and Announced shelves,
+    /// at the calendar's end — a show's next installment is a fact about what is coming, so it is
+    /// Schedule's. A show already on the calendar or in Later is not repeated.
+    ///
+    /// A SHELF of the Library's poster cards since 19 Oct ("Coming back UI is also utterly shitty",
+    /// owner): it was one agenda row per show with the date column left EMPTY — every face indented
+    /// past the eyebrow, a ragged edge down the page — and fifteen rows that each said "Returns
+    /// 2027" in the same grey. These shows have no day, so they never belonged to the agenda's
+    /// anatomy: they are posters, soonest first, each with its window under it ("Returns 3 Oct" in
+    /// the accent inside the horizon, "Jan 2027" grey past it — `ReturnFact`'s one rule), under the
+    /// app's one section header.
+    @ViewBuilder
+    private func comingBackGroup(_ d: Derived, order: Int) -> some View {
+        let listed = Set((d.ahead.flatMap(\.rows) + d.later).map(\.franchise.id))
+        let shows = (appModel.libraryShelves.first { $0.shelf == .comingBack }?.franchises ?? [])
+            .filter { !listed.contains($0.id) }
+            .filter { f in
+                switch typeFilter {
+                case .all: true
+                case .anime: f.source == .anilist
+                case .tv: f.source == .tmdb
+                }
+            }
+        if !shows.isEmpty {
+            VStack(alignment: .leading, spacing: ThemeMetrics.labelGap) {
+                SectionHeaderRow(Copy.Schedule.comingBack, count: shows.count)
+                    .padding(.horizontal, ThemeMetrics.gutter)
+                ScrollView(.horizontal) {
+                    LazyHStack(alignment: .top, spacing: ThemeMetrics.shelfGap) {
+                        ForEach(shows) { f in
+                            ScheduleComingBackTile(franchise: f, fact: ReturnFact.of(f, appModel: appModel)) {
+                                onOpenDetail(f.id, "sched/back/\(f.id)", nil)
+                            }
+                            .franchiseQuickActions(f, appModel: appModel)
+                        }
+                    }
+                    .scrollTargetLayout()
+                }
+                .contentMargins(.horizontal, ThemeMetrics.gutter, for: .scrollContent)
+                .scrollTargetBehavior(.viewAligned)
+                .scrollIndicators(.hidden)
+                .scrollClipDisabled()
+            }
+            .padding(.top, ThemeSpace.x10)
+            // The list's last thing: its captions come to rest clear of the tab bar's glyphs.
+            .padding(.bottom, ThemeSpace.x6)
+            .modifier(riseIn(order))
+            .modifier(ScheduleUnderBarFade(chrome: rootChrome, extra: stripHeight))
         }
     }
 
@@ -1148,14 +1280,20 @@ struct ScheduleView: View {
                                  spoken: spoken(r, line: [line, sub].compactMap { $0 }.joined(separator: ", "), x),
                                  decor: decor(r, counting: counts),
                                  onOpen: openAction(r, x)) {
-            AiringStateControl(state: x.state, episode: r.episode, committing: false, title: f.displayTitle,
-                               batch: count > 1, count: count, canMark: x.canToggle) {
-                toggleWatched(r, watched: x.state.isWatched)
+            if appModel.experience.doors {
+                // The directions: no marks on the calendar — the row opens the show on its episode.
+                ScheduleOutMark(state: x.state)
+            } else {
+                AiringStateControl(state: x.state, episode: r.episode, committing: false, title: f.displayTitle,
+                                   batch: count > 1, count: count, canMark: x.canToggle) {
+                    toggleWatched(r, watched: x.state.isWatched)
+                }
             }
         }
         .franchiseQuickActions(appModel.isInLibrary(f.id) ? f : nil, appModel: appModel)
         .animation(ThemeMotion.pick(ThemeMotion.uiMicro, reduceMotion: reduceMotion), value: x.state.isWatched)
         .modifier(riseIn(order))
+        .modifier(ScheduleUnderBarFade(chrome: rootChrome, extra: stripHeight))
     }
 
     /// Every row says its date to VoiceOver — the date column is drawn on a day's first row only,
@@ -1179,7 +1317,7 @@ struct ScheduleView: View {
         let f = r.franchise
         let x = facts(r)
         return ScheduleStageCard(franchise: f, eyebrow: h.eyebrow, line: heroLine(r), state: x.state,
-                                 canToggle: x.canToggle,
+                                 canToggle: x.canToggle && !appModel.experience.doors,
                                  markLabel: x.state.isWatched ? Copy.Action.markEpisodeUnwatched(r.episode)
                                                               : Copy.Action.markEpisodeWatched(r.episode),
                                  tint: cardTintNow, landing: cardGroundTop,

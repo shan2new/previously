@@ -243,6 +243,8 @@ final class AppModel {
     var audienceChosen = false
     /// The one-time question is due (`askAudienceIfNeeded`).
     var audiencePromptDue = false
+    /// The whole-app direction on screen (`Experience`, Profile › Settings › Version in DEBUG).
+    var experience: Experience = Experience.stored
     /// An applied history import whose background part is still arriving (`AppModel+Import.swift`):
     /// how far it has got, for whichever surface is saying so. nil when none is in flight.
     var importProgress: ImportProgress? {
@@ -352,6 +354,7 @@ final class AppModel {
         currentAccountID = accountID
         if !isolated {
             accountStorage = AccountLocalStore.shared.activate(accountID: accountID)
+            activateWidgetSnapshot()
             LibraryExport.clearTemporaryFiles()
             loadRecents()
             audience = Audience.stored
@@ -582,6 +585,7 @@ final class AppModel {
         let generation = accountGeneration
         AccountDeletion.hold(accountID: currentAccountID)
         erasing = true
+        clearWidgetSnapshot()
         SyncCenter.shared.suspendReplay()
         let clock = ContinuousClock()
         let deadline = clock.now.advanced(by: Self.erasureDrain)
@@ -602,6 +606,7 @@ final class AppModel {
         AccountDeletion.clearHold(accountID: currentAccountID)
         deletionNeedsConfirmation = false
         erasing = false
+        resumeWidgetSnapshot()
         api.halted = false
         if !accountSuspended { SyncCenter.shared.resumeReplay() }
         for (mediaId, write) in progressQueued where progressLane[mediaId] == nil {
@@ -626,6 +631,7 @@ final class AppModel {
     /// the next sign-in opens on a loader, never on someone else's shows.
     func teardown() {
         accountGeneration += 1
+        clearWidgetSnapshot()
         api.invalidateRequests()
         deletionNeedsConfirmation = false
         savingProgressFor = []
@@ -1611,6 +1617,9 @@ final class AppModel {
     /// row survived a bad connection while the batch they confirmed above it vanished — two
     /// answers to one failure, on one screen.
     func setProgress(franchiseId: String, mediaId: Int, episodes: Int, haptic: Bool = true) {
+        // Catalogue controls must first admit the show with their exact progress snapshot.
+        // A bare part PUT cannot create membership and must never bypass that confirmation.
+        guard isInLibrary(franchiseId) else { return }
         let owner = franchise(id: franchiseId)
         let part = owner?.parts.first { $0.mediaId == mediaId }
         // Only an increase is bounded (`writeCeiling`): an unmark on a row recorded above today's

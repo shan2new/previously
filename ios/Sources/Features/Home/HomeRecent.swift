@@ -49,6 +49,10 @@ struct HomeDropCard: View {
     /// gutter to gutter — at 300 pt it sat beside ninety points of nothing).
     var width: CGFloat = HomeDropCard.shelfWidth
     var committing: Bool = false
+    /// The pool of the scene's colour under the card. Calm (`Experience.calm`, 19 Oct) has none:
+    /// the card is a picture in a frame on the canvas, and a colour bleeding out of it onto the page
+    /// is the immersion the owner took out of Home ("very distracting on a day to day use").
+    var lit: Bool = true
     let onOpen: () -> Void
     let onMark: () -> Void
 
@@ -105,7 +109,7 @@ struct HomeDropCard: View {
             // the card's own shape (Schedule's lit card) — a blurred layer flattened to its bounds
             // (`drawingGroup`) ends on the bounds' straight edges.
             .background {
-                if let glow {
+                if lit, let glow {
                     // Cast from the card's lower half: nothing of it rises past the card's top (a
                     // card waiting under the tab bar lit the bar's edge with its colour).
                     shape.fill(ThemeColor.canvas.shadow(.drop(color: glow.opacity(0.4), radius: 22, x: 0, y: 14)))
@@ -130,7 +134,7 @@ struct HomeDropCard: View {
         .accessibilityElement(children: .contain)
         .accessibilityLabel("\(f.displayTitle), \(line), \(aired)")
         .task(id: scene ?? poster) {
-            guard let url = scene ?? poster else { return }
+            guard lit, let url = scene ?? poster else { return }
             let tint = await PaletteCache.shared.resolve(url: url, maxPixel: 240)
             withAnimation(ThemeMotion.pick(ThemeMotion.uiPoster, reduceMotion: reduceMotion)) { glow = HeroLight.glow(tint) }
         }

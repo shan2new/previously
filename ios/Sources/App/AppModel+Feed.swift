@@ -1,8 +1,9 @@
 import Foundation
 
-// The Today feed — the model half (spec §1.6.2). It loads the two tabs from `GET /me/feed`,
-// keeps an offline copy, memoises the rows the list draws and the stories the tray draws, and
-// loads post pages. The server composes posts; this file never re-ranks, re-dates or invents one.
+// The Today feed — the model half (spec §1.6.2). It loads the two tabs from `GET /me/feed` (the feed
+// draws Following; For you, Discover's since 16 Oct, is kept for a trending show's page), keeps an
+// offline copy, memoises the rows the list draws and the stories the tray draws, and loads post
+// pages. The server composes posts; this file never re-ranks, re-dates or invents one.
 //
 // The rules that shape it:
 //   • the feed waits for the visit stamp (iD3) — `fresh` is ordered against `prev_opened_at`;
@@ -19,11 +20,11 @@ final class FeedDerivedCache {
         let library: Int         // libraryVersion (ownership, library copies for art)
         let minute: Int64        // nowMinute (stamps "2h", premiere words)
         let prevOpenedAt: Int64
-        let recs: [String]       // visibleRecommendations.map(\.key)
         let trending: Int        // appModel.trending.count (empty-account module)
         let online: Bool         // SyncCenter.shared.isOnline (the offline notice)
         let hides: Int           // hidesVersion (mutes and hides from anywhere)
         let audience: Audience   // the viewer's kind (For you and its modules are held to it)
+        let doors: Bool          // the directions keep "Episode N is out" off the feed (Home's fact)
     }
     var rows: [FeedTab: (key: Key, rows: [FeedRow])] = [:]
     /// The fresh post models of a tab's current rows (the new-posts pill).
@@ -250,24 +251,31 @@ extension AppModel {
         let libraryCopies = library
         let minute = nowMinute
         let prev = prevOpenedAt
-        let recs = visibleRecommendations.map(\.key)
         let chart = trending
         let folds = feedFolds
         let online = SyncCenter.shared.isOnline
         let kind = audience
         let key = FeedDerivedCache.Key(tab: tab, feed: feedVersion, library: libraryVersion, minute: minute,
-                                       prevOpenedAt: prev, recs: recs, trending: chart.count, online: online,
-                                       hides: hidesVersion, audience: kind)
+                                       prevOpenedAt: prev, trending: chart.count, online: online,
+                                       hides: hidesVersion, audience: kind, doors: experience.doors)
         if let hit = feedDerived.rows[tab], hit.key == key { return hit.rows }
 
         let untracked = Array(chart.filter { !isInLibrary($0.id) && kind.allows($0.source) }
             .prefix(FeedComposer.maxTrending))
-        let rows = FeedComposer.rows(
+        var rows = FeedComposer.rows(
             tab: tab, state: state, library: libraryCopies, libraryIndex: { self.franchise(id: $0) },
             now: minute, folds: folds,
-            hidden: hiddenPostIds, muted: mutedShowIds, recommendationKeys: recs,
+            hidden: hiddenPostIds, muted: mutedShowIds,
             untrackedTrending: untracked, libraryEmpty: libraryCopies.isEmpty, online: online,
             allows: { kind.allows($0) })
+        // The directions (`Experience.doors`): the feed is news. "Episode N is out" is Home's fact —
+        // the billboard and Recently aired say it — so its posts stay off the feed.
+        if key.doors {
+            rows.removeAll { row in
+                if case .post(let m) = row { return m.post.kind == .episode }
+                return false
+            }
+        }
 
         var models: [String: FeedPostModel] = [:]
         var fresh: [FeedPostModel] = []

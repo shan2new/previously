@@ -105,17 +105,29 @@ struct ScheduleStageCard: View {
 
     /// Half the window: the agenda keeps its first rows on the landing screen.
     static var height: CGFloat { (ThemeMetrics.windowHeight * 0.52).rounded() }
+    /// The picture runs this far ABOVE the card's frame, under the status band and the bar's row,
+    /// as Home's billboard does (16 Oct: "a lot of top and bottom BLACK bars which are taking
+    /// visible space", owner): at the landing the bar's veil is over the art, not over a strip of
+    /// canvas — or of yesterday's last row. The feed makes room for it (`ScheduleView.dayBlock`).
+    static var bleed: CGFloat { ThemeMetrics.topSafeInset + FeedMetrics.headerRow }
 
     /// Out: the badge. Still to come: the moment as a quiet label (a tag is for news).
     private var isOut: Bool { state != .upcoming }
 
     var body: some View {
-        ShowBillboard(franchise: franchise, height: Self.height, band: 0, tint: tint, landing: landing,
+        ShowBillboard(franchise: franchise, height: Self.height + Self.bleed, band: Self.bleed,
+                      tint: tint, landing: landing,
                       onOpen: onOpen, onArt: onArt,
                       accessibilityLabel: "\(eyebrow), \(franchise.displayTitle), \(line)",
                       accessibilityHint: Copy.Accessibility.opensTheShowHint,
                       pullStretch: false, visibleBand: ScheduleCardMetrics.clearBand) { name, arrival in
             lockup(name: name, arrival: arrival)
+        }
+        // Taller than the bleed by `overhang`: the picture is drawn a hair larger than its frame
+        // (the lean, the arrival's settle), so its top edge stands above the frame's.
+        .overlay(alignment: .top) {
+            ScheduleCardTopFade(height: Self.bleed + ScheduleCardTopFade.overhang)
+                .offset(y: -ScheduleCardTopFade.overhang)
         }
     }
 
@@ -135,7 +147,7 @@ struct ScheduleStageCard: View {
                         .modifier(arrival.line(0))
                 }
                 if case .logo = name, name.hasGraphicLogo, !typeSize.isAccessibilitySize {
-                    ArtworkLogo(name: name, title: franchise.displayTitle, height: 72, halo: 0.55)
+                    ArtworkLogo(name: name, title: franchise.displayTitle, height: 72, halo: 0.55, hug: true)
                         .padding(.horizontal, ThemeSpace.x8)
                         .padding(.vertical, ThemeSpace.x1)
                         .modifier(arrival.logo)
@@ -165,5 +177,89 @@ struct ScheduleStageCard: View {
         }
         .frame(maxWidth: .infinity)
         .accessibilityElement(children: .contain)
+    }
+}
+
+/// The card's top edge, once the past is in view above it (16 Oct: "That is not a smooth
+/// experience at all", owner — the picture that runs up under the bar at the landing began on a
+/// hard straight edge an inch under yesterday's row once the reader scrolled back to it). At the
+/// landing the card's top IS the screen's top and the picture runs up whole; as the card comes
+/// down the screen, its bleed melts into the canvas the row above sits on. Read in the render pass
+/// (`visualEffect`): a scroll frame re-runs nothing.
+private struct ScheduleCardTopFade: View {
+    let height: CGFloat
+    /// How far the picture can stand above the card's frame: 3.5 % oversize for the lean, ±6 pt of
+    /// lean, and the arrival's 5 % settle, on a ~540-pt picture.
+    static let overhang: CGFloat = 32
+
+    var body: some View {
+        // Read here: the effect's closure runs off the main actor.
+        let reach = max(ThemeMetrics.topSafeInset, 1)
+        let solid = Self.overhang / max(height, 1)
+        LinearGradient(stops: [
+            .init(color: ThemeColor.canvas, location: 0),
+            .init(color: ThemeColor.canvas, location: solid),
+            .init(color: ThemeColor.canvas.opacity(0.72), location: solid + (1 - solid) * 0.3),
+            .init(color: ThemeColor.canvas.opacity(0.22), location: solid + (1 - solid) * 0.7),
+            .init(color: ThemeColor.canvas.opacity(0), location: 1),
+        ], startPoint: .top, endPoint: .bottom)
+        .frame(height: height)
+        .frame(maxWidth: .infinity)
+        .allowsHitTesting(false)
+        .accessibilityHidden(true)
+        .visualEffect { content, proxy in
+            // The CARD's top: the fade itself starts `overhang` above it.
+            let below = proxy.frame(in: .global).minY + Self.overhang
+            return content.opacity(Double(min(1, max(0, below / reach))))
+        }
+    }
+}
+
+/// A row of the agenda fades as it passes under the bar, instead of printing through the bar's
+/// veil (16 Oct). The bar's veil is light over Schedule (`EdgeVeil(overArt:)`) so the stage's art
+/// shows at the landing; without this, yesterday's rows read through it behind "Schedule". The
+/// edge follows the bar as it slides away (the state's `awayFraction`, read here and nowhere in the
+/// row), and the fade itself is a render-pass effect.
+struct ScheduleUnderBarFade: ViewModifier {
+    let chrome: RootChromeState
+    /// What hangs under the bar's row and stays when the row has gone — the week strip.
+    var extra: CGFloat = 0
+
+    /// A row is whole until its top is this far under the bar's foot…
+    private static let start: CGFloat = 4
+    /// …and gone this far under it.
+    private static let length: CGFloat = 40
+
+    func body(content: Content) -> some View {
+        let foot = ThemeMetrics.topSafeInset + FeedMetrics.headerRow * (1 - min(1, max(0, chrome.awayFraction))) + extra
+        let start = Self.start, length = Self.length
+        content.visualEffect { c, proxy in
+            let under = foot - proxy.frame(in: .global).minY - start
+            return c.opacity(Double(1 - min(1, max(0, under / length))))
+        }
+    }
+}
+
+// MARK: - Coming back
+
+/// One show on Coming back's shelf (19 Oct): the Library's poster card, its name and its window —
+/// "Returns 3 Oct" in the accent inside the horizon (a step you can take soon), "Jan 2027" grey past
+/// it (`ReturnFact`). No mark, no progress: nothing here can be watched yet.
+struct ScheduleComingBackTile: View {
+    let franchise: Franchise
+    let fact: ReturnFact
+    let onOpen: () -> Void
+
+    @Environment(\.dynamicTypeSize) private var typeSize
+
+    var body: some View {
+        let f = franchise
+        let pick = PosterPick.shared.choice(for: f)
+        ArtworkPoster(url: pick?.url ?? f.portraitArt, name: pick?.tileName(for: f) ?? .type, title: f.displayTitle,
+                      detailsInBand: true, fixedAspect: 2.0 / 3.0, onOpen: onOpen,
+                      openLabel: "\(f.displayTitle), \(fact.sentence.isEmpty ? fact.text : fact.sentence)") {
+            PosterCaptionText(title: f.displayTitle.shelfShortened(fitting: 26), fact: fact.text, lead: fact.soon)
+        }
+        .frame(width: ForYouShelves.tileWidth(typeSize))
     }
 }

@@ -383,6 +383,7 @@ struct ImportView: View {
                 } else {
                     Button(Copy.Import.chooseFile) { pickingFile = true }
                         .buttonStyle(PrimaryButtonStyle2())
+                        .qaIdentifier("qa.import.choose-file")
                 }
             }
         }
@@ -448,6 +449,7 @@ struct ImportView: View {
                 EmptyState(EmptyStateCopy(symbol: "magnifyingglass", title: Copy.Import.nothingFound,
                                           supporting: emptyPreviewSupporting(preview)))
                     .padding(.horizontal, ThemeMetrics.gutter)
+                    .qaIdentifier("qa.import.empty-preview")
             } else {
                 ScrollView {
                     VStack(alignment: .leading, spacing: ThemeSpace.x5) {
@@ -480,6 +482,11 @@ struct ImportView: View {
                             note(Copy.Import.preserved)
                             if let line = unmatchedLine(preview) { note(line) }
                             if preview.adultSkipped > 0 { note(Copy.Import.adultSkipped(preview.adultSkipped)) }
+                            #if PREVIOUSLY_QA
+                            Text("QA import preview").font(.system(size: 1)).foregroundStyle(.clear)
+                                .accessibilityIdentifier("qa.import.preview-counts")
+                                .accessibilityValue("\(preview.listed)|\(preview.ready)|\(preview.episodes)|\(preview.adultSkipped)")
+                            #endif
                             if let failure = model.failure { InlineNotice(failure) }
                         }
                     }
@@ -499,6 +506,7 @@ struct ImportView: View {
                         }
                         .buttonStyle(PrimaryButtonStyle2())
                         .disabled(model.adding)
+                        .qaIdentifier("qa.import.apply")
                     }
                 }
             }
@@ -600,6 +608,7 @@ struct ImportView: View {
                     .foregroundStyle(ThemeColor.textSecondary)
                     .multilineTextAlignment(.center)
                     .fixedSize(horizontal: false, vertical: true)
+                    .qaIdentifier("qa.import.done.skipped")
             }
             if progress?.isDone == true {
                 Button(Copy.Import.another) { model.startAnother() }
@@ -614,6 +623,7 @@ struct ImportView: View {
             FirstRunFoot {
                 Button(Copy.Import.done) { onFinished(true) }
                     .buttonStyle(PrimaryButtonStyle2())
+                    .qaIdentifier("qa.import.done")
             }
         }
     }

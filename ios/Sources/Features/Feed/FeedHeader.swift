@@ -1,26 +1,26 @@
 import SwiftUI
 
-// The top of the feed, as X builds its own (round 3, measured from X iOS at 393 pt):
-//   · a real BAR — glass over the feed with one crisp hairline, never a gradient that lets the
-//     content ghost through it half-lit;
-//   · a balanced row: you on the left, the brand in the middle, your activity on the right;
-//   · the feed's two rooms as TABS with an underline, directly under the brand;
+// The top of the feed (16 Oct: "Feed screen doesn't need For You as it is already present in the
+// search… We also don't need to show the previously logo in the feed screen", owner):
+//   · ONE row, the roots' own (`RootHeaderRow`, Library's and Schedule's): you on the left, the
+//     screen's name in the middle, your activity on the right — no brand mark, no tabs, no rule;
+//   · over the roots' VEIL (`EdgeVeil`, as `RootHeader` draws it — "a lot of top and bottom BLACK
+//     bars which are taking visible space", owner, 16 Oct): the posts scroll on under it, blurred
+//     and dimmed, where an opaque slab of canvas hid them; it runs up through the status band, so
+//     the clock stays legible once the row has gone;
 //   · it gets out of the way — gone on the way down, back the moment you scroll up, tied to the
-//     finger and never parked half over a post.
+//     finger and never parked half over a post. The app's bar rides it (`ScrollAwayChrome`).
+// For you lives in Discover only; the feed is Following.
 
 // MARK: - The bar's one moving fact
 
 /// The header's offset, held OUTSIDE the screen's state: the scroll probe WRITES it, and only
-/// `FeedHeader` and `FeedPillSlot` read it, so a scroll frame invalidates the bar and nothing else
-/// (the app's rule: the scroll offset is never screen state).
+/// `FeedHeader`, `FeedPillSlot` and the app's bar read it, so a scroll frame invalidates the bars
+/// and nothing else (the app's rule: the scroll offset is never screen state).
 ///
 /// X's bar is tied to the finger, not to a timer: it slides up point for point as you read down,
 /// comes back point for point the moment you scroll up, and when the scroll comes to rest it is
 /// either all there or all gone.
-///
-/// X's two rooms are PAGES side by side (a real pager, not a list that swaps its rows): each keeps
-/// its own place, the bar follows whichever page is in front, and the tab underline rides the
-/// pager's offset while the finger is still moving (`pageProgress`).
 @MainActor
 @Observable
 final class FeedChromeState: ScrollAwayChrome {
@@ -30,37 +30,20 @@ final class FeedChromeState: ScrollAwayChrome {
 
     /// How far the bar has slid up: 0 (all there) … `FeedHeader.height` (gone).
     private(set) var offset: CGFloat = 0
-    /// The page in front is more than `downThreshold` points down.
+    /// The feed is more than `downThreshold` points down.
     private(set) var down = false
-    /// The pager's position: 0 = Following … 1 = For you, continuous while a swipe is under way.
-    /// Read ONLY by the tab row, so a swipe redraws two words and a capsule.
-    private(set) var pageProgress: CGFloat
     var hidden: Bool { offset >= FeedHeader.height - 0.5 }
     var awayFraction: CGFloat { offset / FeedHeader.height }
 
-    /// The page in front; the other page's probe is recorded, never acted on.
-    @ObservationIgnored private var page: FeedTab
-    /// Each page's last scroll distance (a page keeps its place, so its bar picks up from there).
-    @ObservationIgnored private var lastY: [FeedTab: CGFloat] = [:]
+    /// The feed's last scroll distance.
+    @ObservationIgnored private var lastY: CGFloat = 0
     /// `-feedPinHeader 1`: captures that jump to a post keep the bar in shot.
     private let pinned = FeedCapture.pinHeader
 
-    init(page: FeedTab) {
-        self.page = page
-        pageProgress = Self.progress(of: page)
-    }
-
-    /// A page's resting progress: its index in the pager.
-    static func progress(of page: FeedTab) -> CGFloat {
-        CGFloat(FeedTab.allCases.firstIndex(of: page) ?? 0)
-    }
-
-    /// One page's scroll distance from its resting top (negative while pulling to refresh).
-    func track(_ y: CGFloat, page p: FeedTab) {
-        let previous = lastY[p] ?? 0
-        lastY[p] = y
-        guard p == page else { return }
-        let dy = y - previous
+    /// The feed's scroll distance from its resting top (negative while pulling to refresh).
+    func track(_ y: CGFloat) {
+        let dy = y - lastY
+        lastY = y
         let isDown = y > Self.downThreshold
         if isDown != down { down = isDown }
         guard !pinned else { return }
@@ -69,33 +52,16 @@ final class FeedChromeState: ScrollAwayChrome {
     }
 
     /// At rest the bar is either shown or gone: past halfway it finishes leaving, else it returns.
-    func settle(page p: FeedTab) {
-        guard p == page, !pinned, offset > 0, offset < FeedHeader.height else { return }
-        let gone = offset > FeedHeader.height / 2 && (lastY[p] ?? 0) > FeedHeader.height
+    func settle() {
+        guard !pinned, offset > 0, offset < FeedHeader.height else { return }
+        let gone = offset > FeedHeader.height / 2 && lastY > FeedHeader.height
         withAnimation(Self.motion) { offset = gone ? FeedHeader.height : 0 }
     }
 
-    /// The bar comes back (the wordmark's scroll to top, a page change, the pill).
+    /// The bar comes back (the title's scroll to top, a re-selected tab, the pill).
     func reveal() {
         guard offset != 0 else { return }
         withAnimation(Self.motion) { offset = 0 }
-    }
-
-    /// The pager put `p` in front: the bar comes back (it carries the tabs that say where you are)
-    /// and the pill's "well down" is that page's own.
-    func activate(_ p: FeedTab) {
-        guard p != page else { return }
-        page = p
-        let isDown = (lastY[p] ?? 0) > Self.downThreshold
-        if isDown != down { down = isDown }
-        reveal()
-    }
-
-    /// The pager's offset as a fraction of a page (the probe on the pager's content).
-    func setPageProgress(_ value: CGFloat) {
-        let v = min(max(value, 0), CGFloat(FeedTab.allCases.count - 1))
-        let landed = v == v.rounded()
-        if abs(v - pageProgress) >= 0.002 || (landed && v != pageProgress) { pageProgress = v }
     }
 
     private static var motion: Animation {
@@ -106,19 +72,15 @@ final class FeedChromeState: ScrollAwayChrome {
 // MARK: - The header
 
 struct FeedHeader: View {
-    /// Measured on X iOS: a 44-pt row (avatar · logo · bell), a 44-pt tab row, one rule.
-    static var height: CGFloat { FeedMetrics.headerRow + FeedMetrics.headerTabs + FeedMetrics.hairline }
+    /// One row, the roots' 44 pt (`RootHeaderRow`) — no tab row and no rule under it since 16 Oct.
+    static var height: CGFloat { FeedMetrics.headerRow }
 
-    /// The page in front (the one the pager has settled on).
-    let selected: FeedTab
     let chrome: FeedChromeState
     let unread: Int
     let onProfile: () -> Void
     let onActivity: () -> Void
-    /// The wordmark scrolls the feed to the top, as X's logo does; so does the selected tab.
+    /// The title scrolls the feed to the top, as X's logo does (so does re-tapping the tab).
     let onTop: () -> Void
-    /// A tab tapped: the pager slides to it.
-    let onSelect: (FeedTab) -> Void
     /// The status band the bar slides under (the window's, unless the host measured its own).
     var topInset: CGFloat = ThemeMetrics.topSafeInset
 
@@ -126,52 +88,59 @@ struct FeedHeader: View {
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     /// The bell rings once when there is something new to see.
     @State private var rang = 0
-    /// The mark's width in the bar: the cut P stands ~24 pt tall, X's logo's height.
+    /// The brand mark's width in a bar: the cut P stands ~24 pt tall, X's logo's height. The feed
+    /// no longer draws it (16 Oct); Home's header still does (`HomeParts`).
     static let markWidth: CGFloat = 17
 
     var body: some View {
-        VStack(spacing: 0) {
-            // X's row: you on the left, the mark alone in the middle, one quiet control on the
-            // right. Monochrome — the logo's full stop is the only colour in the bar.
-            ZStack {
-                Button(action: onTop) {
-                    PreviouslyMark(width: Self.markWidth, style: .glyph, ink: ThemeColor.feedText)
-                        .padding(.horizontal, ThemeSpace.x3)
-                        .frame(minHeight: FeedMetrics.headerRow)
+        // Library's and Schedule's row (`RootHeaderRow`), point for point: the name centred in the
+        // app's face and primary ink, a control each side on the gutter, 44-pt targets.
+        ZStack {
+            Button(action: onTop) {
+                Text(Copy.Feed.title)
+                    .type(ThemeType.bodyEmphasis)
+                    .foregroundStyle(ThemeColor.textPrimary)
+                    .lineLimit(1)
+                    .padding(.horizontal, ThemeSpace.x3)
+                    .frame(minHeight: FeedMetrics.headerRow)
+                    .contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
+            .accessibilityLabel(Copy.Feed.title)
+            .accessibilityHint(Copy.Feed.scrollToTopHint)
+            .accessibilityAddTraits(.isHeader)
+            HStack(spacing: ThemeSpace.x1) {
+                Button(action: onProfile) {
+                    AccountDisc(identity: auth.identity, diameter: Self.discDiameter, quiet: true)
+                        .frame(width: FeedMetrics.actionHitHeight, height: FeedMetrics.actionHitHeight,
+                               alignment: .leading)
                         .contentShape(Rectangle())
                 }
                 .buttonStyle(FeedIconPressStyle())
-                .accessibilityLabel(Copy.Feed.scrollToTop)
-                HStack(spacing: 0) {
-                    Button(action: onProfile) {
-                        AccountDisc(identity: auth.identity, diameter: Self.discDiameter, quiet: true)
-                            .frame(width: FeedMetrics.actionHitHeight, height: FeedMetrics.actionHitHeight,
-                                   alignment: .leading)
-                            .contentShape(Rectangle())
-                    }
-                    .buttonStyle(FeedIconPressStyle())
-                    .accessibilityLabel(Copy.Feed.profile)
-                    Spacer(minLength: 0)
-                    bell
-                }
+                .accessibilityLabel(Copy.Feed.profile)
+                Spacer(minLength: ThemeSpace.x2)
+                bell
             }
-            .padding(.horizontal, ThemeMetrics.gutter)
-            .frame(height: FeedMetrics.headerRow)
-
-            FeedTabsRow(selected: selected, chrome: chrome, onSelect: onSelect, onTop: onTop)
-            Rectangle().fill(ThemeColor.feedSeparator).frame(height: FeedMetrics.hairline)
         }
-        .background { FeedHeaderGround() }
-        .offset(y: -chrome.offset)
-        // The status band keeps its own glass, drawn OVER the sliding bar, so the bar passes under
-        // it instead of through the clock — X's, point for point.
-        .overlay(alignment: .top) {
-            FeedHeaderGround()
-                .frame(height: topInset)
+        .padding(.horizontal, ThemeMetrics.gutter)
+        .frame(height: FeedMetrics.headerRow)
+        .barInk()
+        // The row's band still takes its own touches, as its opaque ground did: a tap beside the
+        // title never opens the post passing under the veil. The veil itself (status band, ramp)
+        // lets everything through.
+        .contentShape(Rectangle())
+        // The controls thin out as the row leaves, as the other roots' do; the veil does not.
+        .modifier(RootChromeFade(chrome: chrome))
+        // `RootHeader`'s veil, from the screen's top edge: the status band and the row, then its
+        // ramp. It slides with the row, so once the row has gone the veil's foot still lies under
+        // the clock — one veil, never a second one stacked over the status band.
+        .background(alignment: .top) {
+            EdgeVeil(edge: .top,
+                     band: topInset + FeedMetrics.headerRow,
+                     line: topInset + FeedMetrics.headerRow / 2)
                 .offset(y: -topInset)
-                .allowsHitTesting(false)
-                .accessibilityHidden(true)
         }
+        .offset(y: -chrome.offset)
         .onChange(of: unread) { old, new in
             if new > old { ring() }
         }
@@ -224,87 +193,15 @@ struct FeedHeader: View {
 
 }
 
-/// X's tabs: the width split between them, both words bold 16 (measured, round 3), so nothing
-/// reflows under the underline. The underline and the ink FOLLOW THE PAGER (X's): while the finger
-/// drags the page, the capsule slides and stretches from one word to the other and the ink moves
-/// with it; a tap slides the pager and the capsule rides the same animation. This row is the only
-/// reader of `pageProgress`. No haptic: a tab is not a write (the app's rule).
-private struct FeedTabsRow: View {
-    let selected: FeedTab
-    let chrome: FeedChromeState
-    let onSelect: (FeedTab) -> Void
-    let onTop: () -> Void
-
-    /// Each word's frame in the row, for the capsule's two ends.
-    @State private var words: [FeedTab: CGRect] = [:]
-
-    /// X's underline: 3 pt, and 11 pt wider than the word on each side.
-    private static let underlineHeight: CGFloat = 3
-    private static let underlineOverhang: CGFloat = 11
-    private static let space = "feedTabsRow"
-
-    var body: some View {
-        let p = chrome.pageProgress
-        HStack(spacing: 0) {
-            ForEach(Array(FeedTab.allCases.enumerated()), id: \.element) { index, t in
-                // 1 on the page in front, 0 a page away, in between mid-swipe.
-                let lit = max(0, 1 - abs(p - CGFloat(index)))
-                Button {
-                    if t == selected { onTop() } else { onSelect(t) }
-                } label: {
-                    word(t, ink: ThemeColor.feedSecondary)
-                        .overlay { word(t, ink: ThemeColor.feedText).opacity(lit) }
-                        .onGeometryChange(for: CGRect.self) { proxy in
-                            proxy.frame(in: .named(Self.space))
-                        } action: { frame in
-                            if words[t] != frame { words[t] = frame }
-                        }
-                        .frame(maxWidth: .infinity, maxHeight: .infinity)
-                        .frame(height: FeedMetrics.headerTabs)
-                        .contentShape(Rectangle())
-                }
-                .buttonStyle(.plain)
-                .accessibilityAddTraits(t == selected ? .isSelected : [])
-            }
-        }
-        .overlay(alignment: .bottomLeading) { underline(p) }
-        .coordinateSpace(.named(Self.space))
-    }
-
-    private func word(_ t: FeedTab, ink: Color) -> some View {
-        Text(Copy.Feed.tab(t))
-            .type(ThemeType.feedTab)
-            .foregroundStyle(ink)
-            .lineLimit(1)
-            .fixedSize(horizontal: true, vertical: false)
-    }
-
-    /// The capsule between the two words' measured frames, `p` of the way across.
-    @ViewBuilder
-    private func underline(_ p: CGFloat) -> some View {
-        let tabs = FeedTab.allCases
-        if let first = tabs.first, let last = tabs.last, let a = words[first], let b = words[last] {
-            let width = a.width + (b.width - a.width) * p + 2 * Self.underlineOverhang
-            let midX = a.midX + (b.midX - a.midX) * p
-            Capsule()
-                .fill(ThemeColor.feedText)
-                .frame(width: width, height: Self.underlineHeight)
-                .offset(x: midX - width / 2)
-                .allowsHitTesting(false)
-                .accessibilityHidden(true)
-        }
-    }
-}
-
-/// The bar's ground: the feed's own canvas, FLUSH with the content (X's and Instagram's, 25 Sep —
-/// "the header area in both X and Instagram is flush (same background color) as content", owner).
-/// The material under canvas at the bars' 0.74 read as a lighter grey band across the top of the
-/// feed even with nothing under it: a system material lightens by itself in dark mode. The bar
-/// hides on the way down, so what passes under it is rarely seen; the hairline under the tabs is
-/// the only edge it draws.
+/// Discover's Explore header's ground: the canvas, FLUSH with the content (X's and Instagram's,
+/// 25 Sep — "the header area in both X and Instagram is flush (same background color) as content",
+/// owner). The feed's own header left it on 16 Oct for the roots' veil (`EdgeVeil`, above).
 struct FeedHeaderGround: View {
+    @Environment(\.accessibilityReduceTransparency) private var reduceTransparency
+
+    /// Transparent since 17 Oct (the bars are); opaque canvas under Reduce Transparency.
     var body: some View {
-        ThemeColor.canvas
+        reduceTransparency ? ThemeColor.canvas : Color.clear
     }
 }
 

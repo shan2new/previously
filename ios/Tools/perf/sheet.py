@@ -3,9 +3,10 @@
 import sys, os
 from PIL import Image
 d = sys.argv[1]; out = sys.argv[2] if len(sys.argv) > 2 else f'{d}/sheet.png'
-# Today is the feed (25 Sep): `feed`, `feed-foryou`, the story viewer and a post page replace the
-# billboard's five states (today, today-upnext, today-watching, today-calm, today-recap).
-names = ['feed','feed-foryou','story','post','activity','schedule','library','library-all','search','discover-genre','profile','saved','detail-slime','detail-got','detail-aot','detail-wed','detail-trailers','detail-people','detail-watch','detail-stage','receipt-inplace','receipt-lane']
+# Today is the feed (25 Sep): `feed`, the story viewer and a post page replace the billboard's five
+# states (today, today-upnext, today-watching, today-calm, today-recap). The feed's For you page
+# (`feed-foryou`) went on 16 Oct.
+names = ['feed','story','post','activity','schedule','library','library-all','search','discover-genre','profile','saved','detail-slime','detail-got','detail-aot','detail-wed','detail-trailers','detail-people','detail-watch','detail-stage','receipt-inplace','receipt-lane']
 tiles = []
 for n in names:
     p = f'{d}/{n}.png'

@@ -75,15 +75,21 @@ enum ThemeGel {
 // MARK: - Metrics
 
 enum FeedMetrics {
-    /// Row side inset. With the 44-pt avatar and the 8-pt gap, the text column starts at 62 (X's).
-    static let inset: CGFloat = 10
-    /// A show's or a person's avatar in a row.
-    static let avatar: CGFloat = 44
-    /// Avatar → text column.
-    static let gap: CGFloat = 8
-    /// The row's foot: 10 (was 6) since 9 Oct — with `FeedPostLayout.barTop` and `mediaTop` opened
-    /// too, the one change that answered "the Feed feels utterly cramped" (owner).
-    static let rowTop: CGFloat = 12, rowBottom: CGFloat = 10
+    // 16 Oct: "the Feed screen feels denser and not as airy and pleasing to scroll through as X"
+    // (owner). The row's sides were 10 pt — the media ran to 10 pt of the glass on the right, where
+    // X leaves 16 — and its top 12 against a foot of ~24 under the action glyphs, so every rule sat
+    // tight over the next post's name. Now the app's gutter on both sides, X's 40-pt avatar and its
+    // 10-pt gap (the column at 66, 311 wide at 393 pt), and a deeper top.
+    /// Row side inset: 16 (was 10), `ThemeMetrics.gutter`, so a post lines up with the tray, the
+    /// modules and every other screen.
+    static let inset: CGFloat = ThemeMetrics.gutter
+    /// A show's or a person's avatar in a row: 40 (was 44), X's.
+    static let avatar: CGFloat = 40
+    /// Avatar → text column: 10 (was 8), X's.
+    static let gap: CGFloat = 10
+    /// The rule → the avatar's top: 16 (12 before). The foot under the action bar's 44-pt targets:
+    /// 12 (10 since 9 Oct, 6 before — "the Feed feels utterly cramped", owner).
+    static let rowTop: CGFloat = 16, rowBottom: CGFloat = 12
     /// A reply row's reply and like slots (a post's share their room equally — `PostActionBar`).
     static let actionSlot: CGFloat = 68
     /// A post's pinned save and share slots: glyphs 32 apart, as X's bookmark and share are (the hit
@@ -107,7 +113,8 @@ enum FeedMetrics {
     /// X's rule and border: one physical pixel (`ThemeMetrics.pixel`), never 0.5 pt or 1 pt — every
     /// separator, media edge, note box and capsule outline in the feed's surfaces uses it.
     static var hairline: CGFloat { ThemeMetrics.pixel }
-    /// `FeedHeader.height` = headerRow + headerTabs + hairline.
+    /// A root's header row (the feed's, Library's, Schedule's — `FeedHeader.height` since 16 Oct,
+    /// when the feed lost its tab row), and Discover's Explore tab row under its field.
     static let headerRow: CGFloat = 44, headerTabs: CGFloat = 44
     /// Instagram's tray, measured off the owner's screenshot at 393 pt (25 Sep): a 92-pt ring, a
     /// 3.4-pt stroke, a 2.4-pt gap, an 80-pt photo, 12 pt between rings. The build's 66 read as
@@ -156,66 +163,66 @@ extension ThemeType {
     // tracks itself by size. The Outfit Light that parted the words from the SemiBold name (25 Sep:
     // "X's ones are lighter") went with them: SF Regular a point under the name is already the
     // lighter line, in the same ink. A glyph sized to the text reads `feedMeta.font`, never the body's.
-    static let feedName = TypeToken(font: .custom("Outfit-SemiBold", size: 16, relativeTo: .callout), tracking: -0.15)
-    static let feedMeta = TypeToken(font: .custom("Outfit-Regular", size: 16, relativeTo: .callout), tracking: -0.10)
+    static let feedName = TypeToken(.title, .semibold, 16, .callout, tracking: -0.15)
+    static let feedMeta = TypeToken(.text, .regular, 16, .callout, tracking: -0.10)
     /// The name over a post's or a reply's words — X's 15, the words' own size (26 Sep: at 16 the
     /// Outfit name read "chunky" beside X's bold 15 — a cap 7 % taller, a line ~15 % wider). Its
     /// grey installment and stamp are `feedSubhead`, X's 15 as well.
-    static let feedPostName = TypeToken(font: .custom("Outfit-SemiBold", size: 15, relativeTo: .subheadline), tracking: -0.10)
+    static let feedPostName = TypeToken(.title, .semibold, 15, .subheadline, tracking: -0.10)
     /// A post's words — in a row, a pinned post, a reply, the composer's quote: SF 15.
-    static let feedBody = TypeToken(font: .system(.subheadline), tracking: 0)
+    static let feedBody = TypeToken(.reading, .regular, 15, .subheadline)
     /// The post page's words (X's detail sets its text a size up): SF 17.
-    static let feedBodyLarge = TypeToken(font: .system(.body), tracking: 0)
+    static let feedBodyLarge = TypeToken(.reading, .regular, 17, .body)
     /// A Community Note's words, a reply quoted in Activity, a headline in the story's trail, a post's
     /// words under its picture: SF 15. The note's title is the app speaking (`feedNoteTitle`).
-    static let feedNote = TypeToken(font: .system(.subheadline), tracking: 0)
-    static let feedNoteTitle = TypeToken(font: .custom("Outfit-SemiBold", size: 15, relativeTo: .subheadline), tracking: -0.10)
+    static let feedNote = TypeToken(.reading, .regular, 15, .subheadline)
+    static let feedNoteTitle = TypeToken(.text, .semibold, 15, .subheadline, tracking: -0.10)
     /// The app's own 15-pt line — a folded post, "Replying to @…", a stamp, the likes line, an empty
     /// or locked state — and the glyphs sized to it: `feedNote`'s Outfit, kept when the words left.
-    static let feedSubhead = TypeToken(font: .custom("Outfit-Regular", size: 15, relativeTo: .subheadline), tracking: -0.05)
+    static let feedSubhead = TypeToken(.text, .regular, 15, .subheadline, tracking: -0.05)
     /// The app's own sentences on the feed's surfaces — the rules, a report's reasons, a show's bio,
     /// the caught-up and discussion headings — keep the Outfit Light the post words wore until 26 Sep.
-    static let feedLight = TypeToken(font: .custom("Outfit-Light", size: 16, relativeTo: .callout), tracking: -0.05)
-    static let feedLightLarge = TypeToken(font: .custom("Outfit-Light", size: 18, relativeTo: .body), tracking: -0.10)
-    static let feedSmall = TypeToken(font: .custom("Outfit-Regular", size: 13, relativeTo: .footnote), tracking: 0)
-    static let feedCount = TypeToken(font: .custom("Outfit-Regular", size: 13, relativeTo: .footnote).monospacedDigit(), tracking: 0)
-    static let feedCountLarge = TypeToken(font: .custom("Outfit-Regular", size: 15, relativeTo: .subheadline).monospacedDigit(), tracking: 0)
+    static let feedLight = TypeToken(.paragraph, .light, 16, .callout, tracking: -0.05)
+    static let feedLightLarge = TypeToken(.paragraph, .light, 18, .body, tracking: -0.10)
+    static let feedSmall = TypeToken(.text, .regular, 13, .footnote)
+    static let feedCount = TypeToken(.text, .regular, 13, .footnote, monospacedDigits: true)
+    static let feedCountLarge = TypeToken(.text, .regular, 15, .subheadline, monospacedDigits: true)
     /// X's tabs, measured (round 3): the same weight in BOTH states — only the ink says which is
     /// selected, so the word never reflows under the sliding underline.
-    static let feedTab = TypeToken(font: .custom("Outfit-SemiBold", size: 16, relativeTo: .callout), tracking: -0.15)
-    static let feedModuleTitle = TypeToken(font: .custom("Outfit-SemiBold", size: 20, relativeTo: .title3), tracking: -0.30)
-    static let feedPill = TypeToken(font: .custom("Outfit-SemiBold", size: 14, relativeTo: .subheadline), tracking: 0)
-    static let storyName = TypeToken(font: .custom("Outfit-Regular", size: 12, relativeTo: .caption), tracking: 0)
+    static let feedTab = TypeToken(.text, .semibold, 16, .callout, tracking: -0.15)
+    static let feedModuleTitle = TypeToken(.display, .semibold, 20, .title3, tracking: -0.30)
+    static let feedPill = TypeToken(.text, .semibold, 14, .subheadline)
+    static let storyName = TypeToken(.text, .regular, 12, .caption)
     /// The ring's NEW tag: Instagram's LIVE tag, heavy caps at a fixed size (the tag is part of the
     /// ring, which does not grow with Dynamic Type).
     static let storyRingTag = TypeToken(font: .custom("Outfit-Bold", fixedSize: 10), tracking: 0.6)
     /// The reply bar at rest and the story's reply row: the app inviting a reply, so Outfit.
-    static let storyReply = TypeToken(font: .custom("Outfit-Regular", size: 15, relativeTo: .subheadline), tracking: -0.05)
+    static let storyReply = TypeToken(.text, .regular, 15, .subheadline, tracking: -0.05)
     /// What you type in the composer or the open reply bar is a post's words: SF 17, the post page's
     /// size. (Choosing a name or a username is not — `IdentitySetupView` sets `ThemeType.body`.)
-    static let composeField = TypeToken(font: .system(.body), tracking: 0)
+    static let composeField = TypeToken(.reading, .regular, 17, .body)
     /// Schedule's caps — a weekday over its date, the card's moment ("TONIGHT AT 7:30 PM"), the
     /// month the agenda crosses into, "LATER" — in the app's face: the system's small caps beside
     /// Outfit names read as a second font on every row (the feed's own lesson, 25 Sep).
-    static let feedEyebrow = TypeToken(font: .custom("Outfit-SemiBold", size: 12, relativeTo: .caption), tracking: 0.9)
+    static let feedEyebrow = TypeToken(.text, .semibold, 12, .caption, tracking: 0.9)
     /// Schedule's date numeral — the rows' date column and the month grid's cells, one instrument.
-    static let feedDate = TypeToken(font: .custom("Outfit-SemiBold", size: 18, relativeTo: .subheadline).monospacedDigit(), tracking: 0)
+    static let feedDate = TypeToken(.text, .semibold, 18, .subheadline, monospacedDigits: true)
     /// A chart row's rank numeral (Discover's Trending).
-    static let trendRank = TypeToken(font: .custom("Outfit-SemiBold", size: 20, relativeTo: .title3).monospacedDigit(), tracking: 0)
+    static let trendRank = TypeToken(.display, .semibold, 20, .title3, monospacedDigits: true)
     /// A genre tile's name. SemiBold 17, not Bold 18: Outfit's Bold is rounder and heavier than
     /// SF's, and at 18 the names read chunky, like a template ("genre card copy text font needs
     /// rework, it's poorly built", owner, 26 Sep; four treatments compared on the real art).
-    static let genreName = TypeToken(font: .custom("Outfit-SemiBold", size: 17, relativeTo: .headline), tracking: -0.15)
+    static let genreName = TypeToken(.display, .semibold, 17, .headline, tracking: -0.15)
     /// A show page's name — X's profile name, a step above the page title.
-    static let feedProfileName = TypeToken(font: .custom("Outfit-Bold", size: 22, relativeTo: .title2), tracking: -0.35)
+    static let feedProfileName = TypeToken(.display, .bold, 22, .title2, tracking: -0.35)
     /// X's page title beside its back arrow ("Post").
-    static let feedPageTitle = TypeToken(font: .custom("Outfit-SemiBold", size: 20, relativeTo: .title3), tracking: -0.30)
+    static let feedPageTitle = TypeToken(.display, .semibold, 20, .title3, tracking: -0.30)
     /// A person's monogram at the 40-pt disc (`FeedMetrics.personDisc`). Other discs use
     /// `discMonogram(diameter:)`, which keeps the same letter-to-disc proportion. FIXED size, as
     /// `AccountDisc`'s is: the disc does not grow with Dynamic Type, so a letter that did would
     /// spill past its circle at the accessibility sizes.
     static let discMonogram = TypeToken(font: .custom("Outfit-SemiBold", fixedSize: discMonogramSize), tracking: 0)
-    static let stickerQuestion = TypeToken(font: .custom("Outfit-SemiBold", size: 19, relativeTo: .headline), tracking: 0)
+    static let stickerQuestion = TypeToken(.display, .semibold, 19, .headline)
 
     /// `discMonogram` scaled to a disc of `diameter` points (`size / 40` ≈ 0.42 × the disc), so a
     /// 22-pt pill face and a 44-pt comment author carry the same proportion as the 40-pt disc.

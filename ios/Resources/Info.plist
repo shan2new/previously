@@ -61,6 +61,10 @@
 		<string>Outfit-Medium.ttf</string>
 		<string>Outfit-SemiBold.ttf</string>
 		<string>Outfit-Bold.ttf</string>
+		<string>HankenGrotesk-Regular.ttf</string>
+		<string>HankenGrotesk-Medium.ttf</string>
+		<string>HankenGrotesk-SemiBold.ttf</string>
+		<string>HankenGrotesk-Bold.ttf</string>
 	</array>
 	<key>UILaunchScreen</key>
 	<dict>
