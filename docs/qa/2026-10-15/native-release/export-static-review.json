@@ -1,0 +1,128 @@
+{
+  "reviewedAt": "2026-10-15T16:33:50.232868+00:00",
+  "status": "no_concrete_defect_found_in_reviewed_repair",
+  "scope": "Frozen export repair: owner and accepted-erasure boundaries, one-item singleflight/cache, repeated transfer callbacks, JSON/CSV selection and user-saved copies.",
+  "findings": [],
+  "verifiedSourceBehavior": [
+    {
+      "area": "singleflight and cache",
+      "evidence": [
+        "ios/Sources/App/AccountExportPreparation.swift:10",
+        "ios/Sources/Features/Profile/LibraryExport.swift:24",
+        "ios/Sources/Features/Profile/LibraryExport.swift:72"
+      ],
+      "observation": "Copies of one JSON Transferable retain the same preparation reference. Concurrent loads share a pending task; successful repeats reuse its Document. Every access checks the captured owner, including before caching/returning an awaited value. Identity-matched pending cleanup cannot erase a newer task. Failed loads are not cached and can retry."
+    },
+    {
+      "area": "owner and file writes",
+      "evidence": [
+        "ios/Sources/App/AccountExportStore.swift:7",
+        "ios/Sources/App/AccountLocalStore.swift:52",
+        "ios/Sources/Auth/AuthManager.swift:160",
+        "ios/Sources/App/AppModel.swift:658",
+        "ios/Sources/Features/Profile/ProfileView.swift:1176"
+      ],
+      "observation": "Snapshot generation and owner guard both JSON and CSV writes on MainActor. Sign-out, confirmed deletion and cold signed-out recovery clear the account snapshot and app-managed staging before stale future writes can succeed. Accepted deletion tears down synchronously before provider sign-out await."
+    },
+    {
+      "area": "formats and call count",
+      "evidence": [
+        "ios/Sources/Features/Profile/LibraryExport.swift:37",
+        "ios/Sources/Features/Profile/LibraryExport.swift:153",
+        "ios/Sources/Features/Profile/ProfileView.swift:1389",
+        "ios/Sources/Features/Profile/AccountSuspendedView.swift:128"
+      ],
+      "observation": "JSON exposes only .json and CSV only .commaSeparatedText, using distinct Transferable types. CSV has a fixed .csv filename and local payload; it never calls /me/export. Profile selects the corresponding type. Suspended account export uses the same guarded JSON type."
+    },
+    {
+      "area": "saved copies",
+      "evidence": [
+        "ios/Sources/App/AccountExportStore.swift:23",
+        "ios/Sources/Features/Profile/LibraryExport.swift:111"
+      ],
+      "observation": "Cleanup targets only app-managed temporary staging and legacy export-prefixed temporary entries. It does not traverse Documents or arbitrary destination URLs, so copies saved by users remain theirs."
+    },
+    {
+      "area": "four helper tests",
+      "evidence": [
+        "ios/UITests/AccountExportPreparationTests.swift:7",
+        "ios/UITests/AccountExportPreparationTests.swift:24",
+        "ios/UITests/AccountExportPreparationTests.swift:42",
+        "ios/UITests/AccountExportPreparationTests.swift:58"
+      ],
+      "observation": "Tests assert concurrent/repeated coalescing, failure then retry, stale cached access and owner change during await. The review inspected their assertions only; it did not run them or infer real ShareLink callback behavior."
+    }
+  ],
+  "sourceFiles": [
+    {
+      "path": "ios/Sources/App/AccountExportPreparation.swift",
+      "scope": "primary",
+      "sha256": "5efb223a25dbd5b76ec307e7146c4a07b291332ffdf3572562b98959da12cf19"
+    },
+    {
+      "path": "ios/Sources/Features/Profile/LibraryExport.swift",
+      "scope": "primary",
+      "sha256": "2fa09e4f7b477fac1a8e7003fb04780b7bed3c0debf8b0154ee8f4033058d278"
+    },
+    {
+      "path": "ios/Sources/Features/Profile/ProfileView.swift",
+      "scope": "primary",
+      "sha256": "7dfebb360d661e8a2621cd10b8053d1b7c02593d1675d1d8b1a29519327c723b"
+    },
+    {
+      "path": "ios/Sources/Features/Profile/AccountSuspendedView.swift",
+      "scope": "primary",
+      "sha256": "47124b1c7fa7d0ebface4920512c350dca0d5386f608f3085a897af4508bcbd3"
+    },
+    {
+      "path": "ios/UITests/AccountExportPreparationTests.swift",
+      "scope": "primary",
+      "sha256": "c90bf22de5ba4eb9585e845612090cca57b5cc90c9bca0cd85bbed7523d88b51"
+    },
+    {
+      "path": "ios/Sources/App/AccountExportStore.swift",
+      "scope": "supporting lifecycle/transport context",
+      "sha256": "de3cb42dbe012ff7a79cbe120329212bd612bd3054ec54ef18889ee386f00629"
+    },
+    {
+      "path": "ios/Sources/App/AccountLocalStore.swift",
+      "scope": "supporting lifecycle/transport context",
+      "sha256": "820dad8e5f0f4b84f2f1e5fbc0cb3b48c92c51ed34f80a22b88405bd70783873"
+    },
+    {
+      "path": "ios/Sources/Auth/AuthManager.swift",
+      "scope": "supporting lifecycle/transport context",
+      "sha256": "0aca59743154a7ea83c8db5abab0f3839ae7e7de36442b4228f964ebd5a5eb19"
+    },
+    {
+      "path": "ios/Sources/App/AppModel.swift",
+      "scope": "supporting lifecycle/transport context",
+      "sha256": "ca5c20f1d9fc91c039e9bc274e91213b6a20118b767f23820723c861ccc24536"
+    },
+    {
+      "path": "ios/Sources/Features/Profile/AccountDeletion.swift",
+      "scope": "supporting lifecycle/transport context",
+      "sha256": "772982add8a22c76632004f473d02254b252978d73f17a07736a84d0d3c5b3f5"
+    },
+    {
+      "path": "ios/Sources/Networking/APIClient.swift",
+      "scope": "supporting lifecycle/transport context",
+      "sha256": "afa2ea523bad125977da5581a35a947bbf17da873d65cc91fa8c10b3f5c523fe"
+    }
+  ],
+  "execution": {
+    "readOnlySourceReview": true,
+    "sourceEdits": false,
+    "compilerOrBuild": false,
+    "simulatorOrUI": false,
+    "runtimeTests": false,
+    "providerOrAccountActions": false
+  },
+  "boundaries": [
+    "The cache is per Transferable item, not a global per-account export cache. A recreated view/item starts a new preparation. Separate requested exports still consume the existing server allowance.",
+    "Singleflight coalesces application loads; it does not suppress APIClient transport retries. The configured default remains three HTTP export requests per hour, and errors permit a later retry. Actual Files journeys must measure request counts.",
+    "Erasure preparation/uncertain hold does not itself revoke AccountLocalStore or clear temporary exports. An already-issued same-owner cached transfer is not explicitly canceled at that boundary. Confirmed deletion/sign-out does revoke and clear it; no A-to-B exposure or runtime hold-path exposure was reproduced by this review.",
+    "User-saved copies intentionally survive app account cleanup; this is not a promise to revoke files already delivered to external destinations.",
+    "Static review is not runtime/compiler qualification, live erasure proof, production ShareLink behavior, physical-device verification or archive17 approval."
+  ]
+}

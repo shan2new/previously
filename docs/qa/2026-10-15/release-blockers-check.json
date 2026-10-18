@@ -1,0 +1,136 @@
+{
+  "schemaVersion": 1,
+  "checkedAt": "2026-10-15T20:44:00.064383+05:30",
+  "scope": "Read-only release-blocker check: current source, archive15, visible TestFlight, public GETs, installed ops and scoped Apple email search. No fixes/deploys/account changes/submission performed.",
+  "head": "57365d7783b90663815f3169b2a7d66e4af251cc",
+  "concurrentTrackedChanges": [
+    "ios/project.yml"
+  ],
+  "currentProjectVersion": "16",
+  "technicalBlockers": [
+    {
+      "priority": "P0 for widget-bearing candidate15/16",
+      "issue": "Next-up widget snapshot is not bound to account and survives teardown",
+      "evidenceType": "Static source confirmed independently twice, with root source read; no live device reproduction",
+      "impact": "Prior-account show titles and episode position can remain after sign-out/deletion/account switch; in-flight art fetch can republish old snapshot",
+      "requiredCorrection": "Guard writes by account generation/owner, cancel writer and purge shared files on teardown, invalidate widget timelines, exercise cross-account/deletion regression",
+      "criticalFiles": [
+        {
+          "path": "ios/Shared/NextUpSnapshot.swift",
+          "sha256": "6646f368f2edcb1415294b949f054819e962c925ff1f7ef0f4d23742f92af0bc",
+          "matchesHead": true
+        },
+        {
+          "path": "ios/Sources/App/AppModel+Widget.swift",
+          "sha256": "3269780f44ab08d44ef7be21d291078a38251644b3e0408054d1c3a9836d1407",
+          "matchesHead": true
+        },
+        {
+          "path": "ios/Sources/App/AppModel.swift",
+          "sha256": "678ec6cd8d6ebf70ec3ce7bcec40cfd74d17b79a3af115daadf3aa646749bb39",
+          "matchesHead": true
+        },
+        {
+          "path": "ios/Widgets/NextUpWidget.swift",
+          "sha256": "e4266a9a97630c1559af573d0c55f384be7c729d351648f9ebe83af1419be0c9",
+          "matchesHead": true
+        }
+      ]
+    },
+    {
+      "priority": "P1",
+      "issue": "9Oct progress-derived status fix is absent from installed production backend",
+      "installedArtifact": "/Users/shan2new/Infra/previously/releases/20261006T123751Z/server/dist/services/library.js",
+      "installedSha256": "8bf90099e70939dd644e52acef0d637a7c1a495073acdf0eebb0a3e37fab7233",
+      "statusAfterWritesPresent": false,
+      "derivedStatusAfterProgressPresent": false,
+      "sourceCommit": "62d694f",
+      "sourcePath": "server/src/services/library.ts",
+      "impact": "Production progress writes can retain stale Planned status; one-off owner backfill did not install ongoing rule",
+      "requiredCorrection": "Qualify and deploy the status-rule backend artifact, then verify fresh status transitions"
+    }
+  ],
+  "handoffAndQualificationGaps": [
+    {
+      "topic": "Apple2.1 request",
+      "lastConfirmedAt": "2026-10-07",
+      "lastConfirmedBuild": 14,
+      "lastConfirmedState": "Rejected / Unresolved Issues",
+      "currentLiveStateVerified": false,
+      "liveAttempt": "Chrome unavailable; in-app browser reached App Store Connect login with authResultFAILED. No login/submission mutation.",
+      "freshEmailSearch": "Scoped Apple/Previously emails since6Oct returned6Oct submission and7Oct rejection only; this does not establish current portal state",
+      "pendingInLatestLocalRecords": [
+        "actual physical-device recording",
+        "final factual reply and Review Notes with evidence",
+        "sample attachments and resubmission"
+      ],
+      "evidence": [
+        "docs/qa/2026-10-07/app-store/rejection-receipt.json",
+        "docs/qa/2026-10-07/app-store/response-draft-saved-receipt.json",
+        "docs/audits/2026-10-09/README.md"
+      ]
+    },
+    {
+      "topic": "Consumer QA on actual chosen release",
+      "actualLiveErasureVerified": false,
+      "filesImportExportVerified": false,
+      "notes": "No later successful evidence located. Latest erasure-preparation observation7Oct was baseline_not_ready; do not present it as current account state or a reproduced app failure. Earlier directed/monkey checks predate new widget/UI/status changes.",
+      "evidence": [
+        "docs/qa/2026-10-07/native-live/erasure-baseline-preparation-20261007T152657449774Z.json",
+        "docs/qa/2026-10-06/native-live/files-recheck/result.json",
+        "docs/audits/2026-10-09/README.md"
+      ]
+    }
+  ],
+  "freshPositiveChecks": {
+    "testFlight": {
+      "method": "Native TestFlight visible AX on15Oct",
+      "version": "1.0",
+      "build": 15,
+      "releaseDateDisplayed": "9Oct2026",
+      "installButtonEnabled": true,
+      "testerAvailabilityVerified": true,
+      "phoneInstalledBuildVerified": false,
+      "appStoreSelectedBuildVerified": false
+    },
+    "publicEndpoints": {
+      "landing": 200,
+      "privacy": 200,
+      "support": 200,
+      "apiHealth": 200,
+      "apiReady": 200,
+      "observedBy": "landing_release agent,15Oct15:07-15:11UTC"
+    },
+    "operations": {
+      "installedLaunchAgentsMatchQualifiedHashes": true,
+      "apiRequestsObserved": 14436,
+      "api5xxObserved": 0,
+      "backupChecksumAndSizeMatch": true,
+      "latestBackupAgeHoursAtCheck": 17.4,
+      "retentionAndLogCapsPass": true,
+      "diskFreeGiB": 17.4
+    },
+    "historical5xLoad": {
+      "passed": true,
+      "date": "2026-10-06",
+      "scope": "Installed backend artifact; does not automatically qualify undeployed9Oct rule"
+    }
+  },
+  "separateDiagnostic": {
+    "job": "stale-reports",
+    "retainedFailureCount": 169,
+    "causeConfirmed": false,
+    "releaseBlockerEstablished": false,
+    "notes": "Anime/TV jobs completed; comments disabled. Diagnose separately rather than infer consumer failure."
+  },
+  "constraintsHonored": {
+    "newRecurringSpend": false,
+    "licenseOutreachOrGateAdded": false,
+    "acceptedSameMacHardwareLossLimitReopened": false,
+    "sourceEdits": false,
+    "deploymentOrRestart": false,
+    "accountWrites": false,
+    "appInstallOrUpdate": false,
+    "appStoreReplyOrResubmission": false
+  }
+}

@@ -1,0 +1,266 @@
+{
+  "checkedAt": "2026-10-15T18:47:09.455754+00:00",
+  "archivePath": "/Users/shan2new/Projects/previously/ios/build/Previously-17.xcarchive",
+  "baselineArchivePath": "/Users/shan2new/Projects/previously/ios/build/Previously-16.xcarchive",
+  "expectedBuild": "17",
+  "archiveCreationDate": "2026-10-15 18:44:40",
+  "status": "artifact_checks_passed",
+  "checks": {
+    "appBundle": true,
+    "widgetBundle": true,
+    "version": true,
+    "build": true,
+    "iPhoneOnly": true,
+    "minimum18": true,
+    "devicePlatform": true,
+    "productionAPI": true,
+    "canonicalPrivacy": true,
+    "canonicalTerms": true,
+    "publicKeyLiveAndMatchesQualified16": true,
+    "baselineBuild16": true,
+    "baselineProductionBundle": true,
+    "baselineSignatureValid": true,
+    "nonExemptEncryptionFalse": true,
+    "widgetExtensionPoint": true,
+    "productionDisplayNameMatches16": true,
+    "noQADisplayOrBundleName": true,
+    "fileSharingAbsentOrFalse": true,
+    "openingDocumentsInPlaceAbsentOrFalse": true,
+    "supportEmailMatches16": true,
+    "noArbitraryATSLoads": true,
+    "widgetProductionDisplayNameMatches16": true,
+    "widgetNoQADisplayOrBundleName": true,
+    "widgetNoArbitraryATSLoads": true,
+    "appSharedGroupExact": true,
+    "appTeamExact": true,
+    "appApplicationIdentifierExact": true,
+    "appAppleSignInCorrectScope": true,
+    "appSignatureValid": true,
+    "appEmbeddedProfilePresent": true,
+    "appProfileDecoded": true,
+    "appProfileNotExpired": true,
+    "appProfileAppGroupMatches": true,
+    "appProfileApplicationIdentifierMatches": true,
+    "appArm64Only": true,
+    "appMachODeviceMin18": true,
+    "widgetSharedGroupExact": true,
+    "widgetTeamExact": true,
+    "widgetApplicationIdentifierExact": true,
+    "widgetAppleSignInCorrectScope": true,
+    "widgetSignatureValid": true,
+    "widgetEmbeddedProfilePresent": true,
+    "widgetProfileDecoded": true,
+    "widgetProfileNotExpired": true,
+    "widgetProfileAppGroupMatches": true,
+    "widgetProfileApplicationIdentifierMatches": true,
+    "widgetArm64Only": true,
+    "widgetMachODeviceMin18": true,
+    "exactExpectedPrivacyManifests": true,
+    "privacyNoTracking:Clerk_ClerkKit.bundle/PrivacyInfo.xcprivacy": true,
+    "privacyNoTracking:Clerk_ClerkKitUI.bundle/PrivacyInfo.xcprivacy": true,
+    "privacyNoTracking:PhoneNumberKit_PhoneNumberKit.bundle/PrivacyInfo.xcprivacy": true,
+    "privacyNoTracking:PrivacyInfo.xcprivacy": true,
+    "appDeclaredDataTypesExact": true,
+    "userDefaultsReasonCA92.1": true
+  },
+  "failedChecks": [],
+  "targets": [
+    {
+      "kind": "app",
+      "bundle": "/Users/shan2new/Projects/previously/ios/build/Previously-17.xcarchive/Products/Applications/Previously.app",
+      "version": "1.0",
+      "build": "17",
+      "architectures": [
+        "arm64"
+      ],
+      "binarySHA256": "ee9391e82f1f8ecd9b145c448190da01d02789e95eeff823dad43b1b6552c70a",
+      "infoSHA256": "a04f22f40980a94903bc421d803ca41a868d26ed8bd57ff57563d5dcab6214fe",
+      "sdk": "iphoneos27.0",
+      "xcodeBuild": "27A266a",
+      "signing": {
+        "signatureValid": true,
+        "entitlements": {
+          "application-identifier": "YLPZXZS2F4.com.cognipin.previously",
+          "com.apple.developer.applesignin": [
+            "Default"
+          ],
+          "com.apple.developer.team-identifier": "YLPZXZS2F4",
+          "com.apple.security.application-groups": [
+            "group.com.cognipin.previously"
+          ],
+          "get-task-allow": true
+        },
+        "embeddedProfilePresent": true,
+        "profileDecoded": true,
+        "profileNotExpired": true,
+        "profileExpiresAt": "2027-10-09T13:11:09",
+        "profileAppGroupMatches": true,
+        "profileApplicationIdentifierMatches": true
+      }
+    },
+    {
+      "kind": "widget",
+      "bundle": "/Users/shan2new/Projects/previously/ios/build/Previously-17.xcarchive/Products/Applications/Previously.app/PlugIns/PreviouslyWidgets.appex",
+      "version": "1.0",
+      "build": "17",
+      "architectures": [
+        "arm64"
+      ],
+      "binarySHA256": "dccd89ffe215e49801570d6a2eb60996499e8b5dd12e6d30b58e8a56fd96a831",
+      "infoSHA256": "90fd6679e29e0b8a1fdb952acced7b852c9f4023c2ee44ba555fc8f0ec567e84",
+      "sdk": "iphoneos27.0",
+      "xcodeBuild": "27A266a",
+      "signing": {
+        "signatureValid": true,
+        "entitlements": {
+          "application-identifier": "YLPZXZS2F4.com.cognipin.previously.widgets",
+          "com.apple.developer.team-identifier": "YLPZXZS2F4",
+          "com.apple.security.application-groups": [
+            "group.com.cognipin.previously"
+          ],
+          "get-task-allow": true
+        },
+        "embeddedProfilePresent": true,
+        "profileDecoded": true,
+        "profileNotExpired": true,
+        "profileExpiresAt": "2027-10-09T13:11:12",
+        "profileAppGroupMatches": true,
+        "profileApplicationIdentifierMatches": true
+      }
+    }
+  ],
+  "privacy": [
+    {
+      "path": "Clerk_ClerkKit.bundle/PrivacyInfo.xcprivacy",
+      "sha256": "13a72c8448476d8369a0e9a279464f20913f528022cd7ebfff31baa4d4f840ba",
+      "matchesQualified16": true
+    },
+    {
+      "path": "Clerk_ClerkKitUI.bundle/PrivacyInfo.xcprivacy",
+      "sha256": "13a72c8448476d8369a0e9a279464f20913f528022cd7ebfff31baa4d4f840ba",
+      "matchesQualified16": true
+    },
+    {
+      "path": "PhoneNumberKit_PhoneNumberKit.bundle/PrivacyInfo.xcprivacy",
+      "sha256": "561040f7a52952f75d02d4b6758382ff48c563d6f25c84a09f1a655f6dc60ff8",
+      "matchesQualified16": true
+    },
+    {
+      "path": "PrivacyInfo.xcprivacy",
+      "sha256": "1dbd4ccfcf2f16699db8750f0a41bcea77ff60d06c1ba082dd175fdf7e4211a0",
+      "matchesQualified16": true
+    }
+  ],
+  "provenance": {
+    "compilerLogPath": "/Users/shan2new/Library/Developer/XcodeBuildMCP/workspaces/previously-2bd4c895d527/logs/build_device_2026-10-15T18-42-10-076Z_pid65651_1f87760a.log",
+    "compilerLogSHA256": "884a23e7f3f06f9c3da1b1866ca3725aff0e1b7f2bc1f430f3f93af60ccd1ed2",
+    "compilerEvidence": {
+      "archiveSucceededMarker": true,
+      "releaseConfigurationMarker": true,
+      "releaseEvidence": {
+        "CLIConfigurationArgument": true,
+        "bothModuleObjectOutputsUnderReleaseIPhoneOS": true
+      },
+      "bothRuntimeModulesObserved": true,
+      "noQANorDebugDefinesInObservedCompilerInvocations": true,
+      "observedCompilerInvocationsTargetDeviceMin18": true,
+      "modules": {
+        "Previously": [
+          {
+            "defines": [],
+            "target": "arm64-apple-ios18.0",
+            "releaseObjectOutputPath": true,
+            "objectOutputConfiguration": "Release"
+          },
+          {
+            "defines": [],
+            "target": "arm64-apple-ios18.0",
+            "releaseObjectOutputPath": true,
+            "objectOutputConfiguration": "Release"
+          },
+          {
+            "defines": [],
+            "target": "arm64-apple-ios18.0",
+            "releaseObjectOutputPath": true,
+            "objectOutputConfiguration": "Release"
+          },
+          {
+            "defines": [],
+            "target": "arm64-apple-ios18.0",
+            "releaseObjectOutputPath": true,
+            "objectOutputConfiguration": "Release"
+          },
+          {
+            "defines": [],
+            "target": "arm64-apple-ios18.0",
+            "releaseObjectOutputPath": true,
+            "objectOutputConfiguration": "Release"
+          },
+          {
+            "defines": [],
+            "target": "arm64-apple-ios18.0",
+            "releaseObjectOutputPath": true,
+            "objectOutputConfiguration": "Release"
+          }
+        ],
+        "PreviouslyWidgets": [
+          {
+            "defines": [],
+            "target": "arm64-apple-ios18.0",
+            "releaseObjectOutputPath": true,
+            "objectOutputConfiguration": "Release"
+          },
+          {
+            "defines": [],
+            "target": "arm64-apple-ios18.0",
+            "releaseObjectOutputPath": true,
+            "objectOutputConfiguration": "Release"
+          },
+          {
+            "defines": [],
+            "target": "arm64-apple-ios18.0",
+            "releaseObjectOutputPath": true,
+            "objectOutputConfiguration": "Release"
+          },
+          {
+            "defines": [],
+            "target": "arm64-apple-ios18.0",
+            "releaseObjectOutputPath": true,
+            "objectOutputConfiguration": "Release"
+          },
+          {
+            "defines": [],
+            "target": "arm64-apple-ios18.0",
+            "releaseObjectOutputPath": true,
+            "objectOutputConfiguration": "Release"
+          },
+          {
+            "defines": [],
+            "target": "arm64-apple-ios18.0",
+            "releaseObjectOutputPath": true,
+            "objectOutputConfiguration": "Release"
+          }
+        ]
+      },
+      "boundary": "A supplied text log is evidence, not a cryptographic binding between source and binary. GUI logs need no CLI configuration or success banner: per-module Release-iphoneos object output paths identify configuration. Incremental builds can omit compiler invocations; missing evidence stays pending."
+    },
+    "sourceManifest": {
+      "path": "/Users/shan2new/Projects/previously/docs/qa/2026-10-15/consumer-release/archive17-source-manifest.json",
+      "sha256": "82e0ee042b690cc849b9d9171a966a98c58fb1c0f0e6fb1b72bad3a5ca77ef50",
+      "fileCount": 596,
+      "currentFilesMatch": true,
+      "changedPaths": []
+    }
+  },
+  "observedCompileConfigurationPassed": true,
+  "suppliedSourceFreezeStillMatches": true,
+  "verifierSHA256": "4af865adbfacdc72e95aa6f48cfc0c2c56db1fe378c3cd001aec8a8d4b929858",
+  "readOnly": true,
+  "boundaries": [
+    "Compile flags remain unverified without both app and widget compiler commands in a supplied Release archive log.",
+    "A supplied source manifest proves only that its listed current files are unchanged. It does not independently bind those inputs to this Mach-O or attest the manifest's creation time or completeness.",
+    "get-task-allow can be true in a development-signed archive. App Store distribution signing and Apple upload processing require separate receipts.",
+    "An iPhoneOS archive cannot run in CoreSimulator. QA and production-configured Release simulator variants can share source/configuration but are different executables, entitlements and storage environments.",
+    "This inspection does not prove physical-device widgets, real-account erasure, provider auth, launch success, TestFlight availability, Apple review or approval."
+  ]
+}

@@ -1,0 +1,81 @@
+{
+  "schemaVersion": 1,
+  "checkedAtUTC": "2026-10-15T17:21:05.534507+00:00",
+  "scope": "Read already-exported successful admission-case PNGs only. No new attachment export, native action, source mutation or creative editing.",
+  "manifestPath": "ios/Tools/qa/.runs/20261015T161326526097Z/attachments/manifest.json",
+  "manifestSha256": "1a10159c1d3992dc2bc1eb02355926e8c7652c40502ca07fce277af703d39116",
+  "observed": [
+    {
+      "testIdentifier": "PreviouslyAdmissionTests/testAcceptThroughSelectedTVEpisodeDoesNotResetToEpisodeOne()",
+      "path": "ios/Tools/qa/.runs/20261015T161326526097Z/attachments/F1C4B4A7-E975-486F-B3F1-A936CDC632CC.png",
+      "sha256": "b5e4cc9102c87957fccccf9c96de9cfde45fc5f0acfd22916126c7ef11ccf786",
+      "suggestedHumanReadableName": "admission-through-last-screen_0_A095B0D3-11D5-4084-8F2D-E06532318E63.png",
+      "visuallyInspected": true,
+      "settledAdmissionAlertVisible": false,
+      "observedState": "Blank/transition state; no admission alert.",
+      "selectedForCompanion": false
+    },
+    {
+      "testIdentifier": "PreviouslyAdmissionTests/testAcceptUnownedTVNextEpisodeAddsOnceAndExistingShowMarksNormally()",
+      "path": "ios/Tools/qa/.runs/20261015T161326526097Z/attachments/99236538-4A92-41D4-8829-9C9491AF5EEB.png",
+      "sha256": "eea3a7095f113b13149588c09e3b8c8b694e9c6b906d55509443f2630d817951",
+      "suggestedHumanReadableName": "admission-next-last-screen_0_D2A79F78-0387-4C68-9A2D-F43E800CEE1D.png",
+      "visuallyInspected": true,
+      "settledAdmissionAlertVisible": false,
+      "observedState": "Post-write toast with animation overlap; no admission alert.",
+      "selectedForCompanion": false
+    },
+    {
+      "testIdentifier": "PreviouslyAdmissionTests/testAcceptUnownedTVSeasonKeepsFullSelectedSeason()",
+      "path": "ios/Tools/qa/.runs/20261015T161326526097Z/attachments/56A3E283-C49A-481E-B1D5-6F569B8F7C07.png",
+      "sha256": "14b50d67211d5e25c286985059df22eea067843218c9acc6367856d12b939dd7",
+      "suggestedHumanReadableName": "admission-season-last-screen_0_DDBDE340-CA8C-4433-B06D-2B5253F97883.png",
+      "visuallyInspected": true,
+      "settledAdmissionAlertVisible": false,
+      "observedState": "Post-write season toast with animation overlap; no admission alert.",
+      "selectedForCompanion": false
+    },
+    {
+      "testIdentifier": "PreviouslyAdmissionTests/testCancelUnownedTVEpisodeLeavesMembershipAndProgressUntouched()",
+      "path": "ios/Tools/qa/.runs/20261015T161326526097Z/attachments/E57FE69F-5AF6-4310-A4EF-1682238995BD.png",
+      "sha256": "9bfe6bbfe735265ac5ccb9106b3f3752ddf50fd92949c2852d838b543c9a895e",
+      "suggestedHumanReadableName": "admission-cancel-last-screen_0_385F83E2-EA00-4B5C-B8BD-05D190D5A021.png",
+      "visuallyInspected": true,
+      "settledAdmissionAlertVisible": false,
+      "observedState": "Cancelled/unowned episode-list end state; no admission alert.",
+      "selectedForCompanion": false
+    },
+    {
+      "testIdentifier": "PreviouslyAdmissionTests/testCommittedAdmissionLostReceiptHasOneEffect()",
+      "path": "ios/Tools/qa/.runs/20261015T161326526097Z/attachments/BF96BAA1-ADF6-4EE2-8676-50E4DE83F3B5.png",
+      "sha256": "0b633ae1cdde9f8b68ff856cfc02e00d64235d26954bcddd72a8915c690cce0a",
+      "suggestedHumanReadableName": "admission-lost-receipt-last-screen_0_E11ABFA3-62CF-4D90-B368-896ED66BA82F.png",
+      "visuallyInspected": true,
+      "settledAdmissionAlertVisible": false,
+      "observedState": "Post-write episode-list and toast end state; no admission alert.",
+      "selectedForCompanion": false
+    },
+    {
+      "testIdentifier": "PreviouslyAdmissionTests/testFailedAdmissionRetryKeepsExactSelectedProgressAndOperation()",
+      "path": "ios/Tools/qa/.runs/20261015T161326526097Z/attachments/BB8D1F3B-DEE0-4150-BA20-588D10B80E9C.png",
+      "sha256": "5ecfc7c3fec09cef766e9bafe18bebef47b619f71ed33ab00bf230285d187e90",
+      "suggestedHumanReadableName": "admission-retry-last-screen_0_904E3410-4598-44CC-AFA1-C8FF9F767ECF.png",
+      "visuallyInspected": true,
+      "settledAdmissionAlertVisible": false,
+      "observedState": "Profile end state; no admission alert.",
+      "selectedForCompanion": false
+    },
+    {
+      "testIdentifier": "PreviouslyAdmissionTests/testToolbarBulkAdmissionUsesSelectedSecondSeasonOnly()",
+      "path": "ios/Tools/qa/.runs/20261015T161326526097Z/attachments/E797F597-68C8-4FEE-8683-192658761FF0.png",
+      "sha256": "e45443f8a103df1916e1a66c046c63e1769df8d059052071181f1a50632a35cf",
+      "suggestedHumanReadableName": "admission-selected-second-season-last-screen_0_A62545AB-07E5-4E13-8317-CDE8B923568B.png",
+      "visuallyInspected": true,
+      "settledAdmissionAlertVisible": false,
+      "observedState": "Selected-second-season post-write toast; no admission alert.",
+      "selectedForCompanion": false
+    }
+  ],
+  "decision": "Retain the explicitly historical 9 October context image until a genuine settled current alert capture is supplied. These end-state images do not represent the modal.",
+  "qualificationBoundary": "QA fixture imagery does not prove production Release or consumer account behavior."
+}

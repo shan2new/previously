@@ -9,6 +9,7 @@ test('candidate plists are valid, LTS pinned, reversible and remain uninstalled'
   const directory=await mkdtemp(join(tmpdir(),'previously-install-'));const envFile=join(directory,'production.env');const old=join(directory,'old.plist');
   try {
     await writeFile(envFile,'TEST_ONLY=private-not-a-real-secret\n',{mode:0o600});await writeFile(old,'old immutable rollback candidate');
+    for(const label of ['com.shan.previously.backup','com.shan.previously.ops'])await writeFile(join(directory,label+'.plist'),'old '+label+' candidate');
     const artifact=join(directory,'immutable-server');await mkdir(join(artifact,'ops'),{recursive:true});await mkdir(join(artifact,'dist'));
     for(const name of ['run-server.mjs','backup.mjs','collect.mjs','initialize-ledger.mjs','restore-check.mjs'])await writeFile(join(artifact,'ops',name),await readFile(join(serverRoot,'ops',name)));
     const output=join(directory,'candidate');
@@ -19,6 +20,11 @@ test('candidate plists are valid, LTS pinned, reversible and remain uninstalled'
     assert.equal(result.installed,false);assert.equal(result.jobs.length,3);
     for(const label of result.jobs){const file=join(output,label+'.plist');await command('plutil',['-lint',file],process.env);const content=await readFile(file,'utf8');assert.ok(content.includes('/opt/homebrew/opt/node@24/bin/node'));assert.ok(content.includes('/dev/null'));assert.ok(!content.includes('private-not-a-real-secret'));assert.equal((await stat(file)).mode&0o777,0o600);}
     assert.equal(await readFile(join(output,'rollback/com.shan.previously.plist'),'utf8'),'old immutable rollback candidate');
+    for(const label of ['com.shan.previously.backup','com.shan.previously.ops']){
+      const path=join(output,'rollback',label+'.plist');
+      assert.equal(await readFile(path,'utf8'),'old '+label+' candidate');
+      assert.equal((await stat(path)).mode&0o777,0o600);
+    }
     assert.equal((await stat(output)).mode&0o777,0o700);
   }finally{await rm(directory,{recursive:true});}
 });

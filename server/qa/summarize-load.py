@@ -17,7 +17,11 @@ parser.add_argument('--protocol-evidence', type=Path, default=BASE / 'progress-f
 parser.add_argument('--recovery-evidence', type=Path, default=BASE / 'deletion-recovery/compiled-node24-apple-policy')
 parser.add_argument('--policy-evidence', type=Path, default=BASE / 'content-policy/compiled-node24-apple-policy')
 parser.add_argument('--artifact-manifest', type=Path, default=BASE / 'operations/apple-policy-artifact/artifact-manifest.json')
+parser.add_argument('--evidence-base', type=Path, default=BASE,
+                    help='Owned dated QA directory under docs/qa; validation criteria stay unchanged')
 args = parser.parse_args()
+BASE = args.evidence_base.resolve()
+assert BASE.is_relative_to(ROOT / 'docs/qa'), 'Evidence must remain inside the owned QA tree'
 run = args.run.resolve()
 assert run.is_relative_to(BASE / 'load-testing'), 'Receipt must use saved owned load evidence'
 

@@ -1,0 +1,122 @@
+{
+  "recordedAtUTC": "2026-10-15T19:03:33.114562+00:00",
+  "overallStatus": "technical_work_incomplete",
+  "consumerReadyConfirmed": false,
+  "version": "1.0",
+  "candidateBuild": "17",
+  "newRecurringSpendAdded": false,
+  "licensingOutreachOrApprovalGateAdded": false,
+  "completed": {
+    "addToLibraryAndContinue": {
+      "implemented": true,
+      "nativeAdmissionCasesPassed": 7,
+      "behavior": "Native confirmation retains exact selected progress; Cancel makes no change; confirmed operation continues with durable retry/Undo."
+    },
+    "widgetAccountIsolation": {
+      "implemented": true,
+      "namedStorageAndQALifecycleCasesPassed": 14,
+      "physicalWidgetRefreshVerified": false
+    },
+    "filesImportExport": {
+      "actualFilesUICasesPassed": 3,
+      "exportPreparationCasesPassed": 4,
+      "sealedFullRunReceiptPublished": false
+    },
+    "backend": {
+      "deployedReviewedArtifact": true,
+      "fiveTimesCapacityProfilePassed": true,
+      "coreRequests": 82800,
+      "coreErrors": 0,
+      "scope": "Loopback core API/SQL with cached synthetic catalogue and deterministic provider stubs; not WAN or live provider quota proof."
+    },
+    "deviceArchive": {
+      "artifactChecksPassed": 56,
+      "actualReleaseCompilerProof": true,
+      "capturedInputsStillMatch": true,
+      "verifiedOrganizerCopyReady": true
+    },
+    "releaseSimulator": {
+      "compileChecksPassed": 25,
+      "installed": false,
+      "launched": false
+    }
+  },
+  "remaining": [
+    {
+      "item": "Complete native qualification",
+      "state": "not_qualified",
+      "evidence": "75 directed cases and two seeds passed; final seed external timeout124 at1800s; final oracle/relaunch checks incomplete. No assertion defect or Mac-lock cause established.",
+      "next": "Resume investigation and run on an available interactive test host; preserve existing failures and all assertions."
+    },
+    {
+      "item": "Ordinary production account erasure verification",
+      "state": "pending",
+      "evidence": "Dedicated provider identity/password and guarded read-only DB preflight verified; no app account or one-title/one-episode baseline exists yet.",
+      "next": "Normal production UI login/setup, protected baseline, exact dedicated-account deletion and independent provider/SQL/journal readback."
+    },
+    {
+      "item": "Upload candidate17 to TestFlight",
+      "state": "pending",
+      "evidence": "Actual verified archive is ready in Organizer; no upload17 or processing receipt exists.",
+      "next": "Finish qualification and upload through the existing signed-in Xcode account once desktop access is available."
+    }
+  ],
+  "desktopAccess": {
+    "lastObserved": "locked; automatic unlock paused after physical input",
+    "manualUnlockRequested": true,
+    "replyReceived": false,
+    "xctestTimeoutCausedByMacLock": null
+  },
+  "appleReviewCloseout": {
+    "owner": "user",
+    "handledByAgent": false,
+    "freshPortalStateVerified": false
+  },
+  "receipts": {
+    "archive": {
+      "path": "docs/qa/2026-10-15/consumer-release/archive17-inspection.json",
+      "sha256": "09f18e567b87cb7275a7dff3e29da6fc537bcc75efd0bdce70815d80fbfff660"
+    },
+    "archiveReview": {
+      "path": "docs/qa/2026-10-15/consumer-release/archive17-independent-review.json",
+      "sha256": "25837ae3eb612b5872930b64db6a82e4655156cff77e2af2cccc11d84836c8f1"
+    },
+    "organizerCopy": {
+      "path": "docs/qa/2026-10-15/consumer-release/archive17-organizer-copy.json",
+      "sha256": "2307d40f4a985820cea3bc8fd7ee9f10425d0b0bcd5a4f2bdf9b6d853bc81786"
+    },
+    "releaseSimulatorCompile": {
+      "path": "docs/qa/2026-10-15/consumer-release/release17-simulator-inspection.json",
+      "sha256": "877202c896e6c89a05518acedb44be10c476967a6474a8caa0bd41f225208dce"
+    },
+    "nativeAttempt": {
+      "path": "docs/qa/2026-10-15/native-release/failed-full-run-1754.json",
+      "sha256": "dc753fcd942bcd2cec3fa028f904899084401c0b3ffc72d54ae4b81d60d5cf79"
+    },
+    "backendCapacity": {
+      "path": "docs/qa/2026-10-15/backend-release/load-testing/final-results.json",
+      "sha256": "3e9b79caeeba0547b8667e935c3aada0f1ffce1b56339bb281865bc6f8166df1"
+    },
+    "backendActivation": {
+      "path": "docs/qa/2026-10-15/backend-release/activation-receipt.json",
+      "sha256": "8738c14b9d70316355bab83d245a10de509db087c21c6590ff94a33aaada6627"
+    },
+    "productionSnapshot": {
+      "path": "docs/qa/2026-10-15/backend-release/production-snapshot-20261015T182328Z.json",
+      "sha256": "c06e03653c1ad0c00686578ba834224f0f22fa3468d057af55905335eae27bfc"
+    },
+    "productionErasure": {
+      "path": "docs/qa/2026-10-15/native-release/live-erasure-results.json",
+      "sha256": "25ceb1f0fe0f3ef097c9160c36ae3b4f45f34e0e6995ddd569d56fb3ddcab620"
+    },
+    "idleInvestigation": {
+      "path": "docs/qa/2026-10-15/native-release/xctest-idle-investigation.md",
+      "sha256": "7e99ed385e2dde23bbad45c9031767086bf1b862f005b64cdad532409c66e319"
+    }
+  },
+  "boundaries": [
+    "Phase passes do not qualify the failed full native run.",
+    "The simulator compile is not production runtime, physical iPhone, account deletion or device archive execution proof.",
+    "Archive signing is separate from App Store distribution, upload, processing and approval."
+  ]
+}

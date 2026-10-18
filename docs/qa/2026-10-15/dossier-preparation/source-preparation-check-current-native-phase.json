@@ -1,0 +1,79 @@
+{
+  "schemaVersion": 1,
+  "checkedAtUTC": "2026-10-15T18:14:07.988021+00:00",
+  "operation": "source_only_no_render_no_native_actions",
+  "syntaxParsed": true,
+  "expectedStates": {
+    "capacityPassed": true,
+    "activationPassed": true,
+    "filesFocusedPassed": true,
+    "heroFocusedPassed": true,
+    "initialNativeFullFailed": true,
+    "secondNativeFullFailed": true,
+    "historicalSourceSnapshotCaptured": true,
+    "providerReadPreflightPassed": true,
+    "currentDirectedPhasePassed": true,
+    "directedPassed": false,
+    "seedsPassed": false,
+    "filesPassed": false,
+    "archivePassed": false,
+    "uploadPassed": false,
+    "erasurePassed": false,
+    "releaseSimulatorPassed": false
+  },
+  "allExpectedStatesObserved": true,
+  "localMarkdownLinksChecked": 15,
+  "localMarkdownLinksMissing": [],
+  "receiptSha256": {
+    "docs/qa/2026-10-15/backend-release/prepared-proof.json": "ce464fa460849648c26fc6856f1105663ed3b5a35126bd4ea4adc8a637860f5b",
+    "docs/qa/2026-10-15/backend-release/load-testing/final-results.json": "3e9b79caeeba0547b8667e935c3aada0f1ffce1b56339bb281865bc6f8166df1",
+    "docs/qa/2026-10-15/backend-release/load-testing/failed-initial-results.json": "7fa5155082e5f561bb3f9b45ffba6fb750a53b0cb161d9661baeca182e404dfe",
+    "docs/qa/2026-10-15/backend-release/activation-receipt.json": "8738c14b9d70316355bab83d245a10de509db087c21c6590ff94a33aaada6627",
+    "docs/qa/2026-10-15/backend-release/activation-first-failed-receipt.json": "616b47d935a9348126397b16a65f4bca6442d6a63afd5d18e077d006a6856f91",
+    "docs/qa/2026-10-15/backend-release/activation-old-service-recovery.json": "05840e922a00ebe098a4104428dd881d1565a7cf037fd18330b44b7c00259f06",
+    "docs/qa/2026-10-15/backend-release/activation-first-outage-review.json": "b19a81ca7169c2b7c92b1351aa93ba11b2f9c65ccca2105238791d3b60281e65",
+    "docs/qa/2026-10-15/backend-release/activation-helper-verification.json": "3b4e552276f205dfb528082e6a3fa735e298385ad9908ad2e88721bc0109f105",
+    "docs/qa/2026-10-15/widget-privacy/runtime-results.json": "8fc7af79c83521d68a4e584331d30b75ec603772c597f1e40ed27720f457733e",
+    "ios/Tools/qa/.runs/20261015T161326526097Z/ledger.json": "3ad25f849bfc1e02d291cdbc028caa403f486d3c739b6c786f9b616d25821231",
+    "ios/Tools/qa/.runs/20261015T175132730759Z/ledger.json": "5293f94ad43faffb083b85321215567b7fcb11e074d7583d58f8dfccf87ea633",
+    "docs/qa/2026-10-15/native-release/failed-full-run-1715.json": "ec784d048f4446d8770933afba050e0d711a61e171ccd2585f0a91799b6e7e63",
+    "docs/qa/2026-10-15/native-release/failed-full-run-1735.json": "5912a286bcf6c187792db4a9874276cfa7ce5cc0822cee632fded8494877006e",
+    "docs/qa/2026-10-15/hero-readiness/focused-runtime.json": "821107068685e4061c9bf53fa8fa6292c342e6ea6ef2ac5a7aa2d0ae2b9f7561",
+    "docs/qa/2026-10-15/hero-readiness/static-review.json": "0ecd61a024b2e1beca131de959609b51ee4536d2810521f365e8daef7a88cce5",
+    "ios/Tools/qa/.runs/20261015T175438622566Z/ledger.json": "1ef7b423deec910c6003bb3f0050bb8bd000be07a0d37312b7227bdd5a0f30d4",
+    "docs/qa/2026-10-15/consumer-release/native-source-manifest-1735.json": "4f93fb77f6fa93db1ced49ab485ec8c6af2acf53a7566fbde1183e0063f0be82",
+    "docs/qa/2026-10-15/live-erasure/provider-preflight-20261015T180825Z.json": "4be7de31f41fe4354ec86174e2f60bdca7ab5a903b71e8dfb39be75b4ce2f7f6"
+  },
+  "sourceSha256": "b8bb04e663432431ff38c0214880f26bccc0009a0413b9bfda10f690b113b470",
+  "inputManifestSha256": "3e563efaedc10fd2f80f599430b36414283c9e1846309b322350fa6c83335dae",
+  "currentNativeProgress": {
+    "ledgerPath": "ios/Tools/qa/.runs/20261015T175438622566Z/ledger.json",
+    "status": "running",
+    "directedCounts": {
+      "passed": 75,
+      "failed": 0,
+      "skipped": 0
+    },
+    "sourceFingerprint": {
+      "sha256": "649ce5a703b568c40e7bc7baa3fd0857c88e92bc3b0c8a60761aae5408d68fd6",
+      "fileCount": 431
+    },
+    "finalAllRunQualificationInferred": false
+  },
+  "historicalSourceSnapshotOnly": {
+    "path": "docs/qa/2026-10-15/consumer-release/native-source-manifest-1735.json",
+    "capturedAt": "2026-10-15T17:35:27.341624+00:00",
+    "manifestSHA256": "9e34e611541b137b1c90d692158b7ed747ed1578c03ff1a20539e26317db4cd3",
+    "nativeQAFingerprint": {
+      "sha256": "3ad6f80e294c418dca7a81abb969a4bc2eb3976fe514c304b8b781a38cb1c4c0",
+      "fileCount": 431
+    },
+    "matchesCurrentSource": false,
+    "archiveOrNativeQualificationInferred": false
+  },
+  "freshArchiveSourceManifestPresent": false,
+  "providerPreflightBoundary": "Exactly three GETs. No disposable-account existence/password proof, fresh DB read, ready baseline, app session or deletion start.",
+  "earlierDraftPdfSha256": "91e725fc3aff5542bd0712cee93d769aca111cab20142bcebe4ba3cdded8b886",
+  "finalPdfCreated": false,
+  "remainingVisualWork": "Page3 progress/failure-history and page6 artifact/provider boundaries changed after inspected draft. Render/inspect only after root authorization."
+}

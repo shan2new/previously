@@ -1,0 +1,374 @@
+[
+  {
+    "at": "2026-10-15T15:29:03.922241+00:00",
+    "topByRSS": [
+      {
+        "pid": 57276,
+        "cpuPercent": 202.2,
+        "rssKiB": 735056,
+        "command": "node"
+      },
+      {
+        "pid": 49336,
+        "cpuPercent": 0.2,
+        "rssKiB": 260784,
+        "command": "/Applications/ChatGPT.app/Contents/Resources/codex-cli/CodexCLI.app/Contents/MacOS/codex"
+      },
+      {
+        "pid": 48101,
+        "cpuPercent": 0.0,
+        "rssKiB": 254528,
+        "command": "/Applications/Claude.app/Contents/Frameworks/Claude Helper (Renderer).app/Contents/MacOS/Claude Helper (Renderer)"
+      },
+      {
+        "pid": 49335,
+        "cpuPercent": 0.3,
+        "rssKiB": 246016,
+        "command": "/Applications/ChatGPT.app/Contents/Frameworks/Codex Framework.framework/Versions/155.0.8059.40/Helpers/Codex (Renderer).app/Contents/MacOS/Codex (Renderer)"
+      },
+      {
+        "pid": 37308,
+        "cpuPercent": 0.2,
+        "rssKiB": 215872,
+        "command": "/Users/shan2new/Library/Application Support/Claude/claude-code/2.1.295/9d6405864fdc/claude.app/Contents/MacOS/claude"
+      },
+      {
+        "pid": 49245,
+        "cpuPercent": 1.8,
+        "rssKiB": 209680,
+        "command": "/Applications/ChatGPT.app/Contents/MacOS/ChatGPT"
+      },
+      {
+        "pid": 62492,
+        "cpuPercent": 0.0,
+        "rssKiB": 194560,
+        "command": "/System/Library/PrivateFrameworks/MediaAnalysis.framework/Versions/A/mediaanalysisd"
+      },
+      {
+        "pid": 51880,
+        "cpuPercent": 0.0,
+        "rssKiB": 186048,
+        "command": "/private/var/run/com.apple.security.cryptexd/mnt/watchOS_24R362/Library/Developer/CoreSimulator/Profiles/Runtimes/watchOS 27.0.simruntime/Contents/Resources/RuntimeRoot/System/Library/PrivateFrameworks/NanoTimeKit.framework/XPCServices/NTKFaceSnapshotService.xpc/NTKFaceSnapshotService"
+      },
+      {
+        "pid": 51594,
+        "cpuPercent": 0.5,
+        "rssKiB": 178576,
+        "command": "/private/var/run/com.apple.security.cryptexd/mnt/watchOS_24R362/Library/Developer/CoreSimulator/Profiles/Runtimes/watchOS 27.0.simruntime/Contents/Resources/RuntimeRoot/System/Library/CoreServices/Carousel.app/Carousel"
+      },
+      {
+        "pid": 57194,
+        "cpuPercent": 0.2,
+        "rssKiB": 175168,
+        "command": "/Applications/Xcode.app/Contents/Developer/usr/bin/xcodebuild"
+      },
+      {
+        "pid": 57261,
+        "cpuPercent": 18.9,
+        "rssKiB": 173744,
+        "command": "/opt/homebrew/Cellar/node@24/24.21.0/bin/node"
+      },
+      {
+        "pid": 57249,
+        "cpuPercent": 0.0,
+        "rssKiB": 159344,
+        "command": "/Applications/Xcode.app/Contents/SharedFrameworks/SwiftBuild.framework/Versions/A/PlugIns/SWBBuildService.bundle/Contents/MacOS/SWBBuildService"
+      },
+      {
+        "pid": 57035,
+        "cpuPercent": 0.0,
+        "rssKiB": 158448,
+        "command": "/Users/shan2new/Library/Developer/CoreSimulator/Devices/F0089925-9ABB-4D63-9C53-B2E4BD2D9FCF/data/Containers/Bundle/Application/53DE3CC3-13C9-414A-AA04-D0159B747863/KestrelWatch.app/KestrelWatch"
+      },
+      {
+        "pid": 51851,
+        "cpuPercent": 0.5,
+        "rssKiB": 138752,
+        "command": "/var/run/com.apple.security.cryptexd/mnt/watchOS_24R362/Library/Developer/CoreSimulator/Profiles/Runtimes/watchOS 27.0.simruntime/Contents/Resources/RuntimeRoot/Applications/ClockFace.app/ClockFace"
+      },
+      {
+        "pid": 49426,
+        "cpuPercent": 0.3,
+        "rssKiB": 121792,
+        "command": "/Applications/ChatGPT.app/Contents/Frameworks/Codex Framework.framework/Versions/155.0.8059.40/Helpers/Codex (Renderer).app/Contents/MacOS/Codex (Renderer)"
+      },
+      {
+        "pid": 51961,
+        "cpuPercent": 0.0,
+        "rssKiB": 108912,
+        "command": "/var/run/com.apple.security.cryptexd/mnt/watchOS_24R362/Library/Developer/CoreSimulator/Profiles/Runtimes/watchOS 27.0.simruntime/Contents/Resources/RuntimeRoot/Applications/WidgetRenderer_Snapshots.app/WidgetRenderer_Snapshots"
+      },
+      {
+        "pid": 57282,
+        "cpuPercent": 67.1,
+        "rssKiB": 96016,
+        "command": "postgres: shan2new previously_qa_load_e00b88ba7cde4910a50e992766470aaf 127.0.0.1(62886) idle"
+      },
+      {
+        "pid": 48058,
+        "cpuPercent": 0.0,
+        "rssKiB": 94848,
+        "command": "/Applications/Claude.app/Contents/MacOS/Claude"
+      },
+      {
+        "pid": 53766,
+        "cpuPercent": 98.0,
+        "rssKiB": 94640,
+        "command": "/System/Library/PrivateFrameworks/AppleNeuralEngine.framework/XPCServices/ANECompilerService.xpc/Contents/MacOS/ANECompilerService"
+      },
+      {
+        "pid": 55294,
+        "cpuPercent": 0.0,
+        "rssKiB": 84560,
+        "command": "/private/var/run/com.apple.security.cryptexd/mnt/watchOS_24R362/Library/Developer/CoreSimulator/Profiles/Runtimes/watchOS 27.0.simruntime/Contents/Resources/RuntimeRoot/usr/libexec/testmanagerd"
+      },
+      {
+        "pid": 51686,
+        "cpuPercent": 0.0,
+        "rssKiB": 81200,
+        "command": "/private/var/run/com.apple.security.cryptexd/mnt/watchOS_24R362/Library/Developer/CoreSimulator/Profiles/Runtimes/watchOS 27.0.simruntime/Contents/Resources/RuntimeRoot/System/Library/PrivateFrameworks/ChronoCore.framework/Support/chronod"
+      },
+      {
+        "pid": 51596,
+        "cpuPercent": 0.1,
+        "rssKiB": 73632,
+        "command": "/private/var/run/com.apple.security.cryptexd/mnt/watchOS_24R362/Library/Developer/CoreSimulator/Profiles/Runtimes/watchOS 27.0.simruntime/Contents/Resources/RuntimeRoot/System/Library/PrivateFrameworks/AssistantServices.framework/assistantd"
+      },
+      {
+        "pid": 55312,
+        "cpuPercent": 0.0,
+        "rssKiB": 71856,
+        "command": "/private/var/run/com.apple.security.cryptexd/mnt/watchOS_24R362/Library/Developer/CoreSimulator/Profiles/Runtimes/watchOS 27.0.simruntime/Contents/Resources/RuntimeRoot/usr/libexec/gamed"
+      },
+      {
+        "pid": 49480,
+        "cpuPercent": 0.0,
+        "rssKiB": 70016,
+        "command": "/Applications/ChatGPT.app/Contents/Frameworks/Codex Framework.framework/Versions/155.0.8059.40/Helpers/Codex (Renderer).app/Contents/MacOS/Codex (Renderer)"
+      },
+      {
+        "pid": 1487,
+        "cpuPercent": 0.0,
+        "rssKiB": 64192,
+        "command": "/Library/Application Support/Logitech.localized/LogiOptionsPlus/logioptionsplus_agent.app/Contents/MacOS/logioptionsplus_agent"
+      },
+      {
+        "pid": 51623,
+        "cpuPercent": 0.0,
+        "rssKiB": 64192,
+        "command": "/private/var/run/com.apple.security.cryptexd/mnt/watchOS_24R362/Library/Developer/CoreSimulator/Profiles/Runtimes/watchOS 27.0.simruntime/Contents/Resources/RuntimeRoot/System/Library/PrivateFrameworks/NanoTimeKit.framework/nanotimekitd"
+      },
+      {
+        "pid": 37396,
+        "cpuPercent": 0.0,
+        "rssKiB": 61440,
+        "command": "/Users/shan2new/Library/Application Support/Claude/claude-code/2.1.295/9d6405864fdc/claude.app/Contents/MacOS/claude"
+      },
+      {
+        "pid": 51805,
+        "cpuPercent": 0.0,
+        "rssKiB": 57712,
+        "command": "/private/var/run/com.apple.security.cryptexd/mnt/watchOS_24R362/Library/Developer/CoreSimulator/Profiles/Runtimes/watchOS 27.0.simruntime/Contents/Resources/RuntimeRoot/usr/libexec/toolkitd"
+      },
+      {
+        "pid": 92898,
+        "cpuPercent": 0.0,
+        "rssKiB": 57248,
+        "command": "node /Users/shan2new/Infra/status/current/build/main.js"
+      },
+      {
+        "pid": 57253,
+        "cpuPercent": 0.0,
+        "rssKiB": 54160,
+        "command": "npm run typecheck"
+      }
+    ],
+    "totalProcessRSSKiB": 11617072
+  },
+  {
+    "at": "2026-10-15T15:29:19.168238+00:00",
+    "topByRSS": [
+      {
+        "pid": 57362,
+        "cpuPercent": 12.2,
+        "rssKiB": 259328,
+        "command": "/Users/shan2new/Library/Developer/CoreSimulator/Devices/F0089925-9ABB-4D63-9C53-B2E4BD2D9FCF/data/Containers/Bundle/Application/27EE401B-D80A-4A3D-81F9-80E3C8D2D293/KestrelWatch.app/KestrelWatch"
+      },
+      {
+        "pid": 49336,
+        "cpuPercent": 1.1,
+        "rssKiB": 256384,
+        "command": "/Applications/ChatGPT.app/Contents/Resources/codex-cli/CodexCLI.app/Contents/MacOS/codex"
+      },
+      {
+        "pid": 57314,
+        "cpuPercent": 1.4,
+        "rssKiB": 222640,
+        "command": "/Users/shan2new/Library/Developer/CoreSimulator/Devices/F0089925-9ABB-4D63-9C53-B2E4BD2D9FCF/data/Containers/Bundle/Application/27749BC2-6D4C-4EDB-80AD-9E952AFE5418/KestrelWatchUITests-Runner.app/KestrelWatchUITests-Runner"
+      },
+      {
+        "pid": 49335,
+        "cpuPercent": 0.0,
+        "rssKiB": 196768,
+        "command": "/Applications/ChatGPT.app/Contents/Frameworks/Codex Framework.framework/Versions/155.0.8059.40/Helpers/Codex (Renderer).app/Contents/MacOS/Codex (Renderer)"
+      },
+      {
+        "pid": 57261,
+        "cpuPercent": 3.1,
+        "rssKiB": 196304,
+        "command": "/opt/homebrew/Cellar/node@24/24.21.0/bin/node"
+      },
+      {
+        "pid": 62492,
+        "cpuPercent": 0.0,
+        "rssKiB": 183776,
+        "command": "/System/Library/PrivateFrameworks/MediaAnalysis.framework/Versions/A/mediaanalysisd"
+      },
+      {
+        "pid": 51594,
+        "cpuPercent": 0.2,
+        "rssKiB": 177376,
+        "command": "/private/var/run/com.apple.security.cryptexd/mnt/watchOS_24R362/Library/Developer/CoreSimulator/Profiles/Runtimes/watchOS 27.0.simruntime/Contents/Resources/RuntimeRoot/System/Library/CoreServices/Carousel.app/Carousel"
+      },
+      {
+        "pid": 37308,
+        "cpuPercent": 0.3,
+        "rssKiB": 170464,
+        "command": "/Users/shan2new/Library/Application Support/Claude/claude-code/2.1.295/9d6405864fdc/claude.app/Contents/MacOS/claude"
+      },
+      {
+        "pid": 49245,
+        "cpuPercent": 1.0,
+        "rssKiB": 156352,
+        "command": "/Applications/ChatGPT.app/Contents/MacOS/ChatGPT"
+      },
+      {
+        "pid": 57194,
+        "cpuPercent": 1.2,
+        "rssKiB": 153856,
+        "command": "/Applications/Xcode.app/Contents/Developer/usr/bin/xcodebuild"
+      },
+      {
+        "pid": 57249,
+        "cpuPercent": 0.0,
+        "rssKiB": 152784,
+        "command": "/Applications/Xcode.app/Contents/SharedFrameworks/SwiftBuild.framework/Versions/A/PlugIns/SWBBuildService.bundle/Contents/MacOS/SWBBuildService"
+      },
+      {
+        "pid": 51880,
+        "cpuPercent": 14.0,
+        "rssKiB": 150048,
+        "command": "/private/var/run/com.apple.security.cryptexd/mnt/watchOS_24R362/Library/Developer/CoreSimulator/Profiles/Runtimes/watchOS 27.0.simruntime/Contents/Resources/RuntimeRoot/System/Library/PrivateFrameworks/NanoTimeKit.framework/XPCServices/NTKFaceSnapshotService.xpc/NTKFaceSnapshotService"
+      },
+      {
+        "pid": 51851,
+        "cpuPercent": 5.0,
+        "rssKiB": 138736,
+        "command": "/var/run/com.apple.security.cryptexd/mnt/watchOS_24R362/Library/Developer/CoreSimulator/Profiles/Runtimes/watchOS 27.0.simruntime/Contents/Resources/RuntimeRoot/Applications/ClockFace.app/ClockFace"
+      },
+      {
+        "pid": 48101,
+        "cpuPercent": 0.0,
+        "rssKiB": 135808,
+        "command": "/Applications/Claude.app/Contents/Frameworks/Claude Helper (Renderer).app/Contents/MacOS/Claude Helper (Renderer)"
+      },
+      {
+        "pid": 49426,
+        "cpuPercent": 0.1,
+        "rssKiB": 120464,
+        "command": "/Applications/ChatGPT.app/Contents/Frameworks/Codex Framework.framework/Versions/155.0.8059.40/Helpers/Codex (Renderer).app/Contents/MacOS/Codex (Renderer)"
+      },
+      {
+        "pid": 51961,
+        "cpuPercent": 7.7,
+        "rssKiB": 111168,
+        "command": "/var/run/com.apple.security.cryptexd/mnt/watchOS_24R362/Library/Developer/CoreSimulator/Profiles/Runtimes/watchOS 27.0.simruntime/Contents/Resources/RuntimeRoot/Applications/WidgetRenderer_Snapshots.app/WidgetRenderer_Snapshots"
+      },
+      {
+        "pid": 57312,
+        "cpuPercent": 0.0,
+        "rssKiB": 96976,
+        "command": "/opt/homebrew/Cellar/node@24/24.21.0/bin/node"
+      },
+      {
+        "pid": 55294,
+        "cpuPercent": 0.6,
+        "rssKiB": 83904,
+        "command": "/private/var/run/com.apple.security.cryptexd/mnt/watchOS_24R362/Library/Developer/CoreSimulator/Profiles/Runtimes/watchOS 27.0.simruntime/Contents/Resources/RuntimeRoot/usr/libexec/testmanagerd"
+      },
+      {
+        "pid": 51686,
+        "cpuPercent": 2.0,
+        "rssKiB": 78096,
+        "command": "/private/var/run/com.apple.security.cryptexd/mnt/watchOS_24R362/Library/Developer/CoreSimulator/Profiles/Runtimes/watchOS 27.0.simruntime/Contents/Resources/RuntimeRoot/System/Library/PrivateFrameworks/ChronoCore.framework/Support/chronod"
+      },
+      {
+        "pid": 37396,
+        "cpuPercent": 0.1,
+        "rssKiB": 78048,
+        "command": "/Users/shan2new/Library/Application Support/Claude/claude-code/2.1.295/9d6405864fdc/claude.app/Contents/MacOS/claude"
+      },
+      {
+        "pid": 57282,
+        "cpuPercent": 0.0,
+        "rssKiB": 77088,
+        "command": "postgres: shan2new previously_qa_load_e00b88ba7cde4910a50e992766470aaf 127.0.0.1(62886) idle"
+      },
+      {
+        "pid": 51596,
+        "cpuPercent": 0.0,
+        "rssKiB": 75264,
+        "command": "/private/var/run/com.apple.security.cryptexd/mnt/watchOS_24R362/Library/Developer/CoreSimulator/Profiles/Runtimes/watchOS 27.0.simruntime/Contents/Resources/RuntimeRoot/System/Library/PrivateFrameworks/AssistantServices.framework/assistantd"
+      },
+      {
+        "pid": 49480,
+        "cpuPercent": 0.0,
+        "rssKiB": 71104,
+        "command": "/Applications/ChatGPT.app/Contents/Frameworks/Codex Framework.framework/Versions/155.0.8059.40/Helpers/Codex (Renderer).app/Contents/MacOS/Codex (Renderer)"
+      },
+      {
+        "pid": 55312,
+        "cpuPercent": 0.0,
+        "rssKiB": 70624,
+        "command": "/private/var/run/com.apple.security.cryptexd/mnt/watchOS_24R362/Library/Developer/CoreSimulator/Profiles/Runtimes/watchOS 27.0.simruntime/Contents/Resources/RuntimeRoot/usr/libexec/gamed"
+      },
+      {
+        "pid": 48058,
+        "cpuPercent": 0.1,
+        "rssKiB": 70512,
+        "command": "/Applications/Claude.app/Contents/MacOS/Claude"
+      },
+      {
+        "pid": 62998,
+        "cpuPercent": 0.1,
+        "rssKiB": 69904,
+        "command": "/Users/shan2new/Projects/aura-assistant/agent/.venv/lib/python3.12/site-packages/claude_agent_sdk/_bundled/claude"
+      },
+      {
+        "pid": 53766,
+        "cpuPercent": 97.2,
+        "rssKiB": 69328,
+        "command": "/System/Library/PrivateFrameworks/AppleNeuralEngine.framework/XPCServices/ANECompilerService.xpc/Contents/MacOS/ANECompilerService"
+      },
+      {
+        "pid": 1487,
+        "cpuPercent": 0.7,
+        "rssKiB": 65488,
+        "command": "/Library/Application Support/Logitech.localized/LogiOptionsPlus/logioptionsplus_agent.app/Contents/MacOS/logioptionsplus_agent"
+      },
+      {
+        "pid": 51805,
+        "cpuPercent": 0.0,
+        "rssKiB": 64368,
+        "command": "/private/var/run/com.apple.security.cryptexd/mnt/watchOS_24R362/Library/Developer/CoreSimulator/Profiles/Runtimes/watchOS 27.0.simruntime/Contents/Resources/RuntimeRoot/usr/libexec/toolkitd"
+      },
+      {
+        "pid": 51623,
+        "cpuPercent": 3.7,
+        "rssKiB": 64096,
+        "command": "/private/var/run/com.apple.security.cryptexd/mnt/watchOS_24R362/Library/Developer/CoreSimulator/Profiles/Runtimes/watchOS 27.0.simruntime/Contents/Resources/RuntimeRoot/System/Library/PrivateFrameworks/NanoTimeKit.framework/nanotimekitd"
+      }
+    ],
+    "totalProcessRSSKiB": 11242240
+  }
+]

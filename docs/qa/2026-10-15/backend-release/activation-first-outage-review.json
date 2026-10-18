@@ -1,0 +1,11 @@
+{
+  "oldJobsStoppedAt": "2026-10-15T16:50:33.466932+00:00",
+  "failedBootstrapAt": "2026-10-15T16:50:33.472991+00:00",
+  "firstPreservedHealthyObservationAt": "2026-10-15T16:51:59.428045+00:00",
+  "observedRecoveryWindowSeconds": 85.961113,
+  "automaticRollbackSucceeded": false,
+  "oldPlistFilesAutomaticallyRestored": true,
+  "oldServicesManuallyBootstrapped": true,
+  "productionDatabaseRestored": false,
+  "diagnosticBoundary": "Original CLI status/stderr were discarded by generic error wrapping. Sanitized idle-backup bootstrap later also returned0, so environment alone is not proven as the cause. Old backend shutdown_started followed bootout return by7ms, exposing an unload/drain race. Repaired helper preserves operator context, waits captured PID and registration exit, retries bootstrap boundedly and retains safe CLI failures."
+}

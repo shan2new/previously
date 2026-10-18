@@ -1,0 +1,109 @@
+{
+  "reviewedAt": "2026-10-15T16:31:00.634040+00:00",
+  "status": "no_concrete_defect_found_in_reviewed_scope",
+  "scope": "Selected-progress Add to Library admission: exact intent, cancel, retry, account lifecycle, read-only preview and unaired eligibility.",
+  "findings": [],
+  "verifiedSourceBehavior": [
+    {
+      "area": "selection/cancel/one-use/account fence",
+      "evidence": [
+        "ios/Sources/Models/ProgressAdmissionTicket.swift:4",
+        "ios/Sources/App/AppModel+ProgressAdmission.swift:35"
+      ],
+      "observation": "Immutable selected batch is admitted once, consumed synchronously; cancellation/accountID/epoch mismatch cannot dispatch. Erasure and suspension refuse acceptance."
+    },
+    {
+      "area": "selected parts and progress",
+      "evidence": [
+        "ios/Sources/Models/Models+Shared.swift:83",
+        "ios/Sources/Features/FranchiseDetail/FranchiseDetailView.swift:693"
+      ],
+      "observation": "Only unique known supplied media IDs are included; targets use existing writeCeiling, previous values stay paired, status follows resulting franchise. Explicit selected season wins toolbar targeting."
+    },
+    {
+      "area": "read-only preview",
+      "evidence": [
+        "ios/Sources/Features/FranchiseDetail/FranchiseDetailView.swift:290",
+        "ios/Sources/Features/FranchiseDetail/FranchiseDetailView.swift:1204"
+      ],
+      "observation": "Parent disables hit testing and explicitly refuses admission in preview. No new actionable bypass found."
+    },
+    {
+      "area": "unaired eligibility",
+      "evidence": [
+        "ios/Sources/Features/FranchiseDetail/DetailSupport.swift:709",
+        "ios/Sources/Features/FranchiseDetail/DetailSupport.swift:855",
+        "ios/Sources/Features/FranchiseDetail/FranchiseDetailView.swift:1450",
+        "ios/Sources/Features/FranchiseDetail/FranchiseDetailView.swift:1652",
+        "ios/Sources/Features/FranchiseDetail/FranchiseDetailView.swift:2608"
+      ],
+      "observation": "Episode marks require aired eligibility; season and unit controls exclude upcoming positive-mark paths. Existing write ceiling also bounds admission."
+    },
+    {
+      "area": "durability and retry",
+      "evidence": [
+        "ios/Sources/App/AppModel+Writes.swift:52",
+        "ios/Sources/App/AppModel.swift:2018",
+        "ios/Sources/App/AppModel.swift:2133"
+      ],
+      "observation": "Accepted compound intent stages synchronously before dispatch; journal/replay retains exact parts, status and mutation stamp. No separate subscribe gap is added."
+    },
+    {
+      "area": "in-flight account switch",
+      "evidence": [
+        "ios/Sources/App/AppModel.swift:630",
+        "ios/Sources/App/AppModel.swift:2064",
+        "ios/Sources/Networking/APIClient.swift:874"
+      ],
+      "observation": "Teardown increments account generation, cancels/clears batch and retry state, and invalidates transport. Transport checks request epoch and account identity across awaits and attempts."
+    }
+  ],
+  "sourceFiles": [
+    {
+      "path": "ios/Sources/App/AppModel+ProgressAdmission.swift",
+      "sha256": "e381049da5a4e81464f0ce14f664822952e14e8ca20e85b34bd2c298a4c41931"
+    },
+    {
+      "path": "ios/Sources/Models/ProgressAdmissionTicket.swift",
+      "sha256": "20a301a0fe1b04047cb523d67a760ea707eae7e9e556349470b57ee1867cf712"
+    },
+    {
+      "path": "ios/Sources/Models/Models+Shared.swift",
+      "sha256": "736136ae3bad759e1f427d3ed94728e0f937344cafdd2a78b099aad70a9c77ea"
+    },
+    {
+      "path": "ios/Sources/Features/FranchiseDetail/DetailSupport.swift",
+      "sha256": "21a9156d83029eb622f7626aceef094d464fd340c4418be286725067aa162d65"
+    },
+    {
+      "path": "ios/Sources/Features/FranchiseDetail/FranchiseDetailView.swift",
+      "sha256": "366656373b075852d4455f3f3c434f848b318d40a3ac0ae24d9fb049cfb496c0"
+    },
+    {
+      "path": "ios/Sources/App/AppModel+Writes.swift",
+      "sha256": "79b2c7b6e47e5de21fb63a1c259fb84c7b46295b04fcf6415bf13dcdd1bcdfa7"
+    },
+    {
+      "path": "ios/Sources/App/AppModel.swift",
+      "sha256": "ca5c20f1d9fc91c039e9bc274e91213b6a20118b767f23820723c861ccc24536"
+    },
+    {
+      "path": "ios/Sources/Networking/APIClient.swift",
+      "sha256": "afa2ea523bad125977da5581a35a947bbf17da873d65cc91fa8c10b3f5c523fe"
+    }
+  ],
+  "execution": {
+    "readOnlySourceReview": true,
+    "sourceEdits": false,
+    "buildOrCompiler": false,
+    "simulatorOrUI": false,
+    "runtimeTests": false,
+    "providerOrAccountActions": false
+  },
+  "boundaries": [
+    "Static source review only; not additional runtime coverage or real-provider proof.",
+    "Root separately reported seven passing admission UI cases, including selected Season 2; this review did not rerun them.",
+    "Existing general progress/import/export/widget behaviors outside the selected-progress admission scope were not certified.",
+    "Candidate source remains subject to final frozen native qualification and actual archive verification."
+  ]
+}

@@ -1,0 +1,703 @@
+{
+  "passed": true,
+  "database": "previously_qa_content_8928ce55b30c49d4800aa6abfb091258",
+  "transport": {
+    "anilistCalls": 12,
+    "malMappings": 5,
+    "mediaReads": 3,
+    "searches": 3,
+    "blockedFetches": 0,
+    "blockedSockets": 0,
+    "unsupportedQueries": 0
+  },
+  "boundary": "Compiled production routes/services with real scratch PG; no listener, credentials, provider traffic or production DB",
+  "directProviderCacheLimitation": "TMDB credentials remain blank; direct/batch eligibility and cached snapshot-preview service are tested separately.",
+  "cases": [
+    {
+      "name": "exact policy retains Ecchi and unknown or nonboolean flags",
+      "status": "passed",
+      "evidence": {
+        "allowedTitles": [
+          "QA Normal Show",
+          "QA Ecchi Show",
+          "QA Unknown Show",
+          "QA Missing Flag Show",
+          "QA String Flag Show"
+        ],
+        "exactBooleanOnly": true
+      },
+      "durationMs": 0
+    },
+    {
+      "name": "real SQL visibility excludes adult flag, franchise Hentai and known member Hentai",
+      "status": "passed",
+      "evidence": {
+        "visible": 5,
+        "excluded": 3
+      },
+      "durationMs": 3
+    },
+    {
+      "name": "cached detail and direct resolve block BLOCKED_ADULT_FLAG_TITLE",
+      "status": "passed",
+      "evidence": {
+        "detailStatus": 404,
+        "resolveStatus": 422
+      },
+      "durationMs": 10
+    },
+    {
+      "name": "cached search blocks BLOCKED_ADULT_FLAG_TITLE",
+      "status": "passed",
+      "evidence": {
+        "results": 0
+      },
+      "durationMs": 31
+    },
+    {
+      "name": "cached detail and direct resolve block BLOCKED_HENTAI_TITLE",
+      "status": "passed",
+      "evidence": {
+        "detailStatus": 404,
+        "resolveStatus": 422
+      },
+      "durationMs": 5
+    },
+    {
+      "name": "cached search blocks BLOCKED_HENTAI_TITLE",
+      "status": "passed",
+      "evidence": {
+        "results": 0
+      },
+      "durationMs": 3
+    },
+    {
+      "name": "cached detail and direct resolve block BLOCKED_MEMBER_HENTAI_TITLE",
+      "status": "passed",
+      "evidence": {
+        "detailStatus": 404,
+        "resolveStatus": 422
+      },
+      "durationMs": 3
+    },
+    {
+      "name": "cached search blocks BLOCKED_MEMBER_HENTAI_TITLE",
+      "status": "passed",
+      "evidence": {
+        "results": 0
+      },
+      "durationMs": 2
+    },
+    {
+      "name": "normal, Ecchi and unknown cached details and search remain available",
+      "status": "passed",
+      "evidence": {
+        "allowed": 5
+      },
+      "durationMs": 27
+    },
+    {
+      "name": "library omits excluded rows and related art while preserving allowed shows",
+      "status": "passed",
+      "evidence": {
+        "libraryRows": 5,
+        "relatedTitles": [
+          "QA Normal Recommendation",
+          "QA Ecchi Show"
+        ]
+      },
+      "durationMs": 5
+    },
+    {
+      "name": "safe detail drops excluded local and known unmaterialized related cards",
+      "status": "passed",
+      "evidence": {
+        "related": [
+          "QA Normal Recommendation",
+          "QA Ecchi Show"
+        ]
+      },
+      "durationMs": 3
+    },
+    {
+      "name": "Following feed and individual post detail exclude adult metadata",
+      "status": "passed",
+      "evidence": {
+        "followingPosts": 5,
+        "safeDetailStatus": 200
+      },
+      "durationMs": 38
+    },
+    {
+      "name": "saved and reminders retain opaque ownership but omit excluded post art and titles",
+      "status": "passed",
+      "evidence": {
+        "storedRowsRetained": true
+      },
+      "durationMs": 22
+    },
+    {
+      "name": "notifications page and unread badge exclude adult rows consistently",
+      "status": "passed",
+      "evidence": {
+        "visibleNotifications": 5,
+        "unread": 5
+      },
+      "durationMs": 11
+    },
+    {
+      "name": "direct and batch watch provider routes refuse excluded IDs with credentials blank",
+      "status": "passed",
+      "evidence": {
+        "batchAvailableIds": 5,
+        "tmdbCredentialBlank": true
+      },
+      "durationMs": 10
+    },
+    {
+      "name": "snapshot preview service drops stored adult provider art and watch links",
+      "status": "passed",
+      "evidence": {
+        "returnedSnapshots": 5
+      },
+      "durationMs": 1
+    },
+    {
+      "name": "recommendations block stale adult target fallback and hidden seed reason titles",
+      "status": "passed",
+      "evidence": {
+        "items": [
+          {
+            "title": "QA Normal Recommendation",
+            "reason": {
+              "kind": "watching",
+              "seeds": [
+                {
+                  "franchiseId": "8c2a39ab-c8e2-44f0-8b69-51631bbe88f3",
+                  "title": "QA Normal Show"
+                }
+              ],
+              "count": 1
+            }
+          }
+        ]
+      },
+      "durationMs": 8
+    },
+    {
+      "name": "For you cached cards are rechecked after classification changes",
+      "status": "passed",
+      "evidence": {
+        "cardPresentBefore": true,
+        "cardPresentAfter": false,
+        "withinExistingCacheLifetime": true
+      },
+      "durationMs": 19
+    },
+    {
+      "name": "new AniList related metadata excludes raw adult and Hentai candidates",
+      "status": "passed",
+      "evidence": {
+        "related": [
+          "QA Normal Recommendation"
+        ]
+      },
+      "durationMs": 0
+    },
+    {
+      "name": "known ready import excludes blocked entries and reports policy skips separately",
+      "status": "passed",
+      "evidence": {
+        "preview": {
+          "id": "39bd0e3b-a5f9-403e-b3cb-712a5ce8fdcd",
+          "source": "mal",
+          "listed": 8,
+          "ready": 5,
+          "toFetch": 0,
+          "episodes": 15,
+          "byStatus": {
+            "watching": 5,
+            "completed": 0,
+            "planned": 0,
+            "paused": 0,
+            "dropped": 0
+          },
+          "unmatched": {
+            "count": 0,
+            "titles": []
+          },
+          "sample": [
+            {
+              "id": "8c2a39ab-c8e2-44f0-8b69-51631bbe88f3",
+              "source": "anilist",
+              "title": "QA Normal Show",
+              "cover": "https://qa.invalid/QA%20Normal%20Show/portrait.jpg",
+              "banner": "https://qa.invalid/QA%20Normal%20Show/landscape.jpg",
+              "images": {
+                "portrait": "https://qa.invalid/QA%20Normal%20Show/portrait.jpg",
+                "landscape": "https://qa.invalid/QA%20Normal%20Show/landscape.jpg"
+              },
+              "artwork": {
+                "portraits": [
+                  {
+                    "url": "https://qa.invalid/QA%20Normal%20Show/portrait.jpg",
+                    "source": "anilist",
+                    "width": null,
+                    "height": null,
+                    "language": null,
+                    "score": null
+                  }
+                ],
+                "landscapes": [
+                  {
+                    "url": "https://qa.invalid/QA%20Normal%20Show/landscape.jpg",
+                    "source": "anilist",
+                    "width": null,
+                    "height": null,
+                    "language": null,
+                    "score": null
+                  }
+                ],
+                "logos": []
+              },
+              "isReleasing": false,
+              "partCount": 1,
+              "nextAiringAt": null,
+              "upcoming": null,
+              "year": 2024,
+              "themes": [
+                "Drama"
+              ],
+              "featuredVideo": null
+            },
+            {
+              "id": "bce12fbd-2a4d-438b-a14d-77bd5d4fad84",
+              "source": "anilist",
+              "title": "QA Ecchi Show",
+              "cover": "https://qa.invalid/QA%20Ecchi%20Show/portrait.jpg",
+              "banner": "https://qa.invalid/QA%20Ecchi%20Show/landscape.jpg",
+              "images": {
+                "portrait": "https://qa.invalid/QA%20Ecchi%20Show/portrait.jpg",
+                "landscape": "https://qa.invalid/QA%20Ecchi%20Show/landscape.jpg"
+              },
+              "artwork": {
+                "portraits": [
+                  {
+                    "url": "https://qa.invalid/QA%20Ecchi%20Show/portrait.jpg",
+                    "source": "anilist",
+                    "width": null,
+                    "height": null,
+                    "language": null,
+                    "score": null
+                  }
+                ],
+                "landscapes": [
+                  {
+                    "url": "https://qa.invalid/QA%20Ecchi%20Show/landscape.jpg",
+                    "source": "anilist",
+                    "width": null,
+                    "height": null,
+                    "language": null,
+                    "score": null
+                  }
+                ],
+                "logos": []
+              },
+              "isReleasing": false,
+              "partCount": 1,
+              "nextAiringAt": null,
+              "upcoming": null,
+              "year": 2024,
+              "themes": [
+                "Drama"
+              ],
+              "featuredVideo": null
+            },
+            {
+              "id": "b4486afc-42fc-4cc6-82e9-11403bd6b790",
+              "source": "anilist",
+              "title": "QA Unknown Show",
+              "cover": "https://qa.invalid/QA%20Unknown%20Show/portrait.jpg",
+              "banner": "https://qa.invalid/QA%20Unknown%20Show/landscape.jpg",
+              "images": {
+                "portrait": "https://qa.invalid/QA%20Unknown%20Show/portrait.jpg",
+                "landscape": "https://qa.invalid/QA%20Unknown%20Show/landscape.jpg"
+              },
+              "artwork": {
+                "portraits": [
+                  {
+                    "url": "https://qa.invalid/QA%20Unknown%20Show/portrait.jpg",
+                    "source": "anilist",
+                    "width": null,
+                    "height": null,
+                    "language": null,
+                    "score": null
+                  }
+                ],
+                "landscapes": [
+                  {
+                    "url": "https://qa.invalid/QA%20Unknown%20Show/landscape.jpg",
+                    "source": "anilist",
+                    "width": null,
+                    "height": null,
+                    "language": null,
+                    "score": null
+                  }
+                ],
+                "logos": []
+              },
+              "isReleasing": false,
+              "partCount": 1,
+              "nextAiringAt": null,
+              "upcoming": null,
+              "year": 2024,
+              "themes": [
+                "Drama"
+              ],
+              "featuredVideo": null
+            },
+            {
+              "id": "c8289a15-5283-42c8-a511-a98d06721353",
+              "source": "anilist",
+              "title": "QA Missing Flag Show",
+              "cover": "https://qa.invalid/QA%20Missing%20Flag%20Show/portrait.jpg",
+              "banner": "https://qa.invalid/QA%20Missing%20Flag%20Show/landscape.jpg",
+              "images": {
+                "portrait": "https://qa.invalid/QA%20Missing%20Flag%20Show/portrait.jpg",
+                "landscape": "https://qa.invalid/QA%20Missing%20Flag%20Show/landscape.jpg"
+              },
+              "artwork": {
+                "portraits": [
+                  {
+                    "url": "https://qa.invalid/QA%20Missing%20Flag%20Show/portrait.jpg",
+                    "source": "anilist",
+                    "width": null,
+                    "height": null,
+                    "language": null,
+                    "score": null
+                  }
+                ],
+                "landscapes": [
+                  {
+                    "url": "https://qa.invalid/QA%20Missing%20Flag%20Show/landscape.jpg",
+                    "source": "anilist",
+                    "width": null,
+                    "height": null,
+                    "language": null,
+                    "score": null
+                  }
+                ],
+                "logos": []
+              },
+              "isReleasing": false,
+              "partCount": 1,
+              "nextAiringAt": null,
+              "upcoming": null,
+              "year": 2024,
+              "themes": [
+                "Drama"
+              ],
+              "featuredVideo": null
+            },
+            {
+              "id": "9cf84a35-0389-412e-8d6f-c7dcbeac09ff",
+              "source": "anilist",
+              "title": "QA String Flag Show",
+              "cover": "https://qa.invalid/QA%20String%20Flag%20Show/portrait.jpg",
+              "banner": "https://qa.invalid/QA%20String%20Flag%20Show/landscape.jpg",
+              "images": {
+                "portrait": "https://qa.invalid/QA%20String%20Flag%20Show/portrait.jpg",
+                "landscape": "https://qa.invalid/QA%20String%20Flag%20Show/landscape.jpg"
+              },
+              "artwork": {
+                "portraits": [
+                  {
+                    "url": "https://qa.invalid/QA%20String%20Flag%20Show/portrait.jpg",
+                    "source": "anilist",
+                    "width": null,
+                    "height": null,
+                    "language": null,
+                    "score": null
+                  }
+                ],
+                "landscapes": [
+                  {
+                    "url": "https://qa.invalid/QA%20String%20Flag%20Show/landscape.jpg",
+                    "source": "anilist",
+                    "width": null,
+                    "height": null,
+                    "language": null,
+                    "score": null
+                  }
+                ],
+                "logos": []
+              },
+              "isReleasing": false,
+              "partCount": 1,
+              "nextAiringAt": null,
+              "upcoming": null,
+              "year": 2024,
+              "themes": [
+                "Drama"
+              ],
+              "featuredVideo": null
+            }
+          ],
+          "skipped": {
+            "count": 3,
+            "reasons": {
+              "adult_content": 3
+            }
+          }
+        },
+        "finished": {
+          "id": "39bd0e3b-a5f9-403e-b3cb-712a5ce8fdcd",
+          "state": "done",
+          "shows": 5,
+          "remaining": 0,
+          "failed": 0,
+          "skipped": {
+            "count": 3,
+            "reasons": {
+              "adult_content": 3
+            }
+          }
+        }
+      },
+      "durationMs": 16
+    },
+    {
+      "name": "policy change after preview is checked before writes without altering owned history",
+      "status": "passed",
+      "evidence": {
+        "finished": {
+          "id": "66757543-6417-4537-8b31-8c7b1b06c998",
+          "state": "done",
+          "shows": 0,
+          "remaining": 0,
+          "failed": 0,
+          "skipped": {
+            "count": 1,
+            "reasons": {
+              "adult_content": 1
+            }
+          }
+        },
+        "membershipRows": 0,
+        "progressRows": 0
+      },
+      "durationMs": 3024
+    },
+    {
+      "name": "pending raw adult and Hentai import settle as policy skips, not failures",
+      "status": "passed",
+      "evidence": {
+        "finished": {
+          "id": "100cf2dc-163c-43d4-8011-eaeba77e9f3e",
+          "state": "done",
+          "shows": 0,
+          "remaining": 0,
+          "failed": 0,
+          "skipped": {
+            "count": 2,
+            "reasons": {
+              "adult_content": 2
+            }
+          }
+        },
+        "membershipRows": 0,
+        "progressRows": 0
+      },
+      "durationMs": 5973
+    },
+    {
+      "name": "mixed safe and raw adult relation component imports safe part without adult art",
+      "status": "passed",
+      "evidence": {
+        "finished": {
+          "id": "5caf350a-bc9c-4be2-8c8a-363a8f2e51d5",
+          "state": "done",
+          "shows": 1,
+          "remaining": 0,
+          "failed": 0,
+          "skipped": {
+            "count": 0,
+            "reasons": {
+              "adult_content": 0
+            }
+          }
+        },
+        "memberMediaIds": [
+          310201003
+        ]
+      },
+      "durationMs": 9077
+    },
+    {
+      "name": "MAL upstream classification skips source units before materialisation",
+      "status": "passed",
+      "evidence": {
+        "preview": {
+          "id": "3b0a8b4d-b15f-438b-ad12-a9c3257406f8",
+          "source": "mal",
+          "listed": 2,
+          "ready": 0,
+          "toFetch": 0,
+          "episodes": 0,
+          "byStatus": {
+            "watching": 0,
+            "completed": 0,
+            "planned": 0,
+            "paused": 0,
+            "dropped": 0
+          },
+          "unmatched": {
+            "count": 0,
+            "titles": []
+          },
+          "sample": [],
+          "skipped": {
+            "count": 2,
+            "reasons": {
+              "adult_content": 2
+            }
+          }
+        },
+        "applied": {
+          "id": "3b0a8b4d-b15f-438b-ad12-a9c3257406f8",
+          "state": "done",
+          "shows": 0,
+          "remaining": 0,
+          "failed": 0,
+          "skipped": {
+            "count": 2,
+            "reasons": {
+              "adult_content": 2
+            }
+          }
+        }
+      },
+      "durationMs": 2918
+    },
+    {
+      "name": "AniList list classification preserves listed counts and imports only allowed entries",
+      "status": "passed",
+      "evidence": {
+        "preview": {
+          "id": "8949d819-9deb-4ddd-b2c0-e9198937be85",
+          "source": "anilist",
+          "listed": 3,
+          "ready": 1,
+          "toFetch": 0,
+          "episodes": 3,
+          "byStatus": {
+            "watching": 1,
+            "completed": 0,
+            "planned": 0,
+            "paused": 0,
+            "dropped": 0
+          },
+          "unmatched": {
+            "count": 0,
+            "titles": []
+          },
+          "sample": [
+            {
+              "id": "8c2a39ab-c8e2-44f0-8b69-51631bbe88f3",
+              "source": "anilist",
+              "title": "QA Normal Show",
+              "cover": "https://qa.invalid/QA%20Normal%20Show/portrait.jpg",
+              "banner": "https://qa.invalid/QA%20Normal%20Show/landscape.jpg",
+              "images": {
+                "portrait": "https://qa.invalid/QA%20Normal%20Show/portrait.jpg",
+                "landscape": "https://qa.invalid/QA%20Normal%20Show/landscape.jpg"
+              },
+              "artwork": {
+                "portraits": [
+                  {
+                    "url": "https://qa.invalid/QA%20Normal%20Show/portrait.jpg",
+                    "source": "anilist",
+                    "width": null,
+                    "height": null,
+                    "language": null,
+                    "score": null
+                  }
+                ],
+                "landscapes": [
+                  {
+                    "url": "https://qa.invalid/QA%20Normal%20Show/landscape.jpg",
+                    "source": "anilist",
+                    "width": null,
+                    "height": null,
+                    "language": null,
+                    "score": null
+                  }
+                ],
+                "logos": []
+              },
+              "isReleasing": false,
+              "partCount": 1,
+              "nextAiringAt": null,
+              "upcoming": null,
+              "year": 2024,
+              "themes": [
+                "Drama"
+              ],
+              "featuredVideo": null
+            }
+          ],
+          "skipped": {
+            "count": 2,
+            "reasons": {
+              "adult_content": 2
+            }
+          }
+        },
+        "applied": {
+          "id": "8949d819-9deb-4ddd-b2c0-e9198937be85",
+          "state": "done",
+          "shows": 1,
+          "remaining": 0,
+          "failed": 0,
+          "skipped": {
+            "count": 2,
+            "reasons": {
+              "adult_content": 2
+            }
+          }
+        }
+      },
+      "durationMs": 3020
+    },
+    {
+      "name": "owner DB memberships, progress, sessions, inbox, saves and reminders remain exact",
+      "status": "passed",
+      "evidence": {
+        "rowsAndTimestampsUnchanged": true,
+        "tables": [
+          "subscriptions",
+          "progress",
+          "watch_sessions",
+          "notifications",
+          "saves",
+          "reminders"
+        ]
+      },
+      "durationMs": 10
+    },
+    {
+      "name": "account API export deliberately retains complete owned excluded-title history",
+      "status": "passed",
+      "evidence": {
+        "subscriptionRows": 8,
+        "progressRows": 8,
+        "excludedTitlesRetained": [
+          "BLOCKED_ADULT_FLAG_TITLE",
+          "BLOCKED_HENTAI_TITLE",
+          "BLOCKED_MEMBER_HENTAI_TITLE"
+        ]
+      },
+      "durationMs": 45
+    }
+  ]
+}

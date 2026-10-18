@@ -113,6 +113,14 @@ describe('alertModeration', () => {
 describe('alertStaleReports — the hourly nudge', () => {
   const NOW = Date.UTC(2026, 8, 25, 12)
 
+  it('keeps a real queue-read failure visible to the scheduled job', async () => {
+    const error = new Error('Synthetic queue unavailable')
+    mocks.staleOpenReports.mockRejectedValueOnce(error)
+    const fetch = okFetch()
+    await expect(alertStaleReports(NOW, { url: '', fetch })).rejects.toBe(error)
+    expect(fetch).not.toHaveBeenCalled()
+  })
+
   it('asks for reports older than 12 hours and stays quiet when there are none', async () => {
     mocks.staleOpenReports.mockResolvedValue({ count: 0, oldestAt: null })
     const fetch = okFetch()

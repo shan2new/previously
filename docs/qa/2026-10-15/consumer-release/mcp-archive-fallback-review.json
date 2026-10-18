@@ -1,0 +1,87 @@
+{
+  "reviewedAt": "2026-10-15T16:42:19.608002+00:00",
+  "status": "feasible_composed_invocation_unexecuted",
+  "installedMCPVersion": "2.7.0",
+  "dedicatedMCPArchiveActionExists": false,
+  "documentedExtraArgsPassthrough": true,
+  "appleDocumentsMultipleActions": true,
+  "exactArchiveBuildPairValidatedAtRuntime": false,
+  "reconstructedActionSuffix": [
+    "archive",
+    "-archivePath",
+    "/unique/owned/Previously-17.xcarchive",
+    "build"
+  ],
+  "requiredInvocationContext": {
+    "project": "ios/Previously.xcodeproj",
+    "scheme": "Previously",
+    "configuration": "Release",
+    "platform": "iOS",
+    "preferXcodebuild": true,
+    "archivePathMustBeNew": true
+  },
+  "sourceEvidence": [
+    {
+      "path": "/Users/shan2new/.npm/_npx/6389024b78b4e852/node_modules/xcodebuildmcp/package.json",
+      "sha256": "dc85bf6a19b57d5da3244a51b9c9077980b8e86e12d10096731bd8aaf41277de"
+    },
+    {
+      "path": "/Users/shan2new/.npm/_npx/6389024b78b4e852/node_modules/xcodebuildmcp/build/mcp/tools/device/build_device.js",
+      "sha256": "0bd5b94c0ab4afc357e0d9fc7866b98cd134b0442f5323659e628e36398e173e"
+    },
+    {
+      "path": "/Users/shan2new/.npm/_npx/6389024b78b4e852/node_modules/xcodebuildmcp/build/utils/build-utils.js",
+      "sha256": "577bd6f5fa04d95e1c74920a091df7bcf3fe3135741b8b447c41ed9531da7288"
+    },
+    {
+      "path": "/Users/shan2new/.npm/_npx/6389024b78b4e852/node_modules/xcodebuildmcp/build/utils/xcodebuild-pipeline.js",
+      "sha256": "943c7e1c9b8f57cb76889c6e7eb950e740fc03554de2222dfb3f4ebaf5fcb11d"
+    },
+    {
+      "path": "/Users/shan2new/.npm/_npx/6389024b78b4e852/node_modules/xcodebuildmcp/build/utils/xcodebuild-log-capture.js",
+      "sha256": "2393e61edbda587dc4537c2a1f0c87be0a31ac5a3bfd2dc97658b0cbc176b3c7"
+    },
+    {
+      "path": "/Applications/Xcode.app/Contents/Developer/usr/share/man/man1/xcodebuild.1",
+      "sha256": "0c3bbc6c997ffd6130ebeb4278e90eeae8987bc6811a3295aa3229693db0bd2d"
+    }
+  ],
+  "lineEvidence": {
+    "deviceSchema": "build_device.js65\u201380 extraArgs string array, buildAction36\u201342 build/build-for-testing",
+    "commandConstruction": "build-utils.js95\u2013111 generic iOS destination;125\u2013128 extraArgs then buildAction",
+    "backendChoice": "build-utils.js19\u201339 preferXcodebuild true prevents xcodemake backend",
+    "rawLogs": "xcodebuild-pipeline.js175\u2013181 writes stdout/stderr chunks; build_device.js115\u2013127 includes buildLogPath in result",
+    "appleMultipleActions": "installed xcodebuild.1:315\u2013333",
+    "appleArchivePath": "installed xcodebuild.1:284\u2013292",
+    "appleExportCannotCombine": "installed xcodebuild.1:269\u2013276"
+  },
+  "primaryWebSources": [
+    "https://raw.githubusercontent.com/getsentry/XcodeBuildMCP/v2.7.0/src/utils/build-utils.ts",
+    "https://raw.githubusercontent.com/getsentry/XcodeBuildMCP/v2.7.0/src/mcp/tools/device/build_device.ts",
+    "https://developer.apple.com/library/archive/technotes/tn2339/_index.html"
+  ],
+  "risks": [
+    "No exact primary guarantee or local runtime proof for archive+build ordering/combination; both acceptance and output must be observed.",
+    "Trailing build is unavoidable through this helper, may cost extra work or fail after archive creation; record action-level and overall status independently.",
+    "MCP build-result SUCCEEDED is generic subprocess success, not an archive artifact contract. It does not verify archivePath contents.",
+    "Locked desktop may still prevent signing/keychain interaction. This is not an unlock or signing-credential workaround.",
+    "Archive/export/upload are distinct. Apple forbids exportArchive combined with an action, so upload cannot be added through this technique.",
+    "Incremental logs may omit compiler invocations; do not assert missing flags were verified. No clean/cache deletion/new DerivedData prescription is authorized by this review."
+  ],
+  "successEvidenceNeeded": [
+    "Actual fresh archive at previously absent unique path and current CreationDate, with preserved prior16.",
+    "Raw full MCP buildLogPath showing ARCHIVE SUCCEEDED and source/config/compiler command evidence; retained exact invocation and exit/overall status.",
+    "Independent app+widget56artifact checks including signing, provisioning, privacy, production key match16, noQAfileexposure and ATS checks.",
+    "Pre/post source freeze and qualified simulator receipt provenance, with explicit source-to-binary limitation.",
+    "Separate actual distribution signing/upload/processing receipts if later performed."
+  ],
+  "actionsPerformed": {
+    "sourceOrPackageEdits": false,
+    "xcodeStateChanges": false,
+    "buildOrCompiler": false,
+    "simulatorOrUI": false,
+    "rawXcodebuild": false,
+    "upload": false,
+    "onlyDocumentationReportWritten": true
+  }
+}

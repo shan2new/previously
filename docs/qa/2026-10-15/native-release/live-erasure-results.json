@@ -1,0 +1,97 @@
+{
+  "version": 1,
+  "preparedAt": "2026-10-15T18:14:38.668850+00:00",
+  "status": "pending",
+  "qualified": false,
+  "reason": "The dedicated QA provider identity is ready, but normal production app setup and consumer account deletion have not been performed.",
+  "candidate": {
+    "version": "1.0",
+    "build": "17",
+    "archiveStatus": "pending",
+    "productionReleaseUIVerified": null,
+    "installedBuildVerified": null,
+    "runtime": null,
+    "device": null
+  },
+  "beforeDeletion": {
+    "exactQAObservedAt": "2026-10-15T18:13:17.037193+00:00",
+    "dedicatedProviderExists": true,
+    "providerHTTPStatus": 200,
+    "expectedIdentityMatched": true,
+    "passwordEnabled": true,
+    "readOnlySQLVerified": true,
+    "qaAppAccountPresent": false,
+    "qaLibraryEntryCount": 0,
+    "qaProgressEntryCount": 0,
+    "qaEpisodeSum": 0,
+    "oneTitleOneEpisodeSetupReady": false,
+    "readyBaselineCaptured": false,
+    "deletionStarted": false,
+    "protectedProviderPreflight": {
+      "observedAt": "2026-10-15T18:08:27.426044+00:00",
+      "accountsPresent": 5,
+      "securityUnchanged": true,
+      "scope": "Before-deletion provider guard only; this is not a post-deletion protected-account check."
+    }
+  },
+  "consumerUI": {
+    "normalRelease17Login": null,
+    "targetIdentityMatchedInUI": null,
+    "oneTitleOneEpisodeAcknowledged": null,
+    "confirmationPresented": null,
+    "deletionConfirmed": null,
+    "outcome": null,
+    "localAccountDataPurged": null,
+    "coldLaunchSignedOut": null
+  },
+  "postDeletion": {
+    "productionErasureVerified": null,
+    "providerAbsent": null,
+    "ownedDataScopesEmpty": null,
+    "SQLTombstoneVerified": null,
+    "independentJournalVerified": null,
+    "protectedProviderAccountsUnchanged": null,
+    "protectedAppDataUnchanged": null,
+    "appleOutcome": null,
+    "receiptPath": null
+  },
+  "restart": {
+    "performed": null,
+    "coldRestartOutcomeVerified": null,
+    "operationalReceiptPath": null,
+    "postRestartReceiptPath": null
+  },
+  "safety": {
+    "providerMutations": 0,
+    "appRequestsOrSessionsCreated": 0,
+    "accountOrSettingsEdits": false,
+    "deletionMarkerWritten": false,
+    "readyBaselineCreatedOrReplaced": false,
+    "savedPrivateStateUnchanged": true,
+    "DeviceTrustBypassed": false,
+    "IDsEmailsTokensOrPrivateHashesExported": false,
+    "newCallsMadeForThisAggregate": 0
+  },
+  "primaryReceipts": [
+    {
+      "path": "docs/qa/2026-10-15/live-erasure/provider-preflight-20261015T180825Z.json",
+      "sha256": "4be7de31f41fe4354ec86174e2f60bdca7ab5a903b71e8dfb39be75b4ce2f7f6"
+    },
+    {
+      "path": "docs/qa/2026-10-15/live-erasure/exact-qa-readback-20261015T181317Z.json",
+      "sha256": "686380eb3f7874680b9033701dd873e445901a0e79830307a14895df4026890a"
+    }
+  ],
+  "nextEvidence": {
+    "status": "not_recorded",
+    "proposedReceiptName": "live-erasure-consumer-<UTC timestamp>.json",
+    "requiredObservedSteps": [
+      "Normal production QA login and exactly one acknowledged library title with episode 1 watched.",
+      "A ready exact-target baseline before actual consumer deletion.",
+      "Actual in-app deletion result and signed-out cold launch.",
+      "Read-only post-deletion provider, owned-data, journal and protected-account checks.",
+      "Separate operational restart receipt and post-restart readback if restart safety is exercised."
+    ],
+    "instruction": "Record actual progress in a new dated receipt and reference it explicitly; do not infer completion from these preflight readbacks or replace their historical observations."
+  }
+}

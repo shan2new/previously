@@ -1,0 +1,90 @@
+{
+  "version": 1,
+  "preparedAt": "2026-10-15T17:31:52.780376+00:00",
+  "status": "repair_prepared_runtime_verification_pending",
+  "failedRun": "ios/Tools/qa/.runs/20261015T171508872199Z",
+  "failedDirected": {
+    "passed": 64,
+    "total": 75,
+    "failed": 11,
+    "skipped": 0,
+    "monkeysStarted": 0
+  },
+  "sampleCase": "PreviouslyAccountIsolationTests/testOldOwnerDelayedWriteCannotRetryWithNewOwnerToken",
+  "runtime": "iOS 27.0 (24A434)",
+  "observed": {
+    "markTapRecordedAt": "2026-10-15T17:15:58Z",
+    "tapTarget": "qa.progress.mark.1001",
+    "finalProgress": 3,
+    "finalJournalCount": 0,
+    "admissionAlertInFinalHierarchy": false,
+    "domainWriteRequestsBeforeNextReset": 0,
+    "videoFramesShowBlankArrivalArea": true,
+    "finalScreenshotShowsEpisode4ActionUncommitted": true
+  },
+  "interpretation": "The real mark was attempted before any write was staged. Saved video and source support invisible billboard controls being exposed before arrival; video offsets are media positions, not a subframe synchronization proof of the tap. The correction still requires focused and full native reruns.",
+  "sourceDelta": {
+    "path": "ios/Sources/DesignSystem/ShowBillboard.swift",
+    "beforeSHA256": "aa7ceff65fe18ac9c68f9ffec2b5dfe0c03b771bea2cbf70a47721a6d594aa45",
+    "afterSHA256": "ddfe5c12c1ef50d0bd5f98d6893f0a5eb20f74522ff96985a4456fd0c1060a65",
+    "beforeSource": "HEAD file; no prior working-tree changes in this file",
+    "productionFilesChanged": 1,
+    "testOrHarnessChanges": false,
+    "changes": [
+      "HomeArrival hides controls from hit testing and accessibility until shown or Reduce Motion.",
+      "Settled nil or empty artwork signals artLoaded once; no image callback is awaited for an already drawn fallback."
+    ],
+    "retained": [
+      "Real-image failure fallback remains 3000ms.",
+      "Reduce Motion remains immediately visible.",
+      "No timers, progress writes, API calls, retries or fixture assertions were added."
+    ]
+  },
+  "validation": {
+    "scopedDiffCheckPassed": true,
+    "buildRunByAgent": false,
+    "nativeTestsRunByAgent": false,
+    "focusedRerun": "pending_root",
+    "full75AndThree300SecondSeeds": "pending_root"
+  },
+  "evidence": [
+    {
+      "path": "ios/Tools/qa/.runs/20261015T171508872199Z/attachments/FA583509-CE55-4BF3-841D-B26D2E9243DD.mp4",
+      "sha256": "999893e7405f3bbb4052abbdcc5fbf3bfbc504ef7ecd52bf7aad68448d61dee8",
+      "kind": "original_xctest_screen_recording"
+    },
+    {
+      "path": "ios/Tools/qa/.runs/20261015T171508872199Z/attachments/83700B5F-6FB9-413E-808F-52C44C38E43D.txt",
+      "sha256": "b9ecd3a068675e7dba9a770e12ab9d6ca19af4248f800125249c44002218d9ed",
+      "kind": "final_accessibility_hierarchy"
+    },
+    {
+      "path": "ios/Tools/qa/.runs/20261015T171508872199Z/attachments/7B01D94B-51D1-4C73-A1E1-48EC76A434D8.png",
+      "sha256": "79a34f5d63f1de149221ef452819c40a8123587cb7f698b5aa1529f44cb729c7",
+      "kind": "final_xctest_screenshot"
+    },
+    {
+      "path": "ios/Tools/qa/.runs/20261015T171508872199Z/attachments/9D874F75-7331-4202-8AB3-D62B52ACC20A.json",
+      "sha256": "47436b19a0d3a204dc0265ccb921e4787f316ce848ea42415b02b7539655dc48",
+      "kind": "ordered_action_trace"
+    },
+    {
+      "path": "docs/qa/2026-10-15/hero-readiness/actual-before-mark-9.4s.png",
+      "sha256": "08b55e1f24420ae30bdd082e7d12db720f7fcbe2873419a71c1d783aee51ecca",
+      "kind": "unedited_decoded_video_frame",
+      "mediaOffsetSeconds": 9.4
+    },
+    {
+      "path": "docs/qa/2026-10-15/hero-readiness/actual-after-mark-10.1s.png",
+      "sha256": "5a0938dfc96c3f9c45c81da8546af0f12e12f62736b762272a43261dae72acc1",
+      "kind": "unedited_decoded_video_frame",
+      "mediaOffsetSeconds": 10.1
+    },
+    {
+      "path": "docs/qa/2026-10-15/hero-readiness/actual-later-11.5s.png",
+      "sha256": "5a0938dfc96c3f9c45c81da8546af0f12e12f62736b762272a43261dae72acc1",
+      "kind": "unedited_decoded_video_frame",
+      "mediaOffsetSeconds": 11.5
+    }
+  ]
+}

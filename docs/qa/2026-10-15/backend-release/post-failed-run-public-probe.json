@@ -1,0 +1,22 @@
+{
+  "measuredAt": "2026-10-15T16:01:05.410616+00:00",
+  "initialDefaultPythonUserAgentStatus": 403,
+  "results": [
+    {
+      "userAgent": "node",
+      "durationMs": 2628.7,
+      "status": 200,
+      "body": {
+        "ok": true
+      }
+    },
+    {
+      "userAgent": "curl/8.7.1",
+      "durationMs": 235.2,
+      "status": 200,
+      "body": {
+        "ok": true
+      }
+    }
+  ]
+}

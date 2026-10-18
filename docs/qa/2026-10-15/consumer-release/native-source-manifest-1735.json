@@ -1,0 +1,2398 @@
+{
+  "capturedAt": "2026-10-15T17:35:27.341624+00:00",
+  "repository": "/Users/shan2new/Projects/previously",
+  "head": "57365d7783b90663815f3169b2a7d66e4af251cc",
+  "nativeQAFingerprint": {
+    "sha256": "3ad6f80e294c418dca7a81abb969a4bc2eb3976fe514c304b8b781a38cb1c4c0",
+    "fileCount": 431
+  },
+  "fileCount": 596,
+  "manifestSHA256": "9e34e611541b137b1c90d692158b7ed747ed1578c03ff1a20539e26317db4cd3",
+  "files": [
+    {
+      "path": "ios/Previously.xcodeproj/project.pbxproj",
+      "sha256": "8bc422c833369af91ff3428f7eecc0722b008d195ea44d3b579d1262d74da762"
+    },
+    {
+      "path": "ios/Previously.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/Package.resolved",
+      "sha256": "9531884c399bb5e2b8ba9350a0608fec5fb8d10f5bdea6fc7c152ea3b184b158"
+    },
+    {
+      "path": "ios/Previously.xcodeproj/xcshareddata/xcschemes/Previously.xcscheme",
+      "sha256": "3aeab6ed2a97852e83aecdae618feb2a89f5a33a8e7f49ca5c8ba4680a4c2460"
+    },
+    {
+      "path": "ios/Previously.xcodeproj/xcshareddata/xcschemes/PreviouslyQA.xcscheme",
+      "sha256": "c40dccfeec941b4cb4f3957841f007588bea42f096a1c5d1f09e314402acc10a"
+    },
+    {
+      "path": "ios/Resources/AppIcon.icon/Assets/flaps-bottom.png",
+      "sha256": "2b4cd386ccbadf080465f41badedd1d4248c6818c162a31e448d86438c8ef3e2"
+    },
+    {
+      "path": "ios/Resources/AppIcon.icon/Assets/flaps-top.png",
+      "sha256": "af4e09d3e756e60fa23db7d66be0820daf8e1da762d2ce87b2bae88c9930b1fe"
+    },
+    {
+      "path": "ios/Resources/AppIcon.icon/Assets/ground.png",
+      "sha256": "0b9e9c6bd6eb8912048f4cf0487abe47af469aab526665622588329fe80db0d3"
+    },
+    {
+      "path": "ios/Resources/AppIcon.icon/Assets/letter-bottom.png",
+      "sha256": "7d024e3c650b068889e6de22608c05fd877065cacc72d7f17b81c3087f63838b"
+    },
+    {
+      "path": "ios/Resources/AppIcon.icon/Assets/letter-top.png",
+      "sha256": "403314b355c0fa8f52cb2cab4682e6112b56056a0457732d80b2fc9eb2577ac7"
+    },
+    {
+      "path": "ios/Resources/AppIcon.icon/Assets/pins.png",
+      "sha256": "6efe6b06bffe5f8183766afbea634bbf293ce376aa69b6c82973b4e17dca462d"
+    },
+    {
+      "path": "ios/Resources/AppIcon.icon/Assets/stop.png",
+      "sha256": "1a4c76b11caa2b4c72e3c84cb7ddd06f88616f1a28eeea8f149f804c2a5a810d"
+    },
+    {
+      "path": "ios/Resources/AppIcon.icon/icon.json",
+      "sha256": "9bc2f2b0f701f4bc704274c79cf5a231b467708fbaeeae57c6f554ca8bd4f49a"
+    },
+    {
+      "path": "ios/Resources/Assets.xcassets/AccentColor.colorset/Contents.json",
+      "sha256": "beb1ba57c36ece4e47b7ff3c0346610a2d4deed9491a37e45530390792722a0f"
+    },
+    {
+      "path": "ios/Resources/Assets.xcassets/Contents.json",
+      "sha256": "0fd49ba3c3585c709678e0046a821c3c60685ec7063720d30d3a3448be3a208b"
+    },
+    {
+      "path": "ios/Resources/Assets.xcassets/Genres/Contents.json",
+      "sha256": "f5fb0e1f3a8142892ed092efb5955c1c2cc537003a89ad7bbdb9dade7fe8985f"
+    },
+    {
+      "path": "ios/Resources/Assets.xcassets/Genres/genre-action-anime.imageset/Contents.json",
+      "sha256": "9ac339a466a2e97f5b5e04d69cefacf0b04a1c4b70cb1e5338c8dd4de3eb56e0"
+    },
+    {
+      "path": "ios/Resources/Assets.xcassets/Genres/genre-action-anime.imageset/genre-action-anime@2x.jpg",
+      "sha256": "ed7a3ddd1f4500f90657e4c8b7881881aa76759d4a633b3f0e03551202f7793f"
+    },
+    {
+      "path": "ios/Resources/Assets.xcassets/Genres/genre-action-anime.imageset/genre-action-anime@3x.jpg",
+      "sha256": "471fea218de29ff2530f9d2244e94b502478717d6153fc52290a00aeb722e813"
+    },
+    {
+      "path": "ios/Resources/Assets.xcassets/Genres/genre-action-tv.imageset/Contents.json",
+      "sha256": "fb35bf5280a4be4123bdf43ab3c37953b220ab561b60b3b717fd14ff8f9c899a"
+    },
+    {
+      "path": "ios/Resources/Assets.xcassets/Genres/genre-action-tv.imageset/genre-action-tv@2x.jpg",
+      "sha256": "b1b275db31da66fe81d23795fc1a3bcc24e53d8635d5e176b06e1bb1cda5f0df"
+    },
+    {
+      "path": "ios/Resources/Assets.xcassets/Genres/genre-action-tv.imageset/genre-action-tv@3x.jpg",
+      "sha256": "a160b856f6e468acd08e8c0df21017d8aec4c2f4ff0848839a575046313ce53a"
+    },
+    {
+      "path": "ios/Resources/Assets.xcassets/Genres/genre-adventure-anime.imageset/Contents.json",
+      "sha256": "ce0ffc234592414929a7648810ae3cc6afadebcf427bc14c864fcbd9af2a3902"
+    },
+    {
+      "path": "ios/Resources/Assets.xcassets/Genres/genre-adventure-anime.imageset/genre-adventure-anime@2x.jpg",
+      "sha256": "40633514f1cdb83d0ee7cd132c5c87b1aaa69b24bec7dd36171c81cc0205f3cc"
+    },
+    {
+      "path": "ios/Resources/Assets.xcassets/Genres/genre-adventure-anime.imageset/genre-adventure-anime@3x.jpg",
+      "sha256": "65aa862dae8d9eb929fc8725e911fa43ef8771394d53045052730c2c36a14862"
+    },
+    {
+      "path": "ios/Resources/Assets.xcassets/Genres/genre-adventure-tv.imageset/Contents.json",
+      "sha256": "91557119533f88e195357e4ea3bb04ddea05efa41546d5c69b9eaed6428090ab"
+    },
+    {
+      "path": "ios/Resources/Assets.xcassets/Genres/genre-adventure-tv.imageset/genre-adventure-tv@2x.jpg",
+      "sha256": "0b2ca15c0663fafee97fafd2f9571e60c3bce8d36986bbdd8dcde74ef936f215"
+    },
+    {
+      "path": "ios/Resources/Assets.xcassets/Genres/genre-adventure-tv.imageset/genre-adventure-tv@3x.jpg",
+      "sha256": "2f34f5f51d8056c8ac60bd05688e94b4f866cd6c44ddf574ce1b38ff270efea7"
+    },
+    {
+      "path": "ios/Resources/Assets.xcassets/Genres/genre-animation-tv.imageset/Contents.json",
+      "sha256": "cada392e5c913e2a8b84a31c9d844a26c67564599fa7e669f12c0e3813fd9d04"
+    },
+    {
+      "path": "ios/Resources/Assets.xcassets/Genres/genre-animation-tv.imageset/genre-animation-tv@2x.jpg",
+      "sha256": "810c190fc256625795cb43922e60f3420dc83b6d8703e13c9c40a19423940857"
+    },
+    {
+      "path": "ios/Resources/Assets.xcassets/Genres/genre-animation-tv.imageset/genre-animation-tv@3x.jpg",
+      "sha256": "35cb0ac8aac88c8165a7c338cd8000031a5f6e6dd40d10824be8893ceece3cca"
+    },
+    {
+      "path": "ios/Resources/Assets.xcassets/Genres/genre-comedy-anime.imageset/Contents.json",
+      "sha256": "c7ee00ddd478178507490847c3d8049b0b3da1cbc1557ac16c410e4dd44f0a81"
+    },
+    {
+      "path": "ios/Resources/Assets.xcassets/Genres/genre-comedy-anime.imageset/genre-comedy-anime@2x.jpg",
+      "sha256": "5da8daad9c9d009ecd746cc91810e085cdbe6c9f1e8a5e3fd6cd6d3a2e70901c"
+    },
+    {
+      "path": "ios/Resources/Assets.xcassets/Genres/genre-comedy-anime.imageset/genre-comedy-anime@3x.jpg",
+      "sha256": "e83896c475c711090cab0869325cc42d444ed58560467966505e7960213b4542"
+    },
+    {
+      "path": "ios/Resources/Assets.xcassets/Genres/genre-comedy-tv.imageset/Contents.json",
+      "sha256": "f6f4f19e35daf96410f53a8b2210bbcbab8f03dc5b0b47c1bfa06d4ec712b1a4"
+    },
+    {
+      "path": "ios/Resources/Assets.xcassets/Genres/genre-comedy-tv.imageset/genre-comedy-tv@2x.jpg",
+      "sha256": "e952075d79505dacb166d8835bf741241db6d6bda1d0675eca81e782bae15f40"
+    },
+    {
+      "path": "ios/Resources/Assets.xcassets/Genres/genre-comedy-tv.imageset/genre-comedy-tv@3x.jpg",
+      "sha256": "e4d1bc57dbadf2d1d4fa04199be5dd5ea96b90d082876919a5ce33cdb4f14e2a"
+    },
+    {
+      "path": "ios/Resources/Assets.xcassets/Genres/genre-crime-tv.imageset/Contents.json",
+      "sha256": "a6b04b49fb4f99a026859e06a3b6f8a2b33f78b60134f2c56686c369dfc807aa"
+    },
+    {
+      "path": "ios/Resources/Assets.xcassets/Genres/genre-crime-tv.imageset/genre-crime-tv@2x.jpg",
+      "sha256": "334dc4883c8902ae4e8bf48ba6fa5c7fa05a725a70c544a36e51d6b6cf170004"
+    },
+    {
+      "path": "ios/Resources/Assets.xcassets/Genres/genre-crime-tv.imageset/genre-crime-tv@3x.jpg",
+      "sha256": "ac5ae3d7c42860af5b12ad830212c088e316ef6295b17db5b45f99eb262ac2d0"
+    },
+    {
+      "path": "ios/Resources/Assets.xcassets/Genres/genre-documentary-tv.imageset/Contents.json",
+      "sha256": "2fefa8f4a76c07e05e42541cfec0f31b1f8e3e4055c641b1b94704432482a4eb"
+    },
+    {
+      "path": "ios/Resources/Assets.xcassets/Genres/genre-documentary-tv.imageset/genre-documentary-tv@2x.jpg",
+      "sha256": "54fe1a6bb2c9ee427e8c79c1bd58f9c867241b8d2f751d64794af6a569381980"
+    },
+    {
+      "path": "ios/Resources/Assets.xcassets/Genres/genre-documentary-tv.imageset/genre-documentary-tv@3x.jpg",
+      "sha256": "ca7b822c807909846d0f7f71c3cecf97288bece88264f58f7df1f9efff825826"
+    },
+    {
+      "path": "ios/Resources/Assets.xcassets/Genres/genre-drama-anime.imageset/Contents.json",
+      "sha256": "cf11ca601e52c3b538f371757c2ea5aad3123c352ffbfc75de61dc42cb1c691f"
+    },
+    {
+      "path": "ios/Resources/Assets.xcassets/Genres/genre-drama-anime.imageset/genre-drama-anime@2x.jpg",
+      "sha256": "2450382be44b88ea3da423be75566839ccee669e362bca4f28202bf354229adb"
+    },
+    {
+      "path": "ios/Resources/Assets.xcassets/Genres/genre-drama-anime.imageset/genre-drama-anime@3x.jpg",
+      "sha256": "6f3db1ffb26035760fa82e3fc98c51a3e453d388f89be9ba8f2629aa85a593cd"
+    },
+    {
+      "path": "ios/Resources/Assets.xcassets/Genres/genre-drama-tv.imageset/Contents.json",
+      "sha256": "88d7e60470c4672e0edbf51395da6b0d84cd0ad47820bf27d12130247e652b01"
+    },
+    {
+      "path": "ios/Resources/Assets.xcassets/Genres/genre-drama-tv.imageset/genre-drama-tv@2x.jpg",
+      "sha256": "ed8d4b1a83fd56d9bf627a05b953ace4fdd9d6a9e625ad47cd040862cbff31e0"
+    },
+    {
+      "path": "ios/Resources/Assets.xcassets/Genres/genre-drama-tv.imageset/genre-drama-tv@3x.jpg",
+      "sha256": "2224601fc78b5890be8175f0da44aa4de76b242e3600d156bc392d187d956d03"
+    },
+    {
+      "path": "ios/Resources/Assets.xcassets/Genres/genre-family-tv.imageset/Contents.json",
+      "sha256": "2eba2cce0d7e3b82c8cdf94f057ea5a3d63446a026ea47eb89433d58f6687b78"
+    },
+    {
+      "path": "ios/Resources/Assets.xcassets/Genres/genre-family-tv.imageset/genre-family-tv@2x.jpg",
+      "sha256": "2db6c7560262f0271158f0f6fe0d36305776f10110677a2403c452d68d5b68a9"
+    },
+    {
+      "path": "ios/Resources/Assets.xcassets/Genres/genre-family-tv.imageset/genre-family-tv@3x.jpg",
+      "sha256": "368a81f618b7bcf7b48c632d9693c7b3a47d2587c26c553e69ea6d30e1f8626d"
+    },
+    {
+      "path": "ios/Resources/Assets.xcassets/Genres/genre-fantasy-anime.imageset/Contents.json",
+      "sha256": "20aa1a8b4bc135f6043200851abc92474f796026c49e73a6af98a575381a1a0c"
+    },
+    {
+      "path": "ios/Resources/Assets.xcassets/Genres/genre-fantasy-anime.imageset/genre-fantasy-anime@2x.jpg",
+      "sha256": "f5fc9eee84fb0b08b07c20fc5f8e19d414a71379fd24a1db83c7c84d67dbd0b8"
+    },
+    {
+      "path": "ios/Resources/Assets.xcassets/Genres/genre-fantasy-anime.imageset/genre-fantasy-anime@3x.jpg",
+      "sha256": "29430754141e5c19233461f60dba1beb219c74a58c80bb501b0ca53d3cdcaa36"
+    },
+    {
+      "path": "ios/Resources/Assets.xcassets/Genres/genre-fantasy-tv.imageset/Contents.json",
+      "sha256": "0d6bebf6e8ec4e62857de11ee6386592f026b0fd5441fef2b4f2973f45e21939"
+    },
+    {
+      "path": "ios/Resources/Assets.xcassets/Genres/genre-fantasy-tv.imageset/genre-fantasy-tv@2x.jpg",
+      "sha256": "435cf93d32695575019f5ef632dcca1bd32de8b10ad6875228b4d0e2b0fcb8dd"
+    },
+    {
+      "path": "ios/Resources/Assets.xcassets/Genres/genre-fantasy-tv.imageset/genre-fantasy-tv@3x.jpg",
+      "sha256": "04b7800d9e285fe38c4642ec24775299c78437cd290eacb72e27dee38155e3d0"
+    },
+    {
+      "path": "ios/Resources/Assets.xcassets/Genres/genre-horror-anime.imageset/Contents.json",
+      "sha256": "a7a5bf0d5ce1bbf0dc1fb9d64a4999dfac2f32deec2ea2af05d11e7440edd2ee"
+    },
+    {
+      "path": "ios/Resources/Assets.xcassets/Genres/genre-horror-anime.imageset/genre-horror-anime@2x.jpg",
+      "sha256": "212377572e6946d5eb238d776e9e3ef29ae10f6aa30689dcfa5fedc3fb6ee8f8"
+    },
+    {
+      "path": "ios/Resources/Assets.xcassets/Genres/genre-horror-anime.imageset/genre-horror-anime@3x.jpg",
+      "sha256": "a3551fc77683dcea32a189ab9de679e17c2c29125add911a9418f5ffefd4f9c6"
+    },
+    {
+      "path": "ios/Resources/Assets.xcassets/Genres/genre-mahou-shoujo-anime.imageset/Contents.json",
+      "sha256": "9aa6b78f05b3d6cce680c682db40c483af6d825c347bda50c2e98778d683c6b7"
+    },
+    {
+      "path": "ios/Resources/Assets.xcassets/Genres/genre-mahou-shoujo-anime.imageset/genre-mahou-shoujo-anime@2x.jpg",
+      "sha256": "e6404c6ec44399292700b300df6240ce9335a12408f7e5fc0e321792cb293674"
+    },
+    {
+      "path": "ios/Resources/Assets.xcassets/Genres/genre-mahou-shoujo-anime.imageset/genre-mahou-shoujo-anime@3x.jpg",
+      "sha256": "d0ee33fb7ad614f27cd6665b1a6c31450ed7ab571b4b887f37d90e59273517a1"
+    },
+    {
+      "path": "ios/Resources/Assets.xcassets/Genres/genre-mecha-anime.imageset/Contents.json",
+      "sha256": "384c85ae7b4c9e68fbcf992f6d056fdbac17aa4e19ddeb950f0a00e72770daaa"
+    },
+    {
+      "path": "ios/Resources/Assets.xcassets/Genres/genre-mecha-anime.imageset/genre-mecha-anime@2x.jpg",
+      "sha256": "7c6cb7ceda3cbab03838580897f49ef49d67df780053e8c1404f5751fd2d1b94"
+    },
+    {
+      "path": "ios/Resources/Assets.xcassets/Genres/genre-mecha-anime.imageset/genre-mecha-anime@3x.jpg",
+      "sha256": "c9e141acd9b45d4021254190ffcb223073cab05cd012553b1edfad541b10d6a3"
+    },
+    {
+      "path": "ios/Resources/Assets.xcassets/Genres/genre-music-anime.imageset/Contents.json",
+      "sha256": "5e5ff75167b7e6997a10c88705b0fac66324be5c4a5e53a1b1504dfff2348701"
+    },
+    {
+      "path": "ios/Resources/Assets.xcassets/Genres/genre-music-anime.imageset/genre-music-anime@2x.jpg",
+      "sha256": "9b3fbcbabd200390d3370c9c50987c0dbf80de3202db5572b57643521715a985"
+    },
+    {
+      "path": "ios/Resources/Assets.xcassets/Genres/genre-music-anime.imageset/genre-music-anime@3x.jpg",
+      "sha256": "9db2e034c06f2709e421d6a5bc7c861a07d4f2312d56377dbfbfb37db268d9d7"
+    },
+    {
+      "path": "ios/Resources/Assets.xcassets/Genres/genre-mystery-anime.imageset/Contents.json",
+      "sha256": "81f5f67bb2c03191d2f4e6c6e437d8dec2d5111d2fcb261ebf7d5a2bf0202fc4"
+    },
+    {
+      "path": "ios/Resources/Assets.xcassets/Genres/genre-mystery-anime.imageset/genre-mystery-anime@2x.jpg",
+      "sha256": "540d295875c29c16ac97468a88f469d5238256d56c548ed8ae568de2e751edb0"
+    },
+    {
+      "path": "ios/Resources/Assets.xcassets/Genres/genre-mystery-anime.imageset/genre-mystery-anime@3x.jpg",
+      "sha256": "6b49b0558bf189a148d095d5f09d1d8b92c3f9e9c148eb2a19d37063abfa1c87"
+    },
+    {
+      "path": "ios/Resources/Assets.xcassets/Genres/genre-mystery-tv.imageset/Contents.json",
+      "sha256": "73a9206516ed7da7b53bc654aa098027f303386f277eaa53ac6c367485a763ee"
+    },
+    {
+      "path": "ios/Resources/Assets.xcassets/Genres/genre-mystery-tv.imageset/genre-mystery-tv@2x.jpg",
+      "sha256": "812c9c5ec6eaa7a29c60741a7ae99fd97bc4f577dafc272ffc303b932a856c3c"
+    },
+    {
+      "path": "ios/Resources/Assets.xcassets/Genres/genre-mystery-tv.imageset/genre-mystery-tv@3x.jpg",
+      "sha256": "e3b3a1cd002a5a40d982c45a72252daab3ef655c2128d75447a16f62007609d1"
+    },
+    {
+      "path": "ios/Resources/Assets.xcassets/Genres/genre-psychological-anime.imageset/Contents.json",
+      "sha256": "ec692fca80941837b98444f2e7a7b3a23249441211b97e58f9974db91295bbdc"
+    },
+    {
+      "path": "ios/Resources/Assets.xcassets/Genres/genre-psychological-anime.imageset/genre-psychological-anime@2x.jpg",
+      "sha256": "c449c04f3d63e7d7f70baf3788398c593e3c59c1a527bdaf28efb94d40af54e4"
+    },
+    {
+      "path": "ios/Resources/Assets.xcassets/Genres/genre-psychological-anime.imageset/genre-psychological-anime@3x.jpg",
+      "sha256": "4f571ce2ef73f6c705a4e7bb7df3f2b34082f4641a75ad646a286915666bef83"
+    },
+    {
+      "path": "ios/Resources/Assets.xcassets/Genres/genre-reality-tv.imageset/Contents.json",
+      "sha256": "fd0ef3f13d84518000a8b209207fcbf7a2303c606322b9453d4fcdbf982af016"
+    },
+    {
+      "path": "ios/Resources/Assets.xcassets/Genres/genre-reality-tv.imageset/genre-reality-tv@2x.jpg",
+      "sha256": "9827027a3a61221db5cdb416a9d5e237dfdbfdba0eb0fdbba19f8fe7dc9a8d98"
+    },
+    {
+      "path": "ios/Resources/Assets.xcassets/Genres/genre-reality-tv.imageset/genre-reality-tv@3x.jpg",
+      "sha256": "a68ba9f787c202b782f09838a798ac66f557ef0391059088c6630eee1282dcc3"
+    },
+    {
+      "path": "ios/Resources/Assets.xcassets/Genres/genre-romance-anime.imageset/Contents.json",
+      "sha256": "e3504ac11b32f885f7b8abc061d0d3f7d0bb8457dc02a19dc21133f4d47a22f0"
+    },
+    {
+      "path": "ios/Resources/Assets.xcassets/Genres/genre-romance-anime.imageset/genre-romance-anime@2x.jpg",
+      "sha256": "871315ff4a3c7bb3f7bb8abe443019579cdc361c1434cbce9860a42abab371b1"
+    },
+    {
+      "path": "ios/Resources/Assets.xcassets/Genres/genre-romance-anime.imageset/genre-romance-anime@3x.jpg",
+      "sha256": "e340cc53194c4ef383b77b2601080570b377be5203060aee98cf24b4da6674e7"
+    },
+    {
+      "path": "ios/Resources/Assets.xcassets/Genres/genre-sci-fi-anime.imageset/Contents.json",
+      "sha256": "201d208ab065e63f90255560fa0e79f787695c185091d5660eb15454ae71aced"
+    },
+    {
+      "path": "ios/Resources/Assets.xcassets/Genres/genre-sci-fi-anime.imageset/genre-sci-fi-anime@2x.jpg",
+      "sha256": "0dcc657124d800f0754bf245dc8e27a2e91d4b12637d952d4c44d380d953ec28"
+    },
+    {
+      "path": "ios/Resources/Assets.xcassets/Genres/genre-sci-fi-anime.imageset/genre-sci-fi-anime@3x.jpg",
+      "sha256": "c3a38597d5f61b5040a3f52718ead925a0073ecac3dc69cc090592238d9570f2"
+    },
+    {
+      "path": "ios/Resources/Assets.xcassets/Genres/genre-sci-fi-tv.imageset/Contents.json",
+      "sha256": "197b89550dd43a4af016239b467bc2ec5aec9f1bb5f90d9ecfc9d766561ecb59"
+    },
+    {
+      "path": "ios/Resources/Assets.xcassets/Genres/genre-sci-fi-tv.imageset/genre-sci-fi-tv@2x.jpg",
+      "sha256": "65b68f14e194bc1a6225f1a4f41a6b3f914ef12ac5cb9770c1d7e616fe3c8c1f"
+    },
+    {
+      "path": "ios/Resources/Assets.xcassets/Genres/genre-sci-fi-tv.imageset/genre-sci-fi-tv@3x.jpg",
+      "sha256": "3d9fcb7c68a1ae2ef9947734c39734dd7e41cbb6912a23fd5fb283e19eca80a8"
+    },
+    {
+      "path": "ios/Resources/Assets.xcassets/Genres/genre-slice-of-life-anime.imageset/Contents.json",
+      "sha256": "30ee803c3f521b69bafb2fcc628832e61d37297a312af57ae1261ca18118b54e"
+    },
+    {
+      "path": "ios/Resources/Assets.xcassets/Genres/genre-slice-of-life-anime.imageset/genre-slice-of-life-anime@2x.jpg",
+      "sha256": "91a30d716492e05934065f3137618a7be73091b9942ccb7a4f39511688de6832"
+    },
+    {
+      "path": "ios/Resources/Assets.xcassets/Genres/genre-slice-of-life-anime.imageset/genre-slice-of-life-anime@3x.jpg",
+      "sha256": "69b322cfdfe425acfc835ac6f01ec1b2f8a25a47f4eff3f9a67e662347a5b47b"
+    },
+    {
+      "path": "ios/Resources/Assets.xcassets/Genres/genre-sports-anime.imageset/Contents.json",
+      "sha256": "ab3725baf20aedc4b572abb896ccc6d7e7ce9cdae1d9ecb8e7411c7079bc45f3"
+    },
+    {
+      "path": "ios/Resources/Assets.xcassets/Genres/genre-sports-anime.imageset/genre-sports-anime@2x.jpg",
+      "sha256": "08bf863fd0183cd8d9204e64c127296404badcea0ea187bc538342ad8180936a"
+    },
+    {
+      "path": "ios/Resources/Assets.xcassets/Genres/genre-sports-anime.imageset/genre-sports-anime@3x.jpg",
+      "sha256": "7abdd7536f6fb91ec6a77652145fccff1dda9093c4b25524b5fe79516ce2779d"
+    },
+    {
+      "path": "ios/Resources/Assets.xcassets/Genres/genre-supernatural-anime.imageset/Contents.json",
+      "sha256": "b63c8e43dacfb0cd19155534f9909e6383604360830975307ecb9b235569bea6"
+    },
+    {
+      "path": "ios/Resources/Assets.xcassets/Genres/genre-supernatural-anime.imageset/genre-supernatural-anime@2x.jpg",
+      "sha256": "9ba2665276a0489547e4bb085b989bbad90a0190107c1024845c713ce6907c4b"
+    },
+    {
+      "path": "ios/Resources/Assets.xcassets/Genres/genre-supernatural-anime.imageset/genre-supernatural-anime@3x.jpg",
+      "sha256": "b266c6231627bfcd8509718b0e70efb2c3c46b5f2ccc5284f9c2150ef7bad1af"
+    },
+    {
+      "path": "ios/Resources/Assets.xcassets/Genres/genre-thriller-anime.imageset/Contents.json",
+      "sha256": "780f98f16e4bd25dca83dba3a78329217ef90671e773b1702be29ddd580ff07f"
+    },
+    {
+      "path": "ios/Resources/Assets.xcassets/Genres/genre-thriller-anime.imageset/genre-thriller-anime@2x.jpg",
+      "sha256": "f08d8af6fdfe90a6d39e5bb59c49cec0245a2a38e6c8f91661e51dc88d4a7422"
+    },
+    {
+      "path": "ios/Resources/Assets.xcassets/Genres/genre-thriller-anime.imageset/genre-thriller-anime@3x.jpg",
+      "sha256": "9b22281fd238071d3e408398df1fff479171a7bc8a0b69381a9d77a236f1a5e7"
+    },
+    {
+      "path": "ios/Resources/Assets.xcassets/Genres/genre-war-politics-tv.imageset/Contents.json",
+      "sha256": "4b55e3010a9138e199764a6445d26e6ef7c60b833be654cce43907d6be8e1d57"
+    },
+    {
+      "path": "ios/Resources/Assets.xcassets/Genres/genre-war-politics-tv.imageset/genre-war-politics-tv@2x.jpg",
+      "sha256": "1f4800ca3d6ed387202a77760be3fe4dadecfd1c0a7d66a28184ef4d30d09b77"
+    },
+    {
+      "path": "ios/Resources/Assets.xcassets/Genres/genre-war-politics-tv.imageset/genre-war-politics-tv@3x.jpg",
+      "sha256": "40c2af24bbddf465d211a401c0fa3e42cc0ed737020cee76e73b0445a9d9f82b"
+    },
+    {
+      "path": "ios/Resources/Assets.xcassets/Genres/genre-western-tv.imageset/Contents.json",
+      "sha256": "198a00fc703ab8b9428f876a0293ab34f37692943d98ca80078c93e7c1b1b7d9"
+    },
+    {
+      "path": "ios/Resources/Assets.xcassets/Genres/genre-western-tv.imageset/genre-western-tv@2x.jpg",
+      "sha256": "2b84e6781d66f6cb91486f5043f0ce3f10d10a99f12662233195f43e10e62191"
+    },
+    {
+      "path": "ios/Resources/Assets.xcassets/Genres/genre-western-tv.imageset/genre-western-tv@3x.jpg",
+      "sha256": "0707cea0902f8af5fa7e4b356ea083b3aef54c56cd0fd8319ea638db2dd87746"
+    },
+    {
+      "path": "ios/Resources/Assets.xcassets/LaunchBackground.colorset/Contents.json",
+      "sha256": "6eb61ddc33f0ef4db1532eee3683f63fcc5f15ea612d10e75dfaa7fd00b873eb"
+    },
+    {
+      "path": "ios/Resources/Assets.xcassets/TMDBLogo.imageset/Contents.json",
+      "sha256": "78765243df264f7838059fc2d8d63b4a52c4134d482d1ee27920c899db05691d"
+    },
+    {
+      "path": "ios/Resources/Assets.xcassets/TMDBLogo.imageset/tmdb-logo.svg",
+      "sha256": "8e7b30f73a4020692ccca9c88bafe5dcb6f8a62a4c6bc55cd9ba82bb2cd95f6c"
+    },
+    {
+      "path": "ios/Resources/Assets.xcassets/TabDiscover.imageset/Contents.json",
+      "sha256": "75e0a739ad99b7e9a325b4ab74859ed01886b519eb02e2ff125cec5113cbcfcc"
+    },
+    {
+      "path": "ios/Resources/Assets.xcassets/TabDiscover.imageset/TabDiscover.pdf",
+      "sha256": "c100e5244c781c73afe1b414b581dc606f509ef3d949ece9375b25384a4989e0"
+    },
+    {
+      "path": "ios/Resources/Assets.xcassets/TabDiscoverFill.imageset/Contents.json",
+      "sha256": "8229ce8fea2c75ef0db706879d6057f6f18419a7d8d3821ff02c9f2e232dffea"
+    },
+    {
+      "path": "ios/Resources/Assets.xcassets/TabDiscoverFill.imageset/TabDiscoverFill.pdf",
+      "sha256": "fe5295e025e45757d68c80a45cdaeac02ea4114b2c6899bd5e5701d635ed28e5"
+    },
+    {
+      "path": "ios/Resources/Assets.xcassets/TabHome.imageset/Contents.json",
+      "sha256": "5c3ae6142bfff387bdd98747a0f250516a846ca8145f6018645aa08a62d941bf"
+    },
+    {
+      "path": "ios/Resources/Assets.xcassets/TabHome.imageset/TabHome.pdf",
+      "sha256": "7c93e880f37b3ab75aec246850e3bd0ebd79bd696f2dc822a27b8e095f8f3b8a"
+    },
+    {
+      "path": "ios/Resources/Assets.xcassets/TabHomeFill.imageset/Contents.json",
+      "sha256": "b886e82f19238a87acd1ebadd308f642ca51082309b4d6e27bddabe66e7bde3f"
+    },
+    {
+      "path": "ios/Resources/Assets.xcassets/TabHomeFill.imageset/TabHomeFill.pdf",
+      "sha256": "9644c3e0a50129b0dbd2ede1d30b293e757a220bebb55c75d96014a88d8f073e"
+    },
+    {
+      "path": "ios/Resources/Assets.xcassets/TabLibrary.imageset/Contents.json",
+      "sha256": "e82837b3d8c294242e41eb0a69cfd8b31ae04704e1941b62c3bc34f0e973b497"
+    },
+    {
+      "path": "ios/Resources/Assets.xcassets/TabLibrary.imageset/TabLibrary.pdf",
+      "sha256": "badc159c77777ac714493f9fe5251869fe7bab3301a174399e5d05a4e5faceac"
+    },
+    {
+      "path": "ios/Resources/Assets.xcassets/TabLibraryFill.imageset/Contents.json",
+      "sha256": "669e911eb733c3b79956ad04500187b4d8becfa3ebd773deb4a4631488ce81b0"
+    },
+    {
+      "path": "ios/Resources/Assets.xcassets/TabLibraryFill.imageset/TabLibraryFill.pdf",
+      "sha256": "9049963973e4a10369aeb3ce3c1bb6cf597975260429fe8852baaae7c58d0d0c"
+    },
+    {
+      "path": "ios/Resources/Assets.xcassets/TabSchedule.imageset/Contents.json",
+      "sha256": "11d62555e3d4442cd921a0b7fd8cca4e7e8e9a2ba355a03bf864b0f1b7284dd8"
+    },
+    {
+      "path": "ios/Resources/Assets.xcassets/TabSchedule.imageset/TabSchedule.pdf",
+      "sha256": "530edfc6a005209cbdc41ad0199655fc1bdffe1eb08d351484fa6c237054b3d9"
+    },
+    {
+      "path": "ios/Resources/Assets.xcassets/TabScheduleFill.imageset/Contents.json",
+      "sha256": "d0d836a046803666f79df608a539fbb17b790b219748183f95756340c02e6955"
+    },
+    {
+      "path": "ios/Resources/Assets.xcassets/TabScheduleFill.imageset/TabScheduleFill.pdf",
+      "sha256": "b930f1ab861e6bf58aa6a1b1bba8c42b071dd8dc72b542ebb9742d14def97723"
+    },
+    {
+      "path": "ios/Resources/Assets.xcassets/TabToday.imageset/Contents.json",
+      "sha256": "d67dffc8a7e4f6d66573cc20b82eda861a5b84fa6931242072aafa41465996d6"
+    },
+    {
+      "path": "ios/Resources/Assets.xcassets/TabToday.imageset/TabToday.pdf",
+      "sha256": "0593d8faa166b7696d0a3693d7c3d467c377808f1d88e855ba62debf45db46d8"
+    },
+    {
+      "path": "ios/Resources/Assets.xcassets/TabTodayFill.imageset/Contents.json",
+      "sha256": "375b3aed0eeb5c8b187b5a0490a04a3d7d42eaa705e2d8b070a1171da7ee593b"
+    },
+    {
+      "path": "ios/Resources/Assets.xcassets/TabTodayFill.imageset/TabTodayFill.pdf",
+      "sha256": "8f4491cd59ab00801369d08ccfb78727c3afdb45dcd85c3be851e2fc5e847306"
+    },
+    {
+      "path": "ios/Resources/Assets.xcassets/audience-anime-v1.imageset/Contents.json",
+      "sha256": "cabcbf55c2474e37d808a8f4d274bc15a123279ea511974e56b93c052e21344a"
+    },
+    {
+      "path": "ios/Resources/Assets.xcassets/audience-anime-v1.imageset/audience-anime-v1@2x.jpg",
+      "sha256": "6fbeeba5dad7ac2f05397cceb075c36164f8d65899ff19dce87d73331df25360"
+    },
+    {
+      "path": "ios/Resources/Assets.xcassets/audience-anime-v1.imageset/audience-anime-v1@3x.jpg",
+      "sha256": "2303196e71afc19dd5dbd149be75d73960c13491af9d5ce3d4164add0218f5b4"
+    },
+    {
+      "path": "ios/Resources/Assets.xcassets/audience-both-v1.imageset/Contents.json",
+      "sha256": "1531d058a42ecf581e15502add38de2689be49f4c2f6515fd789fe0cea238462"
+    },
+    {
+      "path": "ios/Resources/Assets.xcassets/audience-both-v1.imageset/audience-both-v1@2x.jpg",
+      "sha256": "08b1eec98d69c9afd97b2a810b4c881e0e8c8b5acb1c3434a2bd3644bbf613b8"
+    },
+    {
+      "path": "ios/Resources/Assets.xcassets/audience-both-v1.imageset/audience-both-v1@3x.jpg",
+      "sha256": "e7b60648b42ee8398678c388aa7580f5831f344b35759f29e13046f7e8ad228f"
+    },
+    {
+      "path": "ios/Resources/Assets.xcassets/audience-tv-v1.imageset/Contents.json",
+      "sha256": "8793d7f952a78ec0a90f69a5dfe9340807fc479d04f32da9501cb2b74f3b6942"
+    },
+    {
+      "path": "ios/Resources/Assets.xcassets/audience-tv-v1.imageset/audience-tv-v1@2x.jpg",
+      "sha256": "b1f0c58d3387ecde1e5569887be925802e6d34e9df776aea123dea8aaf1df46e"
+    },
+    {
+      "path": "ios/Resources/Assets.xcassets/audience-tv-v1.imageset/audience-tv-v1@3x.jpg",
+      "sha256": "c8a7fe92b26bcba7192cc445fd78a07675bb6e1ad856ec2264da30a89e528ddd"
+    },
+    {
+      "path": "ios/Resources/Assets.xcassets/empty-home-flap-board-v1.imageset/Contents.json",
+      "sha256": "25c3bd86657973821b9c183f68e847d4b56b29f079c8dbf7554c8c94e3a6fd52"
+    },
+    {
+      "path": "ios/Resources/Assets.xcassets/empty-home-flap-board-v1.imageset/empty-home-flap-board-v1@2x.png",
+      "sha256": "e24ff055f5539f216b04d25bbec68569a46a0659592b37012e363529c06dd81e"
+    },
+    {
+      "path": "ios/Resources/Assets.xcassets/empty-home-flap-board-v1.imageset/empty-home-flap-board-v1@3x.png",
+      "sha256": "17d3c7dd26b01d6a25a450211cbcdc931a818e6c543b7850b37d6489aed3df17"
+    },
+    {
+      "path": "ios/Resources/Assets.xcassets/empty-library-episode-frames-v2.imageset/Contents.json",
+      "sha256": "2863e7a5c0ff310499896f88c3ac85f26b3f1af9618db5fbc0129a5d3f0210ff"
+    },
+    {
+      "path": "ios/Resources/Assets.xcassets/empty-library-episode-frames-v2.imageset/empty-library-episode-frames-v2@2x.png",
+      "sha256": "555a2dc8d782827d4f1a910878ef15c7789c51d0049888c0e3392bb6af407c77"
+    },
+    {
+      "path": "ios/Resources/Assets.xcassets/empty-library-episode-frames-v2.imageset/empty-library-episode-frames-v2@3x.png",
+      "sha256": "18b38ee2df21dd27588ed67afaf3bc51a42220bc7e8f848328338b689dd69588"
+    },
+    {
+      "path": "ios/Resources/Assets.xcassets/empty-saved-bookmark-frames-v1.imageset/Contents.json",
+      "sha256": "43dfa9997f66d8d18012ab5229ee34d37eed88167bf73c6eaa8e007cdbcab275"
+    },
+    {
+      "path": "ios/Resources/Assets.xcassets/empty-saved-bookmark-frames-v1.imageset/empty-saved-bookmark-frames-v1@2x.png",
+      "sha256": "0bc4079a0bcffb6e0f556fa3c948c088eeddbf5fb5b748be54fc52fbf98d67fb"
+    },
+    {
+      "path": "ios/Resources/Assets.xcassets/empty-saved-bookmark-frames-v1.imageset/empty-saved-bookmark-frames-v1@3x.png",
+      "sha256": "58c13c2bfc76654e06e91b71208a0210f1d8ad78e02c359f2e6451a63f121349"
+    },
+    {
+      "path": "ios/Resources/Assets.xcassets/empty-schedule-flap-calendar-v1.imageset/Contents.json",
+      "sha256": "0c666716b8d43cf0146bc27feddbadf6f819b414d1ea957b31a7c9152c7f6fca"
+    },
+    {
+      "path": "ios/Resources/Assets.xcassets/empty-schedule-flap-calendar-v1.imageset/empty-schedule-flap-calendar-v1@2x.png",
+      "sha256": "b0186d0310d236e66dc70d82bb38da3ffea91d37189704e4d824f1df57e37410"
+    },
+    {
+      "path": "ios/Resources/Assets.xcassets/empty-schedule-flap-calendar-v1.imageset/empty-schedule-flap-calendar-v1@3x.png",
+      "sha256": "0638c9f0ec6ac90d728deb0c08d2893c2d37a20a729f9943032e0d13c00ef23c"
+    },
+    {
+      "path": "ios/Resources/Assets.xcassets/first-run-alert-bell-v1.imageset/Contents.json",
+      "sha256": "fc88d345508082feec40a9d79a02441042c4312713c86f7368414e34420ea347"
+    },
+    {
+      "path": "ios/Resources/Assets.xcassets/first-run-alert-bell-v1.imageset/first-run-alert-bell-v1@2x.png",
+      "sha256": "31726ad6b9b0066933434f2c3864d5fc6fa3d1af1aa0cffcffcc5844790398ef"
+    },
+    {
+      "path": "ios/Resources/Assets.xcassets/first-run-alert-bell-v1.imageset/first-run-alert-bell-v1@3x.png",
+      "sha256": "527effb2c8ba37c181c539c83ddc88371cc7adecc111719099eaf25893fe3409"
+    },
+    {
+      "path": "ios/Resources/Assets.xcassets/login-cozy-backdrop-v3.imageset/Contents.json",
+      "sha256": "757a14c44d4142099fe2bd879ddfd7df7ad6ebd418a9edc3e6b88133fc11e0f8"
+    },
+    {
+      "path": "ios/Resources/Assets.xcassets/login-cozy-backdrop-v3.imageset/login-cozy-backdrop-v3@2x.jpg",
+      "sha256": "27c9a76bcc4a1578e82ac07f66343b54fb5114b5383500be7414ed53504c5b73"
+    },
+    {
+      "path": "ios/Resources/Assets.xcassets/login-cozy-backdrop-v3.imageset/login-cozy-backdrop-v3@3x.jpg",
+      "sha256": "ce1bdc328b9c39603f616b5af3ee27e61b4726925db7d3063f6fa9ab7f448b0d"
+    },
+    {
+      "path": "ios/Resources/Fonts/Outfit-Bold.ttf",
+      "sha256": "49dcdf653a004a2575b3de649f5e4c549d774fecddf317812330edd0ad70685a"
+    },
+    {
+      "path": "ios/Resources/Fonts/Outfit-Light.ttf",
+      "sha256": "643f64e9bfc140a9352ebf1b33958d5d5e0548ddc1bf7dc439e8da3df482473a"
+    },
+    {
+      "path": "ios/Resources/Fonts/Outfit-Medium.ttf",
+      "sha256": "9a9f465776e653cd6175661d844555e08684d432518f1d2c621bcb3006598f9c"
+    },
+    {
+      "path": "ios/Resources/Fonts/Outfit-Regular.ttf",
+      "sha256": "6a8c9be856a6b9e09c66615634904616152c9de5e44db343a3ced240479c586a"
+    },
+    {
+      "path": "ios/Resources/Fonts/Outfit-SemiBold.ttf",
+      "sha256": "8900df5726b5a6f23e723594f11d5ea27e695bd85c884f18d88ed080544fe205"
+    },
+    {
+      "path": "ios/Resources/Info.plist",
+      "sha256": "2c481b5471994bb328a0c7554a5f48cdaa7b3ddd310bbce77d7b9f5976b4942d"
+    },
+    {
+      "path": "ios/Resources/PrivacyInfo.xcprivacy",
+      "sha256": "1dbd4ccfcf2f16699db8750f0a41bcea77ff60d06c1ba082dd175fdf7e4211a0"
+    },
+    {
+      "path": "ios/Resources/QA-Info.plist",
+      "sha256": "930640dbe18053e26891b1fd15c6a21d75aed7968e7dd770ae97aab82b972cd3"
+    },
+    {
+      "path": "ios/Shared/AiringActivityAttributes.swift",
+      "sha256": "6184fc5d6c295331c9929029cf1cca8ff266edb99c4e8ecbdf0c32aea68c1400"
+    },
+    {
+      "path": "ios/Shared/AppGlyph.swift",
+      "sha256": "63fa585dd090603a04efd69ffb349bad9f5a7ba96d4b1a90fed00cb5681f0a0b"
+    },
+    {
+      "path": "ios/Shared/AppGlyphCatalog.swift",
+      "sha256": "4a366b9b3170804afdb9a89635c07b76c5e03e4dc2173c9f8ee8cd45a1b28ed3"
+    },
+    {
+      "path": "ios/Shared/AppSymbols.xcassets/Glyph-arrow-clockwise.imageset/Contents.json",
+      "sha256": "7b851f6586c549ed972083e3f74f66825cefd884d30a7e99005ac668bff521d1"
+    },
+    {
+      "path": "ios/Shared/AppSymbols.xcassets/Glyph-arrow-clockwise.imageset/Glyph-arrow-clockwise.pdf",
+      "sha256": "3ac1619baded8f0a8a3b218c4b4f05223fd242cf00b1904c95b462355ba7e3bd"
+    },
+    {
+      "path": "ios/Shared/AppSymbols.xcassets/Glyph-arrow-counterclockwise.imageset/Contents.json",
+      "sha256": "0a4e7c8d1310ff6272e090025aaf64d3a9084ea45831ed1d1b63c66eee8bc833"
+    },
+    {
+      "path": "ios/Shared/AppSymbols.xcassets/Glyph-arrow-counterclockwise.imageset/Glyph-arrow-counterclockwise.pdf",
+      "sha256": "3d57eeee0bddfe238e7cf7305a6fae2e33812fd2547b854e48bd9e3695275223"
+    },
+    {
+      "path": "ios/Shared/AppSymbols.xcassets/Glyph-arrow-down-right-and-arrow-up-left.imageset/Contents.json",
+      "sha256": "c4156f074addf27a9a89ad91270eb861822b1b4c7aaf83d7891bed244b529b9a"
+    },
+    {
+      "path": "ios/Shared/AppSymbols.xcassets/Glyph-arrow-down-right-and-arrow-up-left.imageset/Glyph-arrow-down-right-and-arrow-up-left.pdf",
+      "sha256": "940a88696891f54295f594fd24464c979fb8b0f1c9f9545bd465ef254b3e8a22"
+    },
+    {
+      "path": "ios/Shared/AppSymbols.xcassets/Glyph-arrow-left.imageset/Contents.json",
+      "sha256": "d2293f6fa836685f8e2d693e016b2b5f0e6c481ae08d4cb50c7817e9b7b3792b"
+    },
+    {
+      "path": "ios/Shared/AppSymbols.xcassets/Glyph-arrow-left.imageset/Glyph-arrow-left.pdf",
+      "sha256": "7a269ba3cd4797b46efd94c57a737699405163385576a911cf019cb5230a5c86"
+    },
+    {
+      "path": "ios/Shared/AppSymbols.xcassets/Glyph-arrow-triangle-2-circlepath.imageset/Contents.json",
+      "sha256": "b1deab5d018de10c38cbb1129c12526685dbadc379cd3c45593a461ca23ab242"
+    },
+    {
+      "path": "ios/Shared/AppSymbols.xcassets/Glyph-arrow-triangle-2-circlepath.imageset/Glyph-arrow-triangle-2-circlepath.pdf",
+      "sha256": "7152d25f4db3edf53488130fef62da9e891e29ae5816f40a96e014aff6502464"
+    },
+    {
+      "path": "ios/Shared/AppSymbols.xcassets/Glyph-arrow-up-backward.imageset/Contents.json",
+      "sha256": "326ceced8545435ce864277d823b920ed830f993288a10b9501967396b32f0e4"
+    },
+    {
+      "path": "ios/Shared/AppSymbols.xcassets/Glyph-arrow-up-backward.imageset/Glyph-arrow-up-backward.pdf",
+      "sha256": "60faf4402b3fb989f062145d1a93a0fca14e7e44c2c7523dbc8a6969885d3648"
+    },
+    {
+      "path": "ios/Shared/AppSymbols.xcassets/Glyph-arrow-up-forward.imageset/Contents.json",
+      "sha256": "448aa4a55427fdf60784424872f3f28416a731874dc356609c68b4c7feb3d01c"
+    },
+    {
+      "path": "ios/Shared/AppSymbols.xcassets/Glyph-arrow-up-forward.imageset/Glyph-arrow-up-forward.pdf",
+      "sha256": "cb9c61420f723ad654de5faef6e579b7489197e7a686f966548b46db9fe2ef8d"
+    },
+    {
+      "path": "ios/Shared/AppSymbols.xcassets/Glyph-arrow-up-left-and-arrow-down-right.imageset/Contents.json",
+      "sha256": "65b6e18778518fba5176d1d1b5f14fc90775fad9f4a402793e43016eb111a9b2"
+    },
+    {
+      "path": "ios/Shared/AppSymbols.xcassets/Glyph-arrow-up-left-and-arrow-down-right.imageset/Glyph-arrow-up-left-and-arrow-down-right.pdf",
+      "sha256": "b193e3d58ce8d79d883478a9b27fcdab70f819393c04d811d7ab87b4c9cae7c5"
+    },
+    {
+      "path": "ios/Shared/AppSymbols.xcassets/Glyph-arrow-up-right.imageset/Contents.json",
+      "sha256": "e1e33b3e2edbd557ffee27abfe7a20778243412c97a2f9eba3c6ad632e3b51dc"
+    },
+    {
+      "path": "ios/Shared/AppSymbols.xcassets/Glyph-arrow-up-right.imageset/Glyph-arrow-up-right.pdf",
+      "sha256": "cb9c61420f723ad654de5faef6e579b7489197e7a686f966548b46db9fe2ef8d"
+    },
+    {
+      "path": "ios/Shared/AppSymbols.xcassets/Glyph-arrow-up.imageset/Contents.json",
+      "sha256": "7eafcab82eb5c540287d17108ec8189c700a02089c8e14841952df02f07772a6"
+    },
+    {
+      "path": "ios/Shared/AppSymbols.xcassets/Glyph-arrow-up.imageset/Glyph-arrow-up.pdf",
+      "sha256": "81ff6152e20f052ab1d61b95561d3de97407270c3ad68cd77dceea67e139d577"
+    },
+    {
+      "path": "ios/Shared/AppSymbols.xcassets/Glyph-at.imageset/Contents.json",
+      "sha256": "57682fa1857e2430425e79090ef1937e963475bded189a5bac863f52eb994701"
+    },
+    {
+      "path": "ios/Shared/AppSymbols.xcassets/Glyph-at.imageset/Glyph-at.pdf",
+      "sha256": "0d2932f8802e1c705b89ddf4e2099f107111ee45007012ab6d55caa6d8558e06"
+    },
+    {
+      "path": "ios/Shared/AppSymbols.xcassets/Glyph-bell-badge.imageset/Contents.json",
+      "sha256": "6d6f8e3a81c6a807b1b74b4012f0c649e954f5782e86b77c4f9463cdbe960354"
+    },
+    {
+      "path": "ios/Shared/AppSymbols.xcassets/Glyph-bell-badge.imageset/Glyph-bell-badge.pdf",
+      "sha256": "dc0a16e4552427348854dbd4a0eec68692b368bcb00979c476662ff7c30542d0"
+    },
+    {
+      "path": "ios/Shared/AppSymbols.xcassets/Glyph-bell-fill.imageset/Contents.json",
+      "sha256": "c1efc626dffa9817b397ccccbfc8062ece043368a2ea8569183ffd74a7e36a96"
+    },
+    {
+      "path": "ios/Shared/AppSymbols.xcassets/Glyph-bell-fill.imageset/Glyph-bell-fill.pdf",
+      "sha256": "93bb4072fa28d66972a8f3b8590ae3854b19f9efcad35028c9413c77961dabc2"
+    },
+    {
+      "path": "ios/Shared/AppSymbols.xcassets/Glyph-bell.imageset/Contents.json",
+      "sha256": "7512b5ae410235c74ccf20d8afb452f362059547e4a0b5fa78bf56469f3ca1b6"
+    },
+    {
+      "path": "ios/Shared/AppSymbols.xcassets/Glyph-bell.imageset/Glyph-bell.pdf",
+      "sha256": "e5f94901e45f6a8296650d3c63d718e555942298d6e834c27953c80cca265311"
+    },
+    {
+      "path": "ios/Shared/AppSymbols.xcassets/Glyph-bookmark-fill.imageset/Contents.json",
+      "sha256": "bda2c8c5db23097aff1776a716662f00fba0e88877b7618b49952797e8106c4d"
+    },
+    {
+      "path": "ios/Shared/AppSymbols.xcassets/Glyph-bookmark-fill.imageset/Glyph-bookmark-fill.pdf",
+      "sha256": "b6e1c4b18d3238c75faff96910a6a24a76922d82acc05d5043b0ba15d15f7eec"
+    },
+    {
+      "path": "ios/Shared/AppSymbols.xcassets/Glyph-bookmark-slash.imageset/Contents.json",
+      "sha256": "ed6b626cef888ccc0b0ec66347727d8822aa4d37504bd088ddf68f71dbd7b5aa"
+    },
+    {
+      "path": "ios/Shared/AppSymbols.xcassets/Glyph-bookmark-slash.imageset/Glyph-bookmark-slash.pdf",
+      "sha256": "81f08ba0cf116c4a90dd20b15a5771075cd3407d935efe56c1b6c8069ded3682"
+    },
+    {
+      "path": "ios/Shared/AppSymbols.xcassets/Glyph-bookmark.imageset/Contents.json",
+      "sha256": "767c03d20da7b6f959c44f7bb449d8d11ef154f7b5b7970d168e789c3bb7f8d6"
+    },
+    {
+      "path": "ios/Shared/AppSymbols.xcassets/Glyph-bookmark.imageset/Glyph-bookmark.pdf",
+      "sha256": "55242c3f525e6921b134117c6a30eaae9030f7cec44a0b1049eb1ebd0181a988"
+    },
+    {
+      "path": "ios/Shared/AppSymbols.xcassets/Glyph-bubble-left-and-bubble-right.imageset/Contents.json",
+      "sha256": "5f1e92c0075b72e188b6532ee9f93a3035460f7cc7c47f4f90721de0d66aa8e4"
+    },
+    {
+      "path": "ios/Shared/AppSymbols.xcassets/Glyph-bubble-left-and-bubble-right.imageset/Glyph-bubble-left-and-bubble-right.pdf",
+      "sha256": "cc4944812d1ac6d4bfe91bacdea85a0b892e335fd1d74914721c877bbef4cb1b"
+    },
+    {
+      "path": "ios/Shared/AppSymbols.xcassets/Glyph-bubble-left-fill.imageset/Contents.json",
+      "sha256": "13b8f7b900ca9df17a3dca7e33ac3b51525014c7fe4a18e44607278ac0292a27"
+    },
+    {
+      "path": "ios/Shared/AppSymbols.xcassets/Glyph-bubble-left-fill.imageset/Glyph-bubble-left-fill.pdf",
+      "sha256": "9890bf338fa87cee20fa50c35511e964547bf4af097677b6c3dd4776ddd384ab"
+    },
+    {
+      "path": "ios/Shared/AppSymbols.xcassets/Glyph-bubble-left.imageset/Contents.json",
+      "sha256": "a1497d45356fe8f04c34cc41c5a8356bd24094f77789a4333476c80dee7c7c85"
+    },
+    {
+      "path": "ios/Shared/AppSymbols.xcassets/Glyph-bubble-left.imageset/Glyph-bubble-left.pdf",
+      "sha256": "90166c93f31a7e6935a6a14c0383aa3762a650926fbaf18bbeaea06d55ad405e"
+    },
+    {
+      "path": "ios/Shared/AppSymbols.xcassets/Glyph-calendar.imageset/Contents.json",
+      "sha256": "090349a836ad63654899e884be81715209efe3a8442ef54d025ece6f615f47f7"
+    },
+    {
+      "path": "ios/Shared/AppSymbols.xcassets/Glyph-calendar.imageset/Glyph-calendar.pdf",
+      "sha256": "8a940f183dc32157461b94b9ad3c86b23f3ffec1c420f6b1147475dd3e840004"
+    },
+    {
+      "path": "ios/Shared/AppSymbols.xcassets/Glyph-checkmark-circle-fill.imageset/Contents.json",
+      "sha256": "423afb4c7e42d875dabb2cb476c0655057239cea32c0e139274aa002cba564c9"
+    },
+    {
+      "path": "ios/Shared/AppSymbols.xcassets/Glyph-checkmark-circle-fill.imageset/Glyph-checkmark-circle-fill.pdf",
+      "sha256": "27839a8bbc0d043b634a99e603990c975b5d79aaa27afc051d01593a58abe483"
+    },
+    {
+      "path": "ios/Shared/AppSymbols.xcassets/Glyph-checkmark-circle.imageset/Contents.json",
+      "sha256": "bc81431fb87ac4dd764b1cd3fdc089075a8906669a61db62b522e5a999e37bb8"
+    },
+    {
+      "path": "ios/Shared/AppSymbols.xcassets/Glyph-checkmark-circle.imageset/Glyph-checkmark-circle.pdf",
+      "sha256": "0f8a5b7f96fba86d71348ad22694f432f5a1746f0c48cef8e8b4e91fddf337c4"
+    },
+    {
+      "path": "ios/Shared/AppSymbols.xcassets/Glyph-checkmark-seal-fill.imageset/Contents.json",
+      "sha256": "78270dc84954873ffdea3eeade85e0d48ee378f0e6dc5b479f22fc3dad00b3b4"
+    },
+    {
+      "path": "ios/Shared/AppSymbols.xcassets/Glyph-checkmark-seal-fill.imageset/Glyph-checkmark-seal-fill.pdf",
+      "sha256": "80bbb0076a153d90c8a36da9df4ba9b4d611aa401e656204481c96a0c667e4ea"
+    },
+    {
+      "path": "ios/Shared/AppSymbols.xcassets/Glyph-checkmark.imageset/Contents.json",
+      "sha256": "6586879eb6f20f6f55a26fd905dabee3900c15088fcadb2bd5e2f6b0b25c3c90"
+    },
+    {
+      "path": "ios/Shared/AppSymbols.xcassets/Glyph-checkmark.imageset/Glyph-checkmark.pdf",
+      "sha256": "e0d74d8fa813244461e01a669043f9755ce681e2ad6c3c99e1eeaa3ae52c68e4"
+    },
+    {
+      "path": "ios/Shared/AppSymbols.xcassets/Glyph-chevron-down.imageset/Contents.json",
+      "sha256": "d72e8199568578122a264e2446ace44d0acf5e808eefa666e303a3c6d4e6219c"
+    },
+    {
+      "path": "ios/Shared/AppSymbols.xcassets/Glyph-chevron-down.imageset/Glyph-chevron-down.pdf",
+      "sha256": "a94dca04958b90c66065d0f05737bc2f40f12d280c8fe9fb8e123b37e9b86313"
+    },
+    {
+      "path": "ios/Shared/AppSymbols.xcassets/Glyph-chevron-forward.imageset/Contents.json",
+      "sha256": "8bbbbe408f5e6ad1a0a2c149a7a604c473070ab836d0177a4f35cca86165accf"
+    },
+    {
+      "path": "ios/Shared/AppSymbols.xcassets/Glyph-chevron-forward.imageset/Glyph-chevron-forward.pdf",
+      "sha256": "b8f11333fe541bce344e1a09579fad9cc4045584f08c9690c6f5f0680da761c9"
+    },
+    {
+      "path": "ios/Shared/AppSymbols.xcassets/Glyph-chevron-left.imageset/Contents.json",
+      "sha256": "6acd4ee3a707aba91bc9e6c27536105c46581afa346c23e002fff57f7edef73b"
+    },
+    {
+      "path": "ios/Shared/AppSymbols.xcassets/Glyph-chevron-left.imageset/Glyph-chevron-left.pdf",
+      "sha256": "54b46ba841f599b04b2beba48a8d355d505fb1c0498dedd53351de1f1ac276d8"
+    },
+    {
+      "path": "ios/Shared/AppSymbols.xcassets/Glyph-chevron-right.imageset/Contents.json",
+      "sha256": "c5e51114170ee574cbd31c55be4a929a40e972549a817869ed26574486ce1912"
+    },
+    {
+      "path": "ios/Shared/AppSymbols.xcassets/Glyph-chevron-right.imageset/Glyph-chevron-right.pdf",
+      "sha256": "b8f11333fe541bce344e1a09579fad9cc4045584f08c9690c6f5f0680da761c9"
+    },
+    {
+      "path": "ios/Shared/AppSymbols.xcassets/Glyph-chevron-up-chevron-down.imageset/Contents.json",
+      "sha256": "0859cc600049a618dfb0eb1c0b2fe875b6e4d1e0949d3f2ed94933a221d3acc9"
+    },
+    {
+      "path": "ios/Shared/AppSymbols.xcassets/Glyph-chevron-up-chevron-down.imageset/Glyph-chevron-up-chevron-down.pdf",
+      "sha256": "ae15e9730e261b50ce947296b135beb70f5c603a19bd78a9f61386fd8b52243b"
+    },
+    {
+      "path": "ios/Shared/AppSymbols.xcassets/Glyph-chevron-up.imageset/Contents.json",
+      "sha256": "f43ac09fda320239756908f7b292cd321603830ab09a83d86043c7f4117334a0"
+    },
+    {
+      "path": "ios/Shared/AppSymbols.xcassets/Glyph-chevron-up.imageset/Glyph-chevron-up.pdf",
+      "sha256": "06777784039fc32382fb7be53fe1d646e77977ee9f61cdf0fc62d1ff0bdb1ddf"
+    },
+    {
+      "path": "ios/Shared/AppSymbols.xcassets/Glyph-circle-fill.imageset/Contents.json",
+      "sha256": "1d2c5f365e2ee544d760cfae666ce2eda29274824e790c3a73888266e3b52b7f"
+    },
+    {
+      "path": "ios/Shared/AppSymbols.xcassets/Glyph-circle-fill.imageset/Glyph-circle-fill.pdf",
+      "sha256": "9716004a3126e5a2bb1aed4c2b6940cbcb6db1e3eb37d959d3bf1dcb8f774b6d"
+    },
+    {
+      "path": "ios/Shared/AppSymbols.xcassets/Glyph-circle.imageset/Contents.json",
+      "sha256": "feca04cc54dd4e63bc6a48c9b421af5b5d6a1190138bf1419207e77e97e46842"
+    },
+    {
+      "path": "ios/Shared/AppSymbols.xcassets/Glyph-circle.imageset/Glyph-circle.pdf",
+      "sha256": "ebc1b2479ac04a1a7f38d23301d5f546b2ef63ac78370eec6cd69c6733d0c6b4"
+    },
+    {
+      "path": "ios/Shared/AppSymbols.xcassets/Glyph-clock-arrow-circlepath.imageset/Contents.json",
+      "sha256": "24a83b880b06a83217882a5cc68ca854a86cb27cd4143ea11f4fc6b72bd2fa61"
+    },
+    {
+      "path": "ios/Shared/AppSymbols.xcassets/Glyph-clock-arrow-circlepath.imageset/Glyph-clock-arrow-circlepath.pdf",
+      "sha256": "ae69b501441644f9df286edf70b5758df8c173529ed987e1d017efa770e692b3"
+    },
+    {
+      "path": "ios/Shared/AppSymbols.xcassets/Glyph-clock.imageset/Contents.json",
+      "sha256": "d894f81212a4423062e09d380138ad42f7b77dcdaeeb057bed5c4c6b84308ce1"
+    },
+    {
+      "path": "ios/Shared/AppSymbols.xcassets/Glyph-clock.imageset/Glyph-clock.pdf",
+      "sha256": "caaa0e4aabfb1ac704b8905945f3299d9dc175b738515bab0871bc7758f7b6c7"
+    },
+    {
+      "path": "ios/Shared/AppSymbols.xcassets/Glyph-curlybraces.imageset/Contents.json",
+      "sha256": "a9cf5104564262b6b9c884fa07a7f416c5d2b6ae8a3807a4b5ac9966caea456a"
+    },
+    {
+      "path": "ios/Shared/AppSymbols.xcassets/Glyph-curlybraces.imageset/Glyph-curlybraces.pdf",
+      "sha256": "3c3f53129790d7f7481d48ecb301c837e29e0809793f5889b20ef129d28c0edc"
+    },
+    {
+      "path": "ios/Shared/AppSymbols.xcassets/Glyph-doc-on-doc.imageset/Contents.json",
+      "sha256": "3111d4333f60df878ba49b2fd14d43b6b48a6a12a6a8af25c013e52ab95a75dc"
+    },
+    {
+      "path": "ios/Shared/AppSymbols.xcassets/Glyph-doc-on-doc.imageset/Glyph-doc-on-doc.pdf",
+      "sha256": "9c0f6114cb5014f6846cf8eef0c7356e16e0975884fcc3a2844a85fb0e037f74"
+    },
+    {
+      "path": "ios/Shared/AppSymbols.xcassets/Glyph-doc-text.imageset/Contents.json",
+      "sha256": "a0bc280d2af27936976ae58aa67abacbc82f9f335f66e1ac895421664205152a"
+    },
+    {
+      "path": "ios/Shared/AppSymbols.xcassets/Glyph-doc-text.imageset/Glyph-doc-text.pdf",
+      "sha256": "65bd44991e974924fb2b3c824c85043b8831e0ca60f573793921ad8982ce2937"
+    },
+    {
+      "path": "ios/Shared/AppSymbols.xcassets/Glyph-dot-radiowaves-left-and-right.imageset/Contents.json",
+      "sha256": "a198860771ea9fcaedb0c9123aba73d24e587f280e955d497230f7009b1f713f"
+    },
+    {
+      "path": "ios/Shared/AppSymbols.xcassets/Glyph-dot-radiowaves-left-and-right.imageset/Glyph-dot-radiowaves-left-and-right.pdf",
+      "sha256": "8f2038869c1b50dd2852708fd6c9b17181d63ca3a42e87ec934711ac552c2727"
+    },
+    {
+      "path": "ios/Shared/AppSymbols.xcassets/Glyph-ellipsis.imageset/Contents.json",
+      "sha256": "50d4c3d894c81cf3f52bb9b7709f319dc65e5ebc1533df76cffb702e9131c53a"
+    },
+    {
+      "path": "ios/Shared/AppSymbols.xcassets/Glyph-ellipsis.imageset/Glyph-ellipsis.pdf",
+      "sha256": "78b66f5827127edaf9a6efc7fabce4429ff434fa2f9c984d3a53d5f718c51def"
+    },
+    {
+      "path": "ios/Shared/AppSymbols.xcassets/Glyph-envelope.imageset/Contents.json",
+      "sha256": "8bb1b603913201061b4c7b646116658e7ed145e2becb63865d3209b5bf4f40c2"
+    },
+    {
+      "path": "ios/Shared/AppSymbols.xcassets/Glyph-envelope.imageset/Glyph-envelope.pdf",
+      "sha256": "e80ddac3c2c0b0ebfaadc14cd26bf21fd27aafa0d7d07ea9e1c7911d05c93eb4"
+    },
+    {
+      "path": "ios/Shared/AppSymbols.xcassets/Glyph-exclamationmark-circle.imageset/Contents.json",
+      "sha256": "5a030bfbd642a98c305f66f02a2d256a3233e057fb00e11abb2e12127bc14d79"
+    },
+    {
+      "path": "ios/Shared/AppSymbols.xcassets/Glyph-exclamationmark-circle.imageset/Glyph-exclamationmark-circle.pdf",
+      "sha256": "7a2ab75738a4bee6f4d837f0582c6592afc1852229bee58e599c24587ad01df9"
+    },
+    {
+      "path": "ios/Shared/AppSymbols.xcassets/Glyph-exclamationmark-triangle-fill.imageset/Contents.json",
+      "sha256": "d1e08369dc927ce05dd15d557123fd52274593c07c06acc893b4dc44e88819a2"
+    },
+    {
+      "path": "ios/Shared/AppSymbols.xcassets/Glyph-exclamationmark-triangle-fill.imageset/Glyph-exclamationmark-triangle-fill.pdf",
+      "sha256": "d25dd971501131cee8d2154d6ae84545b5b00b143cd65eefc2aa995c90a9aee9"
+    },
+    {
+      "path": "ios/Shared/AppSymbols.xcassets/Glyph-eye-slash-fill.imageset/Contents.json",
+      "sha256": "1e082f2b2653a33650663fa0282cc33d8e0f64b1beabdd1a2d3229c9ae95d2e8"
+    },
+    {
+      "path": "ios/Shared/AppSymbols.xcassets/Glyph-eye-slash-fill.imageset/Glyph-eye-slash-fill.pdf",
+      "sha256": "43b37172ae77e92e0e8f89ef2f0b9e6077d42dbe658b94f92bad7bdec6f9a115"
+    },
+    {
+      "path": "ios/Shared/AppSymbols.xcassets/Glyph-eye-slash.imageset/Contents.json",
+      "sha256": "e75c0bfb1040d74113621dd1ee427b1038b753ceae47083a23d9301c00cc45a4"
+    },
+    {
+      "path": "ios/Shared/AppSymbols.xcassets/Glyph-eye-slash.imageset/Glyph-eye-slash.pdf",
+      "sha256": "43b37172ae77e92e0e8f89ef2f0b9e6077d42dbe658b94f92bad7bdec6f9a115"
+    },
+    {
+      "path": "ios/Shared/AppSymbols.xcassets/Glyph-eye.imageset/Contents.json",
+      "sha256": "4ae9367915d1a1e8f76ef0a0e8234f81ac70d1ce8d582287473345bfb9bb479f"
+    },
+    {
+      "path": "ios/Shared/AppSymbols.xcassets/Glyph-eye.imageset/Glyph-eye.pdf",
+      "sha256": "fae963adae7130114fa5e3d4be842c3e320b78ef068f6373c66e9287909b7137"
+    },
+    {
+      "path": "ios/Shared/AppSymbols.xcassets/Glyph-flag-fill.imageset/Contents.json",
+      "sha256": "0d8520172b63f4efd4b61fd18701f7dc3f99c6e95f8bbb299da9ea864492f7cd"
+    },
+    {
+      "path": "ios/Shared/AppSymbols.xcassets/Glyph-flag-fill.imageset/Glyph-flag-fill.pdf",
+      "sha256": "3b935030890e78f20ef8d69d2ebfb01454bfa82c340e4a9e148b46b58653f65f"
+    },
+    {
+      "path": "ios/Shared/AppSymbols.xcassets/Glyph-flag.imageset/Contents.json",
+      "sha256": "54cf1d1b352ebbf7f6098acd01dc48698254938faa1510e7211118a53779bda7"
+    },
+    {
+      "path": "ios/Shared/AppSymbols.xcassets/Glyph-flag.imageset/Glyph-flag.pdf",
+      "sha256": "8086f569ce961c13214792fd257651c817441a4e3b6bbb3e45c39c1039ca05da"
+    },
+    {
+      "path": "ios/Shared/AppSymbols.xcassets/Glyph-globe.imageset/Contents.json",
+      "sha256": "61e3471eaf2465f1e93e2b380a60f33d57836fe315092e29672edcd258b7ab37"
+    },
+    {
+      "path": "ios/Shared/AppSymbols.xcassets/Glyph-globe.imageset/Glyph-globe.pdf",
+      "sha256": "54325bce304efae5cf73dd6c81c3f9ceb90e8e1cb66dee0f205a995d6681fcf8"
+    },
+    {
+      "path": "ios/Shared/AppSymbols.xcassets/Glyph-gobackward-10.imageset/Contents.json",
+      "sha256": "8bacde8a835504796ae162440923caaa33856223840f26e671dbabcd23cba9ae"
+    },
+    {
+      "path": "ios/Shared/AppSymbols.xcassets/Glyph-gobackward-10.imageset/Glyph-gobackward-10.pdf",
+      "sha256": "c6b05a78f4f5bceafc3b7bf423b5ea4c76704f8209f484e26f578373b44161a6"
+    },
+    {
+      "path": "ios/Shared/AppSymbols.xcassets/Glyph-goforward-10.imageset/Contents.json",
+      "sha256": "824d685ecd0febbe8d8ad9e0f6ba435360528b48070df7174e6b855b1d2e2d25"
+    },
+    {
+      "path": "ios/Shared/AppSymbols.xcassets/Glyph-goforward-10.imageset/Glyph-goforward-10.pdf",
+      "sha256": "4767324a3bf65b8c8b6c46a2267bb0c415c77059ea514934efae383b25f357a4"
+    },
+    {
+      "path": "ios/Shared/AppSymbols.xcassets/Glyph-hand-raised.imageset/Contents.json",
+      "sha256": "85e6afb090c902166e606bb24464999b4052f94408444530d53c1fa522323c10"
+    },
+    {
+      "path": "ios/Shared/AppSymbols.xcassets/Glyph-hand-raised.imageset/Glyph-hand-raised.pdf",
+      "sha256": "c47581f9bf6befb8672cb93c4b58623471e9426de099ba760d42a27d4203defa"
+    },
+    {
+      "path": "ios/Shared/AppSymbols.xcassets/Glyph-hand-tap.imageset/Contents.json",
+      "sha256": "ab90b3bd7598d49d77315c42132b7bdb20a3718a3375d1a10e767b9250de24cf"
+    },
+    {
+      "path": "ios/Shared/AppSymbols.xcassets/Glyph-hand-tap.imageset/Glyph-hand-tap.pdf",
+      "sha256": "b59fdebc35ba8d1b8233dde67e1016b2488dc27266fe55be0c364bf4115cfda9"
+    },
+    {
+      "path": "ios/Shared/AppSymbols.xcassets/Glyph-hand-thumbsdown.imageset/Contents.json",
+      "sha256": "4f81489417e01e28f1f584ffda66717e2dca64098c567d27be0e99d13d479599"
+    },
+    {
+      "path": "ios/Shared/AppSymbols.xcassets/Glyph-hand-thumbsdown.imageset/Glyph-hand-thumbsdown.pdf",
+      "sha256": "ec485fd10f5c8a36f36e1e344336a6bbf9ea543baf1736a4a011b9a31f2d47ba"
+    },
+    {
+      "path": "ios/Shared/AppSymbols.xcassets/Glyph-heart-fill.imageset/Contents.json",
+      "sha256": "ab85d82ab9e2568f494d3082e9e0214bdfce2b350f7af352e0e88eb81514a927"
+    },
+    {
+      "path": "ios/Shared/AppSymbols.xcassets/Glyph-heart-fill.imageset/Glyph-heart-fill.pdf",
+      "sha256": "d35f0f5ccd12b27eb241b28ce7daf8f61ffa32c40921a65f5f4f685d52cb7420"
+    },
+    {
+      "path": "ios/Shared/AppSymbols.xcassets/Glyph-heart.imageset/Contents.json",
+      "sha256": "91ec88ce6ec16a3edefc819e92c662dbaa7372989a490573e2135acc0c32bcbe"
+    },
+    {
+      "path": "ios/Shared/AppSymbols.xcassets/Glyph-heart.imageset/Glyph-heart.pdf",
+      "sha256": "fca66dcbd83586be55ab55a61ada5f0151b2750299598887a0035c29c839190a"
+    },
+    {
+      "path": "ios/Shared/AppSymbols.xcassets/Glyph-info-circle.imageset/Contents.json",
+      "sha256": "cac8fa0c3880bd2e2c634f1e8d26300ebab6eae7f4297f122597c181354ce3d3"
+    },
+    {
+      "path": "ios/Shared/AppSymbols.xcassets/Glyph-info-circle.imageset/Glyph-info-circle.pdf",
+      "sha256": "f27cdc632878ea462887a40e7b6e916994b3ef27a900b5ccf0cf1a10b41462cb"
+    },
+    {
+      "path": "ios/Shared/AppSymbols.xcassets/Glyph-ladybug.imageset/Contents.json",
+      "sha256": "c774200e3961d7915449ed1aa9ec2345d31d989d6208ec8b00069490b9434c30"
+    },
+    {
+      "path": "ios/Shared/AppSymbols.xcassets/Glyph-ladybug.imageset/Glyph-ladybug.pdf",
+      "sha256": "3170926f8a777438ea2f32a8271f23257f3749587b24d7eca4575b7dccb8f1e8"
+    },
+    {
+      "path": "ios/Shared/AppSymbols.xcassets/Glyph-line-3-horizontal-decrease-circle-fill.imageset/Contents.json",
+      "sha256": "4ec0d9ac2f0fb63b00d438b9a1c31059dd77aad1fdee2854957aa8ad65e816ce"
+    },
+    {
+      "path": "ios/Shared/AppSymbols.xcassets/Glyph-line-3-horizontal-decrease-circle-fill.imageset/Glyph-line-3-horizontal-decrease-circle-fill.pdf",
+      "sha256": "39355e003f381de92992ade7155502089cbc2e749b2eef3f3945eaf20d02618f"
+    },
+    {
+      "path": "ios/Shared/AppSymbols.xcassets/Glyph-line-3-horizontal-decrease.imageset/Contents.json",
+      "sha256": "d603a3dc76ac31d1ef3066bea7b4a855cad197a47cf141657114ccada843a727"
+    },
+    {
+      "path": "ios/Shared/AppSymbols.xcassets/Glyph-line-3-horizontal-decrease.imageset/Glyph-line-3-horizontal-decrease.pdf",
+      "sha256": "38494f823c6ce9932a47af3b1664022a3af1412caf1c742b12ad21dd6476cb21"
+    },
+    {
+      "path": "ios/Shared/AppSymbols.xcassets/Glyph-link.imageset/Contents.json",
+      "sha256": "76c771ee7df731344ff98e3fda65b79f938ca7c8224ab598463eb02b2e014197"
+    },
+    {
+      "path": "ios/Shared/AppSymbols.xcassets/Glyph-link.imageset/Glyph-link.pdf",
+      "sha256": "5a3168f1c054e35530c56209137072b13aeff0fce913c37a8fe2be67c54d0dc4"
+    },
+    {
+      "path": "ios/Shared/AppSymbols.xcassets/Glyph-lock-fill.imageset/Contents.json",
+      "sha256": "967ae60e37fe219993e06889ca25cc44e285cf7e5c255f30b6a773a4fd3e8854"
+    },
+    {
+      "path": "ios/Shared/AppSymbols.xcassets/Glyph-lock-fill.imageset/Glyph-lock-fill.pdf",
+      "sha256": "8e5c2b6fb863a1ed48f1c232ba96c22d2b4a7a6a8d9d633ebde96da6e026b5e5"
+    },
+    {
+      "path": "ios/Shared/AppSymbols.xcassets/Glyph-magnifyingglass.imageset/Contents.json",
+      "sha256": "72d1956763e1b62ccd3eeabb2a8c801d38ed7c9ef0fdbb8db12ce3640d953850"
+    },
+    {
+      "path": "ios/Shared/AppSymbols.xcassets/Glyph-magnifyingglass.imageset/Glyph-magnifyingglass.pdf",
+      "sha256": "1c15a70f4bb71da1c668ac7e050be13710be37c29dab75ca7fefbf246d7e0a2d"
+    },
+    {
+      "path": "ios/Shared/AppSymbols.xcassets/Glyph-minus-circle.imageset/Contents.json",
+      "sha256": "18417ef067e9d03ffbb8466c243173e7bef70f924207cca4d1bb40422bfa460d"
+    },
+    {
+      "path": "ios/Shared/AppSymbols.xcassets/Glyph-minus-circle.imageset/Glyph-minus-circle.pdf",
+      "sha256": "94f6c9f141ac3f4a6a7d0db98645060480fb60444a1fa62f51d2d4b2b315fea9"
+    },
+    {
+      "path": "ios/Shared/AppSymbols.xcassets/Glyph-minus.imageset/Contents.json",
+      "sha256": "8db1c59df8b3da6c3ea2e1b5d238f6bf33edcfcc0fe64f6da97f7609a74ecfb5"
+    },
+    {
+      "path": "ios/Shared/AppSymbols.xcassets/Glyph-minus.imageset/Glyph-minus.pdf",
+      "sha256": "e7b9b8c5ccf25ac86056e3064b77f33c2a3e6944216995a539f1e99a02ba88d7"
+    },
+    {
+      "path": "ios/Shared/AppSymbols.xcassets/Glyph-newspaper.imageset/Contents.json",
+      "sha256": "9e802078f19de54422487d75da93d2ddb569e075c9f1b412d1b6e40051136455"
+    },
+    {
+      "path": "ios/Shared/AppSymbols.xcassets/Glyph-newspaper.imageset/Glyph-newspaper.pdf",
+      "sha256": "f80625a09eb47786664c685835024b6d83de3639999d5f655d9a53b5d7556d3b"
+    },
+    {
+      "path": "ios/Shared/AppSymbols.xcassets/Glyph-number-circle.imageset/Contents.json",
+      "sha256": "b08b73b30058fccb7b2f1b65257d4f0cbec0a903e0045d75ce8d4221a38d617e"
+    },
+    {
+      "path": "ios/Shared/AppSymbols.xcassets/Glyph-number-circle.imageset/Glyph-number-circle.pdf",
+      "sha256": "e5159d7f25609454d99b687321977b613df8a82c25fbc7e54d8446cd81bd28f2"
+    },
+    {
+      "path": "ios/Shared/AppSymbols.xcassets/Glyph-paperplane.imageset/Contents.json",
+      "sha256": "4bd3f3a9c960de783412e2026414359a226583cca7231702c13f18f8abb6a508"
+    },
+    {
+      "path": "ios/Shared/AppSymbols.xcassets/Glyph-paperplane.imageset/Glyph-paperplane.pdf",
+      "sha256": "67095bcf63a9679549b56d6d4c0b56091c2b4255d0985f29f2c87450265d37a9"
+    },
+    {
+      "path": "ios/Shared/AppSymbols.xcassets/Glyph-pause-circle.imageset/Contents.json",
+      "sha256": "9a8ae2beff1e9154543f83a1ce4cb6ee40de81bf07df8c5ce24617510b2a5a8f"
+    },
+    {
+      "path": "ios/Shared/AppSymbols.xcassets/Glyph-pause-circle.imageset/Glyph-pause-circle.pdf",
+      "sha256": "6bef9dd3a82ee94c88e92c7fdc5c66c57307fa4b24ca9c23c70e2d89be134688"
+    },
+    {
+      "path": "ios/Shared/AppSymbols.xcassets/Glyph-pause-fill.imageset/Contents.json",
+      "sha256": "4f670cc14a49199e4a28c8fcf0ca0fc6a1cdb8371bd1285da0be5a013196cb72"
+    },
+    {
+      "path": "ios/Shared/AppSymbols.xcassets/Glyph-pause-fill.imageset/Glyph-pause-fill.pdf",
+      "sha256": "a2839ead5a866084fbe3b78bf5ce658c5aba2262d0892371da20e86d9d30d08d"
+    },
+    {
+      "path": "ios/Shared/AppSymbols.xcassets/Glyph-person-2-fill.imageset/Contents.json",
+      "sha256": "219c3b01a1774fbfcf2dfd31a16c53b63fce6e9e1ca679704a550f451de77df7"
+    },
+    {
+      "path": "ios/Shared/AppSymbols.xcassets/Glyph-person-2-fill.imageset/Glyph-person-2-fill.pdf",
+      "sha256": "8344e89d04c02d533053dd756addd1d2fd5f46cb86b09b6fd0e4922b30345326"
+    },
+    {
+      "path": "ios/Shared/AppSymbols.xcassets/Glyph-person-crop-circle-badge-exclamationmark.imageset/Contents.json",
+      "sha256": "b6beadf93783ae3b9832a1af5afe626b8c535cacdd0e06d1ee05d949ec4e872c"
+    },
+    {
+      "path": "ios/Shared/AppSymbols.xcassets/Glyph-person-crop-circle-badge-exclamationmark.imageset/Glyph-person-crop-circle-badge-exclamationmark.pdf",
+      "sha256": "b0dc8e56fe8d3a9a7edc620f0c70c760d639693e8a2b27406df20d15b9f5c2c6"
+    },
+    {
+      "path": "ios/Shared/AppSymbols.xcassets/Glyph-person-crop-circle-badge-xmark.imageset/Contents.json",
+      "sha256": "9a1d96e9d9790932c7e4e6a191fa32d6cdc5aa7d9a257ccf6ec2e05d140e5997"
+    },
+    {
+      "path": "ios/Shared/AppSymbols.xcassets/Glyph-person-crop-circle-badge-xmark.imageset/Glyph-person-crop-circle-badge-xmark.pdf",
+      "sha256": "3cc9be4f753e1853d70364c6506498711a160a16bcd297a8d1f682cfb76cc7e0"
+    },
+    {
+      "path": "ios/Shared/AppSymbols.xcassets/Glyph-person-fill.imageset/Contents.json",
+      "sha256": "498c4bcba1e0920fc1d74f6d83cdd02af28849f5d77adaf4e7b3ee8dabe2ec68"
+    },
+    {
+      "path": "ios/Shared/AppSymbols.xcassets/Glyph-person-fill.imageset/Glyph-person-fill.pdf",
+      "sha256": "5cef26d2834446a26a69a8949e81203ab61665fa4a4f1e180cd25e1e72bd9924"
+    },
+    {
+      "path": "ios/Shared/AppSymbols.xcassets/Glyph-photo.imageset/Contents.json",
+      "sha256": "e4b7688332c474bd6218db3fb924343083ed884ff0e2cf1458bc822bb395a557"
+    },
+    {
+      "path": "ios/Shared/AppSymbols.xcassets/Glyph-photo.imageset/Glyph-photo.pdf",
+      "sha256": "8eda7884964fa901f74fee0cce6b15802b358ab8f73130b98321be9bdaba4b11"
+    },
+    {
+      "path": "ios/Shared/AppSymbols.xcassets/Glyph-pin-fill.imageset/Contents.json",
+      "sha256": "d4d4b592770351ddbe1d8ad85e3d072e4f387b146e6a9bfec469c0c961378e4e"
+    },
+    {
+      "path": "ios/Shared/AppSymbols.xcassets/Glyph-pin-fill.imageset/Glyph-pin-fill.pdf",
+      "sha256": "5174cfa2e52fc124e668ae80c0ffe66d0fd0a2db2eaae347b8de8d8bde118452"
+    },
+    {
+      "path": "ios/Shared/AppSymbols.xcassets/Glyph-play-circle.imageset/Contents.json",
+      "sha256": "e3de073be4b55a4107b52819f9137a628c4a3a76d09a1a8f47c459e2853b9638"
+    },
+    {
+      "path": "ios/Shared/AppSymbols.xcassets/Glyph-play-circle.imageset/Glyph-play-circle.pdf",
+      "sha256": "dc20e5603c018733f76e2fe98593c2e5780bcefaccd415f163904a05c6fde766"
+    },
+    {
+      "path": "ios/Shared/AppSymbols.xcassets/Glyph-play-fill.imageset/Contents.json",
+      "sha256": "c834df9ef7dd1bee011edd175d44b57c725a5104695ac4179578c71b4bebdf4b"
+    },
+    {
+      "path": "ios/Shared/AppSymbols.xcassets/Glyph-play-fill.imageset/Glyph-play-fill.pdf",
+      "sha256": "d8d06543fa03e279bdef1f5b638b6e05d64d4610ba3cea98697edba60d5156dd"
+    },
+    {
+      "path": "ios/Shared/AppSymbols.xcassets/Glyph-play-rectangle-on-rectangle.imageset/Contents.json",
+      "sha256": "7c0f587fbf697ba54373719b2c9e3369681ee7d6152ee3c5fac1ea37a17858c6"
+    },
+    {
+      "path": "ios/Shared/AppSymbols.xcassets/Glyph-play-rectangle-on-rectangle.imageset/Glyph-play-rectangle-on-rectangle.pdf",
+      "sha256": "74a7a4f93f787f66ebf517a03bc41df18947d2cdc203becdae629412346c1801"
+    },
+    {
+      "path": "ios/Shared/AppSymbols.xcassets/Glyph-play-rectangle.imageset/Contents.json",
+      "sha256": "b23337624eaa5007f18ff997c36856e37006fca226a056e35ad214a5e7120fc8"
+    },
+    {
+      "path": "ios/Shared/AppSymbols.xcassets/Glyph-play-rectangle.imageset/Glyph-play-rectangle.pdf",
+      "sha256": "47790e7eebad5e09fe1b85dd9ac7417962838666efe7de9e3b4ea5a047f9209b"
+    },
+    {
+      "path": "ios/Shared/AppSymbols.xcassets/Glyph-plus-circle.imageset/Contents.json",
+      "sha256": "9f4188a30fcdb1e3a0755eac1105742b9125ce85d6ef69680a0d966d295be76b"
+    },
+    {
+      "path": "ios/Shared/AppSymbols.xcassets/Glyph-plus-circle.imageset/Glyph-plus-circle.pdf",
+      "sha256": "d9d5f445f9c1dda04713d3d0799e34e0699f3ef50b9683ca4cf0e11563f66e40"
+    },
+    {
+      "path": "ios/Shared/AppSymbols.xcassets/Glyph-plus.imageset/Contents.json",
+      "sha256": "0cb342d18c51e0ee2c5351612ca1c6cee6501a606cd6a383e1e0e706b057449f"
+    },
+    {
+      "path": "ios/Shared/AppSymbols.xcassets/Glyph-plus.imageset/Glyph-plus.pdf",
+      "sha256": "b4fed37e6f957efb6d4bcaca1786d909cad5d1dffb69b05bd9e01adc488b5f36"
+    },
+    {
+      "path": "ios/Shared/AppSymbols.xcassets/Glyph-questionmark-bubble.imageset/Contents.json",
+      "sha256": "ca85862e8ff8dcfd76eb33ed2ce4c06d5dc61b6c2ca32816f7b807b1e888886f"
+    },
+    {
+      "path": "ios/Shared/AppSymbols.xcassets/Glyph-questionmark-bubble.imageset/Glyph-questionmark-bubble.pdf",
+      "sha256": "e35e0299076cd8f9da404ae5141c48f5f905eb98f574eaf07a7b5dc1969e4427"
+    },
+    {
+      "path": "ios/Shared/AppSymbols.xcassets/Glyph-rectangle-portrait-and-arrow-right.imageset/Contents.json",
+      "sha256": "39335654ec56616a565e5c3b8b3d98219f1fe67f6aef2f1f39ba545e18cc2e18"
+    },
+    {
+      "path": "ios/Shared/AppSymbols.xcassets/Glyph-rectangle-portrait-and-arrow-right.imageset/Glyph-rectangle-portrait-and-arrow-right.pdf",
+      "sha256": "5c60f69d0d45ce105b67a2c7898b570e46894f7c859d4083a39ac6bc5cae8ef2"
+    },
+    {
+      "path": "ios/Shared/AppSymbols.xcassets/Glyph-rectangle-stack.imageset/Contents.json",
+      "sha256": "1347275487c58b322122f5744b1c131be0eb6af099ac204ad72cfb353a4a3bab"
+    },
+    {
+      "path": "ios/Shared/AppSymbols.xcassets/Glyph-rectangle-stack.imageset/Glyph-rectangle-stack.pdf",
+      "sha256": "bcda9edbe213676ce6c8602a017a35012709761f2d314151b997dcd3bcb5a1d6"
+    },
+    {
+      "path": "ios/Shared/AppSymbols.xcassets/Glyph-safari.imageset/Contents.json",
+      "sha256": "ed25a832c476172590306475823a618de673b37ac214bc7bece20b5f5306f05c"
+    },
+    {
+      "path": "ios/Shared/AppSymbols.xcassets/Glyph-safari.imageset/Glyph-safari.pdf",
+      "sha256": "7948f116f0b77024677c6304892547c1b34dab3722f4e5679ce1b0225de0e61a"
+    },
+    {
+      "path": "ios/Shared/AppSymbols.xcassets/Glyph-slider-horizontal-3.imageset/Contents.json",
+      "sha256": "14d505ff937a7c3de6eccedc018babe72e10af09d2ee229c46759902d0e78929"
+    },
+    {
+      "path": "ios/Shared/AppSymbols.xcassets/Glyph-slider-horizontal-3.imageset/Glyph-slider-horizontal-3.pdf",
+      "sha256": "3540952d17aeef65f9de4b85f0d6965428be756332050be29070d1e272354be5"
+    },
+    {
+      "path": "ios/Shared/AppSymbols.xcassets/Glyph-speaker-slash-fill.imageset/Contents.json",
+      "sha256": "34f36b7bdd6e7f7679c9311354637a4797275cfe1593ad2c44db6b761db089bc"
+    },
+    {
+      "path": "ios/Shared/AppSymbols.xcassets/Glyph-speaker-slash-fill.imageset/Glyph-speaker-slash-fill.pdf",
+      "sha256": "6746e9e54b8db4acc18f371f880050c0a6aef31e75c27fe7df5213f43abce044"
+    },
+    {
+      "path": "ios/Shared/AppSymbols.xcassets/Glyph-speaker-slash.imageset/Contents.json",
+      "sha256": "8f8458b331ddf9cf77ccff8982f5a3465964961ac50f867d10607c1c03a2efa2"
+    },
+    {
+      "path": "ios/Shared/AppSymbols.xcassets/Glyph-speaker-slash.imageset/Glyph-speaker-slash.pdf",
+      "sha256": "6746e9e54b8db4acc18f371f880050c0a6aef31e75c27fe7df5213f43abce044"
+    },
+    {
+      "path": "ios/Shared/AppSymbols.xcassets/Glyph-speaker-wave-2-fill.imageset/Contents.json",
+      "sha256": "c263ede1ed2939a300ed7fd3b6d92200df6b28f1038d2581d2e4ae94dc1ccda9"
+    },
+    {
+      "path": "ios/Shared/AppSymbols.xcassets/Glyph-speaker-wave-2-fill.imageset/Glyph-speaker-wave-2-fill.pdf",
+      "sha256": "f29ab6c77b85540c8bd9e13b75ccc7b7086dd6bcff68272e369257a6a0d72b3c"
+    },
+    {
+      "path": "ios/Shared/AppSymbols.xcassets/Glyph-speaker-wave-2.imageset/Contents.json",
+      "sha256": "f7b0b875163285149b84181193860dd9b52c7bbb0753757ac1adb8c0bd8060af"
+    },
+    {
+      "path": "ios/Shared/AppSymbols.xcassets/Glyph-speaker-wave-2.imageset/Glyph-speaker-wave-2.pdf",
+      "sha256": "f29ab6c77b85540c8bd9e13b75ccc7b7086dd6bcff68272e369257a6a0d72b3c"
+    },
+    {
+      "path": "ios/Shared/AppSymbols.xcassets/Glyph-square-and-arrow-up.imageset/Contents.json",
+      "sha256": "0c8b8eb106f7de742cdb9964b40202f7791b6250e85f9746bb652eca51161476"
+    },
+    {
+      "path": "ios/Shared/AppSymbols.xcassets/Glyph-square-and-arrow-up.imageset/Glyph-square-and-arrow-up.pdf",
+      "sha256": "334fce59181f11e6c3ab2a0fce28299359a03d732ffc7e389422e8dc3d8439de"
+    },
+    {
+      "path": "ios/Shared/AppSymbols.xcassets/Glyph-square-grid-2x2.imageset/Contents.json",
+      "sha256": "f152ee9c97f8b756b632ca36ccbda2820d5da628b6805cf6671ad4868f23fb92"
+    },
+    {
+      "path": "ios/Shared/AppSymbols.xcassets/Glyph-square-grid-2x2.imageset/Glyph-square-grid-2x2.pdf",
+      "sha256": "af2554b2f9d136f6fb18d47b911c71c812e461870fa40cd1ce08230b03789274"
+    },
+    {
+      "path": "ios/Shared/AppSymbols.xcassets/Glyph-square-stack.imageset/Contents.json",
+      "sha256": "702c9bdc8ac3e8c8c67088d1f97df1b25917264c1c5c29947be48da05d1a8cd1"
+    },
+    {
+      "path": "ios/Shared/AppSymbols.xcassets/Glyph-square-stack.imageset/Glyph-square-stack.pdf",
+      "sha256": "d8fa31560c3ddac49ccced5fa8d862a4f2cdeb6491a1ea8b796a26cbdece21c7"
+    },
+    {
+      "path": "ios/Shared/AppSymbols.xcassets/Glyph-tablecells.imageset/Contents.json",
+      "sha256": "56aac336a24412a3456ff57bdf3aa3abdba3a3cbaa5cceb01c56ceaadeb35a9f"
+    },
+    {
+      "path": "ios/Shared/AppSymbols.xcassets/Glyph-tablecells.imageset/Glyph-tablecells.pdf",
+      "sha256": "6903a7905b9be283721ecc9c26a39a8b4ff1ab11194a4ddf7c058cae67d0cec9"
+    },
+    {
+      "path": "ios/Shared/AppSymbols.xcassets/Glyph-text-append.imageset/Contents.json",
+      "sha256": "f3f29f71cb737345ceb812a6f28f7ad190d2e4f950c6bd015c772b144ccd2d92"
+    },
+    {
+      "path": "ios/Shared/AppSymbols.xcassets/Glyph-text-append.imageset/Glyph-text-append.pdf",
+      "sha256": "c32c72effdf3f0c5b40c8d15e335fd6e1a8b4f12f3e7cefb674503c9337de7c0"
+    },
+    {
+      "path": "ios/Shared/AppSymbols.xcassets/Glyph-text-book-closed.imageset/Contents.json",
+      "sha256": "f1d7a9acb907640781fac94ca667235f63f5dfd13d98f817a279997fa1a5d59d"
+    },
+    {
+      "path": "ios/Shared/AppSymbols.xcassets/Glyph-text-book-closed.imageset/Glyph-text-book-closed.pdf",
+      "sha256": "0f10a75ce6e04e1a614c95bdb7f4f61073a8d67ac099a41feeaa34212564ac26"
+    },
+    {
+      "path": "ios/Shared/AppSymbols.xcassets/Glyph-trash.imageset/Contents.json",
+      "sha256": "23beec460d1be0369171743ec5fdb43328332a2c5f22a6ed42ec1e87b2582b53"
+    },
+    {
+      "path": "ios/Shared/AppSymbols.xcassets/Glyph-trash.imageset/Glyph-trash.pdf",
+      "sha256": "8dcd78fc1e2aa58aa237bb521a902379c3fd365ae0b6951421a7da17e1e9caa0"
+    },
+    {
+      "path": "ios/Shared/AppSymbols.xcassets/Glyph-tv.imageset/Contents.json",
+      "sha256": "51b69c4d7c6ba735215b78b908ccb83bfb5eea5cb1bb8e841b2d95ab70563706"
+    },
+    {
+      "path": "ios/Shared/AppSymbols.xcassets/Glyph-tv.imageset/Glyph-tv.pdf",
+      "sha256": "74eb4533c97cf2377822f85a1d2d452ac512b48867c3623c6ce78610994f5ebe"
+    },
+    {
+      "path": "ios/Shared/AppSymbols.xcassets/Glyph-wifi-exclamationmark.imageset/Contents.json",
+      "sha256": "d813a42afefbd7857b18b41e01f215295368f0404c4c95d83effac2bf648a14a"
+    },
+    {
+      "path": "ios/Shared/AppSymbols.xcassets/Glyph-wifi-exclamationmark.imageset/Glyph-wifi-exclamationmark.pdf",
+      "sha256": "ede4f527800a74080f27a64817995048b190730aa0a3d3d007f0497a4f840848"
+    },
+    {
+      "path": "ios/Shared/AppSymbols.xcassets/Glyph-wifi-slash.imageset/Contents.json",
+      "sha256": "0665e454494807b702cdf7f6ea79c04df9033c7aec806497a93a3ae1e0918d63"
+    },
+    {
+      "path": "ios/Shared/AppSymbols.xcassets/Glyph-wifi-slash.imageset/Glyph-wifi-slash.pdf",
+      "sha256": "ede4f527800a74080f27a64817995048b190730aa0a3d3d007f0497a4f840848"
+    },
+    {
+      "path": "ios/Shared/AppSymbols.xcassets/Glyph-xmark-circle-fill.imageset/Contents.json",
+      "sha256": "2534c2d4adccec84171b1ba1862a1ab33e78a761fd72ddd172f47b3efcc644d6"
+    },
+    {
+      "path": "ios/Shared/AppSymbols.xcassets/Glyph-xmark-circle-fill.imageset/Glyph-xmark-circle-fill.pdf",
+      "sha256": "5c249182fbd6c75fc361a6e6422f0d4d0449e7de747b2bb2c95f7052cf6ff600"
+    },
+    {
+      "path": "ios/Shared/AppSymbols.xcassets/Glyph-xmark-circle.imageset/Contents.json",
+      "sha256": "908a3601b92ee3869a313377cfc79d1bb7491c208d04fd7d3b817b0d49f7cbe0"
+    },
+    {
+      "path": "ios/Shared/AppSymbols.xcassets/Glyph-xmark-circle.imageset/Glyph-xmark-circle.pdf",
+      "sha256": "afc846b571a13446f5676abe211852921caa757272ad9f7eae094cc044ac139a"
+    },
+    {
+      "path": "ios/Shared/AppSymbols.xcassets/Glyph-xmark.imageset/Contents.json",
+      "sha256": "9e6ac6ebc098acfbe6526bfee73fbab96c3d19914a55ab956f0281717141b0c0"
+    },
+    {
+      "path": "ios/Shared/AppSymbols.xcassets/Glyph-xmark.imageset/Glyph-xmark.pdf",
+      "sha256": "2c8b342c07e1bbd737d8eeb7f2a1d61039bb4813681a7f1b38b72b25237911cb"
+    },
+    {
+      "path": "ios/Shared/NextUpSnapshot.swift",
+      "sha256": "86d32586a2550bbed7876298c38b31faac581a461fc6ba3bfea2e0772b7c93a1"
+    },
+    {
+      "path": "ios/Sources/App/AccountExportPreparation.swift",
+      "sha256": "5efb223a25dbd5b76ec307e7146c4a07b291332ffdf3572562b98959da12cf19"
+    },
+    {
+      "path": "ios/Sources/App/AccountExportStore.swift",
+      "sha256": "de3cb42dbe012ff7a79cbe120329212bd612bd3054ec54ef18889ee386f00629"
+    },
+    {
+      "path": "ios/Sources/App/AccountLocalStore.swift",
+      "sha256": "820dad8e5f0f4b84f2f1e5fbc0cb3b48c92c51ed34f80a22b88405bd70783873"
+    },
+    {
+      "path": "ios/Sources/App/AppModel+Activity.swift",
+      "sha256": "73b647362ebd8c6e7facce9015540365f27500cc9acab5deb59eb7deb8b5b093"
+    },
+    {
+      "path": "ios/Sources/App/AppModel+Audience.swift",
+      "sha256": "78090257b808226d78044b6bee97dab704f38bb9bb6e3835717b532dc34b2a4d"
+    },
+    {
+      "path": "ios/Sources/App/AppModel+Feed.swift",
+      "sha256": "7f4a1a8af02f6b973ee796c279a61015423b1eac941f68ee39014afc560f92af"
+    },
+    {
+      "path": "ios/Sources/App/AppModel+FirstRun.swift",
+      "sha256": "4c7f14c7028a6df1ab8a8210564fb94b656404264561612e70821151915cdea9"
+    },
+    {
+      "path": "ios/Sources/App/AppModel+Import.swift",
+      "sha256": "740f59a82e16254120650243dfa085dbe1a0be4c7537b6576f560a676854770c"
+    },
+    {
+      "path": "ios/Sources/App/AppModel+ProgressAdmission.swift",
+      "sha256": "e381049da5a4e81464f0ce14f664822952e14e8ca20e85b34bd2c298a4c41931"
+    },
+    {
+      "path": "ios/Sources/App/AppModel+Recommendations.swift",
+      "sha256": "57a71b3a85973989ed37c87fe76567318467869550a4b480d75e448fd4097a82"
+    },
+    {
+      "path": "ios/Sources/App/AppModel+Rewatch.swift",
+      "sha256": "7c6fcd1a3f4e46365399069862732339080a07fe14fd9a7528753bf5a78d80b1"
+    },
+    {
+      "path": "ios/Sources/App/AppModel+Social.swift",
+      "sha256": "2ed81b40c73491ab60afa642b323e842331a4d72f285d4d87f12e41d79998e8c"
+    },
+    {
+      "path": "ios/Sources/App/AppModel+States.swift",
+      "sha256": "432eb7d0f62090ff81bf86dabd4978f4cd0207d66faa1f4d8ee21edb0d7e7506"
+    },
+    {
+      "path": "ios/Sources/App/AppModel+Widget.swift",
+      "sha256": "c8f50e7837b436a8c0eab010d995f158a1e3853535f0f880b5d88c02585ee73c"
+    },
+    {
+      "path": "ios/Sources/App/AppModel+Writes.swift",
+      "sha256": "79b2c7b6e47e5de21fb63a1c259fb84c7b46295b04fcf6415bf13dcdd1bcdfa7"
+    },
+    {
+      "path": "ios/Sources/App/AppModel.swift",
+      "sha256": "ca5c20f1d9fc91c039e9bc274e91213b6a20118b767f23820723c861ccc24536"
+    },
+    {
+      "path": "ios/Sources/App/AppTabBar.swift",
+      "sha256": "993abaa0f2f22519270c78454bb974c27ef0bbaa56885ac3fce33544bc199a99"
+    },
+    {
+      "path": "ios/Sources/App/FeedRegression.swift",
+      "sha256": "295843fcd938651a234679e19e7445ab51b4a05946d38eaff1bfcdc86ee31a7c"
+    },
+    {
+      "path": "ios/Sources/App/KeyboardWarmup.swift",
+      "sha256": "7f0ec8ad622565b65d12d19ee72914c2236bb059183c8e2b19626dcfbff64087"
+    },
+    {
+      "path": "ios/Sources/App/LaunchHandoff.swift",
+      "sha256": "446a5526f93f1ad129f45dcbe0f3c7a3c9700a22aede0075d5649c6b89f5446e"
+    },
+    {
+      "path": "ios/Sources/App/LaunchIdent.swift",
+      "sha256": "40fdedb80224d4850d43d14efcc0136f552c4727d31de1222fcff268a1467013"
+    },
+    {
+      "path": "ios/Sources/App/MutationJournal.swift",
+      "sha256": "54aa558abf9d4495260eeb0d1ccdf4e99e819ddbe0fd83b97f6a5392559e41c3"
+    },
+    {
+      "path": "ios/Sources/App/MutationStamp.swift",
+      "sha256": "7a37d82c5ba01100d9f9f499382c5ceed44e552974dadb6684454f39fcc0bcf2"
+    },
+    {
+      "path": "ios/Sources/App/OrientationGate.swift",
+      "sha256": "1f3d00449503227ad77c993aaa52d937b1ad499f7c86af5fa1ad1914406e8af1"
+    },
+    {
+      "path": "ios/Sources/App/PerfProbe.swift",
+      "sha256": "409d11c882aa0b4f42c0b9c48fc68a67e9509218d1d867096d3b910a45d02a53"
+    },
+    {
+      "path": "ios/Sources/App/Previously.entitlements",
+      "sha256": "da246ddb177e1ee1186348d3d12155d16baab25336f9a2668d8ca6643c78518a"
+    },
+    {
+      "path": "ios/Sources/App/PreviouslyApp.swift",
+      "sha256": "e33f320d0273f32dc5bc364bced17f4503ad3d3a753c1522a0f50cc4b60363d0"
+    },
+    {
+      "path": "ios/Sources/App/QARuntime.swift",
+      "sha256": "cc4495ffa20db10bf023c250637daf0e31ccf108e07642ba22fad2496a9fe1fd"
+    },
+    {
+      "path": "ios/Sources/App/RewatchCopy.swift",
+      "sha256": "41b72d18ef521b99710a79842fd8b1510a7f56a34719f9093abf16ac80de3968"
+    },
+    {
+      "path": "ios/Sources/App/RewatchStore.swift",
+      "sha256": "e04f0ad4971d819ab76162221b22bb26d1cf8daeac292c771d60465bb3ab7891"
+    },
+    {
+      "path": "ios/Sources/App/RootChrome.swift",
+      "sha256": "8a32a98fff2328ca364631ac47e15f4ebf6c9f509998a8e7543611ea6e9b2ecf"
+    },
+    {
+      "path": "ios/Sources/App/RootView.swift",
+      "sha256": "244603f40ffe6869b72b620c1eade258a11bc273daf79b3e2832a3ea823961bb"
+    },
+    {
+      "path": "ios/Sources/App/Routing.swift",
+      "sha256": "7cb92ad2a601cf61a3a5d023c1d79138281e7fed8e095ecf3db3a08bb96c1460"
+    },
+    {
+      "path": "ios/Sources/App/Splash/SplashAfterglow.metal",
+      "sha256": "80d9fdb1307bea80fb5f37aa3b551b053dc978819a0a9751ef3eae6ded956a1d"
+    },
+    {
+      "path": "ios/Sources/App/Splash/SplashAfterglow.swift",
+      "sha256": "64ab50f5ef1f053c42ac7f5f168e0b77c7cfc158c5171f2fdc7adf51c405892b"
+    },
+    {
+      "path": "ios/Sources/App/Splash/SplashAlign.metal",
+      "sha256": "9eda59a01f2c0dedde3d3c35753e4c9536591f7e843b60d08cc150e64e454846"
+    },
+    {
+      "path": "ios/Sources/App/Splash/SplashAlign.swift",
+      "sha256": "0bc11e2102c120ac70d9688386a9dcead210243823589184dbab1ed976279ba0"
+    },
+    {
+      "path": "ios/Sources/App/Splash/SplashFlap.swift",
+      "sha256": "fdbffc7cb7f856fd25231e4a73b300edf6441d3304aac3f2158a3d0f9c4d3b75"
+    },
+    {
+      "path": "ios/Sources/App/Splash/SplashGlass.metal",
+      "sha256": "089838137de8ad9a50decf5263bfe32a94be7491698d1085c9faa2bc6393acaf"
+    },
+    {
+      "path": "ios/Sources/App/Splash/SplashGlass.swift",
+      "sha256": "2b14c7e810ef8b8f844514d42561bf1e4f5c877e800643cc3c1e288b7469af54"
+    },
+    {
+      "path": "ios/Sources/App/Splash/SplashKit.swift",
+      "sha256": "d8773d4fa6abaaeb647be79699506b615eedbb1fe9d0ce2529dbb8c8eca48518"
+    },
+    {
+      "path": "ios/Sources/App/Splash/SplashLens.swift",
+      "sha256": "084c9059054362b72c633c3e281260eb78e6052cc11efcf6aa3c4afe54556c29"
+    },
+    {
+      "path": "ios/Sources/App/Splash/SplashLockup.swift",
+      "sha256": "3fcddd1a7eb83b5b469cbcb61c4e27aa6d492f0fae7c62b5287996826ff49bbe"
+    },
+    {
+      "path": "ios/Sources/App/Splash/SplashMacro.metal",
+      "sha256": "1c697a28377b77dbc4898ce8592dabf9478582343a029e6ff79969c914eda6b6"
+    },
+    {
+      "path": "ios/Sources/App/Splash/SplashMacro.swift",
+      "sha256": "04284c42a31deb5a922c415565f6979368355006b36d3a43fa75d5da21e0f8cd"
+    },
+    {
+      "path": "ios/Sources/App/Splash/SplashPrism.metal",
+      "sha256": "2fc9f91c3060b4d08c34425a751e052860ad6e7077ccfdd27ad43574aa37cf26"
+    },
+    {
+      "path": "ios/Sources/App/Splash/SplashPrism.swift",
+      "sha256": "3028eaf2a1b79898984bf562dd1568da9b723b1e8f5997a199a3d58ff6c15788"
+    },
+    {
+      "path": "ios/Sources/App/Splash/SplashRibbon.metal",
+      "sha256": "674f9cde874d4397b8ddbdfdbf9ef78e40212dc4fd87eb564940e68da221d1dc"
+    },
+    {
+      "path": "ios/Sources/App/Splash/SplashRibbon.swift",
+      "sha256": "c5bd97037bb301a254804ff75857c821e28f9ebe0a479496c74a2e4dab73b5ff"
+    },
+    {
+      "path": "ios/Sources/App/Splash/SplashSilk.metal",
+      "sha256": "69d807de14626446436f3b1a8ead42cc3c2d6e1b7ba0278260be16b8b3e3647b"
+    },
+    {
+      "path": "ios/Sources/App/Splash/SplashSilk.swift",
+      "sha256": "d1a493f86278ccd86f7c136c2bafcd3db0b1ea4cba86a99dcd2c0106e85f5670"
+    },
+    {
+      "path": "ios/Sources/App/Splash/SplashStage.swift",
+      "sha256": "ae17768bdab4194d1bd7e6c39569a45486b2fc7ee443b59d864ea0061b271055"
+    },
+    {
+      "path": "ios/Sources/App/SyncCenter.swift",
+      "sha256": "906d2d69428080bdc2eee6c7d6dd0d005534133347b955194fbb65583e5028af"
+    },
+    {
+      "path": "ios/Sources/Auth/AppleDeletionAuthorization.swift",
+      "sha256": "9aa4d306698c51740ac94064270523a9f76ac7d1010b86bb0da89a7c1e57af42"
+    },
+    {
+      "path": "ios/Sources/Auth/AuthManager.swift",
+      "sha256": "0aca59743154a7ea83c8db5abab0f3839ae7e7de36442b4228f964ebd5a5eb19"
+    },
+    {
+      "path": "ios/Sources/Auth/SignInView.swift",
+      "sha256": "c3e5ed3a2145b8bb97a30971cf55a04332dee6c9d14f1b075920488d8cbbe5d8"
+    },
+    {
+      "path": "ios/Sources/DesignSystem/AppFont.swift",
+      "sha256": "5203305dffecfc56567ade9ced6a6633ee1a1cb41576b5aca4a2b22ef5104ce6"
+    },
+    {
+      "path": "ios/Sources/DesignSystem/Appearance.swift",
+      "sha256": "0552dde7b3574091861d9244db995e3635e614ca37ae289ccd62f85e8341fc37"
+    },
+    {
+      "path": "ios/Sources/DesignSystem/BlurredArt.swift",
+      "sha256": "5bdb9e3ae290cee5d099738e1fd3985e29f767c69d5d686ebf3b10d356ab2f27"
+    },
+    {
+      "path": "ios/Sources/DesignSystem/BrandNavigationTitle.swift",
+      "sha256": "c26deb860fbeebc1ee73057074f6f5ada2b44854aa57486e59c474622d6b3195"
+    },
+    {
+      "path": "ios/Sources/DesignSystem/Copy+Discover.swift",
+      "sha256": "c049fd16b5e266d52deacc1b1aa2e8927c4c8ead5cbe854c4d04644348865fae"
+    },
+    {
+      "path": "ios/Sources/DesignSystem/Copy+Feed.swift",
+      "sha256": "91be97b140542cd2c0dcf122d700cf0e49390f53211384b4174b92fc4e6a8b61"
+    },
+    {
+      "path": "ios/Sources/DesignSystem/Copy+FirstRun.swift",
+      "sha256": "7a3ae334a99eea1a0e81ca2df02949e71bc5228b3ef4b7e1e17b7efc85991d4f"
+    },
+    {
+      "path": "ios/Sources/DesignSystem/Copy+Home.swift",
+      "sha256": "99394b5339124902f17bc0e6ffec7e6949a9f56fb04c190509e26b66c2dd9e55"
+    },
+    {
+      "path": "ios/Sources/DesignSystem/Copy+Import.swift",
+      "sha256": "55384ecb9c32e0adad4708b05783ba29d85325bbe15ff5133ab2f825a2fef67a"
+    },
+    {
+      "path": "ios/Sources/DesignSystem/Copy+Library.swift",
+      "sha256": "17b750275fe1b455bb9a4352e49293e3a1f43557bf531eab1e6d96e5618428a4"
+    },
+    {
+      "path": "ios/Sources/DesignSystem/Copy+Screens.swift",
+      "sha256": "3db210349aabdb66aabb7d0f9c56ae005aab40cc1f198638708c3c6df1b14ba5"
+    },
+    {
+      "path": "ios/Sources/DesignSystem/Copy+Search.swift",
+      "sha256": "22a086f4fceb23a3c65dd71c0c7f678314fe3d72d48e39d97c11fca8a715d080"
+    },
+    {
+      "path": "ios/Sources/DesignSystem/Copy+Social.swift",
+      "sha256": "de6b003156661463a39031fbf99c07d72d0f18f7595ff8135845cdd55b627f22"
+    },
+    {
+      "path": "ios/Sources/DesignSystem/Copy+Stories.swift",
+      "sha256": "f0efd37c215f4db7e794b1bb037af69ba585d6769cc81feaebe230a4e4e66a15"
+    },
+    {
+      "path": "ios/Sources/DesignSystem/Copy.swift",
+      "sha256": "021c247111b91123fc4e5e50f92720ca2bf5057d36719514eac78e37e87edd64"
+    },
+    {
+      "path": "ios/Sources/DesignSystem/FeedComponents.swift",
+      "sha256": "1c1901112897650610ea9d054b5ca3c6d2f5251cf2c6f5a26285c062ea247e1e"
+    },
+    {
+      "path": "ios/Sources/DesignSystem/FeedTokens.swift",
+      "sha256": "4653273d13e24ba331e80d9733f579a501326fb13461e3b93301ed68fe0f92a3"
+    },
+    {
+      "path": "ios/Sources/DesignSystem/FlapGeometry.swift",
+      "sha256": "8b88118810e048b9356ba7928ec8c31cb9f0d187d4cad3ac7c335f3a8a88de63"
+    },
+    {
+      "path": "ios/Sources/DesignSystem/FranchiseContextMenu.swift",
+      "sha256": "96b1ae00dc4988a666b5412ea319da1beccdd502e4a0857d41bd5654b14e217f"
+    },
+    {
+      "path": "ios/Sources/DesignSystem/GlassHelpers.swift",
+      "sha256": "c815a7d37ea2be76b5e27f9de5e0f97bac479b151ceae92e2dc4f0dd43970216"
+    },
+    {
+      "path": "ios/Sources/DesignSystem/HeroLockup.swift",
+      "sha256": "2ddf90716d760dea1df1d717daeda90804ddee55ca489a32c5fe06f877440748"
+    },
+    {
+      "path": "ios/Sources/DesignSystem/ImageLoader.swift",
+      "sha256": "d62252d88baf4487f3f33a28667be1ada8435a67fdb8c6f85abb7b26a170991e"
+    },
+    {
+      "path": "ios/Sources/DesignSystem/LaunchLockup.swift",
+      "sha256": "5d26a16f25f41906ae5ddbb2237f634cee852f40ddbbf3d97db60b41fea295de"
+    },
+    {
+      "path": "ios/Sources/DesignSystem/PageTransition.swift",
+      "sha256": "95c469dd300a12415c5d05bae279e9cc3d4feeb588bdc3ae9a8d997394b7dd32"
+    },
+    {
+      "path": "ios/Sources/DesignSystem/Palette.swift",
+      "sha256": "5d5a29bc5cd179615948efae5f46bc451f760868aecd848b09659295084194dd"
+    },
+    {
+      "path": "ios/Sources/DesignSystem/PosterPick.swift",
+      "sha256": "5f5f8e1f754ee0297c1d69826ccd7e2cbc580bec486fc91b4609b37cbb8f3283"
+    },
+    {
+      "path": "ios/Sources/DesignSystem/PreviouslyMark.swift",
+      "sha256": "465d4648b89fa70cabddb1a52ab93425e6c3b95ff9001aa8eabbc09067aed10c"
+    },
+    {
+      "path": "ios/Sources/DesignSystem/Primitives+States.swift",
+      "sha256": "133e4dc37a9020e27f027358457554a5b6c4959a96c645a1c8a19e5f2a0a7d94"
+    },
+    {
+      "path": "ios/Sources/DesignSystem/Primitives.swift",
+      "sha256": "79890a877b601900b44ca0cf4ad1444651d6bd1662aedd380cf3c7da7bbfc545"
+    },
+    {
+      "path": "ios/Sources/DesignSystem/Receipts+Feed.swift",
+      "sha256": "a56e408c9a597863d9330e513c1d28383b878dcd00ea9049df48a4a0738b419e"
+    },
+    {
+      "path": "ios/Sources/DesignSystem/Receipts.swift",
+      "sha256": "cd38e8fe5052ba453ebe15a7e1b1aa72da496fa427ab60c6d0de476d53abfec1"
+    },
+    {
+      "path": "ios/Sources/DesignSystem/RemoteImageView.swift",
+      "sha256": "621ef64e6d09a9838ff5a3d6d92b747c4b7d363b56f0bf9c2f0536774c0f3eac"
+    },
+    {
+      "path": "ios/Sources/DesignSystem/ScaledFont.swift",
+      "sha256": "b4c9d9457f42c187dac637191e2de37a48b66c5c58d8a69f172fbded051d66e4"
+    },
+    {
+      "path": "ios/Sources/DesignSystem/ScheduleTokens.swift",
+      "sha256": "6de684c5b315b8258c8be5a1c3326f15f2d1db6cabcaf3e32e5e79868cdb5f0d"
+    },
+    {
+      "path": "ios/Sources/DesignSystem/Selection.swift",
+      "sha256": "8977f020e0b2c35208126cfa0ea3521379686a445085b33b3fa0f866d402a092"
+    },
+    {
+      "path": "ios/Sources/DesignSystem/ShowBillboard.swift",
+      "sha256": "ddfe5c12c1ef50d0bd5f98d6893f0a5eb20f74522ff96985a4456fd0c1060a65"
+    },
+    {
+      "path": "ios/Sources/DesignSystem/Skeletons+States.swift",
+      "sha256": "3ec4a9540dce1e99e595d108978d410ee20a8e8f239d61a30c06ebbc8c7ebc3f"
+    },
+    {
+      "path": "ios/Sources/DesignSystem/SplitFlap.swift",
+      "sha256": "48adc36aa2004e32b2005ea368829d7bd4b418c9b92ba6651dbba35074d98c09"
+    },
+    {
+      "path": "ios/Sources/DesignSystem/SubjectCrop.swift",
+      "sha256": "8ed22f3109b442f2e37fe7bb5e8d845529d8bd58e49459c27b2cfa5d8bd812a9"
+    },
+    {
+      "path": "ios/Sources/DesignSystem/ThemeTokens.swift",
+      "sha256": "1f16d8a2bf15854c5c1936caa09b7b51fbf456a7475a9abb0337f0f455fd073a"
+    },
+    {
+      "path": "ios/Sources/DesignSystem/UndoToast.swift",
+      "sha256": "9dbb0c4f9044ab4be7dea7a094402d1aee76e58d186ed306bdcdbd7a12fdc386"
+    },
+    {
+      "path": "ios/Sources/DesignSystem/ZoomTransition.swift",
+      "sha256": "7d51c9ff3476910f31e6e4b3eed9e3206923658167995beed864fb386591175a"
+    },
+    {
+      "path": "ios/Sources/Features/Discover/DiscoverCatalog.swift",
+      "sha256": "21b027ce6726b3cdd202d8800e5599bc7a665c363078cc4bb69aa2b112a3ea36"
+    },
+    {
+      "path": "ios/Sources/Features/Discover/DiscoverExplore.swift",
+      "sha256": "ce548178dcd5007857db886330f7fe1a5ec04857c818e98c69bdc00ad2cfd663"
+    },
+    {
+      "path": "ios/Sources/Features/Discover/DiscoverGenres.swift",
+      "sha256": "da8568ecf27de0023235d226646254cfad38e2d2e1e785d0a473899736e8d8d1"
+    },
+    {
+      "path": "ios/Sources/Features/Discover/DiscoverTopPick.swift",
+      "sha256": "d1cdb64b5ed7e0c9e31045c2d4804876feaee185338d801c54dc79048af9625a"
+    },
+    {
+      "path": "ios/Sources/Features/Discover/DiscoverView.swift",
+      "sha256": "c34dcb0ba1fd7965192715db59a4ec7c6810562b4d5daa7f66c5249f44fb9e4e"
+    },
+    {
+      "path": "ios/Sources/Features/Discover/ForYouShelves.swift",
+      "sha256": "5fa5e6081099eb27012084f6ec69a9987fe0e424f6da82517148087e96535e9b"
+    },
+    {
+      "path": "ios/Sources/Features/Discover/ForYouViews.swift",
+      "sha256": "25c4327109c70e5bee65b692d5154ad3c06efcb5e5656bd06a6f1c6e2799f5c1"
+    },
+    {
+      "path": "ios/Sources/Features/Discover/GenreResultsView.swift",
+      "sha256": "0cfdaa2299ae014dc637d559bda02749e287c713affc247a3d2ed878d7d91f76"
+    },
+    {
+      "path": "ios/Sources/Features/Discover/SearchComponents.swift",
+      "sha256": "e5308bc7610f83603273e71a58660bb1f31b7f631b5ec6b9bf962af136fd61fe"
+    },
+    {
+      "path": "ios/Sources/Features/Feed/FeedCapture.swift",
+      "sha256": "2c130d249ea267e655edd3ce2c8308393b9a9f6ff6e2cc923f099431bfb76191"
+    },
+    {
+      "path": "ios/Sources/Features/Feed/FeedHeader.swift",
+      "sha256": "f91d784c9da4963c2ef66b805a164b4c69dba97bd588fbe3229922ec6993baaf"
+    },
+    {
+      "path": "ios/Sources/Features/Feed/FeedMediaViewer.swift",
+      "sha256": "8fc1efa3c596565a10402b0ef05b5aa7761746650906741d572e974368a84dde"
+    },
+    {
+      "path": "ios/Sources/Features/Feed/FeedModules.swift",
+      "sha256": "197a6dc1eaf5ebbad9eb80bfda85099b796bdb65db715c6e39f9cacb2dc55c30"
+    },
+    {
+      "path": "ios/Sources/Features/Feed/FeedPostViews.swift",
+      "sha256": "9f74b41f881d4ac623aae91d74436d8934c46ace6e680b0cef30391f8f542c98"
+    },
+    {
+      "path": "ios/Sources/Features/Feed/FeedThreadView.swift",
+      "sha256": "eefceb7edbe9a94aea60ff8b84bbe31073aba8422e662e7ca0b939f5f94430ed"
+    },
+    {
+      "path": "ios/Sources/Features/Feed/FeedView.swift",
+      "sha256": "f2df8bbd0f263c0fdf1aa04f28f3d0de6fc3ec0c358f2acc74409906efcb01c1"
+    },
+    {
+      "path": "ios/Sources/Features/Feed/InlineTrailer.swift",
+      "sha256": "f5f603d7aac25f10acd433b3e1388bc6c3476042c098d824c794f5af4e46594d"
+    },
+    {
+      "path": "ios/Sources/Features/Feed/NewsTrail.swift",
+      "sha256": "89f7bd9d07f0b4bfafd7642a2341b6f6b72701d4dfb1bcf6f0270c186adde941"
+    },
+    {
+      "path": "ios/Sources/Features/Feed/PostActionBar.swift",
+      "sha256": "6e10fca4e34e6df12803e6504c1d6227e4875215de6c5f3fb5f0b56e9248ae75"
+    },
+    {
+      "path": "ios/Sources/Features/Feed/Social/ActivitySheet.swift",
+      "sha256": "0076b5e471cca8d8c4eab705706716b71f867b65015ca8962ea187ae569612d3"
+    },
+    {
+      "path": "ios/Sources/Features/Feed/Social/BlockedAccountsView.swift",
+      "sha256": "1e9a717be2fece59d371038d7eda77aa09150bab6a4ad5506970ecf6c0226004"
+    },
+    {
+      "path": "ios/Sources/Features/Feed/Social/CommentRow.swift",
+      "sha256": "db3019198ab9167c5cb234bf839929bdcba1948605bfd890c1e3c4f1602eb772"
+    },
+    {
+      "path": "ios/Sources/Features/Feed/Social/CommentThreadSection.swift",
+      "sha256": "be01cb3409d5e99c0e4fa81f2aac2d520f3ae959d7eaf93c436e88b6c2cdbc49"
+    },
+    {
+      "path": "ios/Sources/Features/Feed/Social/CommunityRulesSheet.swift",
+      "sha256": "ba82b6d0e3b6efaccc52bbc697eff1a9b2e2f0b782370cccd151897b4dc9ccae"
+    },
+    {
+      "path": "ios/Sources/Features/Feed/Social/ComposeRing.swift",
+      "sha256": "3b8766c3aa5c26bd5897700b35549c638ef3210326c994c23fd712a9bc8d19ba"
+    },
+    {
+      "path": "ios/Sources/Features/Feed/Social/ComposeSheet.swift",
+      "sha256": "64ae58612613339afa86c81d53ad7b57f0965e5a0d94c8580cff3a62086fae11"
+    },
+    {
+      "path": "ios/Sources/Features/Feed/Social/IdentitySetupView.swift",
+      "sha256": "7c57731ae60b95b9838f2eac0cf9a35daa1677382ebbe6e335a15902492661c8"
+    },
+    {
+      "path": "ios/Sources/Features/Feed/Social/InlineReplyComposer.swift",
+      "sha256": "a57e270ccc3b978c73d4528c476bef44198ceaf1fde7d610a8dd16fd5f51d0d1"
+    },
+    {
+      "path": "ios/Sources/Features/Feed/Social/MutedShowsView.swift",
+      "sha256": "14935e978dab69dfabe281fc1f9723c4e50d85ac17f2f5b8ce44814dc5f585dc"
+    },
+    {
+      "path": "ios/Sources/Features/Feed/Social/ReportSheet.swift",
+      "sha256": "6856243a42a18a6feb18798b472efdf4a6c96978a84966165fa2c933470cd25e"
+    },
+    {
+      "path": "ios/Sources/Features/Feed/Social/SavedPostsView.swift",
+      "sha256": "5ff85dc02bceb4f15649123a7143507ec4bcbda74deb2209fa2893749c5d3b6b"
+    },
+    {
+      "path": "ios/Sources/Features/Feed/Stories/EpisodeDiscussionView.swift",
+      "sha256": "e56f20f84d6b09e4da8240d4f33e6cc06ab2851aa2a8b1c33acc3b9f3ee80c22"
+    },
+    {
+      "path": "ios/Sources/Features/Feed/Stories/EpisodeRatingSlider.swift",
+      "sha256": "b7aa9764705e25bf4f64b0879a1bb5a21a7c1a59c895c60e2807feaca5bef586"
+    },
+    {
+      "path": "ios/Sources/Features/Feed/Stories/StoryArt.swift",
+      "sha256": "f2503276040c1d69cddc8d97921a1b52da4487edc9aedf339f3e77f47a2db48c"
+    },
+    {
+      "path": "ios/Sources/Features/Feed/Stories/StoryClock.swift",
+      "sha256": "5a1c32497af67e23786b031306e2425f9d15b72ca472cc2edc3c4d2230ecdf45"
+    },
+    {
+      "path": "ios/Sources/Features/Feed/Stories/StoryPage.swift",
+      "sha256": "fe70ac7fc51b292a903756919fe2ef57f511046c3411ad0fabac9cfb79a605f3"
+    },
+    {
+      "path": "ios/Sources/Features/Feed/Stories/StoryTray.swift",
+      "sha256": "c8291c2abad9e52dce20485e9cc8df5169e0b855bd2ab8415d00228aec7735ef"
+    },
+    {
+      "path": "ios/Sources/Features/Feed/Stories/StoryViewer.swift",
+      "sha256": "006de2fa46ee0dfe9aba1370417a58b9c6d0b2ab9bb94f15e0e23f50cd015126"
+    },
+    {
+      "path": "ios/Sources/Features/Feed/XPageChrome.swift",
+      "sha256": "461c7d3f5c7d939d9320b867d7f96a2caae19616bc9401bfca14b5a9facf309f"
+    },
+    {
+      "path": "ios/Sources/Features/FirstRun/FirstRunFlow.swift",
+      "sha256": "57b3ddc6a4d60f07d64fa7bf93e184d0fa3a98cb68592ab5d554101c8c972615"
+    },
+    {
+      "path": "ios/Sources/Features/FirstRun/FirstRunLineupStep.swift",
+      "sha256": "484fdca87e02241bf618e0ff5cebeff9df73f446d76d2892b0d21b0282c28102"
+    },
+    {
+      "path": "ios/Sources/Features/FirstRun/FirstRunModel.swift",
+      "sha256": "fd96aa96d1c65edfbe4d1cfac609660f8f7c31b62a8cadd7b15e2395787e4f7e"
+    },
+    {
+      "path": "ios/Sources/Features/FirstRun/FirstRunPlaceStep.swift",
+      "sha256": "2da1a027d1b891d729498bfd973c6e7ffbc43b478726fc2a4394b6cbc7014e0a"
+    },
+    {
+      "path": "ios/Sources/Features/FirstRun/FirstRunShowsStep.swift",
+      "sha256": "0e0f7739a8a9f073b621c506104677782181507f9cd3972ef52f529df3c2d159"
+    },
+    {
+      "path": "ios/Sources/Features/FranchiseDetail/DetailEnrichment.swift",
+      "sha256": "257d98aef19f13fc773a2316d01b246a45996dc90e20b4d65138231ab6dc5d3a"
+    },
+    {
+      "path": "ios/Sources/Features/FranchiseDetail/DetailSupport.swift",
+      "sha256": "21a9156d83029eb622f7626aceef094d464fd340c4418be286725067aa162d65"
+    },
+    {
+      "path": "ios/Sources/Features/FranchiseDetail/FranchiseDetailView.swift",
+      "sha256": "366656373b075852d4455f3f3c434f848b318d40a3ac0ae24d9fb049cfb496c0"
+    },
+    {
+      "path": "ios/Sources/Features/FranchiseDetail/RewatchViews.swift",
+      "sha256": "9ca6a55af5f8511e4ec50bd7ed7314735591cb30d04d43c545ea7333a5c485a8"
+    },
+    {
+      "path": "ios/Sources/Features/FranchiseDetail/ShowProfileParts.swift",
+      "sha256": "7b9f2ca3df1966191998c097ee0c4445a64afa14da74718262e2bcfb545ab456"
+    },
+    {
+      "path": "ios/Sources/Features/Home/HeroCopyScrim.swift",
+      "sha256": "f356ed554c301bd37a6af073d9c509b87824cecc2843a5b47bc83460b7a382b9"
+    },
+    {
+      "path": "ios/Sources/Features/Home/HomeHeroScene.swift",
+      "sha256": "c8a10a13a4d774bb708ed058cdeba664f710d56c3154c68eddd605088f2d0500"
+    },
+    {
+      "path": "ios/Sources/Features/Home/HomeParts.swift",
+      "sha256": "bf04ea3c427a1f2fb9c8d9e2f7b7f664f13a41c25b32e3960014ce956ba2fadf"
+    },
+    {
+      "path": "ios/Sources/Features/Home/HomeRecent.swift",
+      "sha256": "89848176c5a51a833d6e64b50c0e79e7ce8d10587c660b9a5e5983880ba30f0d"
+    },
+    {
+      "path": "ios/Sources/Features/Home/HomeView.swift",
+      "sha256": "8c26d8f36a415393796a3d24830afa0e86991b6fbe8d9c0aa3e7cd9972e3c953"
+    },
+    {
+      "path": "ios/Sources/Features/Import/ImportFiles.swift",
+      "sha256": "648db297167d61d78564a9fc35f6de46d844fc9d15513f14feaffe0255ffc48b"
+    },
+    {
+      "path": "ios/Sources/Features/Import/ImportView.swift",
+      "sha256": "c8303243812e636a1b125e465a04ea2c173c9015ce95ac7b19100586a9bbdf83"
+    },
+    {
+      "path": "ios/Sources/Features/Library/LibraryFacts.swift",
+      "sha256": "36d339006718b1d4596a245b65698f3f72e834c5fcca95b4dc6544b4412934ea"
+    },
+    {
+      "path": "ios/Sources/Features/Library/LibraryView.swift",
+      "sha256": "e28432a51087a81438ceeab02493c02300f06aec695014ec490c56da04db4e12"
+    },
+    {
+      "path": "ios/Sources/Features/Profile/AccountDeletion.swift",
+      "sha256": "772982add8a22c76632004f473d02254b252978d73f17a07736a84d0d3c5b3f5"
+    },
+    {
+      "path": "ios/Sources/Features/Profile/AccountDeletionNotice.swift",
+      "sha256": "535bc8f58345ce52654fb9d9cf374f2737329ed77969ea606ef0b6c668287632"
+    },
+    {
+      "path": "ios/Sources/Features/Profile/AccountDeletionRecoveryView.swift",
+      "sha256": "5ade442cfdf0adfd7d4ac6a02c8d7d7d5eb44f399281f9fe85870a8b30202286"
+    },
+    {
+      "path": "ios/Sources/Features/Profile/AccountSuspendedView.swift",
+      "sha256": "47124b1c7fa7d0ebface4920512c350dca0d5386f608f3085a897af4508bcbd3"
+    },
+    {
+      "path": "ios/Sources/Features/Profile/AudienceChooser.swift",
+      "sha256": "fb8331b6a77b825d23376408c6a6a063fc2861e8e19c474a7463e684ae8e8be9"
+    },
+    {
+      "path": "ios/Sources/Features/Profile/LibraryExport.swift",
+      "sha256": "2fa09e4f7b477fac1a8e7003fb04780b7bed3c0debf8b0154ee8f4033058d278"
+    },
+    {
+      "path": "ios/Sources/Features/Profile/ProfileView.swift",
+      "sha256": "7dfebb360d661e8a2621cd10b8053d1b7c02593d1675d1d8b1a29519327c723b"
+    },
+    {
+      "path": "ios/Sources/Features/Schedule/ScheduleLit.swift",
+      "sha256": "d6dd7c5462a54fffd774f9928d6b72fecf1f239cdfe6564bf13867a25258f0aa"
+    },
+    {
+      "path": "ios/Sources/Features/Schedule/ScheduleParts.swift",
+      "sha256": "c0749519762b727ce7422fb04979f8881f704db28dce70063208cdac8d2c9c3e"
+    },
+    {
+      "path": "ios/Sources/Features/Schedule/ScheduleReminders.swift",
+      "sha256": "bcbc4821d2cbe6a0364cc6d65bed9519a5c3f5bf15f3c0965c12dfdef6ad51b4"
+    },
+    {
+      "path": "ios/Sources/Features/Schedule/ScheduleRows.swift",
+      "sha256": "6210817100030df0b7776cd523ab3733b2cac194fba80b17ea9392b846dcf3a6"
+    },
+    {
+      "path": "ios/Sources/Features/Schedule/ScheduleView.swift",
+      "sha256": "077662e5308f2eda90ac16c1d9ff3222e58ad2a91ab794f9cfc6681b432f934c"
+    },
+    {
+      "path": "ios/Sources/Features/Trailer/TrailerControls.swift",
+      "sha256": "82ff99859f5d2c4987fcbf9dc7427dafd5bdb449769e158cd8d2948046a5a480"
+    },
+    {
+      "path": "ios/Sources/Features/Trailer/TrailerFullScreen.swift",
+      "sha256": "55ce35b278c3393172b06b1e3191bbeca92b666adbe0c9b0c4b56c56c4f0ff9e"
+    },
+    {
+      "path": "ios/Sources/Features/Trailer/TrailerPlayback.swift",
+      "sha256": "031ed39c4daf28aeec9ab10bdc1882ac0c0311a2272ccbba15018b144ee3a790"
+    },
+    {
+      "path": "ios/Sources/Models/FeedComposer.swift",
+      "sha256": "8fef6084f77326fc752b5d1edd79b26a6944622bec01e42759474dfef842747e"
+    },
+    {
+      "path": "ios/Sources/Models/FranchiseProgressValue.swift",
+      "sha256": "0894caa014e4d24154ff7f7e8f7ee26760c5c91975bf9465cc8c7bbf7d77727a"
+    },
+    {
+      "path": "ios/Sources/Models/Models+Enrichment.swift",
+      "sha256": "d40a6f77a8c864d8a8697d8dd54d9381095d30fd384dc343eb278a02ba2f7e4d"
+    },
+    {
+      "path": "ios/Sources/Models/Models+Feed.swift",
+      "sha256": "522c281cc1a96f719724182d37b22c6ade9c7841867c545574fc7aa205e266e5"
+    },
+    {
+      "path": "ios/Sources/Models/Models+ImportProgress.swift",
+      "sha256": "c1d2fec292ffb77f0b252ab4c4104c65ffe5f7572f1911df6408c967a591a1e7"
+    },
+    {
+      "path": "ios/Sources/Models/Models+Recommendations.swift",
+      "sha256": "bf58af01ed267ececb7068903ffebee8921a48bd9aaed883431798a063a4305d"
+    },
+    {
+      "path": "ios/Sources/Models/Models+Shared.swift",
+      "sha256": "736136ae3bad759e1f427d3ed94728e0f937344cafdd2a78b099aad70a9c77ea"
+    },
+    {
+      "path": "ios/Sources/Models/Models+Stories.swift",
+      "sha256": "64e4101bad1e2ba6becb1501d9f436528048b2e072a231b80d6146e2fa4cec53"
+    },
+    {
+      "path": "ios/Sources/Models/Models.swift",
+      "sha256": "07e5e2a4814be0459908bf29cd364d0bf889b817cc299a1b6f4034b70930634b"
+    },
+    {
+      "path": "ios/Sources/Models/ProgressAdmissionTicket.swift",
+      "sha256": "20a301a0fe1b04047cb523d67a760ea707eae7e9e556349470b57ee1867cf712"
+    },
+    {
+      "path": "ios/Sources/Networking/APIClient.swift",
+      "sha256": "afa2ea523bad125977da5581a35a947bbf17da873d65cc91fa8c10b3f5c523fe"
+    },
+    {
+      "path": "ios/Sources/Networking/AppConfig.swift",
+      "sha256": "58d372561eb5e241b82e95efb8ea29c75fe705dfae9bd2dde6d453d92ef91c7d"
+    },
+    {
+      "path": "ios/Sources/Networking/DemoLibrary.swift",
+      "sha256": "d11481eea9b9c1853dc92cf542b4e416f0740b43e38b32cc4c606fbc68971d61"
+    },
+    {
+      "path": "ios/Sources/Networking/WatchSessionMutationReceipt.swift",
+      "sha256": "31b792906a11a67dfddb0d02ff9b2f1813a6b311e9166ceccac035401ad3c054"
+    },
+    {
+      "path": "ios/Sources/Notifications/AiringLiveActivityManager.swift",
+      "sha256": "fd444ff27f47e7f1194dcb92645ef5957b9f71ba53b031745c55fb5934855cee"
+    },
+    {
+      "path": "ios/Sources/Notifications/EpisodeNotifications.swift",
+      "sha256": "4a13d52398253f96f7f3d1ca20c1d83bee751e5c80f5021e97e04b1943f0c80c"
+    },
+    {
+      "path": "ios/Sources/Util/Formatting.swift",
+      "sha256": "25e34b2ce516ad28815ade98141affaed9027bab00ad93b20cc759babeac934b"
+    },
+    {
+      "path": "ios/Sources/Util/TemporalCopy.swift",
+      "sha256": "89b078d98cfa94bbf30e016808b25342c2d43e330871695b3372d51f09d036fe"
+    },
+    {
+      "path": "ios/Tools/qa/fixture-server.mjs",
+      "sha256": "c704842f6d43a58a477e25cb75ab079c7eb523a12068c721b2bdf8e20c9b3f09"
+    },
+    {
+      "path": "ios/Tools/qa/fixture-server.test.mjs",
+      "sha256": "4a80bd30e90d75d84f6e337cb128eaadf0bae1805ec9fea7beb618ead812ffc0"
+    },
+    {
+      "path": "ios/Tools/qa/run-native-qa.py",
+      "sha256": "8e09a2cfc4281c64d8184f1171d445918ceb42d24f18244933b7ba81c5eac0d6"
+    },
+    {
+      "path": "ios/Tools/qa/run-native-qa.test.py",
+      "sha256": "0bc827689ca3aa2b3e31696443ae20ba4d6f5177a30f8334ae4068fdc1e0b304"
+    },
+    {
+      "path": "ios/UITests/AccountDeletionRequestTests.swift",
+      "sha256": "a85ee32dc5e943f3ad69f6bd648e7fbea7ea4e3b6b1efcd44c99fadecf3c5bb0"
+    },
+    {
+      "path": "ios/UITests/AccountExportPreparationTests.swift",
+      "sha256": "c90bf22de5ba4eb9585e845612090cca57b5cc90c9bca0cd85bbed7523d88b51"
+    },
+    {
+      "path": "ios/UITests/AccountLocalStoreTests.swift",
+      "sha256": "cb0655b73c0cea4a8f9740eb65e063db0201b0be4d6e6d6b8d6624797eade4cf"
+    },
+    {
+      "path": "ios/UITests/ImportModelTests.swift",
+      "sha256": "8b8044ad15aae80cf10ecb45770501c02da194ad93f057e7eae2029e985df21c"
+    },
+    {
+      "path": "ios/UITests/MutationJournalTests.swift",
+      "sha256": "0757794790bab2fba59418745d239a0cce61e27176efc4ec440149968deb71d8"
+    },
+    {
+      "path": "ios/UITests/PreviouslyAccountIsolationTests.swift",
+      "sha256": "b38059cbb677145dc77d46231e1c716bd3f39b25dd5af8d7150b01eaea276f18"
+    },
+    {
+      "path": "ios/UITests/PreviouslyAdmissionTests.swift",
+      "sha256": "7f084d29171230e763a7ee7e536dbea40ccbb3ba06bfbc68d1c8e1db58e52c02"
+    },
+    {
+      "path": "ios/UITests/PreviouslyDeletionTests.swift",
+      "sha256": "5e0609392d58b85e3c4e0fb9710e775bf95ed3dfcd697ddcf0ebe64d382b7df6"
+    },
+    {
+      "path": "ios/UITests/PreviouslyDirectedTests.swift",
+      "sha256": "68ab3a1c33b92b535299e087118d71e626a37af6d3d5ab81767fd9ed13a99f0c"
+    },
+    {
+      "path": "ios/UITests/PreviouslyDurabilityTests.swift",
+      "sha256": "71440064a8f27b99199e7c07943d4cb6a100f2ca0f875d6f2b1df8ae829e8c1e"
+    },
+    {
+      "path": "ios/UITests/PreviouslyFilesTests.swift",
+      "sha256": "85989c28238a16abbf58058338c4611e9c1983f426146233434e1d3a7d969e78"
+    },
+    {
+      "path": "ios/UITests/PreviouslyMonkeyTests.swift",
+      "sha256": "2e8e0525b35f3a8850a9d4e383dcffc09ae401de1eb15a70fd3250f4fa827fa1"
+    },
+    {
+      "path": "ios/UITests/PreviouslyTrailerTests.swift",
+      "sha256": "77bb3a701e105400036cbc5fc3f08d5382ddd4ac0ac1f57bec5eef2975da4072"
+    },
+    {
+      "path": "ios/UITests/PreviouslyWidgetTests.swift",
+      "sha256": "3a940bd88abea45af2dafdc3bb4946ba7307056ba98c44d4d2d23aa2651619a5"
+    },
+    {
+      "path": "ios/UITests/ProgressAdmissionTests.swift",
+      "sha256": "4f1dcd1253bbcac06751eda1a7b6a61d3cc025f7dc22bfdfd7ef0613317752aa"
+    },
+    {
+      "path": "ios/UITests/QAHarnessTests.swift",
+      "sha256": "f70ff5dd00e2e2088ae89fbe17ca8769007a7a878eaed0a51e42358ef5445f8d"
+    },
+    {
+      "path": "ios/UITests/QASupport.swift",
+      "sha256": "7f59c706888e980cf32800077dd4dd441ae2b14122685eb206d48abaa955a536"
+    },
+    {
+      "path": "ios/UITests/README.md",
+      "sha256": "c909b6d9a23860a9f90f748bcb7ed54057cfe0f010a605ea50dbc226c9658cf5"
+    },
+    {
+      "path": "ios/UITests/RewatchStoreTests.swift",
+      "sha256": "46be73b4d362b3aaaf83c9be42af57fb67fd9024317395ce3056313eabfcee04"
+    },
+    {
+      "path": "ios/UITests/WidgetSnapshotTests.swift",
+      "sha256": "56abf400d0ac94b0247eb777fb6de366959d0cff7a2fefc38cf25dacaac07e56"
+    },
+    {
+      "path": "ios/Widgets/Info.plist",
+      "sha256": "3cc4539dd0dd34fb4c5ecc1bf464078e0bf86ee87ff31a47e37afd411510908c"
+    },
+    {
+      "path": "ios/Widgets/NextUpWidget.swift",
+      "sha256": "c0dae9778a78576e8127ac1a0de6937db4f06e3ffc6786be4a5c03549678a3d9"
+    },
+    {
+      "path": "ios/Widgets/PreviouslyWidgets.entitlements",
+      "sha256": "26a3bc52d52f8c2ef75d2b308e449189d7f373e748fb967afb2f612d57194b53"
+    },
+    {
+      "path": "ios/Widgets/PreviouslyWidgets.swift",
+      "sha256": "d04a2e01ca59c39393acda529daa1636aa39c1337fac200d5204d942d46b5ccb"
+    },
+    {
+      "path": "ios/project.yml",
+      "sha256": "a0416edfabf34e9ae87bab505a645bd9679ea82e3c31c1571035eb26d5baf1e4"
+    }
+  ],
+  "boundary": "Local inputs at this time; archive build and source continuity require separate receipts."
+}

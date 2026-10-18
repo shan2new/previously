@@ -1,0 +1,48 @@
+{
+  "observedAt": "2026-10-15T19:02:01.398810+00:00",
+  "exitCode": 0,
+  "toolResult": {
+    "schema": "xcodebuildmcp.output.simulator-list",
+    "schemaVersion": "2",
+    "didError": false,
+    "error": null,
+    "data": {
+      "simulators": [
+        {
+          "name": "Kestrel Focus Ultra 3",
+          "simulatorId": "F0089925-9ABB-4D63-9C53-B2E4BD2D9FCF",
+          "state": "Shutdown",
+          "isAvailable": true,
+          "runtime": "watchOS 27.0"
+        },
+        {
+          "name": "Cirven iPhone 17 Pro",
+          "simulatorId": "86BD8501-0BEF-4E59-B888-723FB794B7A2",
+          "state": "Shutdown",
+          "isAvailable": true,
+          "runtime": "iOS 27.0"
+        },
+        {
+          "name": "Kestrel UX 14 Pro",
+          "simulatorId": "5B953300-DDCB-412F-A455-AFE37A53A0C9",
+          "state": "Shutdown",
+          "isAvailable": true,
+          "runtime": "iOS 27.0"
+        },
+        {
+          "name": "Previously QA 14 Pro",
+          "simulatorId": "0031ED81-55FB-4E88-A0D1-012412C64409",
+          "state": "Shutdown",
+          "isAvailable": true,
+          "runtime": "iOS 27.0"
+        }
+      ]
+    },
+    "nextSteps": [
+      "Boot a simulator: xcodebuildmcp simulator boot --simulator-id UUID_FROM_ABOVE",
+      "Open the simulator UI: xcodebuildmcp simulator open",
+      "Build for simulator: xcodebuildmcp simulator build --scheme YOUR_SCHEME --simulator-id UUID_FROM_ABOVE",
+      "Get app path: xcodebuildmcp simulator get-app-path --scheme YOUR_SCHEME --platform 'iOS Simulator' --simulator-id UUID_FROM_ABOVE"
+    ]
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "measuredAt": "2026-10-15T16:55:42.370286+00:00",
+  "fixtureChecks": 17,
+  "nodeSnippetsSyntaxChecked": 2,
+  "nodeVersion": "v24.21.0",
+  "realLaunchctlInvokedByFixtures": false,
+  "productionConfigurationReadByFixtures": false,
+  "realDatabaseTouchedByFixtures": false,
+  "guardRepairs": "inherited launchctl context; scoped Node/PG; captured PID + registration drain; exact-byte checks per retry; permanent errors stop; no double registration; private backup hash/size/mode; healthy fresh rollback collector"
+}

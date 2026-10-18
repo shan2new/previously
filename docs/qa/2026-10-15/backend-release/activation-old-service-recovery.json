@@ -1,0 +1,49 @@
+{
+  "measuredAt": "2026-10-15T16:51:59.428045+00:00",
+  "manualRecovery": "exact three old reviewed plists bootstrapped using normal logged-in process environment",
+  "result": {
+    "local": {
+      "status": 200,
+      "body": {
+        "ok": true
+      }
+    },
+    "public": {
+      "status": 200,
+      "body": {
+        "ok": true
+      }
+    },
+    "com.shan.previously": {
+      "loaded": true,
+      "state": [
+        "state = running",
+        "last exit code = (never exited)",
+        "state = active",
+        "state = active"
+      ]
+    },
+    "com.shan.previously.backup": {
+      "loaded": true,
+      "state": [
+        "state = not running",
+        "last exit code = (never exited)"
+      ]
+    },
+    "com.shan.previously.ops": {
+      "loaded": true,
+      "state": [
+        "state = not running",
+        "last exit code = 0",
+        "state = active",
+        "state = active"
+      ]
+    },
+    "collector": {
+      "measuredAt": "2026-10-15T16:51:38.357Z",
+      "healthy": true
+    }
+  },
+  "productionRestorePerformed": false,
+  "configurationChanged": false
+}

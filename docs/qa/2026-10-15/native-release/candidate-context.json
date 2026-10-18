@@ -1,0 +1,22 @@
+{
+  "date": "2026-10-15",
+  "version": "1.0",
+  "build": "17",
+  "project": "/Users/shan2new/Projects/previously/ios/Previously.xcodeproj",
+  "scheme": "PreviouslyQA",
+  "configuration": "QA",
+  "simulatorID": "0031ED81-55FB-4E88-A0D1-012412C64409",
+  "simulatorName": "Previously QA 14 Pro",
+  "runtime": "iOS 27.0",
+  "xcodebuildmcp": "2.7.0",
+  "sessionDefaultsToolAvailable": false,
+  "explicitInvocationContext": true,
+  "priorArchivesPreserved": [
+    "Previously-15.xcarchive",
+    "Previously-16.xcarchive"
+  ],
+  "status": "focused native tests in progress; final full75 and three fixed monkey runs pending",
+  "ownerHandlesAppleReviewCloseout": true,
+  "updatedAt": "2026-10-15T17:08:13.443803+00:00",
+  "backendActivationReceipt": "docs/qa/2026-10-15/backend-release/activation-receipt.json"
+}

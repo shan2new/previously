@@ -1,6 +1,6 @@
 import { lstat, mkdir, readFile, writeFile } from 'node:fs/promises';
 import { homedir } from 'node:os';
-import { join, resolve } from 'node:path';
+import { dirname, join, resolve } from 'node:path';
 import { atomicJSON, privateDirectory, sha256 } from './common.mjs';
 const xml=(value)=>String(value).replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;');
 const item=(key,value)=>`<key>${xml(key)}</key>`+(Array.isArray(value)?'<array>'+value.map(v=>'<string>'+xml(v)+'</string>').join('')+'</array>':typeof value==='boolean'?value?'<true/>':'<false/>':typeof value==='number'?'<integer>'+value+'</integer>':typeof value==='object'?'<dict>'+Object.entries(value).map(([k,v])=>item(k,v)).join('')+'</dict>':'<string>'+xml(value)+'</string>');
@@ -20,7 +20,11 @@ export async function prepareInstall({serverDirectory,envFile,operationsDirector
     {...base,Label:'com.shan.previously.ops',ProgramArguments:[nodeBinary,join(serverDirectory,'ops/collect.mjs')],RunAtLoad:true,StartInterval:3600,ExitTimeOut:45},
   ];
   const hashes={};for(const job of jobs){const name=job.Label+'.plist';const content='<?xml version="1.0" encoding="UTF-8"?>\n<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">\n<plist version="1.0"><dict>'+Object.entries(job).map(([key,value])=>item(key,value)).join('')+'</dict></plist>\n';await writeFile(join(outputDirectory,name),content,{mode:0o600,flag:'wx'});hashes[name]=sha256(content);}
-  try{const oldInfo=await lstat(previousPlist);if(!oldInfo.isFile()||oldInfo.isSymbolicLink())throw new Error('unsafe rollback plist');const old=await readFile(previousPlist);const rollback=join(outputDirectory,'rollback');await privateDirectory(rollback);await writeFile(join(rollback,'com.shan.previously.plist'),old,{mode:0o600,flag:'wx'});hashes['rollback/com.shan.previously.plist']=sha256(old);}catch(error){if(error.code!=='ENOENT')throw error;}
+  for(const job of jobs){
+    const name=job.Label+'.plist';
+    const previous=job.Label==='com.shan.previously'?previousPlist:join(dirname(previousPlist),name);
+    try{const oldInfo=await lstat(previous);if(!oldInfo.isFile()||oldInfo.isSymbolicLink())throw new Error('unsafe rollback plist');const old=await readFile(previous);const rollback=join(outputDirectory,'rollback');await privateDirectory(rollback);await writeFile(join(rollback,name),old,{mode:0o600,flag:'wx'});hashes['rollback/'+name]=sha256(old);}catch(error){if(error.code!=='ENOENT')throw error;}
+  }
   await atomicJSON(join(outputDirectory,'candidate-manifest.json'),{version:1,preparedAt:new Date().toISOString(),serverDirectory,envFile,operationsDirectory,nodeBinary,files:hashes,installed:false});
   return {directory:outputDirectory,jobs:jobs.map(job=>job.Label),installed:false};
 }

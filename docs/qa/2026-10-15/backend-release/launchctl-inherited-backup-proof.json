@@ -1,0 +1,9 @@
+{
+  "measuredAt": "2026-10-15T16:55:42.272933+00:00",
+  "scope": "Only idle old-production Previously backup job; API and collector not stopped",
+  "usesActualRepairedHelperBootstrap": true,
+  "context": "inherited operator context; no environment printed or set",
+  "backupJobLoaded": true,
+  "bootstrapAttempts": [],
+  "productionApplicationDataWritten": false
+}

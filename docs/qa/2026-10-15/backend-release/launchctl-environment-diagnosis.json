@@ -1,0 +1,21 @@
+{
+  "measuredAt": "2026-10-15T16:52:22.109924+00:00",
+  "scope": "Previously idle scheduled backup job only; backend and collector stay running",
+  "tests": [
+    {
+      "context": "sanitized",
+      "returnCode": 0,
+      "stderr": ""
+    }
+  ],
+  "backupJobLoadedAfter": true,
+  "inheritedMacContextKeyPresence": {
+    "XPC_SERVICE_NAME": true,
+    "XPC_FLAGS": true,
+    "__CF_USER_TEXT_ENCODING": true,
+    "USER": true,
+    "LOGNAME": true,
+    "SECURITYSESSIONID": false,
+    "COMMAND_MODE": true
+  }
+}

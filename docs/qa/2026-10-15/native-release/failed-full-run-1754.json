@@ -1,0 +1,704 @@
+{
+  "schemaVersion": 1,
+  "recordedAt": "2026-10-15T19:01:01.932848+00:00",
+  "status": "failed",
+  "qualified": false,
+  "fullQualificationPassed": false,
+  "classification": "external_command_timeout_with_incomplete_third_seed_result",
+  "scope": "Synthetic loopback QA app only; this receipt does not qualify a production UI session, archive, upload, or live erasure.",
+  "runPath": "ios/Tools/qa/.runs/20261015T175438622566Z",
+  "runFinishedAt": "2026-10-15T18:57:39.542519+00:00",
+  "runnerExitCode": 1,
+  "configuration": "QA",
+  "bundleID": "com.cognipin.previously.qa",
+  "cliPackage": "xcodebuildmcp@2.7.0",
+  "candidateBuild": 17,
+  "sourceRevision": "57365d7783b90663815f3169b2a7d66e4af251cc",
+  "workingTreeDirty": true,
+  "sourceFingerprint": {
+    "sha256": "649ce5a703b568c40e7bc7baa3fd0857c88e92bc3b0c8a60761aae5408d68fd6",
+    "fileCount": 431
+  },
+  "readOnlyAuditCurrentFingerprint": {
+    "sha256": "649ce5a703b568c40e7bc7baa3fd0857c88e92bc3b0c8a60761aae5408d68fd6",
+    "fileCount": 431
+  },
+  "allFourPhaseFingerprintsMatch": true,
+  "directedPassed": 75,
+  "directedTotal": 75,
+  "directedFailed": 0,
+  "directedSkipped": 0,
+  "monkeyCompletedPassed": 2,
+  "monkeyRequested": 3,
+  "completedPhases": [
+    {
+      "name": "directed",
+      "seed": 20261006,
+      "randomDurationSeconds": 300,
+      "status": "passed",
+      "exitCode": 0,
+      "counts": {
+        "passed": 75,
+        "failed": 0,
+        "skipped": 0
+      },
+      "coverage": [
+        {
+          "version": 1,
+          "caseName": "account-delayed-write",
+          "seed": 20261006,
+          "durationSeconds": 47.57390606403351,
+          "completedActions": 17,
+          "unavailableActions": 0,
+          "assertions": 9,
+          "states": [
+            "anime-detail",
+            "home",
+            "library"
+          ]
+        },
+        {
+          "version": 1,
+          "caseName": "account-failed-retry",
+          "seed": 20261006,
+          "durationSeconds": 32.0310879945755,
+          "completedActions": 19,
+          "unavailableActions": 0,
+          "assertions": 9,
+          "states": [
+            "anime-detail",
+            "home",
+            "library"
+          ]
+        },
+        {
+          "version": 1,
+          "caseName": "admission-through",
+          "seed": 20261006,
+          "durationSeconds": 21.845953941345215,
+          "completedActions": 11,
+          "unavailableActions": 0,
+          "assertions": 5,
+          "states": [
+            "discover",
+            "library"
+          ]
+        },
+        {
+          "version": 1,
+          "caseName": "admission-next",
+          "seed": 20261006,
+          "durationSeconds": 13.874246001243591,
+          "completedActions": 10,
+          "unavailableActions": 0,
+          "assertions": 5,
+          "states": [
+            "discover"
+          ]
+        },
+        {
+          "version": 1,
+          "caseName": "admission-season",
+          "seed": 20261006,
+          "durationSeconds": 14.228380918502808,
+          "completedActions": 9,
+          "unavailableActions": 0,
+          "assertions": 4,
+          "states": [
+            "discover"
+          ]
+        },
+        {
+          "version": 1,
+          "caseName": "admission-cancel",
+          "seed": 20261006,
+          "durationSeconds": 13.139264106750488,
+          "completedActions": 9,
+          "unavailableActions": 0,
+          "assertions": 4,
+          "states": [
+            "discover"
+          ]
+        },
+        {
+          "version": 1,
+          "caseName": "admission-lost-receipt",
+          "seed": 20261006,
+          "durationSeconds": 13.615668892860413,
+          "completedActions": 9,
+          "unavailableActions": 0,
+          "assertions": 4,
+          "states": [
+            "discover"
+          ]
+        },
+        {
+          "version": 1,
+          "caseName": "admission-retry",
+          "seed": 20261006,
+          "durationSeconds": 18.589823961257935,
+          "completedActions": 12,
+          "unavailableActions": 0,
+          "assertions": 3,
+          "states": [
+            "discover",
+            "home"
+          ]
+        },
+        {
+          "version": 1,
+          "caseName": "admission-selected-second-season",
+          "seed": 20261006,
+          "durationSeconds": 18.72111701965332,
+          "completedActions": 12,
+          "unavailableActions": 0,
+          "assertions": 5,
+          "states": [
+            "discover"
+          ]
+        },
+        {
+          "version": 1,
+          "caseName": "delete-manual-apple-revocation",
+          "seed": 20261006,
+          "durationSeconds": 17.69275689125061,
+          "completedActions": 7,
+          "unavailableActions": 0,
+          "assertions": 1,
+          "states": [
+            "home"
+          ]
+        },
+        {
+          "version": 1,
+          "caseName": "delete-pending",
+          "seed": 20261006,
+          "durationSeconds": 16.369354009628296,
+          "completedActions": 7,
+          "unavailableActions": 0,
+          "assertions": 2,
+          "states": [
+            "home"
+          ]
+        },
+        {
+          "version": 1,
+          "caseName": "delete-uncertain-drop-after-commit-complete",
+          "seed": 20261006,
+          "durationSeconds": 23.79672110080719,
+          "completedActions": 8,
+          "unavailableActions": 0,
+          "assertions": 3,
+          "states": [
+            "home"
+          ]
+        },
+        {
+          "version": 1,
+          "caseName": "delete-uncertain-drop-after-commit-pending",
+          "seed": 20261006,
+          "durationSeconds": 23.777867078781128,
+          "completedActions": 8,
+          "unavailableActions": 0,
+          "assertions": 3,
+          "states": [
+            "home"
+          ]
+        },
+        {
+          "version": 1,
+          "caseName": "delete-refused",
+          "seed": 20261006,
+          "durationSeconds": 25.457412004470825,
+          "completedActions": 14,
+          "unavailableActions": 0,
+          "assertions": 6,
+          "states": [
+            "anime-detail",
+            "home",
+            "library"
+          ]
+        },
+        {
+          "version": 1,
+          "caseName": "delete-uncertain-proxy-forbidden-after-commit-complete",
+          "seed": 20261006,
+          "durationSeconds": 23.639138102531433,
+          "completedActions": 8,
+          "unavailableActions": 0,
+          "assertions": 3,
+          "states": [
+            "home"
+          ]
+        },
+        {
+          "version": 1,
+          "caseName": "delete-uncertain-empty-success-after-commit-complete",
+          "seed": 20261006,
+          "durationSeconds": 23.70198702812195,
+          "completedActions": 8,
+          "unavailableActions": 0,
+          "assertions": 3,
+          "states": [
+            "home"
+          ]
+        },
+        {
+          "version": 1,
+          "caseName": "obsolete-progress-retry",
+          "seed": 20261006,
+          "durationSeconds": 26.692795991897583,
+          "completedActions": 15,
+          "unavailableActions": 0,
+          "assertions": 11,
+          "states": [
+            "anime-detail",
+            "home",
+            "library"
+          ]
+        },
+        {
+          "version": 1,
+          "caseName": "account-switch",
+          "seed": 20261006,
+          "durationSeconds": 27.147139072418213,
+          "completedActions": 12,
+          "unavailableActions": 0,
+          "assertions": 3,
+          "states": [
+            "home",
+            "library"
+          ]
+        },
+        {
+          "version": 1,
+          "caseName": "lost-response",
+          "seed": 20261006,
+          "durationSeconds": 17.170804023742676,
+          "completedActions": 7,
+          "unavailableActions": 0,
+          "assertions": 5,
+          "states": [
+            "anime-detail",
+            "library"
+          ]
+        },
+        {
+          "version": 1,
+          "caseName": "persistent-progress-operation",
+          "seed": 20261006,
+          "durationSeconds": 21.99332892894745,
+          "completedActions": 12,
+          "unavailableActions": 0,
+          "assertions": 6,
+          "states": [
+            "anime-detail",
+            "home",
+            "library"
+          ]
+        },
+        {
+          "version": 1,
+          "caseName": "late-search",
+          "seed": 20261006,
+          "durationSeconds": 36.37770700454712,
+          "completedActions": 22,
+          "unavailableActions": 0,
+          "assertions": 26,
+          "states": [
+            "discover",
+            "library"
+          ]
+        },
+        {
+          "version": 1,
+          "caseName": "retry-during-newer-progress",
+          "seed": 20261006,
+          "durationSeconds": 28.77018094062805,
+          "completedActions": 18,
+          "unavailableActions": 0,
+          "assertions": 10,
+          "states": [
+            "anime-detail",
+            "home",
+            "library"
+          ]
+        },
+        {
+          "version": 1,
+          "caseName": "progress-undo",
+          "seed": 20261006,
+          "durationSeconds": 20.468729972839355,
+          "completedActions": 10,
+          "unavailableActions": 0,
+          "assertions": 9,
+          "states": [
+            "anime-detail",
+            "home",
+            "library"
+          ]
+        },
+        {
+          "version": 1,
+          "caseName": "rapid-progress",
+          "seed": 20261006,
+          "durationSeconds": 18.829633951187134,
+          "completedActions": 10,
+          "unavailableActions": 0,
+          "assertions": 6,
+          "states": [
+            "anime-detail",
+            "library"
+          ]
+        },
+        {
+          "version": 1,
+          "caseName": "latest-failure-retry",
+          "seed": 20261006,
+          "durationSeconds": 20.754342079162598,
+          "completedActions": 18,
+          "unavailableActions": 0,
+          "assertions": 11,
+          "states": [
+            "anime-detail",
+            "home",
+            "library"
+          ]
+        },
+        {
+          "version": 1,
+          "caseName": "kill-before-receipt",
+          "seed": 20261006,
+          "durationSeconds": 19.843881011009216,
+          "completedActions": 10,
+          "unavailableActions": 0,
+          "assertions": 10,
+          "states": [
+            "anime-detail",
+            "home",
+            "library"
+          ]
+        },
+        {
+          "version": 1,
+          "caseName": "kill-before-catch",
+          "seed": 20261006,
+          "durationSeconds": 19.644187927246094,
+          "completedActions": 11,
+          "unavailableActions": 0,
+          "assertions": 10,
+          "states": [
+            "anime-detail",
+            "home",
+            "library"
+          ]
+        },
+        {
+          "version": 1,
+          "caseName": "kill-with-newer-queued-intent",
+          "seed": 20261006,
+          "durationSeconds": 20.08457601070404,
+          "completedActions": 12,
+          "unavailableActions": 0,
+          "assertions": 12,
+          "states": [
+            "anime-detail",
+            "home",
+            "library"
+          ]
+        },
+        {
+          "version": 1,
+          "caseName": "files-all-skipped-import",
+          "seed": 20261006,
+          "durationSeconds": 19.563205003738403,
+          "completedActions": 8,
+          "unavailableActions": 0,
+          "assertions": 2,
+          "states": [
+            "home"
+          ]
+        },
+        {
+          "version": 1,
+          "caseName": "files-export-saved-copy",
+          "seed": 20261006,
+          "durationSeconds": 47.898470997810364,
+          "completedActions": 18,
+          "unavailableActions": 0,
+          "assertions": 1,
+          "states": [
+            "home"
+          ]
+        },
+        {
+          "version": 1,
+          "caseName": "files-partial-import",
+          "seed": 20261006,
+          "durationSeconds": 19.2391939163208,
+          "completedActions": 9,
+          "unavailableActions": 0,
+          "assertions": 2,
+          "states": [
+            "home"
+          ]
+        },
+        {
+          "version": 1,
+          "caseName": "widget-deletion-refused",
+          "seed": 20261006,
+          "durationSeconds": 19.52496099472046,
+          "completedActions": 9,
+          "unavailableActions": 0,
+          "assertions": 8,
+          "states": [
+            "home"
+          ]
+        },
+        {
+          "version": 1,
+          "caseName": "widget-logout-offline-b",
+          "seed": 20261006,
+          "durationSeconds": 27.7761709690094,
+          "completedActions": 10,
+          "unavailableActions": 0,
+          "assertions": 21,
+          "states": [
+            "home"
+          ]
+        },
+        {
+          "version": 1,
+          "caseName": "widget-same-owner-offline",
+          "seed": 20261006,
+          "durationSeconds": 9.665037035942078,
+          "completedActions": 1,
+          "unavailableActions": 0,
+          "assertions": 6,
+          "states": []
+        },
+        {
+          "version": 1,
+          "caseName": "widget-deletion-hold",
+          "seed": 20261006,
+          "durationSeconds": 19.52524995803833,
+          "completedActions": 8,
+          "unavailableActions": 0,
+          "assertions": 15,
+          "states": [
+            "home"
+          ]
+        }
+      ],
+      "mutationAudit": {
+        "passed": true,
+        "protectedWrites": 48,
+        "uniqueOperations": 27,
+        "failures": []
+      },
+      "sourceFingerprint": {
+        "sha256": "649ce5a703b568c40e7bc7baa3fd0857c88e92bc3b0c8a60761aae5408d68fd6",
+        "fileCount": 431
+      },
+      "primaryNamedCasesPath": "ios/Tools/qa/.runs/20261015T175438622566Z/directed-named-cases.json",
+      "primaryNamedCasesSHA256": "8acf7da276faace5a99472cbcd771c134a8968a6ba1af16be867559bdc852795",
+      "resultBundlePath": "ios/Tools/qa/.runs/20261015T175438622566Z/directed.xcresult",
+      "resultBundleInfoPlistPresent": true
+    },
+    {
+      "name": "monkey-20261006",
+      "seed": 20261006,
+      "randomDurationSeconds": 300,
+      "status": "passed",
+      "exitCode": 0,
+      "counts": {
+        "passed": 1,
+        "failed": 0,
+        "skipped": 0
+      },
+      "coverage": [
+        {
+          "version": 1,
+          "caseName": "monkey",
+          "seed": 20261006,
+          "durationSeconds": 500.9000540971756,
+          "completedActions": 122,
+          "unavailableActions": 28,
+          "assertions": 89,
+          "states": [
+            "anime-detail",
+            "discover",
+            "feed",
+            "home",
+            "library",
+            "schedule"
+          ]
+        }
+      ],
+      "mutationAudit": {
+        "passed": true,
+        "protectedWrites": 58,
+        "uniqueOperations": 37,
+        "failures": []
+      },
+      "sourceFingerprint": {
+        "sha256": "649ce5a703b568c40e7bc7baa3fd0857c88e92bc3b0c8a60761aae5408d68fd6",
+        "fileCount": 431
+      },
+      "primaryNamedCasesPath": "ios/Tools/qa/.runs/20261015T175438622566Z/monkey-20261006-named-cases.json",
+      "primaryNamedCasesSHA256": "fd00b3f9691b88ad6af212c29766d360f08d19cc8849eb2e4435c359afc0913a",
+      "resultBundlePath": "ios/Tools/qa/.runs/20261015T175438622566Z/monkey-20261006.xcresult",
+      "resultBundleInfoPlistPresent": true
+    },
+    {
+      "name": "monkey-60102620",
+      "seed": 60102620,
+      "randomDurationSeconds": 300,
+      "status": "passed",
+      "exitCode": 0,
+      "counts": {
+        "passed": 1,
+        "failed": 0,
+        "skipped": 0
+      },
+      "coverage": [
+        {
+          "version": 1,
+          "caseName": "monkey",
+          "seed": 60102620,
+          "durationSeconds": 469.14619398117065,
+          "completedActions": 31,
+          "unavailableActions": 3,
+          "assertions": 13,
+          "states": [
+            "anime-detail",
+            "discover",
+            "feed",
+            "home",
+            "library",
+            "schedule"
+          ]
+        }
+      ],
+      "mutationAudit": {
+        "passed": true,
+        "protectedWrites": 60,
+        "uniqueOperations": 39,
+        "failures": []
+      },
+      "sourceFingerprint": {
+        "sha256": "649ce5a703b568c40e7bc7baa3fd0857c88e92bc3b0c8a60761aae5408d68fd6",
+        "fileCount": 431
+      },
+      "primaryNamedCasesPath": "ios/Tools/qa/.runs/20261015T175438622566Z/monkey-60102620-named-cases.json",
+      "primaryNamedCasesSHA256": "db65ac4d2d4c59b654ad2b32d05355b9f6d002316f3bc2c8458004c679f1c143",
+      "resultBundlePath": "ios/Tools/qa/.runs/20261015T175438622566Z/monkey-60102620.xcresult",
+      "resultBundleInfoPlistPresent": true
+    }
+  ],
+  "incompletePhase": {
+    "name": "monkey-38654705664",
+    "seed": 38654705664,
+    "status": "incomplete_timeout",
+    "passed": false,
+    "randomDurationBudgetSeconds": 300,
+    "externalCommandBudgetSeconds": 1800,
+    "exitCode": 124,
+    "reason": "The native test command exceeded its 1800-second budget.",
+    "counts": {},
+    "verifiedTestCases": [],
+    "coverage": [],
+    "completedActions": null,
+    "assertions": null,
+    "visitedStates": null,
+    "finalCanonicalOracleVerified": null,
+    "coldRelaunchVerified": null,
+    "testCaseStartedObserved": true,
+    "testCaseCompletedObserved": false,
+    "qaSummaryObserved": false,
+    "recordedProductAssertionFailureObserved": false,
+    "productCause": "Undetermined. Repeated XCTest animation-idle waits are observed; they do not establish an application assertion failure or a passing seed.",
+    "rawToolJSONPath": "ios/Tools/qa/.runs/20261015T175438622566Z/monkey-38654705664.json",
+    "rawToolJSONBytes": 0,
+    "resultBundlePath": "ios/Tools/qa/.runs/20261015T175438622566Z/monkey-38654705664.xcresult",
+    "resultBundleDirectoryPresent": true,
+    "resultBundleInfoPlistPresent": false,
+    "partialResultBundleFileCount": 42,
+    "primaryResultError": "Primary result cases could not be verified.",
+    "namedCaseReceiptPresent": false,
+    "mutationAudit": {
+      "passed": true,
+      "protectedWrites": 63,
+      "uniqueOperations": 42,
+      "failures": []
+    },
+    "mutationAuditBoundary": "This cumulative metadata audit passed; it is not a completion receipt or substitute for the missing seed assertions.",
+    "mcpLogPath": "/Users/shan2new/Library/Developer/XcodeBuildMCP/workspaces/previously-2bd4c895d527/logs/test_sim_2026-10-15T18-27-40-658Z_pid58655_205fc48a.log",
+    "mcpLogSHA256": "13e98f5f7e1257570087843a95a8594cdf1b9e0bed99b11aa5b13e62a92dd863",
+    "mcpLogLines": 870,
+    "animationIdleWarningCount": 28,
+    "firstAnimationIdleWarning": {
+      "line": 619,
+      "testElapsedSeconds": 101.22
+    },
+    "lastAnimationIdleWarning": {
+      "line": 866,
+      "testElapsedSeconds": 1735.47
+    },
+    "observedIdleWaitPattern": "Approximately 60 seconds before and after subsequent UI events, including chunked long-query typing.",
+    "firstWarningContext": "Close search event completed synthesis at t40.89; idle wait t41.18 ended with warning t101.22.",
+    "tailContext": "Library tab event synthesized at t1735.55; log ends in app-idle wait at t1735.83 with no completed test result.",
+    "unverifiedFinalChecks": [
+      "canonical progress and membership",
+      "not-erased oracle",
+      "cold restart UI/account snapshot",
+      "final checked-state coverage assertions"
+    ]
+  },
+  "cleanup": {
+    "fixtureStopped": true,
+    "fixtureStoppedEvidence": "Runner finally block records fixture is absent or owned child poll is non-null; no cleanup error was recorded.",
+    "cleanupError": null,
+    "qaAppStoppedByThisAudit": false,
+    "qaAppRunningStateAfterTimeout": null,
+    "preparedStopCommandSupported": true,
+    "preparedStopCommandExecuted": false,
+    "preparedStopCommandArgv": [
+      "/opt/homebrew/opt/node@24/bin/node",
+      "/Users/shan2new/.npm/_npx/6389024b78b4e852/node_modules/xcodebuildmcp/build/cli.js",
+      "simulator",
+      "stop",
+      "--simulator-id",
+      "0031ED81-55FB-4E88-A0D1-012412C64409",
+      "--bundle-id",
+      "com.cognipin.previously.qa",
+      "--output",
+      "json"
+    ],
+    "stopCapabilityEvidence": "Installed pinned CLI simulator stop --help and simulator/stop_app_sim.js schema inspected read-only; explicit simulatorId and bundleId are supported."
+  },
+  "auditActions": {
+    "productionCalls": 0,
+    "nativeUIActions": 0,
+    "builds": 0,
+    "tests": 0,
+    "sourceEdits": 0,
+    "fixtureStarts": 0,
+    "stopCommandsExecuted": 0
+  },
+  "primaryEvidence": [
+    {
+      "path": "ios/Tools/qa/.runs/20261015T175438622566Z/ledger.json",
+      "sha256": "5543e262c6ac83724881ec68bf3d6ee94af4cf2c7432fd216faa2ab4f8128434"
+    },
+    {
+      "path": "ios/Tools/qa/run-native-qa.py",
+      "sha256": "8e09a2cfc4281c64d8184f1171d445918ceb42d24f18244933b7ba81c5eac0d6"
+    },
+    {
+      "path": "ios/UITests/PreviouslyMonkeyTests.swift",
+      "sha256": "2e8e0525b35f3a8850a9d4e383dcffc09ae401de1eb15a70fd3250f4fa827fa1"
+    }
+  ],
+  "qualificationBoundary": "75 directed tests and two complete seeds passed on the recorded unchanged fingerprint. The requested three-seed full qualification failed because the third seed has no verifiable final result. Do not report 3/3 or infer a pass from partial actions."
+}

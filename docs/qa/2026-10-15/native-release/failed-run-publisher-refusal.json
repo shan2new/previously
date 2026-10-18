@@ -1,0 +1,21 @@
+{
+  "checkedAt": "2026-10-15T19:05:09.999573+00:00",
+  "argv": [
+    "python3",
+    "docs/qa/2026-10-15/native-release/summarize-native.py",
+    "--run-dir",
+    "ios/Tools/qa/.runs/20261015T175438622566Z",
+    "--verify-only"
+  ],
+  "exitCode": 1,
+  "result": {
+    "qualified": false,
+    "status": "evidence_rejected",
+    "reason": "All-run ledger is not completed/passed.",
+    "successReceiptsWritten": false
+  },
+  "nativeSuccessReceiptExists": false,
+  "filesSuccessReceiptExists": false,
+  "expectedRefusalObserved": true,
+  "boundary": "Read-only verification of actual failed evidence; does not run tests or waive missing qualification."
+}

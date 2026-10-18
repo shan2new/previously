@@ -1,0 +1,49 @@
+{
+  "criteria": {
+    "maxCombinedNativeCPUPercentOfOneCore": 100,
+    "maxBuildProcessCPUPercentOfOneCore": 2,
+    "maxAppTestProcessCPUPercentOfOneCore": 2,
+    "sampleSpacingSeconds": 15,
+    "boundary": "Preflight only; normal resident shared services remain. No process is stopped or reconfigured."
+  },
+  "samples": [
+    {
+      "at": "2026-10-15T16:26:35.762973+00:00",
+      "classes": {
+        "native build/editor compiler; project unknown": {
+          "count": 3,
+          "cpuPercentOfOneCoreSum": 0.0,
+          "maxProcessCPUPercentOfOneCore": 0.0
+        },
+        "simulator services; project unknown": {
+          "count": 6,
+          "cpuPercentOfOneCoreSum": 0.0,
+          "maxProcessCPUPercentOfOneCore": 0.0
+        }
+      },
+      "combinedNativeCPUPercentOfOneCore": 0.0,
+      "quietEnough": true
+    },
+    {
+      "at": "2026-10-15T16:26:50.828134+00:00",
+      "classes": {
+        "native build/editor compiler; project unknown": {
+          "count": 3,
+          "cpuPercentOfOneCoreSum": 0.0,
+          "maxProcessCPUPercentOfOneCore": 0.0
+        },
+        "simulator services; project unknown": {
+          "count": 6,
+          "cpuPercentOfOneCoreSum": 0.0,
+          "maxProcessCPUPercentOfOneCore": 0.0
+        }
+      },
+      "combinedNativeCPUPercentOfOneCore": 0.0,
+      "quietEnough": true
+    }
+  ],
+  "quietEnough": true,
+  "productionMutation": false,
+  "rawArgvCaptured": false,
+  "unrelatedProcessesStopped": false
+}

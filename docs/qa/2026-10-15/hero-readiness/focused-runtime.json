@@ -1,0 +1,36 @@
+{
+  "build": "17",
+  "status": "passed",
+  "counts": {
+    "passed": 2,
+    "failed": 0,
+    "skipped": 0
+  },
+  "originalLedgerPath": "ios/Tools/qa/.runs/20261015T173147527864Z/ledger.json",
+  "sourceFingerprint": {
+    "sha256": "3ad6f80e294c418dca7a81abb969a4bc2eb3976fe514c304b8b781a38cb1c4c0",
+    "fileCount": 431
+  },
+  "testCases": [
+    {
+      "suite": "PreviouslyAccountIsolationTests",
+      "test": "testOldOwnerDelayedWriteCannotRetryWithNewOwnerToken",
+      "status": "passed",
+      "durationMs": 51994
+    },
+    {
+      "suite": "PreviouslyAccountIsolationTests",
+      "test": "testOldOwnerFailedRetryAndCacheDoNotAppearForNewOwner",
+      "status": "passed",
+      "durationMs": 46484
+    }
+  ],
+  "fixtureStopped": true,
+  "mutationAudit": {
+    "passed": true,
+    "protectedWrites": 4,
+    "uniqueOperations": 2,
+    "failures": []
+  },
+  "boundary": "Two focused real UI fault tests only; full75 and three monkey seeds require their own completed unchanged all-run."
+}

@@ -1,0 +1,18 @@
+{
+  "criteria": {
+    "maxRSSGrowthOverWarmupMiB": 128,
+    "maxHeapUsedGrowthOverWarmupMiB": 64,
+    "recoveryMedianOverSteadyAllowanceMiB": 32,
+    "lastFourMinuteRecoveryRSSSlopeMiBPerMinute": 2
+  },
+  "qualifiedDuration": true,
+  "passed": true,
+  "maxRSSMiB": 178.984375,
+  "maxHeapUsedMiB": 103.9266128540039,
+  "warmupBaselineRSSMiB": 172.421875,
+  "warmupBaselineHeapUsedMiB": 69.83966827392578,
+  "lastMinuteSustainedMedianRSSMiB": 172.1875,
+  "lastMinuteRecoveryMedianRSSMiB": 121.34375,
+  "lastFourMinuteRecoveryRSSSlopeMiBPerMinute": -5.327393730014382,
+  "meaning": "Observed plateau/recovery within23minutes, not proof of unlimited uptime."
+}

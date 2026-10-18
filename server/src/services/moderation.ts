@@ -1,4 +1,4 @@
-import { and, asc, desc, eq, inArray, isNull, sql } from 'drizzle-orm'
+import { and, asc, desc, eq, inArray, isNull, lte, sql } from 'drizzle-orm'
 import { alias } from 'drizzle-orm/pg-core'
 import { db } from '../db/index.js'
 import { comments, moderationBans, notifications, reports, userProfiles, users } from '../db/schema.js'
@@ -392,7 +392,9 @@ export async function staleOpenReports(olderThan: Date): Promise<{ count: number
       oldestAt: sql<number | null>`(extract(epoch from min(${reports.createdAt})) * 1000)::float8`,
     })
     .from(reports)
-    .where(and(isNull(reports.resolvedAt), sql`${reports.createdAt} <= ${olderThan}`))
+    // Bind through the timestamp column's encoder. A bare Date interpolated into raw SQL reaches
+    // postgres-js unsafe parameters unencoded and fails even when the reports table is empty.
+    .where(and(isNull(reports.resolvedAt), lte(reports.createdAt, olderThan)))
   const oldest = row?.oldestAt
   return { count: row?.count ?? 0, oldestAt: oldest == null ? null : Number(oldest) }
 }

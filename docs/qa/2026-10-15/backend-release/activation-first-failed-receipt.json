@@ -1,0 +1,41 @@
+{
+  "startedAt": "2026-10-15T16:50:31.097854+00:00",
+  "activated": false,
+  "rollbackPerformed": false,
+  "applicationDataManuallyWritten": false,
+  "productionRestorePerformed": false,
+  "configurationChanged": false,
+  "schemaChanged": false,
+  "artifact": "/Users/shan2new/Infra/previously/releases/20261015T152739Z/server",
+  "sourceSHA256": "1c93625ad9d87eb48a5fcc300781d0cb8235f7f1bea86ae35ec72b5a198eaeb4",
+  "capacityReceipt": "load-testing/final-results.json",
+  "candidateDirectory": "/Users/shan2new/Infra/previously/install-candidates/20261015T152739Z",
+  "previousArtifact": "/Users/shan2new/Infra/previously/releases/20261006T123751Z/server",
+  "artifactFilesVerified": 466,
+  "preactivationBackupRestore": {
+    "createdAt": "2026-10-15T16:50:32.139Z",
+    "manifestPath": "/Users/shan2new/Infra/previously/backups/previously-20261015T165031244Z-adb0724925fd.manifest.json",
+    "bytes": 13850011,
+    "sha256": "baaafa00d1558ab3aaf65191a67af0612cab44abfec1d9425a6ce4777e9d7e22",
+    "tocEntries": 190,
+    "restore": {
+      "scratch": "previously_restore_20261015t165032_e30364b6e2db",
+      "usersBefore": 17,
+      "usersAfter": 17,
+      "deletedUsersSwept": 0,
+      "ledgerRecords": 0,
+      "restoredDeletionRecords": 0,
+      "deletedIdentitiesRemaining": 0,
+      "sha256": "baaafa00d1558ab3aaf65191a67af0612cab44abfec1d9425a6ce4777e9d7e22"
+    },
+    "restoreElapsedSeconds": 1.263770959,
+    "scratchRemoved": true
+  },
+  "oldJobsStoppedAt": "2026-10-15T16:50:33.466932+00:00",
+  "installedAt": "2026-10-15T16:50:33.468728+00:00",
+  "failureClass": "RuntimeError",
+  "failedAt": "2026-10-15T16:50:33.472991+00:00",
+  "rollbackPointersRestored": true,
+  "rollbackStartedAt": "2026-10-15T16:50:33.491826+00:00",
+  "rollbackFailureClass": "RuntimeError"
+}

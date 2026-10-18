@@ -1,0 +1,37 @@
+{
+  "preparedAt": "2026-10-15T15:27:44.182788+00:00",
+  "runtime": "v24.21.0",
+  "artifact": "/Users/shan2new/Infra/previously/releases/20261015T152739Z/server",
+  "sourceSHA256": "1c93625ad9d87eb48a5fcc300781d0cb8235f7f1bea86ae35ec72b5a198eaeb4",
+  "installed": false,
+  "productionCredentialsCopied": false,
+  "productionDependenciesOnly": true,
+  "productionAuditAdvisories": 0,
+  "operationsChecksPassed": 26,
+  "serverUnitsPassed": 1340,
+  "serverUnitFiles": 81,
+  "protocolChecksPassed": 39,
+  "recoveryChecksPassed": 6,
+  "contentPolicyChecksPassed": 27,
+  "fullCapacityQualification": "pending CPU-quiet run",
+  "productionDataWritten": false,
+  "priorProductionArtifact": "/Users/shan2new/Infra/previously/releases/20261006T123751Z/server",
+  "candidateDirectory": "/Users/shan2new/Infra/previously/install-candidates/20261015T152739Z",
+  "rollbackAllThreePlistsCaptured": true,
+  "statusRule": {
+    "previousInstalledFunctionAbsent": true,
+    "candidateDerivedStatusFunctionsPresent": true
+  },
+  "cronFix": {
+    "cause": "unencoded Date in raw Drizzle SQL parameter",
+    "fix": "timestamp column lte encoder",
+    "doesNotDisableJobOrSwallowOtherErrors": true
+  },
+  "schemaMigrationsRequired": false,
+  "dependencyPatch": {
+    "package": "@modelcontextprotocol/sdk",
+    "from": "1.29.0",
+    "to": "1.32.1",
+    "advisory": "https://github.com/modelcontextprotocol/typescript-sdk/security/advisories/GHSA-6qxp-vccf-f47h"
+  }
+}

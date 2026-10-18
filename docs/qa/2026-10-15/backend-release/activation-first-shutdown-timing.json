@@ -1,0 +1,10 @@
+{
+  "oldJobsStoppedAt": "2026-10-15T16:50:33.466932+00:00",
+  "safeEvents": [
+    {
+      "time": 1792083033473,
+      "event": "runtime.shutdown_started",
+      "level": 30
+    }
+  ]
+}

@@ -1,0 +1,112 @@
+{
+  "reviewedAt": "2026-10-15T18:51:37.261778+00:00",
+  "status": "evidence_chain_verified",
+  "readOnlyInspection": true,
+  "build": "17",
+  "checks": {
+    "tool_stdout_hash_matches_invocation": true,
+    "tool_stderr_hash_matches_invocation": true,
+    "tool_process_exit0_and_didError_false": true,
+    "raw_log_hash_matches_inspection": true,
+    "tool_points_to_same_raw_log": true,
+    "verifier_hash_matches_inspection": true,
+    "source_manifest_hash_matches_both_receipts": true,
+    "one_actual_archive_build_command": true,
+    "actual_command_matches_saved_request": true,
+    "archive_and_build_success_banners": true,
+    "both_modules_observed_release_device_no_qa_debug": true,
+    "compiler_summary_matches_inspection": true,
+    "all_596_manifest_files_currently_match": true,
+    "native_fingerprint_matches_manifest_and_completed_phases": true,
+    "source_head_matches_manifest": true,
+    "recorded_times_are_ordered": true,
+    "inspection_has_56_passed_checks": true,
+    "inspected_app_widget_bytes_still_match": true,
+    "inspected_privacy_bytes_still_match": true,
+    "production_public_clerk_key_matches16_without_value_output": true,
+    "organizer_copy_73_regular_files_exactly_match": true,
+    "no_recognized_secret_patterns_in_reviewed_receipts_or_raw_log": true
+  },
+  "failedChecks": [],
+  "observations": {
+    "actualInvocation": {
+      "scheme": "Previously",
+      "configuration": "Release",
+      "destination": "generic/platform=iOS",
+      "jobs": "1",
+      "actions": [
+        "archive",
+        "build"
+      ],
+      "archivePath": "/Users/shan2new/Projects/previously/ios/build/Previously-17.xcarchive",
+      "derivedDataPath": "/Users/shan2new/Projects/previously/ios/build/DerivedData",
+      "lockedPackageFlags": [
+        "-disableAutomaticPackageResolution",
+        "-onlyUsePackageVersionsFromResolvedFile"
+      ]
+    },
+    "toolDidError": false,
+    "toolExitCode": 0,
+    "archiveCreatedAt": "2026-10-15T18:44:40+00:00",
+    "sourceCapturedAt": "2026-10-15T18:41:57.688531+00:00",
+    "organizerCopyAt": "2026-10-15T18:47:36.340540+00:00",
+    "reportedArtifactChecks": {
+      "passed": 56,
+      "failed": 0,
+      "independentlyRerun": false
+    },
+    "compilerInvocationsByModule": {
+      "Previously": 6,
+      "PreviouslyWidgets": 6
+    },
+    "manifestFileCount": 596,
+    "sourceFingerprint": {
+      "sha256": "649ce5a703b568c40e7bc7baa3fd0857c88e92bc3b0c8a60761aae5408d68fd6",
+      "fileCount": 431
+    },
+    "sourceChangedPaths": [],
+    "organizerRegularFilesCompared": 73,
+    "nativeQASnapshot": {
+      "status": "running",
+      "finishedAt": null,
+      "directedCounts": {
+        "passed": 75,
+        "failed": 0,
+        "skipped": 0
+      },
+      "completedMonkeySeeds": [
+        20261006,
+        60102620
+      ],
+      "completeQualification": false
+    },
+    "secretPatternHits": {
+      "private_key_pem": 0,
+      "clerk_secret_key": 0,
+      "bearer_credential": 0,
+      "apple_client_secret_jwt_assignment": 0
+    }
+  },
+  "provenance": {
+    "invocationPath": "docs/qa/2026-10-15/consumer-release/archive17-attempt1/invocation.json",
+    "invocationSHA256": "96595ea0cc59bbbf71896ddbdc33bf6390a24df594e13e945af378cff303d8ea",
+    "inspectionPath": "docs/qa/2026-10-15/consumer-release/archive17-inspection.json",
+    "inspectionSHA256": "09f18e567b87cb7275a7dff3e29da6fc537bcc75efd0bdce70815d80fbfff660",
+    "sourceManifestPath": "docs/qa/2026-10-15/consumer-release/archive17-source-manifest.json",
+    "sourceManifestFileSHA256": "82e0ee042b690cc849b9d9171a966a98c58fb1c0f0e6fb1b72bad3a5ca77ef50",
+    "compilerLogPath": "/Users/shan2new/Library/Developer/XcodeBuildMCP/workspaces/previously-2bd4c895d527/logs/build_device_2026-10-15T18-42-10-076Z_pid65651_1f87760a.log",
+    "compilerLogSHA256": "884a23e7f3f06f9c3da1b1866ca3725aff0e1b7f2bc1f430f3f93af60ccd1ed2",
+    "organizerReceiptPath": "docs/qa/2026-10-15/consumer-release/archive17-organizer-copy.json",
+    "organizerReceiptSHA256": "2307d40f4a985820cea3bc8fd7ee9f10425d0b0bcd5a4f2bdf9b6d853bc81786",
+    "nativeLedgerPath": "ios/Tools/qa/.runs/20261015T175438622566Z/ledger.json",
+    "nativeLedgerSnapshotSHA256": "436994a29b2cc514fef8339268c54e083c71f396fb13b98ea702d1d392c16c6d"
+  },
+  "boundaries": [
+    "The 56 artifact/signing checks were reviewed and their relevant bytes rehashed; codesign, profile decoding, Mach-O and all 56 checks were not rerun.",
+    "The actual supported device-build CLI passed archive plus build through extraArgs. Actual jobs=1 differs from the earlier prepared jobs=2 plan. No export or upload action is present.",
+    "The local source manifest was captured before archive creation while the third monkey seed was active. It proves listed-file continuity when rehashed; it does not prove completed full QA or cryptographically bind all compiler inputs to the Mach-O.",
+    "QA snapshot was still running with 75 directed and two fixed monkey seeds passed. This review cannot publish full native qualification.",
+    "The verified Organizer archive copy is not evidence of upload, distribution signing, TestFlight processing, Apple review, runtime launch, production authentication, physical widgets or real-account erasure.",
+    "The recognized-secret scan is bounded pattern screening, not a proof that every possible secret is absent. Public production configuration values were compared without printing their contents."
+  ]
+}

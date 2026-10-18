@@ -1,0 +1,33 @@
+{
+  "checkedAt": "2026-10-15T17:10:24.635381+00:00",
+  "status": "preparation_only",
+  "syntheticEvidenceGuardTests": {
+    "passed": 8,
+    "failed": 0,
+    "nativeCommandsMockedOrNotCalled": true
+  },
+  "historicalActualLedgerRejected": {
+    "path": "ios/Tools/qa/.runs/20261006T130049100512Z/ledger.json",
+    "passedDirectedCases": 42,
+    "exitCode": 1,
+    "successReceiptPublished": false
+  },
+  "currentDirectedSourceNames": 75,
+  "actualFinalAllRunQualified": false,
+  "nativeOrCompilerOrSimulatorActivity": false,
+  "sourceEdits": false,
+  "files": [
+    {
+      "path": "docs/qa/2026-10-15/native-release/summarize-native.py",
+      "sha256": "c35d05e94a2480a5126adc66dd8551aa66b2aa10f6f5e139de27cd00edb6d257"
+    },
+    {
+      "path": "docs/qa/2026-10-15/native-release/test_summarize_native.py",
+      "sha256": "47f125ecc955778eafcd9f2d3d01bf4d4d5c20c7e40702700f78fd3aa2c297e2"
+    },
+    {
+      "path": "docs/qa/2026-10-15/native-release/receipts.md",
+      "sha256": "fa15d72d926f1f200ed0194879bcf2828b8379844d7fe91cee123cb284a35ad7"
+    }
+  ]
+}

@@ -1,0 +1,156 @@
+{
+  "checkedAt": "2026-10-15T18:54:44.555393+00:00",
+  "status": "compile_checks_passed",
+  "build": "17",
+  "configuration": "Release",
+  "appPath": "/Users/shan2new/Projects/previously/ios/build/DerivedData/Build/Products/Release-iphonesimulator/Previously.app",
+  "checks": {
+    "toolExitZero": true,
+    "toolNoError": true,
+    "buildSucceededMarker": true,
+    "productionAPI": true,
+    "livePublicKeyMatches16": true,
+    "canonicalPrivacy": true,
+    "canonicalTerms": true,
+    "fileSharingAbsentOrFalse": true,
+    "openingDocumentsAbsentOrFalse": true,
+    "all596CapturedInputsStillMatch": true,
+    "appBundleCorrect": true,
+    "appVersion17": true,
+    "appMin18": true,
+    "appSimulatorPlatform": true,
+    "appSignatureValid": true,
+    "appIncludesHostArm64": true,
+    "widgetBundleCorrect": true,
+    "widgetVersion17": true,
+    "widgetMin18": true,
+    "widgetSimulatorPlatform": true,
+    "widgetSignatureValid": true,
+    "widgetIncludesHostArm64": true,
+    "bothRuntimeCompilerModulesObserved": true,
+    "observedNoDebugOrQAFlags": true,
+    "observedReleaseSimulatorMin18Compilation": true
+  },
+  "failedChecks": [],
+  "targets": [
+    {
+      "kind": "app",
+      "binarySHA256": "634e25090d693859edda4c5f16129ac322a5134e709ce03ed79798fa24c3bba3",
+      "architectures": [
+        "x86_64",
+        "arm64"
+      ],
+      "machOBuildVersions": [
+        [
+          "7",
+          "18.0"
+        ],
+        [
+          "7",
+          "18.0"
+        ]
+      ]
+    },
+    {
+      "kind": "widget",
+      "binarySHA256": "1f6a1b4003756fd20b4fb6da6b5bd4fa4b1a970b94bc8d27d3a10b646c0f3548",
+      "architectures": [
+        "x86_64",
+        "arm64"
+      ],
+      "machOBuildVersions": [
+        [
+          "7",
+          "18.0"
+        ],
+        [
+          "7",
+          "18.0"
+        ]
+      ]
+    }
+  ],
+  "observedCompilerModules": {
+    "Previously": [
+      {
+        "defines": [],
+        "target": "arm64-apple-ios18.0-simulator",
+        "releaseSimulatorObjectOutput": true
+      },
+      {
+        "defines": [],
+        "target": "x86_64-apple-ios18.0-simulator",
+        "releaseSimulatorObjectOutput": true
+      },
+      {
+        "defines": [],
+        "target": "x86_64-apple-ios18.0-simulator",
+        "releaseSimulatorObjectOutput": true
+      },
+      {
+        "defines": [],
+        "target": "x86_64-apple-ios18.0-simulator",
+        "releaseSimulatorObjectOutput": true
+      },
+      {
+        "defines": [],
+        "target": "arm64-apple-ios18.0-simulator",
+        "releaseSimulatorObjectOutput": true
+      },
+      {
+        "defines": [],
+        "target": "arm64-apple-ios18.0-simulator",
+        "releaseSimulatorObjectOutput": true
+      }
+    ],
+    "PreviouslyWidgets": [
+      {
+        "defines": [],
+        "target": "arm64-apple-ios18.0-simulator",
+        "releaseSimulatorObjectOutput": true
+      },
+      {
+        "defines": [],
+        "target": "x86_64-apple-ios18.0-simulator",
+        "releaseSimulatorObjectOutput": true
+      },
+      {
+        "defines": [],
+        "target": "x86_64-apple-ios18.0-simulator",
+        "releaseSimulatorObjectOutput": true
+      },
+      {
+        "defines": [],
+        "target": "x86_64-apple-ios18.0-simulator",
+        "releaseSimulatorObjectOutput": true
+      },
+      {
+        "defines": [],
+        "target": "arm64-apple-ios18.0-simulator",
+        "releaseSimulatorObjectOutput": true
+      },
+      {
+        "defines": [],
+        "target": "arm64-apple-ios18.0-simulator",
+        "releaseSimulatorObjectOutput": true
+      }
+    ]
+  },
+  "sourceManifestPath": "docs/qa/2026-10-15/consumer-release/archive17-source-manifest.json",
+  "sourceManifestSHA256": "82e0ee042b690cc849b9d9171a966a98c58fb1c0f0e6fb1b72bad3a5ca77ef50",
+  "buildLogPath": "/Users/shan2new/Library/Developer/XcodeBuildMCP/workspaces/previously-2bd4c895d527/logs/build_sim_2026-10-15T18-47-53-756Z_pid69154_4d17abca.log",
+  "buildLogSHA256": "6a7153c09829c00a0ad406f5ab74f782841b96a5dea53f563ca73cd2b7a54f2f",
+  "invocationPath": "docs/qa/2026-10-15/consumer-release/release17-simulator-attempt1/invocation.json",
+  "qaFixtureUsed": false,
+  "ordinaryProductionPasswordCyclePassed": null,
+  "installPerformed": false,
+  "launchPerformed": false,
+  "sandboxResetPerformed": false,
+  "productionRuntimeVerified": false,
+  "boundaries": [
+    "This is an ordinary production-configured simulator binary, not the device archive executable.",
+    "Compilation and read-only metadata/signature inspection do not prove launch, login, erasure, actual App Group/WidgetKit use, minimum-iOS18 runtime or physical-device behavior.",
+    "The existing ordinary app sandbox was not installed over, launched or reset.",
+    "Final same-run native qualification remains separate until the final monkey seed and cleanup complete."
+  ]
+}

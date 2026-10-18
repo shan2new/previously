@@ -1,0 +1,21 @@
+{
+  "observedAt": "2026-10-15T17:51:11.850367+00:00",
+  "status": "failed",
+  "originalLedgerPath": "ios/Tools/qa/.runs/20261015T173458816048Z/ledger.json",
+  "directedCounts": {
+    "passed": 74,
+    "failed": 1,
+    "skipped": 0
+  },
+  "monkeysStarted": false,
+  "sourceFingerprint": {
+    "sha256": "3ad6f80e294c418dca7a81abb969a4bc2eb3976fe514c304b8b781a38cb1c4c0",
+    "fileCount": 431
+  },
+  "fixtureStopped": true,
+  "failureNames": [
+    "PreviouslyFilesTests/testJSONAndCSVSaveToFilesContainAccountCopyAndSurviveSignOut"
+  ],
+  "observation": "All11 earlier hero-related failures passed. The only failure immediately queried a global navigation button after CSV Save; exact JSON/CSV bytes and one account-export request assertions had passed first. Named export-screen Back wait is a harness repair pending runtime. Fullrun remains failed.",
+  "qualified": false
+}

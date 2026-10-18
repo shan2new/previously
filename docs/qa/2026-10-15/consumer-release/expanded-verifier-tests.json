@@ -1,0 +1,19 @@
+{
+  "checkedAt": "2026-10-15T16:27:48.519338+00:00",
+  "pureNegativeClassifierTests": {
+    "passed": 5,
+    "failed": 0
+  },
+  "actualBaseline16Inspection": {
+    "receipt": "docs/qa/2026-10-15/consumer-release/baseline16-expanded-verifier-check.json",
+    "exitCode": 0,
+    "artifactChecks": 56,
+    "passed": 56,
+    "failedChecks": [],
+    "compilerEvidencePassed": true
+  },
+  "actual17ArchiveVerified": false,
+  "readOnly": true,
+  "nativeOrSimulatorActivity": false,
+  "verifierSHA256": "4af865adbfacdc72e95aa6f48cfc0c2c56db1fe378c3cd001aec8a8d4b929858"
+}

@@ -1,0 +1,39 @@
+{
+  "measuredAtUTC": "2026-10-15T18:23:28.934Z",
+  "metricsStatus": 200,
+  "usageStatus": 200,
+  "metrics": {
+    "startedAt": 1792083366613,
+    "uptimeSeconds": 5244.677802208,
+    "requests": 104,
+    "errors": 0,
+    "statuses": {
+      "2xx": 101,
+      "4xx": 3
+    },
+    "memoryMiB": {
+      "rss": 39.75,
+      "heapUsed": 36.90306091308594
+    },
+    "eventLoopMs": {
+      "mean": 22.83064985068855,
+      "p95": 22.364159,
+      "p99": 40.501247
+    }
+  },
+  "usage": {
+    "measuredAt": 1792088608924,
+    "counts": {
+      "registered": 17,
+      "active_24h": 2,
+      "active_7d": 3,
+      "registered_7d": 0,
+      "library_users": 9,
+      "progress_users": 7
+    },
+    "deletion": {
+      "pending": 0
+    }
+  },
+  "boundary": "Aggregate telemetry only; no account IDs, raw content, search strings, tokens or individual events. Counters reset at backend restart; low request volume is not demand validation."
+}

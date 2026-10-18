@@ -1,0 +1,19 @@
+...F...............
+======================================================================
+FAIL: test_directed_qualification_includes_account_privacy_suites (__main__.RunnerGuards.test_directed_qualification_includes_account_privacy_suites)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/shan2new/Projects/previously/ios/Tools/qa/run-native-qa.test.py", line 145, in test_directed_qualification_includes_account_privacy_suites
+    self.assertEqual(suites, {'QAHarnessTests', 'AccountLocalStoreTests', 'RewatchStoreTests', 'PreviouslyDirectedTests',
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                             'PreviouslyDeletionTests', 'PreviouslyAccountIsolationTests', 'MutationJournalTests', 'PreviouslyDurabilityTests', 'AccountDeletionRequestTests', 'ImportModelTests',
+                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                             'WidgetSnapshotTests', 'PreviouslyWidgetTests', 'ProgressAdmissionTests', 'PreviouslyAdmissionTests', 'PreviouslyFilesTests'})
+                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: Items in the first set but not the second:
+'AccountExportPreparationTests'
+
+----------------------------------------------------------------------
+Ran 19 tests in 0.058s
+
+FAILED (failures=1)

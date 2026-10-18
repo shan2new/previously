@@ -1,0 +1,60 @@
+{
+  "at": "2026-10-15",
+  "candidate": "/Users/shan2new/Infra/previously/releases/20261015T152739Z/server",
+  "allJobChangesOnlyArtifactPointers": true,
+  "jobs": [
+    {
+      "label": "com.shan.previously",
+      "currentInstalledMatchesCapturedRollback": true,
+      "candidateChangedKeys": [
+        "ProgramArguments",
+        "WorkingDirectory"
+      ],
+      "sameProductionConfigurationReference": true,
+      "sameOperationsRoot": true
+    },
+    {
+      "label": "com.shan.previously.backup",
+      "currentInstalledMatchesCapturedRollback": true,
+      "candidateChangedKeys": [
+        "ProgramArguments",
+        "WorkingDirectory"
+      ],
+      "sameProductionConfigurationReference": true,
+      "sameOperationsRoot": true
+    },
+    {
+      "label": "com.shan.previously.ops",
+      "currentInstalledMatchesCapturedRollback": true,
+      "candidateChangedKeys": [
+        "ProgramArguments",
+        "WorkingDirectory"
+      ],
+      "sameProductionConfigurationReference": true,
+      "sameOperationsRoot": true
+    }
+  ],
+  "fileChanges": [
+    "dist/scripts/status-backfill.js",
+    "dist/scripts/status-backfill.js.map",
+    "dist/services/library.js",
+    "dist/services/library.js.map",
+    "dist/services/moderation.js",
+    "dist/services/moderation.js.map",
+    "ops/README.md",
+    "ops/install-candidate.test.mjs",
+    "ops/ledger.test.mjs",
+    "ops/operational.integration.test.mjs",
+    "ops/prepare-install.mjs",
+    "ops/privacy-retention.test.mjs",
+    "ops/process-wrapper.test.mjs",
+    "ops/source-fingerprint.test.mjs",
+    "package-lock.json",
+    "package.json",
+    "src/scripts/status-backfill.ts",
+    "src/services/library.ts",
+    "src/services/moderation.ts"
+  ],
+  "schemaFilesChanged": false,
+  "productionConfigurationContentsReadOrChanged": false
+}

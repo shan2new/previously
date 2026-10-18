@@ -1,0 +1,19 @@
+{
+  "startedAt": "2026-10-15T15:22:36.448671+00:00",
+  "database": "previously_qa_progress_d00f1a3674da4dffb9a969de388815eb",
+  "host": "127.0.0.1",
+  "databaseCreated": true,
+  "databaseRemoved": true,
+  "productionDatabaseReadOrWritten": false,
+  "dotenvLoaded": false,
+  "nodeVersion": "v24.21.0",
+  "nodeBinary": "/opt/homebrew/opt/node@24/bin/node",
+  "productionModule": "server/dist/server.js",
+  "credentialsInherited": false,
+  "sourceRevision": "57365d7783b90663815f3169b2a7d66e4af251cc",
+  "testExitCode": 1,
+  "compiledChangedDuringRun": [],
+  "scratchConnectionsBeforeDrop": 0,
+  "finishedAt": "2026-10-15T15:22:39.527941+00:00",
+  "overallExitCode": 1
+}

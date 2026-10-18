@@ -1,0 +1,70 @@
+{
+  "schemaVersion": 1,
+  "checkedAtUTC": "2026-10-15T17:02:56.417948+00:00",
+  "draft": true,
+  "pdfPath": "/Users/shan2new/Projects/previously/tmp/pdfs/previously-closeout-draft-20261015.pdf",
+  "pdfSha256": "91e725fc3aff5542bd0712cee93d769aca111cab20142bcebe4ba3cdded8b886",
+  "pages": 6,
+  "layoutIssues": [],
+  "allPagesVisuallyInspected": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6
+  ],
+  "contactSheetPath": "/Users/shan2new/Projects/previously/tmp/pdfs/previously-closeout-draft-20261015/contact.jpg",
+  "fullPageProofPaths": [
+    "/Users/shan2new/Projects/previously/tmp/pdfs/previously-closeout-draft-20261015/page-1.png",
+    "/Users/shan2new/Projects/previously/tmp/pdfs/previously-closeout-draft-20261015/page-2.png",
+    "/Users/shan2new/Projects/previously/tmp/pdfs/previously-closeout-draft-20261015/page-3.png",
+    "/Users/shan2new/Projects/previously/tmp/pdfs/previously-closeout-draft-20261015/page-4.png",
+    "/Users/shan2new/Projects/previously/tmp/pdfs/previously-closeout-draft-20261015/page-5.png",
+    "/Users/shan2new/Projects/previously/tmp/pdfs/previously-closeout-draft-20261015/page-6.png"
+  ],
+  "visualVerdict": "All six full pages and contact sheet inspected. Final clarity/contrast edits changed pages1,4,6 and those full pages were reinspected; pages2,3,5 retained identical RGB pixels to the inspected initial draft. No clipping, overlap, missing images or numbering defects observed. Brand coral period and approved genuine Dynamic Island hardware retained; raw9Oct capture remains unaltered and labeled historical context.",
+  "receiptHashesChecked": 15,
+  "allRecordedReceiptPathsAndHashesMatch": true,
+  "localLinkIssues": [],
+  "verifiedStates": {
+    "backendPreparedPassed": true,
+    "capacityPassed": true,
+    "activationPassed": true,
+    "activationGuardChecksPassed": true,
+    "directedPassed": false,
+    "seedsPassed": false,
+    "admissionPassed": true,
+    "widgetPassed": true,
+    "archivePassed": false,
+    "uploadPassed": false,
+    "releaseSimulatorPassed": false,
+    "erasurePassed": false,
+    "filesPassed": false
+  },
+  "pendingEvidenceAliases": [
+    "nativeSummary",
+    "archive17",
+    "archiveSourceManifest",
+    "upload17",
+    "releaseSimulator17",
+    "realErasure",
+    "filesRuntime"
+  ],
+  "firstActivationBoundary": {
+    "initialActivationFailed": true,
+    "automaticRollbackSucceeded": false,
+    "oldPlistBytesRestored": true,
+    "manualOldServiceRecoveryVerified": true,
+    "observedRecoveryWindowSeconds": 85.961113,
+    "correctedSupervisedActivationPassed": true,
+    "guardFixtureChecks": 17,
+    "noDatabaseRestore": true,
+    "environmentSoleCauseProven": false
+  },
+  "historicalPdfSha256Unchanged": "89d9e55dfdb1290300fba212003320e58e731e7144ba8c4f8e5c615a5ea614ff",
+  "historicalBuilderUntouched": true,
+  "finalOutputCreated": false,
+  "builderSha256AtReview": "6ec128cc0c0aadddaa4172077e48f1b41a91a5a4883fa0c8d6952524f40d88da",
+  "scope": "Initial temporary pending-native/archive visual draft only. No native/backend source or build, simulator, provider, production data, Apple metadata, submission or licensing action by this document task."
+}

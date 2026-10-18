@@ -1,0 +1,35 @@
+[
+  {
+    "attachments" : [
+      {
+        "configurationName" : "Test Scheme Action",
+        "deviceId" : "0031ED81-55FB-4E88-A0D1-012412C64409",
+        "deviceName" : "Previously QA 14 Pro",
+        "exportedFileName" : "20B550C0-56A0-43D3-B60B-C077AB526F79.txt",
+        "isAssociatedWithFailure" : false,
+        "suggestedHumanReadableName" : "admission-next-last-hierarchy_0_C8E3D886-71BE-461A-9191-1CA7702DBB47.txt",
+        "timestamp" : 1792087065.538
+      },
+      {
+        "configurationName" : "Test Scheme Action",
+        "deviceId" : "0031ED81-55FB-4E88-A0D1-012412C64409",
+        "deviceName" : "Previously QA 14 Pro",
+        "exportedFileName" : "5607551E-9318-4335-A683-7102B380B1EA.png",
+        "isAssociatedWithFailure" : false,
+        "suggestedHumanReadableName" : "admission-next-last-screen_0_06DFAA3D-CF99-4BC2-A042-AEA1AF1BF680.png",
+        "timestamp" : 1792087065.338
+      },
+      {
+        "configurationName" : "Test Scheme Action",
+        "deviceId" : "0031ED81-55FB-4E88-A0D1-012412C64409",
+        "deviceName" : "Previously QA 14 Pro",
+        "exportedFileName" : "9C4EBE99-7974-4ADF-9E49-07F9E4F07EF8.json",
+        "isAssociatedWithFailure" : false,
+        "suggestedHumanReadableName" : "admission-next-actions-seed-20261006_0_2159ACBF-23C3-4C5D-A52F-7CD6C56EC8FD.json",
+        "timestamp" : 1792087065.214
+      }
+    ],
+    "testIdentifier" : "PreviouslyAdmissionTests/testAcceptUnownedTVNextEpisodeAddsOnceAndExistingShowMarksNormally()",
+    "testIdentifierURL" : "test://com.apple.xcode/Previously/PreviouslyUITests/PreviouslyAdmissionTests/testAcceptUnownedTVNextEpisodeAddsOnceAndExistingShowMarksNormally"
+  }
+]

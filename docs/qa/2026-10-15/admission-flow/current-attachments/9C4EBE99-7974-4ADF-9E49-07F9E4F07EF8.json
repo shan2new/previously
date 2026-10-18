@@ -1,0 +1,151 @@
+{
+  "account" : "fixture-b",
+  "assertions" : 5,
+  "completedActions" : 10,
+  "durationSeconds" : 13.874246001243591,
+  "operatingSystem" : "Version 27.0 (Build 24A434)",
+  "seed" : 20261006,
+  "states" : [
+    "discover"
+  ],
+  "trace" : [
+    {
+      "action" : "launch",
+      "detail" : "Isolated QA bundle; fixture fixture-b.",
+      "index" : 0,
+      "outcome" : "completed",
+      "target" : "com.cognipin.previously.qa",
+      "timestamp" : "2026-10-15T17:57:35Z"
+    },
+    {
+      "action" : "assert-account",
+      "detail" : "fixtureVersion=1",
+      "index" : 1,
+      "outcome" : "passed",
+      "target" : "qa.account.fixture-b",
+      "timestamp" : "2026-10-15T17:57:35Z"
+    },
+    {
+      "action" : "tap",
+      "detail" : "",
+      "index" : 2,
+      "outcome" : "completed",
+      "target" : "qa.tab.discover",
+      "timestamp" : "2026-10-15T17:57:37Z"
+    },
+    {
+      "action" : "tap",
+      "detail" : "",
+      "index" : 3,
+      "outcome" : "completed",
+      "target" : "qa.search.open",
+      "timestamp" : "2026-10-15T17:57:37Z"
+    },
+    {
+      "action" : "tap",
+      "detail" : "",
+      "index" : 4,
+      "outcome" : "completed",
+      "target" : "qa.search.field",
+      "timestamp" : "2026-10-15T17:57:39Z"
+    },
+    {
+      "action" : "clear-observed",
+      "detail" : "Input is empty before any replacement characters are injected.",
+      "index" : 5,
+      "outcome" : "passed",
+      "target" : "qa.search.field",
+      "timestamp" : "2026-10-15T17:57:39Z"
+    },
+    {
+      "action" : "type-observed",
+      "detail" : "requestedPrefix=television; entered=television",
+      "index" : 6,
+      "outcome" : "observed",
+      "target" : "qa.search.field",
+      "timestamp" : "2026-10-15T17:57:40Z"
+    },
+    {
+      "action" : "assert-value",
+      "detail" : "value=television",
+      "index" : 7,
+      "outcome" : "passed",
+      "target" : "qa.search.field",
+      "timestamp" : "2026-10-15T17:57:40Z"
+    },
+    {
+      "action" : "type",
+      "detail" : "requested=television; entered=television",
+      "index" : 8,
+      "outcome" : "completed",
+      "target" : "qa.search.field",
+      "timestamp" : "2026-10-15T17:57:40Z"
+    },
+    {
+      "action" : "search-result-observed",
+      "detail" : "Enabled and hittable with keyboardVisible=true.",
+      "index" : 9,
+      "outcome" : "passed",
+      "target" : "qa.search.result.qa-tv",
+      "timestamp" : "2026-10-15T17:57:40Z"
+    },
+    {
+      "action" : "tap",
+      "detail" : "",
+      "index" : 10,
+      "outcome" : "completed",
+      "target" : "qa.search.result.qa-tv",
+      "timestamp" : "2026-10-15T17:57:41Z"
+    },
+    {
+      "action" : "tap",
+      "detail" : "",
+      "index" : 11,
+      "outcome" : "completed",
+      "target" : "qa.detail.tab.episodes",
+      "timestamp" : "2026-10-15T17:57:42Z"
+    },
+    {
+      "action" : "tap",
+      "detail" : "",
+      "index" : 12,
+      "outcome" : "completed",
+      "target" : "qa.progress.increment.2001",
+      "timestamp" : "2026-10-15T17:57:43Z"
+    },
+    {
+      "action" : "tap",
+      "detail" : "",
+      "index" : 13,
+      "outcome" : "completed",
+      "target" : "qa.progress.admission.confirm",
+      "timestamp" : "2026-10-15T17:57:44Z"
+    },
+    {
+      "action" : "assert-progress",
+      "detail" : "episodes=1",
+      "index" : 14,
+      "outcome" : "passed",
+      "target" : "qa.progress.2001",
+      "timestamp" : "2026-10-15T17:57:44Z"
+    },
+    {
+      "action" : "tap",
+      "detail" : "",
+      "index" : 15,
+      "outcome" : "completed",
+      "target" : "qa.progress.increment.2001",
+      "timestamp" : "2026-10-15T17:57:45Z"
+    },
+    {
+      "action" : "assert-absent",
+      "detail" : "",
+      "index" : 16,
+      "outcome" : "passed",
+      "target" : "qa.progress.admission.confirm",
+      "timestamp" : "2026-10-15T17:57:45Z"
+    }
+  ],
+  "unavailableActions" : 0,
+  "version" : 1
+}

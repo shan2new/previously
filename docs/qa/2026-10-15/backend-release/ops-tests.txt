@@ -1,0 +1,45 @@
+✔ candidate plists are valid, LTS pinned, reversible and remain uninstalled (110.791041ms)
+✔ precommit intent survives an absent database refresh (131.262375ms)
+✔ completion cannot be downgraded or restore raw ID by delayed request (118.761916ms)
+✔ concurrent requests retain every identity (1314.249916ms)
+✔ missing or corrupted authoritative current ledger fails closed (41.578583ms)
+✔ immutable markers restore a tombstone after an older empty valid snapshot (117.9865ms)
+✔ private snapshot and marker permissions (26.484917ms)
+✔ unchanged ledger reads retain stable records and a matching checksum (65.629917ms)
+✔ legacy hash-only deletion records default to conservative manual Apple fallback (38.480708ms)
+✔ late Apple success survives restoring an older completed snapshot and cannot downgrade (220.406167ms)
+✔ unknown Apple outcome is refused instead of silently claiming revocation (14.203917ms)
+▶ real PostgreSQL backup, deletion-safe restore, isolated cleanup and collection
+  ✔ custom dump has a checked SHA, TOC and private permissions (0.845125ms)
+{
+  severity_local: 'NOTICE',
+  severity: 'NOTICE',
+  code: '42701',
+  message: 'column "apple_revocation" of relation "account_deletions" already exists, skipping',
+  file: 'tablecmds.c',
+  line: '7682',
+  routine: 'check_for_column_name_collision'
+}
+  ✔ newer independent tombstone sweeps a deleted identity from the older backup (1114.186709ms)
+  ✔ pre0015 backup restores proven Apple outcome in its owned scratch only (1159.839416ms)
+  ✔ missing live ledger and altered dump fail before any scratch database survives (24.497875ms)
+  ✔ hourly snapshot authenticates only to loopback and excludes individual data (164.154375ms)
+  ✔ seven-pair retention prunes only owned backups (10.030792ms)
+  ✔ non-cascading ownership fails closed and still drops scratch database (1090.360708ms)
+✔ real PostgreSQL backup, deletion-safe restore, isolated cleanup and collection (5168.057791ms)
+✔ sanitized logs exclude identities, query strings, tokens and free text (1.652167ms)
+✔ metrics and usage snapshots retain only aggregate fields (0.191834ms)
+✔ rotation enforces segment and age limits without deleting foreign files (107.625584ms)
+✔ 30-day aggregate pruning only removes owned expired files (9.957ms)
+✔ a stopped backend does not suspend backup, log or snapshot expiry (41.870708ms)
+{"event":"ops.server_started","heapLimitMiB":256}
+✔ production wrapper applies heap budget, sanitizes both streams and drains SIGTERM (91.834458ms)
+✔ compiled JavaScript bytes participate in the actual artifact fingerprint (19.51675ms)
+ℹ tests 26
+ℹ suites 0
+ℹ pass 26
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 5251.388041

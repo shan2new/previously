@@ -1,0 +1,34 @@
+{
+  "checkedAtUTC": "2026-10-15T16:59:04.458849+00:00",
+  "scope": "Lightweight pure-stdlib loader evaluation. No PDF rendering or native/backend build. Final native/archive/human proofs remain pending.",
+  "capacityPassed": true,
+  "activationPassed": true,
+  "activationGuardFixtureChecks": 17,
+  "initialActivationFailed": true,
+  "manualOldServiceRecovered": true,
+  "firstAutomaticRollbackSucceeded": false,
+  "observedFirstRecoveryWindowSeconds": 85.961113,
+  "missingAliases": [
+    "nativeSummary",
+    "archive17",
+    "archiveSourceManifest",
+    "upload17",
+    "releaseSimulator17",
+    "realErasure",
+    "filesRuntime"
+  ],
+  "receiptSha256": {
+    "docs/qa/2026-10-15/backend-release/prepared-proof.json": "ce464fa460849648c26fc6856f1105663ed3b5a35126bd4ea4adc8a637860f5b",
+    "docs/qa/2026-10-15/backend-release/load-testing/final-results.json": "3e9b79caeeba0547b8667e935c3aada0f1ffce1b56339bb281865bc6f8166df1",
+    "docs/qa/2026-10-15/backend-release/load-testing/failed-initial-results.json": "7fa5155082e5f561bb3f9b45ffba6fb750a53b0cb161d9661baeca182e404dfe",
+    "docs/qa/2026-10-15/backend-release/activation-receipt.json": "8738c14b9d70316355bab83d245a10de509db087c21c6590ff94a33aaada6627",
+    "docs/qa/2026-10-15/backend-release/activation-first-failed-receipt.json": "616b47d935a9348126397b16a65f4bca6442d6a63afd5d18e077d006a6856f91",
+    "docs/qa/2026-10-15/backend-release/activation-old-service-recovery.json": "05840e922a00ebe098a4104428dd881d1565a7cf037fd18330b44b7c00259f06",
+    "docs/qa/2026-10-15/backend-release/activation-first-outage-review.json": "b19a81ca7169c2b7c92b1351aa93ba11b2f9c65ccca2105238791d3b60281e65",
+    "docs/qa/2026-10-15/backend-release/activation-helper-verification.json": "3b4e552276f205dfb528082e6a3fa735e298385ad9908ad2e88721bc0109f105",
+    "docs/qa/2026-10-15/widget-privacy/runtime-results.json": "8fc7af79c83521d68a4e584331d30b75ec603772c597f1e40ed27720f457733e",
+    "ios/Tools/qa/.runs/20261015T161326526097Z/ledger.json": "3ad25f849bfc1e02d291cdbc028caa403f486d3c739b6c786f9b616d25821231"
+  },
+  "pdfLibrariesImported": false,
+  "rendered": false
+}

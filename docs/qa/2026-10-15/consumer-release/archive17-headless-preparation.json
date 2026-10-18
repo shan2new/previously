@@ -1,0 +1,42 @@
+{
+  "checkedAt": "2026-10-15T18:15:06.988977+00:00",
+  "status": "prepared_not_executed",
+  "archive17BuildPathAbsent": true,
+  "availableBytes": 8540499968,
+  "availableGiB": 7.954,
+  "existingReleaseDerivedData": "/Users/shan2new/Projects/previously/ios/build/DerivedData",
+  "existingReleaseDerivedDataPresent": true,
+  "archive16Preserved": true,
+  "node24PathExists": true,
+  "cliPathExists": true,
+  "environmentOverride": {
+    "DEVELOPER_DIR": "/Applications/Xcode.app/Contents/Developer"
+  },
+  "invocationPath": "docs/qa/2026-10-15/consumer-release/archive17-invocation.json",
+  "argvPath": "docs/qa/2026-10-15/consumer-release/archive17-argv.json",
+  "argvSHA256": "298921c3819eb70fbac93a659ad6cea00fce2a5e7bb8ac21e9ffd3b3a4fe26e3",
+  "prior16InvocationDerivedData": "build/DerivedData",
+  "prior16PrivateOverrideNotReused": true,
+  "provenancePending": [
+    "Final75+3singleallrunqualificationandsourceequality",
+    "Freshdiskandarchiveabsencecheckimmediatelybeforebuild",
+    "Prearchivefilemanifestlinkedtoqualifiedsource",
+    "ActualMCPexit/toolbody/rawbuildlog/newarchiveInfo",
+    "Independent56artifactchecksandpostsourceequality"
+  ],
+  "staleReportsTickAfter1750": {
+    "status": "unproven",
+    "knownInstalledBackendLog": "/Users/shan2new/Infra/previously/logs/previously-20261015T165606601Z-6375e4d6392b.ndjson",
+    "lastModifiedAt": "2026-10-15T17:30:15.454839+00:00",
+    "explicitLaterStaleReportsSuccessOrFailureFound": false,
+    "boundary": "No owned runtime log was modified at or after17:50UTC at readback. Silence is not success or failure; no scheduledtick was triggered."
+  },
+  "actions": {
+    "build": false,
+    "nativeUI": false,
+    "simulator": false,
+    "sourceEdit": false,
+    "productionMutation": false,
+    "logReadOnly": true
+  }
+}

@@ -1,0 +1,161 @@
+{
+  "schemaVersion": 1,
+  "checkedAtUTC": "2026-10-15T19:07:23.066398+00:00",
+  "pdfPath": "/Users/shan2new/Projects/previously/output/pdf/previously-release-closeout-2026-10-15.pdf",
+  "pdfSha256": "95085f59afe9e2c1153c70ff3f2d8fc4971aeea53dbfbbbc488f9b8d05f1e4f0",
+  "pages": 6,
+  "draft": false,
+  "layoutIssues": [],
+  "allPagesVisuallyInspected": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6
+  ],
+  "visualReviewMethod": "All six first-final full-page PNGs and contact sheet inspected. After the two clarity edits, final pages3/6 and final contact sheet were reinspected; final pages1/2/4/5 are RGB-identical to their inspected first-final PNGs.",
+  "visualVerdict": "No clipping, overlap, unreadable glyphs, missing imagery or numbering defects observed. Passed 75-directed and seven Files/helper phase counts are green; two-of-three seeds and overall NOT QUALIFIED remain coral. Apple closeout is WITH OWNER. Canonical brand period, genuine marketing Dynamic Island and explicitly historical unaltered9Oct native image preserved.",
+  "fullPageProofs": [
+    {
+      "page": 1,
+      "path": "/Users/shan2new/Projects/previously/tmp/pdfs/finalcloseout/page-1.png",
+      "sha256": "7e23ec43396268435334196f11c703898281213d4ddb7b8ee81af6c8f9cc784d",
+      "width": 2000,
+      "height": 1334,
+      "mode": "RGB"
+    },
+    {
+      "page": 2,
+      "path": "/Users/shan2new/Projects/previously/tmp/pdfs/finalcloseout/page-2.png",
+      "sha256": "c97d01a00d33c450c792cc5accf0a2ee66933fe10e78211b07b929984b62bfe0",
+      "width": 2000,
+      "height": 1334,
+      "mode": "RGB"
+    },
+    {
+      "page": 3,
+      "path": "/Users/shan2new/Projects/previously/tmp/pdfs/finalcloseout/page-3.png",
+      "sha256": "b4e7e99fa54a120c9e16863599869b6124336613553835da05d3f811e076fa0e",
+      "width": 2000,
+      "height": 1334,
+      "mode": "RGB"
+    },
+    {
+      "page": 4,
+      "path": "/Users/shan2new/Projects/previously/tmp/pdfs/finalcloseout/page-4.png",
+      "sha256": "1e0bdacd1f4527372a0e2f92d5103292b5d9226c16d6a29859d124241056749b",
+      "width": 2000,
+      "height": 1334,
+      "mode": "RGB"
+    },
+    {
+      "page": 5,
+      "path": "/Users/shan2new/Projects/previously/tmp/pdfs/finalcloseout/page-5.png",
+      "sha256": "e1a925a3a481caae7ce8ec59c26ba1ebe81b7cdadcc2e8858e8ed397bf31966c",
+      "width": 2000,
+      "height": 1334,
+      "mode": "RGB"
+    },
+    {
+      "page": 6,
+      "path": "/Users/shan2new/Projects/previously/tmp/pdfs/finalcloseout/page-6.png",
+      "sha256": "ea7403d69d4f52ac17a114695a08d84ed3a514d71ef99cfdaecfa1bae2d789b4",
+      "width": 2000,
+      "height": 1334,
+      "mode": "RGB"
+    }
+  ],
+  "contactSheetPath": "/Users/shan2new/Projects/previously/tmp/pdfs/finalcloseout/contact.jpg",
+  "contactSheetSha256": "c865d478f8ed59451f3c95812eee48f58db1b179d0b035ad929e4922ad44414c",
+  "pixelDiffPath": "/Users/shan2new/Projects/previously/tmp/pdfs/finalcloseout/revision-pixel-diff.json",
+  "pixelDiffSha256": "b552c1607475f8e2af89c74baa7a6f2b551ab6a0bc4c4a4848df4d88f5248361",
+  "parentIndependentReview": {
+    "firstRenderPdfSha256": "ed724b6b2a21f2a590c17baf799fb1fdd757fe710a7648fbaaa3c014738cf3d9",
+    "firstRenderInspected": [
+      "contact sheet",
+      "full page3",
+      "full page5",
+      "full page6"
+    ],
+    "finalRenderPdfSha256": "95085f59afe9e2c1153c70ff3f2d8fc4971aeea53dbfbbbc488f9b8d05f1e4f0",
+    "finalChangedFullPagesInspected": [
+      3,
+      6
+    ],
+    "finalClarityFixesVerified": true,
+    "noOverflowOrClippingObserved": true,
+    "currentPage5RGBIdenticalToIndependentlyInspectedFirstRender": true,
+    "codexPDFOpenWasQueuedOnly": true,
+    "actualPanelVisibilityClaimed": false
+  },
+  "receiptHashesChecked": 38,
+  "allRecordedInputHashesMatch": true,
+  "builderSha256": "a7c5f6fa4eebf5f71da8c6d200a28b60d3e01d9fc1d00019302f1f5e9e0d2768",
+  "inputManifestSha256": "89252c28d8b5e7531db014f3dd77fa3b0e184486b897cda033f25b0f6e138ec5",
+  "renderEvidencePath": "/Users/shan2new/Projects/previously/docs/qa/2026-10-15/dossier-preparation/render-evidence.json",
+  "renderEvidenceSha256": "02ec0ca2f8322f700b1102a812f4c901de540b1d2ec1925ee96d4aad71b24575",
+  "generatedMarkdownPath": "/Users/shan2new/Projects/previously/docs/qa/2026-10-15/dossier-preparation/closeout.md",
+  "generatedMarkdownSha256": "80cedc04f62f53e003297e7077e7c2170724b622bbb078fe23cc009b9644c863",
+  "mediaBoxPoints": [
+    1200,
+    800
+  ],
+  "fontEmbedding": {
+    "/AAAAAA+Arial-BoldMT": true,
+    "/AAAAAA+ArialMT": true
+  },
+  "boundedOutputTextSecretPatternHits": 0,
+  "verifiedStates": {
+    "backendPreparedPassed": true,
+    "capacityPassed": true,
+    "activationPassed": true,
+    "activationGuardChecksPassed": true,
+    "productionReadbackPassed": true,
+    "directedPassed": false,
+    "seedsPassed": false,
+    "currentDirectedPhasePassed": true,
+    "currentFilesPhasePassed": true,
+    "currentAdmissionPhasePassed": true,
+    "admissionPassed": true,
+    "widgetPassed": true,
+    "archivePassed": true,
+    "independentArchiveReviewPassed": true,
+    "uploadPassed": false,
+    "releaseSimulatorPassed": false,
+    "releaseSimulatorCompilePassed": true,
+    "erasurePassed": false,
+    "filesPassed": false,
+    "filesFocusedPassed": true,
+    "heroFocusedPassed": true,
+    "providerReadPreflightPassed": true,
+    "qaPresenceReadbackPassed": true
+  },
+  "currentFullNativeFailed": true,
+  "currentPassedSeeds": 2,
+  "finalFailureAuditMatched": true,
+  "archiveNativeSourceLinked": false,
+  "qaStopReportedShutdown": true,
+  "qaStopAppSuccessClaimed": false,
+  "firstActivationBoundary": {
+    "initialActivationFailed": true,
+    "manualOldServiceRecovered": true,
+    "automaticRollbackSucceededOnFirstAttempt": false,
+    "observedRecoveryWindowSeconds": 85.961113
+  },
+  "missingSuccessAliases": [
+    "nativeSummary",
+    "upload17",
+    "releaseSimulator17",
+    "filesRuntime"
+  ],
+  "historicalPdfSha256Unchanged": "89d9e55dfdb1290300fba212003320e58e731e7144ba8c4f8e5c615a5ea614ff",
+  "draftPdfSha256Unchanged": "91e725fc3aff5542bd0712cee93d769aca111cab20142bcebe4ba3cdded8b886",
+  "firstFinalRenderPreservedPath": "/Users/shan2new/Projects/previously/tmp/pdfs/finalcloseout-first/previously-closeout-first.pdf",
+  "firstFinalRenderPreservedSha256": "ed724b6b2a21f2a590c17baf799fb1fdd757fe710a7648fbaaa3c014738cf3d9",
+  "artifactMarkerRepeated": false,
+  "proofBoundary": "Final document snapshot, not consumer readiness. Full native failed at external final-seed timeout; archive and compile pass do not prove upload, ordinary production login/erasure or Apple closeout. No native/UI/runtime mutation by this document task.",
+  "localMarkdownLinksChecked": 31,
+  "localMarkdownLinkIssues": [],
+  "readmeSha256AtReview": "99f031f3a532caa043e2876a950c0f2b2d08a0ed09f601009e51ae2d38cf27e5"
+}

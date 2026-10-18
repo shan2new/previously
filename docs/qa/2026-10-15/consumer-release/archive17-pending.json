@@ -1,0 +1,18 @@
+{
+  "status": "awaiting_actual_archive",
+  "expectedVersion": "1.0",
+  "expectedBuild": "17",
+  "archivePath": null,
+  "baselineArchive": "ios/build/Previously-16.xcarchive",
+  "baselineReceipt": "ios/build/release-16.json",
+  "artifactVerificationReceipt": null,
+  "compilerEvidenceReceipt": null,
+  "sourceFreezeReceipt": null,
+  "distributionSigningReceipt": null,
+  "uploadReceipt": null,
+  "testFlightProcessingReceipt": null,
+  "realAccountErasureReceipt": null,
+  "physicalDeviceRuntimeReceipt": null,
+  "appleReviewHandledByOwner": true,
+  "proofBoundary": "Preparation only. Neither a simulator pass nor an earlier archive/upload certifies archive 17."
+}

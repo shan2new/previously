@@ -1,0 +1,69 @@
+{
+  "schemaVersion": 1,
+  "preparedAtUTC": "2026-10-15T16:39:21.904854+00:00",
+  "status": "final_current_state_companion_incomplete_native_qualification",
+  "expectedVersion": "1.0",
+  "expectedBuild": 17,
+  "minimumIOS": "18.0",
+  "expectedBackendSourceSha256": "1c93625ad9d87eb48a5fcc300781d0cb8235f7f1bea86ae35ec72b5a198eaeb4",
+  "receipts": {
+    "backendPrepared": "docs/qa/2026-10-15/backend-release/prepared-proof.json",
+    "backendLoad": "docs/qa/2026-10-15/backend-release/load-testing/final-results.json",
+    "backendFailedLoad": "docs/qa/2026-10-15/backend-release/load-testing/failed-initial-results.json",
+    "backendActivation": "docs/qa/2026-10-15/backend-release/activation-receipt.json",
+    "widget": "docs/qa/2026-10-15/widget-privacy/runtime-results.json",
+    "admission": "ios/Tools/qa/.runs/20261015T161326526097Z/ledger.json",
+    "archive17": "docs/qa/2026-10-15/consumer-release/archive17-inspection.json",
+    "upload17": "docs/qa/2026-10-15/consumer-release/upload17-receipt.json",
+    "releaseSimulator17": null,
+    "realErasure": "docs/qa/2026-10-15/native-release/live-erasure-results.json",
+    "filesRuntime": "docs/qa/2026-10-15/native-release/files-results.json",
+    "nativeSummary": "docs/qa/2026-10-15/native-release/native-results.json",
+    "archiveSourceManifest": "docs/qa/2026-10-15/consumer-release/archive17-source-manifest.json",
+    "activationFirstFailure": "docs/qa/2026-10-15/backend-release/activation-first-failed-receipt.json",
+    "oldServiceRecovery": "docs/qa/2026-10-15/backend-release/activation-old-service-recovery.json",
+    "activationOutageReview": "docs/qa/2026-10-15/backend-release/activation-first-outage-review.json",
+    "activationGuardVerification": "docs/qa/2026-10-15/backend-release/activation-helper-verification.json",
+    "filesFocused": "ios/Tools/qa/.runs/20261015T175132730759Z/ledger.json",
+    "failedNativeFull": "docs/qa/2026-10-15/native-release/failed-full-run-1715.json",
+    "heroFocused": "docs/qa/2026-10-15/hero-readiness/focused-runtime.json",
+    "heroStaticReview": "docs/qa/2026-10-15/hero-readiness/static-review.json",
+    "failedNativeFullSecond": "docs/qa/2026-10-15/native-release/failed-full-run-1735.json",
+    "nativeInProgress": "ios/Tools/qa/.runs/20261015T175438622566Z/ledger.json",
+    "historicalSourceSnapshot": "docs/qa/2026-10-15/consumer-release/native-source-manifest-1735.json",
+    "providerPreflight": "docs/qa/2026-10-15/live-erasure/provider-preflight-20261015T180825Z.json",
+    "qaExactReadback": "docs/qa/2026-10-15/live-erasure/exact-qa-readback-20261015T181317Z.json",
+    "productionSnapshot": "docs/qa/2026-10-15/backend-release/production-snapshot-20261015T182328Z.json",
+    "productionTelemetry": "docs/qa/2026-10-15/backend-release/production-telemetry-20261015T182328934Z.json",
+    "archiveOrganizerCopy": "docs/qa/2026-10-15/consumer-release/archive17-organizer-copy.json",
+    "archiveInvocation": "docs/qa/2026-10-15/consumer-release/archive17-attempt1/invocation.json",
+    "archiveToolReceipt": "docs/qa/2026-10-15/consumer-release/archive17-attempt1/stdout.json",
+    "releaseSimulatorCompile": "docs/qa/2026-10-15/consumer-release/release17-simulator-inspection.json",
+    "releaseSimulatorCompileInvocation": "docs/qa/2026-10-15/consumer-release/release17-simulator-attempt1/invocation.json",
+    "releaseSimulatorCompileTool": "docs/qa/2026-10-15/consumer-release/release17-simulator-attempt1/stdout.json",
+    "finalNativeFailure": "docs/qa/2026-10-15/native-release/failed-full-run-1754.json",
+    "archiveIndependentReview": "docs/qa/2026-10-15/consumer-release/archive17-independent-review.json",
+    "qaStopAfterTimeout": "docs/qa/2026-10-15/native-release/qa-app-stop-after-timeout.json"
+  },
+  "visuals": {
+    "hero": {
+      "path": "output/app-store/01-home-hero-final.png",
+      "sha256": "ca2c4a0ee090aa888625bf13d12a4082fee5af7538e3c3456a53d3c9e84aa127",
+      "scope": "Approved marketing hardware, not current execution proof"
+    },
+    "episodes": {
+      "path": "design/show-page-2026-10-09/captures/stage-rezero-episodes.jpg",
+      "sha256": "6bf2263c1de5e370110eb8fed54f032ff2f52b2e5b8cd687a0300297e2f40929",
+      "scope": "Unaltered 9 Oct native capture, visual context only"
+    },
+    "nativeIcon": {
+      "path": "docs/qa/2026-10-06/archive13/native-icon-152.png",
+      "sha256": "baf5bdeefe3b0496878e8e4faab834ed5106f88c1298e15c5ced36f56f20bbd5",
+      "scope": "Canonical P/coral-dot native brand icon"
+    }
+  },
+  "scope": "Direct dated inputs. Missing or null aliases remain pending; no fallback to historical qualification. Final native/Files receipts must share one sealed all-run ledger; focused 3/3 Files UI proof is separate.",
+  "textSources": [
+    "docs/qa/2026-10-06/operations/usage-semantics.md"
+  ]
+}

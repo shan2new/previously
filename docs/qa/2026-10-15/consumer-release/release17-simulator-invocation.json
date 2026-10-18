@@ -1,0 +1,15 @@
+{
+  "projectPath": "/Users/shan2new/Projects/previously/ios/Previously.xcodeproj",
+  "scheme": "Previously",
+  "configuration": "Release",
+  "simulatorId": "0031ED81-55FB-4E88-A0D1-012412C64409",
+  "derivedDataPath": "/Users/shan2new/Projects/previously/ios/build/DerivedData",
+  "preferXcodebuild": true,
+  "buildForTesting": false,
+  "extraArgs": [
+    "-jobs",
+    "2",
+    "-disableAutomaticPackageResolution",
+    "-onlyUsePackageVersionsFromResolvedFile"
+  ]
+}

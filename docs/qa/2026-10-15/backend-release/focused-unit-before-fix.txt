@@ -1,0 +1,20 @@
+
+> previously-server@0.1.0 test
+> vitest run src --silent src/services/library.test.ts src/services/moderationAlert.test.ts
+
+file:///Users/shan2new/Projects/previously/server/node_modules/vitest/dist/chunks/cac.uFydS1Z4.js:698
+			throw new TypeError(`Unexpected value "--silent=${value}". Use "--silent=true ${value}" instead.`);
+			      ^
+
+TypeError: Unexpected value "--silent=src/services/library.test.ts". Use "--silent=true src/services/library.test.ts" instead.
+    at Object.transform (file:///Users/shan2new/Projects/previously/server/node_modules/vitest/dist/chunks/cac.uFydS1Z4.js:698:10)
+    at transform (file:///Users/shan2new/Projects/previously/server/node_modules/vitest/dist/chunks/cac.uFydS1Z4.js:2196:39)
+    at setDotProp (file:///Users/shan2new/Projects/previously/server/node_modules/vitest/dist/chunks/cac.uFydS1Z4.js:209:22)
+    at CAC.mri (file:///Users/shan2new/Projects/previously/server/node_modules/vitest/dist/chunks/cac.uFydS1Z4.js:593:9)
+    at CAC.parse (file:///Users/shan2new/Projects/previously/server/node_modules/vitest/dist/chunks/cac.uFydS1Z4.js:510:27)
+    at file:///Users/shan2new/Projects/previously/server/node_modules/vitest/dist/cli.js:11:13
+    at ModuleJob.run (node:internal/modules/esm/module_job:561:25)
+    at async node:internal/modules/esm/loader:647:26
+    at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:101:5)
+
+Node.js v24.21.0

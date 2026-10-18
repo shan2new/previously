@@ -1,0 +1,39 @@
+{
+  "measuredAt": "2026-10-15T16:22:26.669034+00:00",
+  "productionJobs": [
+    {
+      "label": "com.shan.previously",
+      "pointsToPriorProductionArtifact": true,
+      "unchangedSinceRollbackCapture": true
+    },
+    {
+      "label": "com.shan.previously.backup",
+      "pointsToPriorProductionArtifact": true,
+      "unchangedSinceRollbackCapture": true
+    },
+    {
+      "label": "com.shan.previously.ops",
+      "pointsToPriorProductionArtifact": true,
+      "unchangedSinceRollbackCapture": true
+    }
+  ],
+  "candidateFileCount": 466,
+  "candidateFilesUnchanged": true,
+  "capacityRerunStarted": false,
+  "activationPerformed": false,
+  "nativeProcessClasses": {
+    "simulator services; project unknown": {
+      "processes": 238,
+      "cpuPercentOfOneCoreSum": 19.7
+    },
+    "Previously native app/test runner": {
+      "processes": 2,
+      "cpuPercentOfOneCoreSum": 82.3
+    },
+    "native compiler/build; project unknown": {
+      "processes": 1,
+      "cpuPercentOfOneCoreSum": 0.2
+    }
+  },
+  "processBoundary": "Executable-name classifications only. No raw argv, process identifiers, paths, or credentials emitted; unknown compilers cannot be attributed to a project."
+}

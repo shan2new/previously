@@ -1,0 +1,113 @@
+{
+  "measuredAtUTC": "2026-10-15T18:23:29.497432+00:00",
+  "snapshotKind": "bounded read-only post-deployment production readiness",
+  "probes": [
+    {
+      "origin": "local",
+      "path": "/health",
+      "status": 200,
+      "ok": true,
+      "durationMs": 11.5
+    },
+    {
+      "origin": "local",
+      "path": "/health/ready",
+      "status": 404,
+      "ok": null,
+      "durationMs": 2.2
+    },
+    {
+      "origin": "local",
+      "path": "/ready",
+      "status": 200,
+      "ok": true,
+      "durationMs": 1.5
+    },
+    {
+      "origin": "public",
+      "path": "/health",
+      "status": 200,
+      "ok": true,
+      "durationMs": 246.7
+    },
+    {
+      "origin": "public",
+      "path": "/health/ready",
+      "status": 404,
+      "ok": null,
+      "durationMs": 191.4
+    },
+    {
+      "origin": "public",
+      "path": "/ready",
+      "status": 200,
+      "ok": true,
+      "durationMs": 137.8
+    }
+  ],
+  "documentedReadinessPath": "/ready",
+  "healthReadyAliasImplemented": false,
+  "jobs": [
+    {
+      "label": "com.shan.previously",
+      "loaded": true,
+      "artifactPath": "/Users/shan2new/Infra/previously/releases/20261015T152739Z/server",
+      "matchesActivationReceipt": true,
+      "entryPathMatchesArtifact": true,
+      "state": {
+        "state": "running",
+        "runs": 1
+      }
+    },
+    {
+      "label": "com.shan.previously.backup",
+      "loaded": true,
+      "artifactPath": "/Users/shan2new/Infra/previously/releases/20261015T152739Z/server",
+      "matchesActivationReceipt": true,
+      "entryPathMatchesArtifact": true,
+      "state": {
+        "state": "not running",
+        "runs": 1,
+        "lastExitCode": 0
+      }
+    },
+    {
+      "label": "com.shan.previously.ops",
+      "loaded": true,
+      "artifactPath": "/Users/shan2new/Infra/previously/releases/20261015T152739Z/server",
+      "matchesActivationReceipt": true,
+      "entryPathMatchesArtifact": true,
+      "state": {
+        "state": "not running",
+        "runs": 2,
+        "lastExitCode": 0
+      }
+    }
+  ],
+  "collector": {
+    "measuredAt": "2026-10-15T17:56:22.112Z",
+    "ageMinutes": 27.11,
+    "healthy": true,
+    "publicReady": true,
+    "freeDiskBytes": 8639418368,
+    "pendingDeletions": 0,
+    "backupAgeHoursAtCollection": 1.0030397222222223
+  },
+  "latestBackupMetadata": {
+    "createdAt": "2026-10-15T16:56:11.167Z",
+    "ageHours": 1.455,
+    "bytes": 13850011,
+    "fileSizeMatches": true,
+    "fileMode": "0o600",
+    "sha256FromManifest": "ab307f51120411bd0deb94739fd05cd380bf644fb705408a8280d8dcc99ed82d",
+    "sourceFingerprint": "d21f09b6e96725c99f6addce4c039b817fea2e2f32ae444f30cfb262061af4b7",
+    "matchesActivatedSourceFingerprint": true,
+    "checksumRecomputedInThisSnapshot": false
+  },
+  "boundaries": [
+    "No backup/restart/configuration/DB write/load or scheduled job trigger.",
+    "Backup metadata/size/permissions only in this snapshot; successful activation already independently verified full checksum.",
+    "Private telemetry is captured separately after sanitization; no identifiers/tokens/raw content.",
+    "Scheduled stale-report execution remains unproven; absence of errors does not prove a tick."
+  ]
+}

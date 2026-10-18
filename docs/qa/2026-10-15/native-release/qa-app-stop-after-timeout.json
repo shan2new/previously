@@ -1,0 +1,41 @@
+{
+  "observedAt": "2026-10-15T19:00:46.530245+00:00",
+  "argv": [
+    "/opt/homebrew/opt/node@24/bin/node",
+    "/Users/shan2new/.npm/_npx/6389024b78b4e852/node_modules/xcodebuildmcp/build/cli.js",
+    "simulator",
+    "stop",
+    "--simulator-id",
+    "0031ED81-55FB-4E88-A0D1-012412C64409",
+    "--bundle-id",
+    "com.cognipin.previously.qa",
+    "--output",
+    "json"
+  ],
+  "exitCode": 1,
+  "toolResult": {
+    "schema": "xcodebuildmcp.output.stop-result",
+    "schemaVersion": "2",
+    "didError": true,
+    "error": "Failed to stop app.",
+    "data": {
+      "summary": {
+        "status": "FAILED"
+      },
+      "artifacts": {
+        "simulatorId": "0031ED81-55FB-4E88-A0D1-012412C64409",
+        "bundleId": "com.cognipin.previously.qa"
+      },
+      "diagnostics": {
+        "warnings": [],
+        "errors": [
+          {
+            "message": "An error was encountered processing the command (domain=com.apple.CoreSimulator.SimError, code=405):\nUnable to lookup in current state: Shutdown"
+          }
+        ]
+      }
+    }
+  },
+  "stderr": "",
+  "scope": "Only the owned synthetic QA bundle on its dedicated simulator; no uninstall, erase, source change or ordinary production app action."
+}

@@ -1,0 +1,116 @@
+{
+  "recordedAt": "2026-10-15T16:13:01.719645+00:00",
+  "scope": "14 named widget cases passed; entire focused run failed admission/Files cases",
+  "allSelectedRunStatus": "failed",
+  "allSelectedCounts": {
+    "passed": 24,
+    "failed": 5,
+    "skipped": 0
+  },
+  "widgetCases": [
+    {
+      "suite": "PreviouslyWidgetTests",
+      "test": "testDefinitiveDeletionRefusalRestoresCurrentOwnerWithNewGeneration",
+      "status": "passed",
+      "durationMs": 30687
+    },
+    {
+      "suite": "PreviouslyWidgetTests",
+      "test": "testLogoutColdCleanupAndOfflineAccountBNeverExposeAWidget",
+      "status": "passed",
+      "durationMs": 35224
+    },
+    {
+      "suite": "PreviouslyWidgetTests",
+      "test": "testSameOwnerOfflineColdLaunchRetainsItsValidWidget",
+      "status": "passed",
+      "durationMs": 13774
+    },
+    {
+      "suite": "PreviouslyWidgetTests",
+      "test": "testUnconfirmedDeletionClearsWidgetAndColdHoldCannotRestoreIt",
+      "status": "passed",
+      "durationMs": 22967
+    },
+    {
+      "suite": "WidgetSnapshotTests",
+      "test": "testSameOwnerRelaunchPreservesItsSnapshotAndArtwork",
+      "status": "passed",
+      "durationMs": 4
+    },
+    {
+      "suite": "WidgetSnapshotTests",
+      "test": "testLogoutPurgesSnapshotAllArtworkAndInvalidatesTimeline",
+      "status": "passed",
+      "durationMs": 5
+    },
+    {
+      "suite": "WidgetSnapshotTests",
+      "test": "testAccountBOfflineCannotReadAOrAcceptItsStaleSnapshot",
+      "status": "passed",
+      "durationMs": 3
+    },
+    {
+      "suite": "WidgetSnapshotTests",
+      "test": "testColdAccountSwitchInvalidatesPreviousProcessLeaseBeforeAnyFetch",
+      "status": "passed",
+      "durationMs": 2
+    },
+    {
+      "suite": "WidgetSnapshotTests",
+      "test": "testColdSignedOutCleanupNeedsNoPreviouslyActivatedOwner",
+      "status": "passed",
+      "durationMs": 1
+    },
+    {
+      "suite": "WidgetSnapshotTests",
+      "test": "testReaderRejectsLegacyOwnerlessAndMismatchedSnapshots",
+      "status": "passed",
+      "durationMs": 1
+    },
+    {
+      "suite": "WidgetSnapshotTests",
+      "test": "testLateArtworkCompletionAfterLogoutCannotRecreateFiles",
+      "status": "passed",
+      "durationMs": 1
+    },
+    {
+      "suite": "WidgetSnapshotTests",
+      "test": "testCancelledArtworkLoaderCannotPublishAfterIgnoringCancellation",
+      "status": "passed",
+      "durationMs": 1
+    },
+    {
+      "suite": "WidgetSnapshotTests",
+      "test": "testLateAArtworkCannotOverwriteColdBWidget",
+      "status": "passed",
+      "durationMs": 2
+    },
+    {
+      "suite": "WidgetSnapshotTests",
+      "test": "testLogoutAndSameAccountLoginRejectPreviousGeneration",
+      "status": "passed",
+      "durationMs": 1
+    }
+  ],
+  "widgetCaseCount": 14,
+  "sourceSHA256": {
+    "ios/Shared/NextUpSnapshot.swift": "86d32586a2550bbed7876298c38b31faac581a461fc6ba3bfea2e0772b7c93a1",
+    "ios/Sources/App/AppModel+Widget.swift": "c8f50e7837b436a8c0eab010d995f158a1e3853535f0f880b5d88c02585ee73c",
+    "ios/Sources/Auth/AuthManager.swift": "0aca59743154a7ea83c8db5abab0f3839ae7e7de36442b4228f964ebd5a5eb19",
+    "ios/Widgets/NextUpWidget.swift": "c0dae9778a78576e8127ac1a0de6937db4f06e3ffc6786be4a5c03549678a3d9",
+    "ios/UITests/WidgetSnapshotTests.swift": "56abf400d0ac94b0247eb777fb6de366959d0cff7a2fefc38cf25dacaac07e56",
+    "ios/UITests/PreviouslyWidgetTests.swift": "3a940bd88abea45af2dafdc3bb4946ba7307056ba98c44d4d2d23aa2651619a5"
+  },
+  "runSourceFingerprint": {
+    "sha256": "d9cdc15997abba7574d7f7d3660130bf4a6c36dd8ece5837fda408548bea572e",
+    "fileCount": 429
+  },
+  "resultBundle": "/Users/shan2new/Projects/previously/ios/Tools/qa/.runs/20261015T160218175798Z/directed.xcresult",
+  "namedEvidence": "Apple xcresult test-results tests tree (CLI summary counts29 but flattened list omitted SwiftTesting10)",
+  "configuration": "QA",
+  "build": "17",
+  "simulatorID": "0031ED81-55FB-4E88-A0D1-012412C64409",
+  "productionAccountOrProviderTouched": false,
+  "physicalWidgetKitRefreshVerified": false
+}

@@ -1,0 +1,551 @@
+{
+  "schemaVersion": 1,
+  "capturedAtUTC": "2026-10-15T16:39:22.778179+00:00",
+  "scope": "Preparation inventory only. This records evidence read during a quiet-host run, not completed qualification or deployment. No historical input is overwritten.",
+  "historicalBuilder": {
+    "path": "docs/release/2026-10-05/build_release_plan.py",
+    "sha256": "f47cff85a74aced51e1441710249330b034cde4e1e558474a130499e767bab0c",
+    "loaders": [
+      {
+        "line": 68,
+        "loader": "read_receipt",
+        "expression": "QA / 'native-results.json'"
+      },
+      {
+        "line": 69,
+        "loader": "read_receipt",
+        "expression": "QA / 'load-testing/final-results.json'"
+      },
+      {
+        "line": 70,
+        "loader": "read_receipt",
+        "expression": "QA / 'operations/compiled-runtime-proof.json'"
+      },
+      {
+        "line": 71,
+        "loader": "read_receipt",
+        "expression": "QA / 'operations/production-apple-backup-restore.json'"
+      },
+      {
+        "line": 71,
+        "loader": "read_receipt",
+        "expression": "QA / 'operations/production-backup-restore.json'"
+      },
+      {
+        "line": 72,
+        "loader": "read_receipt",
+        "expression": "QA / 'operations/post-clerk-cutover-backup-restore.json'"
+      },
+      {
+        "line": 73,
+        "loader": "read_receipt",
+        "expression": "QA / 'operations/clerk-production-cutover.json'"
+      },
+      {
+        "line": 74,
+        "loader": "read_receipt",
+        "expression": "QA / 'operations/actual-installed-live-receipt.json'"
+      },
+      {
+        "line": 75,
+        "loader": "read_receipt",
+        "expression": "QA / 'app-store/review-account-provisioned.json'"
+      },
+      {
+        "line": 76,
+        "loader": "read_receipt",
+        "expression": "QA / 'native-live/candidate14-production-native.json'"
+      },
+      {
+        "line": 77,
+        "loader": "read_receipt",
+        "expression": "QA / 'native-live/candidate14-files-pending.json'"
+      },
+      {
+        "line": 78,
+        "loader": "read_receipt",
+        "expression": "QA / 'native-live/candidate14-erasure-native.json'"
+      },
+      {
+        "line": 79,
+        "loader": "read_receipt",
+        "expression": "QA / 'archive14/archive-receipt.json'"
+      },
+      {
+        "line": 80,
+        "loader": "read_receipt",
+        "expression": "QA / 'archive14/upload-receipt.json'"
+      },
+      {
+        "line": 81,
+        "loader": "read_receipt",
+        "expression": "QA / 'app-store/build14-selected-receipt.json'"
+      },
+      {
+        "line": 82,
+        "loader": "read_receipt",
+        "expression": "QA / 'app-store/review-notes-saved-receipt.json'"
+      },
+      {
+        "line": 83,
+        "loader": "read_receipt",
+        "expression": "QA / 'app-store/review-validation-receipt.json'"
+      },
+      {
+        "line": 84,
+        "loader": "read_receipt",
+        "expression": "QA / 'app-store/review-credentials-saved-receipt.json'"
+      },
+      {
+        "line": 85,
+        "loader": "read_receipt",
+        "expression": "QA / 'app-store/review-validation-after-credentials.json'"
+      },
+      {
+        "line": 86,
+        "loader": "read_receipt",
+        "expression": "QA / 'native-live/review-otp-native-recheck.json'"
+      },
+      {
+        "line": 87,
+        "loader": "read_receipt",
+        "expression": "REVIEW_QA / 'rejection-receipt.json'"
+      },
+      {
+        "line": 88,
+        "loader": "read_receipt",
+        "expression": "REVIEW_QA / 'response-draft-saved-receipt.json'"
+      },
+      {
+        "line": 89,
+        "loader": "read_receipt",
+        "expression": "REVIEW_QA / 'review-package-prepared.json'"
+      },
+      {
+        "line": 90,
+        "loader": "read_receipt",
+        "expression": "REVIEW_QA / 'sample-package-receipt.json'"
+      },
+      {
+        "line": 91,
+        "loader": "read_receipt",
+        "expression": "REVIEW_QA / 'review-template-budget-check.json'"
+      },
+      {
+        "line": 92,
+        "loader": "read_receipt",
+        "expression": "QA / 'native-live/provider-enabled-recheck/result.json'"
+      },
+      {
+        "line": 93,
+        "loader": "read_receipt",
+        "expression": "QA / 'native-live/provider-owner-testflight.json'"
+      },
+      {
+        "line": 94,
+        "loader": "read_receipt",
+        "expression": "QA / 'app-store/testflight-build14-existing-group.json'"
+      },
+      {
+        "line": 95,
+        "loader": "read_receipt",
+        "expression": "QA / 'app-store/clerk-access-only-plan.json'"
+      },
+      {
+        "line": 96,
+        "loader": "read_receipt",
+        "expression": "QA / 'native-live/build13-production-signin-blocked.json'"
+      },
+      {
+        "line": 97,
+        "loader": "read_receipt",
+        "expression": "QA / 'app-store/campaign-artwork-uploaded-receipt.json'"
+      },
+      {
+        "line": 98,
+        "loader": "read_receipt",
+        "expression": "QA / 'app-store/owner-declarations-authorized.json'"
+      },
+      {
+        "line": 99,
+        "loader": "read_receipt",
+        "expression": "QA / 'native-live/live-account-erasure-provisioned.json'"
+      },
+      {
+        "line": 100,
+        "loader": "read_receipt",
+        "expression": "QA / 'app-store/google-client-created-secret-remediation.json'"
+      },
+      {
+        "line": 101,
+        "loader": "read_receipt",
+        "expression": "QA / 'app-store/google-original-secret-retirement.json'"
+      },
+      {
+        "line": 102,
+        "loader": "read_receipt",
+        "expression": "QA / 'app-store/campaign-portrait-export-format.json'"
+      },
+      {
+        "line": 103,
+        "loader": "read_receipt",
+        "expression": "QA / 'app-store/campaign-header-export-format.json'"
+      },
+      {
+        "line": 104,
+        "loader": "read_receipt",
+        "expression": "QA / 'operations/legacy-backup-retired.json'"
+      },
+      {
+        "line": 105,
+        "loader": "read_receipt",
+        "expression": "QA / 'operations/legacy-log-files-secured.json'"
+      },
+      {
+        "line": 106,
+        "loader": "read_receipt",
+        "expression": "QA / 'operations/legacy-log-files-retired.json'"
+      },
+      {
+        "line": 107,
+        "loader": "read_receipt",
+        "expression": "QA / 'operations/production-apple-additive-migration.json'"
+      },
+      {
+        "line": 107,
+        "loader": "read_receipt",
+        "expression": "QA / 'operations/production-additive-migrations.json'"
+      },
+      {
+        "line": 108,
+        "loader": "read_receipt",
+        "expression": "QA / 'operations/clerk-migration-proof.json'"
+      },
+      {
+        "line": 109,
+        "loader": "read_receipt",
+        "expression": "QA / 'operations/clerk-instance-verified.json'"
+      },
+      {
+        "line": 110,
+        "loader": "read_receipt",
+        "expression": "QA / 'app-store/clerk-dns-verified.json'"
+      },
+      {
+        "line": 111,
+        "loader": "read_receipt",
+        "expression": "QA / 'app-store/previously-domain-https.json'"
+      },
+      {
+        "line": 112,
+        "loader": "read_receipt",
+        "expression": "QA / 'app-store/google-oauth.json'"
+      },
+      {
+        "line": 113,
+        "loader": "read_receipt",
+        "expression": "QA / 'app-store/clerk-provider-activation-public-readback.json'"
+      },
+      {
+        "line": 114,
+        "loader": "read_receipt",
+        "expression": "QA / 'app-store/provider-frontend-readback.json'"
+      },
+      {
+        "line": 115,
+        "loader": "read_receipt",
+        "expression": "QA / 'app-store/canonical-store-urls.json'"
+      },
+      {
+        "line": 116,
+        "loader": "read_receipt",
+        "expression": "QA / 'app-store/age-rating-saved.json'"
+      },
+      {
+        "line": 117,
+        "loader": "read_receipt",
+        "expression": "QA / 'app-store/apple-sign-in.json'"
+      },
+      {
+        "line": 118,
+        "loader": "read_receipt",
+        "expression": "QA / 'app-store/privacy-draft-receipt.json'"
+      },
+      {
+        "line": 119,
+        "loader": "read_receipt",
+        "expression": "QA / 'app-store/device-id-privacy-draft-saved.json'"
+      },
+      {
+        "line": 120,
+        "loader": "read_receipt",
+        "expression": "QA / 'app-store/privacy-published-receipt.json'"
+      },
+      {
+        "line": 123,
+        "loader": "read_receipt",
+        "expression": "QA / 'sdk-privacy-audit.json'"
+      },
+      {
+        "line": 124,
+        "loader": "read_receipt",
+        "expression": "'docs/release/2026-10-06/campaign-assets.json'"
+      },
+      {
+        "line": 128,
+        "loader": "read_receipt",
+        "expression": "QA / 'operations/apple-policy-artifact/artifact-manifest.json'"
+      },
+      {
+        "line": 129,
+        "loader": "read_receipt",
+        "expression": "QA / 'operations/apple-policy-artifact/production-audit.json'"
+      },
+      {
+        "line": 129,
+        "loader": "read_receipt",
+        "expression": "QA / 'operations/artifact-production-audit.json'"
+      },
+      {
+        "line": 130,
+        "loader": "read_receipt",
+        "expression": "QA / 'landing-release/vercel-production/promotion-receipt.json'"
+      },
+      {
+        "line": 134,
+        "loader": "read_receipt",
+        "expression": "receipt_path"
+      },
+      {
+        "line": 146,
+        "loader": "read_receipt",
+        "expression": "QA / effective_landing_receipt"
+      },
+      {
+        "line": 147,
+        "loader": "read_receipt",
+        "expression": "QA / 'landing-release/vercel-production/public-http-assets.json'"
+      },
+      {
+        "line": 148,
+        "loader": "read_receipt",
+        "expression": "QA / 'landing-release/vercel-production/public-browser/browser-report.json'"
+      },
+      {
+        "line": 149,
+        "loader": "read_receipt",
+        "expression": "'docs/release/2026-10-06/release-status.json'"
+      },
+      {
+        "line": 151,
+        "loader": "read_receipt",
+        "expression": "QA / f'archive{store_build}/upload-receipt.json'"
+      },
+      {
+        "line": 152,
+        "loader": "read_receipt",
+        "expression": "QA / f'app-store/build{store_build}-selected-receipt.json'"
+      },
+      {
+        "line": 153,
+        "loader": "read_receipt",
+        "expression": "QA / f'archive{store_build}/archive-receipt.json'"
+      },
+      {
+        "line": 154,
+        "loader": "count_text",
+        "expression": "'docs/qa/2026-10-06/server-unit-final.txt'"
+      },
+      {
+        "line": 155,
+        "loader": "read_receipt",
+        "expression": "QA / 'apple-deletion/unit-qualified.json'"
+      },
+      {
+        "line": 159,
+        "loader": "count_operator_text",
+        "expression": "'docs/qa/2026-10-06/apple-deletion/ops-final-qualified.log'"
+      },
+      {
+        "line": 162,
+        "loader": "read_receipt",
+        "expression": "protocol_path"
+      },
+      {
+        "line": 163,
+        "loader": "read_receipt",
+        "expression": "recovery_path"
+      },
+      {
+        "line": 164,
+        "loader": "read_receipt",
+        "expression": "QA / 'content-policy/compiled-node24-apple-policy/results.json'"
+      },
+      {
+        "line": 165,
+        "loader": "read_receipt",
+        "expression": "QA / 'deletion-faults/qualified-node24-current/results.json'"
+      },
+      {
+        "line": 166,
+        "loader": "read_receipt",
+        "expression": "QA / 'deletion-status-recovery/2026-10-06T11-13-37.432Z/results.json'"
+      },
+      {
+        "line": 169,
+        "loader": "read_receipt",
+        "expression": "load['previousQualifiedReceiptPath']"
+      }
+    ],
+    "qaRoot": "docs/qa/2026-10-06",
+    "reviewRoot": "docs/qa/2026-10-07/app-store",
+    "statusInput": "docs/release/2026-10-06/release-status.json"
+  },
+  "historicalRenderedSnapshot": {
+    "recordedRevision": "2026-10-07",
+    "recordedBuiltAtUTC": "2026-10-07T05:29:21.330766+00:00",
+    "recordedPdfSha256": "89d9e55dfdb1290300fba212003320e58e731e7144ba8c4f8e5c615a5ea614ff",
+    "recordedPages": 32,
+    "recordedReceiptPaths": [
+      "docs/qa/2026-10-06/app-store/age-rating-saved.json",
+      "docs/qa/2026-10-06/app-store/apple-sign-in.json",
+      "docs/qa/2026-10-06/app-store/build14-selected-receipt.json",
+      "docs/qa/2026-10-06/app-store/campaign-artwork-uploaded-receipt.json",
+      "docs/qa/2026-10-06/app-store/campaign-header-export-format.json",
+      "docs/qa/2026-10-06/app-store/campaign-portrait-export-format.json",
+      "docs/qa/2026-10-06/app-store/canonical-store-urls.json",
+      "docs/qa/2026-10-06/app-store/clerk-access-only-plan.json",
+      "docs/qa/2026-10-06/app-store/clerk-dns-verified.json",
+      "docs/qa/2026-10-06/app-store/clerk-provider-activation-public-readback.json",
+      "docs/qa/2026-10-06/app-store/device-id-privacy-draft-saved.json",
+      "docs/qa/2026-10-06/app-store/google-client-created-secret-remediation.json",
+      "docs/qa/2026-10-06/app-store/google-oauth.json",
+      "docs/qa/2026-10-06/app-store/google-original-secret-retirement.json",
+      "docs/qa/2026-10-06/app-store/owner-declarations-authorized.json",
+      "docs/qa/2026-10-06/app-store/previously-domain-https.json",
+      "docs/qa/2026-10-06/app-store/privacy-draft-receipt.json",
+      "docs/qa/2026-10-06/app-store/privacy-published-receipt.json",
+      "docs/qa/2026-10-06/app-store/provider-frontend-readback.json",
+      "docs/qa/2026-10-06/app-store/review-account-provisioned.json",
+      "docs/qa/2026-10-06/app-store/review-credentials-saved-receipt.json",
+      "docs/qa/2026-10-06/app-store/review-notes-saved-receipt.json",
+      "docs/qa/2026-10-06/app-store/review-validation-after-credentials.json",
+      "docs/qa/2026-10-06/app-store/review-validation-receipt.json",
+      "docs/qa/2026-10-06/app-store/testflight-build14-existing-group.json",
+      "docs/qa/2026-10-06/apple-deletion/ops-final-qualified.log",
+      "docs/qa/2026-10-06/apple-deletion/unit-qualified.json",
+      "docs/qa/2026-10-06/archive13/native-icon-152.png",
+      "docs/qa/2026-10-06/archive14/archive-receipt.json",
+      "docs/qa/2026-10-06/archive14/upload-receipt.json",
+      "docs/qa/2026-10-06/branding/dynamic-island-publication/qualification-receipt.json",
+      "docs/qa/2026-10-06/branding/publication/qualification-receipt.json",
+      "docs/qa/2026-10-06/content-policy/compiled-node24-apple-policy/results.json",
+      "docs/qa/2026-10-06/deletion-faults/qualified-node24-current/results.json",
+      "docs/qa/2026-10-06/deletion-recovery/compiled-node24-apple-policy/results.json",
+      "docs/qa/2026-10-06/deletion-status-recovery/2026-10-06T11-13-37.432Z/results.json",
+      "docs/qa/2026-10-06/landing-final/device-id-draft-publication/qualification-receipt.json",
+      "docs/qa/2026-10-06/landing-final/draft-publication/qualification-receipt.json",
+      "docs/qa/2026-10-06/landing-final/effective-publication/qualification-receipt.json",
+      "docs/qa/2026-10-06/landing-release/vercel-production/promotion-receipt.json",
+      "docs/qa/2026-10-06/landing-release/vercel-production/public-browser/browser-report.json",
+      "docs/qa/2026-10-06/landing-release/vercel-production/public-http-assets.json",
+      "docs/qa/2026-10-06/load-testing/final-results.json",
+      "docs/qa/2026-10-06/native-live/build13-production-signin-blocked.json",
+      "docs/qa/2026-10-06/native-live/candidate14-erasure-native.json",
+      "docs/qa/2026-10-06/native-live/candidate14-files-pending.json",
+      "docs/qa/2026-10-06/native-live/candidate14-production-native.json",
+      "docs/qa/2026-10-06/native-live/live-account-erasure-provisioned.json",
+      "docs/qa/2026-10-06/native-live/provider-enabled-recheck/result.json",
+      "docs/qa/2026-10-06/native-live/provider-owner-testflight.json",
+      "docs/qa/2026-10-06/native-live/review-otp-native-recheck.json",
+      "docs/qa/2026-10-06/native-results.json",
+      "docs/qa/2026-10-06/operations/actual-installed-live-receipt.json",
+      "docs/qa/2026-10-06/operations/apple-policy-artifact/artifact-manifest.json",
+      "docs/qa/2026-10-06/operations/apple-policy-artifact/production-audit.json",
+      "docs/qa/2026-10-06/operations/clerk-instance-verified.json",
+      "docs/qa/2026-10-06/operations/clerk-migration-proof.json",
+      "docs/qa/2026-10-06/operations/clerk-production-cutover.json",
+      "docs/qa/2026-10-06/operations/compiled-runtime-proof.json",
+      "docs/qa/2026-10-06/operations/legacy-backup-retired.json",
+      "docs/qa/2026-10-06/operations/legacy-log-files-retired.json",
+      "docs/qa/2026-10-06/operations/legacy-log-files-secured.json",
+      "docs/qa/2026-10-06/operations/post-clerk-cutover-backup-restore.json",
+      "docs/qa/2026-10-06/operations/production-apple-additive-migration.json",
+      "docs/qa/2026-10-06/operations/production-apple-backup-restore.json",
+      "docs/qa/2026-10-06/operations/usage-semantics.md",
+      "docs/qa/2026-10-06/progress-faults/compiled-node24-apple-policy/results.json",
+      "docs/qa/2026-10-06/sdk-privacy-audit.json",
+      "docs/qa/2026-10-06/server-unit-final.txt",
+      "docs/qa/2026-10-07/app-store/rejection-receipt.json",
+      "docs/qa/2026-10-07/app-store/response-draft-saved-receipt.json",
+      "docs/qa/2026-10-07/app-store/review-package-prepared.json",
+      "docs/qa/2026-10-07/app-store/review-template-budget-check.json",
+      "docs/qa/2026-10-07/app-store/sample-package-receipt.json",
+      "docs/release/2026-10-06/app-review-access-plan.md",
+      "docs/release/2026-10-06/campaign-assets.json",
+      "docs/release/2026-10-06/identity-cutover-recovery.md",
+      "docs/release/2026-10-06/release-status.json",
+      "docs/release/2026-10-07/apple-review-notes.txt",
+      "docs/release/2026-10-07/apple-review-response-draft.md",
+      "docs/release/2026-10-07/apple-review-response.txt",
+      "docs/release/2026-10-07/physical-device-recording-guide.md",
+      "output/app-store/01-home-hero-final.png",
+      "output/app-store/02-library-final.png",
+      "output/app-store/03-schedule-final.png",
+      "output/app-store/04-discover-final.png"
+    ]
+  },
+  "inspectedCurrentInputSha256": {
+    "docs/qa/2026-10-15/backend-release/activation-helper-verification.json": "c7d703353aa1c2740a1b979f5b3f717b0a1c3987da139f4058d1a4189e3360ab",
+    "docs/qa/2026-10-15/backend-release/artifact/artifact-manifest.json": "fd41208a58f68820e55aacffaf9b62fcbe42d64a315fe5bd3321e7ff64f5467e",
+    "docs/qa/2026-10-15/backend-release/artifact/production-audit.json": "0fbcd9fe8da10f7c0b8a497f69843598ecbc4751e72ed30de67f82e318aad21f",
+    "docs/qa/2026-10-15/backend-release/cpu-quiet-second-preflight.json": "d5159b02a594b16d3c2ab5de6e234477f9c9ab00fd1fa30b21e2d6bce7412b15",
+    "docs/qa/2026-10-15/backend-release/load-testing/failed-initial-diagnosis.json": "5addeee2bccaa8ec18cb8b07efcf5c2dfd2793dcbdf264f187967c74e2f89a6e",
+    "docs/qa/2026-10-15/backend-release/load-testing/failed-initial-results.json": "7fa5155082e5f561bb3f9b45ffba6fb750a53b0cb161d9661baeca182e404dfe",
+    "docs/qa/2026-10-15/backend-release/policy-final/results.json": "d587455bea58838cc31fb110cae2485b46ba79d46abbfc17874a60a26b7ff680",
+    "docs/qa/2026-10-15/backend-release/prep-recheck-1621.json": "efd0adff9109f956d3307a5319b6b25527a41b4fe344fc1f23addebb0fb20ac3",
+    "docs/qa/2026-10-15/backend-release/prepared-proof.json": "ce464fa460849648c26fc6856f1105663ed3b5a35126bd4ea4adc8a637860f5b",
+    "docs/qa/2026-10-15/backend-release/protocol-final/results.json": "e7f354834f52a80072bc2261cb6b8175e4605ca1a7f22788d02d845472b2182a",
+    "docs/qa/2026-10-15/backend-release/recovery-final/results.json": "c3f6b17e169110d33eab35cca79cd593dd4a70461766815376e90e19d7ff481d",
+    "docs/qa/2026-10-15/consumer-release/archive17-pending.json": "93f60c86d33dda713a639c37a658d9c0a87fbea454046d1dfdbc7fd2549c8202",
+    "docs/qa/2026-10-15/native-release/candidate-context.json": "737000cdc97e8dc78ee03eafe0145201c829ea9cdb74799cda4cfa5f20448349",
+    "docs/qa/2026-10-15/widget-privacy/runtime-results.json": "8fc7af79c83521d68a4e584331d30b75ec603772c597f1e40ed27720f457733e",
+    "ios/Sources/App/AccountExportPreparation.swift": "5efb223a25dbd5b76ec307e7146c4a07b291332ffdf3572562b98959da12cf19",
+    "ios/Sources/Features/Profile/LibraryExport.swift": "2fa09e4f7b477fac1a8e7003fb04780b7bed3c0debf8b0154ee8f4033058d278",
+    "ios/Tools/qa/.runs/20261015T161326526097Z/ledger.json": "3ad25f849bfc1e02d291cdbc028caa403f486d3c739b6c786f9b616d25821231",
+    "ios/UITests/AccountExportPreparationTests.swift": "c90bf22de5ba4eb9585e845612090cca57b5cc90c9bca0cd85bbed7523d88b51",
+    "ios/build/release-16.json": "d821c6000f7b148cfc081f2d9aeb317aa158cf583c43b310fc130bbf5e0e073e"
+  },
+  "unavailableCurrentAliases": [
+    "backendLoad",
+    "backendActivation",
+    "archive17",
+    "upload17",
+    "releaseSimulator17",
+    "realErasure",
+    "filesRuntime",
+    "nativeSummary",
+    "archiveSourceManifest"
+  ],
+  "historicalPdfEdited": false,
+  "builderImportedOrExecuted": false,
+  "pdfRendered": false,
+  "nativeOrBackendBuildRun": false,
+  "productionOrProviderAction": false,
+  "quietWindow": "Coordinator declared 2026-10-15T16:27:00Z through approximately16:50Z; no rendering until explicit release.",
+  "plannedCurrentReceiptBindings": {
+    "backendPrepared": "docs/qa/2026-10-15/backend-release/prepared-proof.json",
+    "backendLoad": "docs/qa/2026-10-15/backend-release/load-testing/final-results.json",
+    "backendFailedLoad": "docs/qa/2026-10-15/backend-release/load-testing/failed-initial-results.json",
+    "backendActivation": "docs/qa/2026-10-15/backend-release/activation-receipt.json",
+    "widget": "docs/qa/2026-10-15/widget-privacy/runtime-results.json",
+    "admission": "ios/Tools/qa/.runs/20261015T161326526097Z/ledger.json",
+    "archive17": "docs/qa/2026-10-15/consumer-release/archive17-inspection.json",
+    "upload17": "docs/qa/2026-10-15/consumer-release/upload17-receipt.json",
+    "releaseSimulator17": null,
+    "realErasure": "docs/qa/2026-10-15/native-release/live-erasure-results.json",
+    "filesRuntime": "docs/qa/2026-10-15/native-release/files-results.json",
+    "nativeSummary": "docs/qa/2026-10-15/native-release/native-results.json",
+    "archiveSourceManifest": "docs/qa/2026-10-15/consumer-release/archive17-source-manifest.json"
+  }
+}

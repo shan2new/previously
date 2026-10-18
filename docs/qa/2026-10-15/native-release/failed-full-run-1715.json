@@ -1,0 +1,31 @@
+{
+  "observedAt": "2026-10-15T17:30:25.300244+00:00",
+  "status": "failed",
+  "originalLedgerPath": "ios/Tools/qa/.runs/20261015T171508872199Z/ledger.json",
+  "directedCounts": {
+    "passed": 64,
+    "failed": 11,
+    "skipped": 0
+  },
+  "monkeysStarted": false,
+  "sourceFingerprint": {
+    "sha256": "670c8b7a21c0c1c73f7fde616d933fdce7697ceaa624e3147bf44438355f8c23",
+    "fileCount": 431
+  },
+  "fixtureStopped": true,
+  "failureNames": [
+    "PreviouslyAccountIsolationTests/testOldOwnerDelayedWriteCannotRetryWithNewOwnerToken",
+    "PreviouslyAccountIsolationTests/testOldOwnerFailedRetryAndCacheDoNotAppearForNewOwner",
+    "PreviouslyDeletionTests/testDefinitiveRefusalResumesTrackingAndLeavesNoHold",
+    "PreviouslyDirectedTests/testAcceptedNewerProgressRetiresOlderFailedRetry",
+    "PreviouslyDirectedTests/testCommittedWriteWithLostResponseHasOneEffect",
+    "PreviouslyDirectedTests/testFailedProgressReplayRetainsMutationIdentityAcrossRelaunch",
+    "PreviouslyDirectedTests/testOlderRetryCannotBypassNewerProgressInFlight",
+    "PreviouslyDirectedTests/testProgressUndoConvergesAcrossTabsAndRelaunch",
+    "PreviouslyDirectedTests/testUpdatedFailureRetryUsesNewestIntent",
+    "PreviouslyDurabilityTests/testKillAfterCommitBeforeReceiptReplaysOriginalOperationOnce",
+    "PreviouslyDurabilityTests/testKillBeforeCatchRestoresOriginalDurableProgress"
+  ],
+  "observation": "Eleven failures share the existing hero mark path; at least first delayed-write failure has UI progress3 and journal0 with no outgoing progress PUT. Episode-row progress, seven admission cases, three real Files journeys,14widget cases and4export helpers passed their selected scopes. Hero readiness diagnosis and repair still require separate evidence.",
+  "qualified": false
+}

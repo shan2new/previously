@@ -1,0 +1,29 @@
+{
+  "startedAt": "2026-10-15T18:42:09.263393+00:00",
+  "status": "tool_finished",
+  "argv": [
+    "/opt/homebrew/opt/node@24/bin/node",
+    "/Users/shan2new/.npm/_npx/6389024b78b4e852/node_modules/xcodebuildmcp/build/cli.js",
+    "device",
+    "build",
+    "--json",
+    "{\"projectPath\":\"/Users/shan2new/Projects/previously/ios/Previously.xcodeproj\",\"scheme\":\"Previously\",\"configuration\":\"Release\",\"platform\":\"iOS\",\"derivedDataPath\":\"/Users/shan2new/Projects/previously/ios/build/DerivedData\",\"preferXcodebuild\":true,\"extraArgs\":[\"-jobs\",\"1\",\"-disableAutomaticPackageResolution\",\"-onlyUsePackageVersionsFromResolvedFile\",\"archive\",\"-archivePath\",\"/Users/shan2new/Projects/previously/ios/build/Previously-17.xcarchive\"]}",
+    "--output",
+    "json"
+  ],
+  "environmentOverride": {
+    "DEVELOPER_DIR": "/Applications/Xcode.app/Contents/Developer"
+  },
+  "availableBytesBefore": 8492032000,
+  "sourceManifestPath": "docs/qa/2026-10-15/consumer-release/archive17-source-manifest.json",
+  "sourceManifestSHA256": "82e0ee042b690cc849b9d9171a966a98c58fb1c0f0e6fb1b72bad3a5ca77ef50",
+  "nativeAllRunPath": "ios/Tools/qa/.runs/20261015T175438622566Z/ledger.json",
+  "qualificationStatusAtArchiveStart": "75directed-and-two-monkey-passed;finalseed-active",
+  "reasonForConcurrentPreparation": "Final UI seed is in repeated XCTest animation-idle waits. Separate DerivedData, one compiler worker; no upload until final qualification/source match.",
+  "archivePath": "/Users/shan2new/Projects/previously/ios/build/Previously-17.xcarchive",
+  "finishedAt": "2026-10-15T18:47:04.609586+00:00",
+  "exitCode": 0,
+  "archivePathExists": true,
+  "stdout.jsonSHA256": "f7f83c01b0ccb5e1d88dd474e30e6f825abcc8f00dd8efa85bfd22cb60ace8e3",
+  "stderr.logSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+}

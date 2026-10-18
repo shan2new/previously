@@ -114,6 +114,7 @@ async function reset() {
   dropNextResponse = false
   await sql`delete from qa_progress_fault`
   await sql`delete from qa_watch_fault`
+  await sql`delete from qa_status_fault`
   await sql`delete from client_mutation_operations`
   await sql`delete from client_mutation_resources`
   await sql`delete from watch_sessions`
@@ -131,7 +132,8 @@ async function run(name: string, test: () => Promise<unknown>) {
     const evidence = await test()
     cases.push({ name, status: 'passed', durationMs: Math.round(performance.now() - start), evidence })
   } catch (error) {
-    cases.push({ name, status: 'failed', durationMs: Math.round(performance.now() - start), error: error instanceof Error ? error.message : String(error) })
+    const cause = error instanceof Error && error.cause instanceof Error ? `; cause: ${error.cause.message}` : ''
+    cases.push({ name, status: 'failed', durationMs: Math.round(performance.now() - start), error: (error instanceof Error ? error.message : String(error)) + cause })
   }
   console.log(`${cases.at(-1)!.status.toUpperCase()} ${name}`)
 }
@@ -182,6 +184,116 @@ try {
       return NEW;
     end; $$`)
   await sql.unsafe('create trigger qa_watch_before_write before insert or update on watch_sessions for each row execute function qa_fail_watch_session()')
+  await sql`create table qa_status_fault (franchise_id uuid primary key)`
+  await sql.unsafe(`create function qa_fail_status() returns trigger language plpgsql as $$
+    begin
+      if exists (select 1 from qa_status_fault where franchise_id = NEW.franchise_id) then
+        raise exception 'QA injected status failure after progress write' using errcode = 'P0001';
+      end if;
+      return NEW;
+    end; $$`)
+  await sql.unsafe('create trigger qa_subscription_before_update before update on subscriptions for each row execute function qa_fail_status()')
+
+  await run('stale report scan handles an empty queue while public comments remain disabled', async () => {
+    const { staleOpenReports } = await importRuntime<typeof import('../src/services/moderation.js')>('services/moderation')
+    assert.deepEqual(await staleOpenReports(new Date()), { count: 0, oldestAt: null })
+    const response = await call(A, 'GET', '/social/comments?subject=qa-status')
+    assert.equal(response.status, 404)
+    assert.equal(response.body.error, 'comments disabled')
+    return { emptyQueueRead: true, commentsDisabled: true, providerCalls: 0 }
+  })
+
+  await run('stale report scan counts only unresolved old reports without mutating them', async () => {
+    const { staleOpenReports } = await importRuntime<typeof import('../src/services/moderation.js')>('services/moderation')
+    const cutoff = new Date('2026-10-15T00:00:00Z')
+    const ids = [randomUUID(), randomUUID(), randomUUID()]
+    for (const id of ids) await sql`insert into comments (id,user_id,subject,franchise_id,body)
+      values (${id},${userB},'qa-report-scan',${FRANCHISE},'Synthetic scratch-only moderation fixture')`
+    const old = '2026-10-14T23:00:00Z', recent = '2026-10-15T01:00:00Z'
+    await sql`insert into reports (user_id,comment_id,reason,created_at,resolved_at) values
+      (${userA},${ids[0]!},'spam',${old}::timestamptz,null),
+      (${userA},${ids[1]!},'spam',${recent}::timestamptz,null),
+      (${userA},${ids[2]!},'spam',${old}::timestamptz,${recent}::timestamptz)`
+    try {
+      const result = await staleOpenReports(cutoff)
+      assert.deepEqual(result, { count: 1, oldestAt: Date.parse(old) })
+      const [after] = await sql`select count(*)::int as total,count(*) filter (where resolved_at is null)::int as unresolved
+        from reports where comment_id in (${ids[0]!},${ids[1]!},${ids[2]!})`
+      assert.deepEqual(after, { total: 3, unresolved: 2 })
+      return { selectedOldUnresolved: 1, allThreeReportsPreserved: true }
+    } finally {
+      await sql`delete from comments where id in (${ids[0]!},${ids[1]!},${ids[2]!})`
+    }
+  })
+
+  await run('single-part forward progress derives Watching from Planned and replay has one effect', async () => {
+    await sql`update subscriptions set status = 'planned' where user_id = ${userA}`
+    const operation = stamp(1)
+    assert.equal((await call(A, 'PUT', '/me/progress', { mediaId: M1, episodes: 4 }, operation)).status, 200)
+    assert.equal(await statusFor(userA), 'watching')
+    assert.equal((await call(A, 'PUT', '/me/progress', { mediaId: M1, episodes: 4 }, operation)).body.applied, false)
+    const [audit] = await sql`select count(*)::int as writes from qa_progress_audit where user_id = ${userA}`
+    assert.equal(audit!.writes, 1)
+    return { status: 'watching', physicalProgressWrites: 1 }
+  })
+
+  await run('single last-season write derives Watched from Planned and lost receipt replays once', async () => {
+    await sql`update subscriptions set status = 'planned' where user_id = ${userA}`
+    await sql`update progress set episodes_watched = 12 where user_id = ${userA} and media_id = ${M1}`
+    await sql`delete from qa_progress_audit`
+    const operation = stamp(1)
+    dropNextResponse = true
+    await assert.rejects(call(A, 'PUT', '/me/progress', { mediaId: M2, episodes: 10 }, operation), /fetch failed/)
+    assert.equal(await statusFor(userA), 'completed')
+    assert.equal((await call(A, 'PUT', '/me/progress', { mediaId: M2, episodes: 10 }, operation)).body.applied, false)
+    const [audit] = await sql`select count(*)::int as writes from qa_progress_audit where user_id = ${userA}`
+    assert.equal(audit!.writes, 1)
+    return { lostAfterCommit: true, canonicalStatus: 'completed', physicalProgressWrites: 1 }
+  })
+
+  await run('derived status failure rolls back progress receipt and cursors then exact intent retries', async () => {
+    await sql`update subscriptions set status = 'planned' where user_id = ${userA}`
+    await sql`insert into qa_status_fault values (${FRANCHISE})`
+    const operation = stamp(1)
+    assert.equal((await call(A, 'PUT', '/me/progress', { mediaId: M1, episodes: 4 }, operation)).status, 500)
+    assert.equal(await statusFor(userA), 'planned')
+    assert.deepEqual(await progressFor(userA), [{ mediaId: M1, episodes: 2 }, { mediaId: M2, episodes: 3 }])
+    const [before] = await sql`select (select count(*)::int from client_mutation_operations) as receipts,
+      (select count(*)::int from client_mutation_resources) as cursors,(select count(*)::int from qa_progress_audit) as writes`
+    assert.deepEqual(before, { receipts: 0, cursors: 0, writes: 0 })
+    await sql`delete from qa_status_fault`
+    assert.equal((await call(A, 'PUT', '/me/progress', { mediaId: M1, episodes: 4 }, operation)).status, 200)
+    assert.equal(await statusFor(userA), 'watching')
+    return { entireTransactionRolledBack: true, exactIntentRetryAccepted: true }
+  })
+
+  await run('compound progress without explicit status derives Watched in its transaction', async () => {
+    await sql`update subscriptions set status = 'planned' where user_id = ${userA}`
+    const response = await call(A, 'PUT', `/me/franchises/${FRANCHISE}/progress`,
+      { parts: [{ mediaId: M1, episodes: 12 }, { mediaId: M2, episodes: 10 }] }, stamp(1))
+    assert.equal(response.status, 200)
+    assert.equal(response.body.status, 'completed')
+    assert.equal(await statusFor(userA), 'completed')
+    return { canonicalStatus: response.body.status, explicitStatusOmitted: true }
+  })
+
+  await run('older progress can land without replacing a later explicit Planned status', async () => {
+    const older = stamp(1)
+    assert.equal((await call(A, 'PATCH', `/me/subscriptions/${FRANCHISE}`, { status: 'planned' }, stamp(2))).status, 200)
+    assert.equal((await call(A, 'PUT', '/me/progress', { mediaId: M1, episodes: 4 }, older)).status, 200)
+    assert.equal(await statusFor(userA), 'planned')
+    assert.equal((await progressFor(userA))[0]!.episodes, 4)
+    return { laterStatusPreserved: true, olderProgressStillApplied: true }
+  })
+
+  await run('forward progress preserves explicitly Paused Dropped or Watched subscriptions', async () => {
+    for (const [index, status] of ['paused', 'dropped', 'completed'].entries()) {
+      await sql`update subscriptions set status = ${status} where user_id = ${userA}`
+      assert.equal((await call(A, 'PUT', '/me/progress', { mediaId: M1, episodes: 5 + index }, stamp(index + 1))).status, 200)
+      assert.equal(await statusFor(userA), status)
+    }
+    return { statusesPreserved: ['paused', 'dropped', 'completed'] }
+  })
 
   await run('normal absolute PUT is bounded by canonical media count', async () => {
     const response = await call(A, 'PUT', '/me/progress', { mediaId: M1, episodes: 99 })

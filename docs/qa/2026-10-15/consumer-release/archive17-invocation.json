@@ -1,0 +1,17 @@
+{
+  "projectPath": "/Users/shan2new/Projects/previously/ios/Previously.xcodeproj",
+  "scheme": "Previously",
+  "configuration": "Release",
+  "platform": "iOS",
+  "derivedDataPath": "/Users/shan2new/Projects/previously/ios/build/DerivedData",
+  "preferXcodebuild": true,
+  "extraArgs": [
+    "-jobs",
+    "2",
+    "-disableAutomaticPackageResolution",
+    "-onlyUsePackageVersionsFromResolvedFile",
+    "archive",
+    "-archivePath",
+    "/Users/shan2new/Projects/previously/ios/build/Previously-17.xcarchive"
+  ]
+}

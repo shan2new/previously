@@ -1,0 +1,22 @@
+test_bootstrap_does_not_retry_permanent_errors (__main__.ActivationGuardTests.test_bootstrap_does_not_retry_permanent_errors) ... ok
+test_bootstrap_never_double_loads_registered_job (__main__.ActivationGuardTests.test_bootstrap_never_double_loads_registered_job) ... ok
+test_bootstrap_retry_stops_on_external_plist_conflict (__main__.ActivationGuardTests.test_bootstrap_retry_stops_on_external_plist_conflict) ... ok
+test_external_live_plist_conflict_is_preserved_without_mutation (__main__.ActivationGuardTests.test_external_live_plist_conflict_is_preserved_without_mutation) ... ok
+test_failed_capacity_never_stops_jobs_or_takes_backup (__main__.ActivationGuardTests.test_failed_capacity_never_stops_jobs_or_takes_backup) ... ok
+test_post_activation_fault_restores_all_three_old_pointers (__main__.ActivationGuardTests.test_post_activation_fault_restores_all_three_old_pointers) ... ok
+test_publicly_readable_backup_fails_activation (__main__.ActivationGuardTests.test_publicly_readable_backup_fails_activation) ... ok
+test_replacement_waits_for_captured_old_wrapper_after_registration_disappears (__main__.ActivationGuardTests.test_replacement_waits_for_captured_old_wrapper_after_registration_disappears) ... ok
+test_same_size_corruption_fails_activation_and_rollback_takes_verified_backup (__main__.ActivationGuardTests.test_same_size_corruption_fails_activation_and_rollback_takes_verified_backup) ... ok
+test_success_selects_exact_reviewed_pointers_and_writes_receipt (__main__.ActivationGuardTests.test_success_selects_exact_reviewed_pointers_and_writes_receipt) ... ok
+test_symlink_backup_fails_activation (__main__.ActivationGuardTests.test_symlink_backup_fails_activation) ... ok
+test_tampered_manifest_cannot_relabel_another_artifact_as_reviewed (__main__.ActivationGuardTests.test_tampered_manifest_cannot_relabel_another_artifact_as_reviewed) ... ok
+test_transient_bootstrap_failure_retries_and_preserves_safe_diagnostic (__main__.ActivationGuardTests.test_transient_bootstrap_failure_retries_and_preserves_safe_diagnostic) ... ok
+test_unhealthy_rollback_collector_never_claims_verified_recovery (__main__.ActivationGuardTests.test_unhealthy_rollback_collector_never_claims_verified_recovery) ... ok
+test_wrong_backup_size_fails_activation (__main__.ActivationGuardTests.test_wrong_backup_size_fails_activation) ... ok
+test_launchctl_preserves_inherited_operator_context (__main__.InvocationContextTests.test_launchctl_preserves_inherited_operator_context) ... ok
+test_node_helpers_keep_scoped_production_environment (__main__.InvocationContextTests.test_node_helpers_keep_scoped_production_environment) ... ok
+
+----------------------------------------------------------------------
+Ran 17 tests in 0.226s
+
+OK

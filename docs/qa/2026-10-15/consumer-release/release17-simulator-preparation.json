@@ -1,0 +1,94 @@
+{
+  "checkedAt": "2026-10-15T18:33:11.489701+00:00",
+  "status": "prepared_build_only_not_executed",
+  "build": "17",
+  "target": "ordinary production-configured Release simulator variant",
+  "destination": {
+    "name": "Previously QA 14 Pro",
+    "id": "0031ED81-55FB-4E88-A0D1-012412C64409",
+    "runtime": "iOS27.0",
+    "metadataReadOnlyVerified": true
+  },
+  "schema": {
+    "tool": "build_sim",
+    "cliRoute": [
+      "simulator",
+      "build"
+    ],
+    "configurationExplicit": "Release",
+    "platformKeyOmittedBecauseNotInBuildSimSchema": true,
+    "uuidPinsExactDestination": true,
+    "useLatestOSOmittedBecauseIgnoredWithUUID": true,
+    "buildForTesting": false,
+    "preferXcodebuild": true
+  },
+  "environmentOverride": {
+    "DEVELOPER_DIR": "/Applications/Xcode.app/Contents/Developer"
+  },
+  "invocationPath": "docs/qa/2026-10-15/consumer-release/release17-simulator-invocation.json",
+  "argvPath": "docs/qa/2026-10-15/consumer-release/release17-simulator-argv.json",
+  "expectedBuildPath": "/Users/shan2new/Projects/previously/ios/build/DerivedData/Build/Products/Release-iphonesimulator/Previously.app",
+  "existingArtifactAtThatPath": {
+    "build": "14",
+    "bundle": "com.cognipin.previously",
+    "platform": "iPhoneSimulator",
+    "minimum": "18.0",
+    "livePublicKeyMatches16": true,
+    "productionAPI": true,
+    "boundary": "This is an old compiled artifact, distinct from the separately installed ordinary build12 sandbox. It is not17proof."
+  },
+  "storage": {
+    "availableBytes": 8838959104,
+    "availableGiB": 8.232,
+    "existingReleaseSimulatorProductsAllocatedKiB": 408400,
+    "existingSourcePackagesAllocatedKiB": 59064,
+    "expectedNormalProjectSimulatorIntermediateDirectoryPresent": false,
+    "additionalFootprintEstimateGiB": [
+      1,
+      2
+    ],
+    "estimateBoundary": "Planning allowance only, not a measured upper bound. Release simulator intermediates may need rebuilding. Recheck after the device archive and before compiling; do not remove existing evidence or caches based on this estimate."
+  },
+  "inspectionAfterFutureBuild": [
+    "Preserve actual argv/env publiccontext, pre/post frozen-source manifest, MCP exit/body and rawbuildLogPath.",
+    "Require successful ordinaryPreviously Release build for pinned iOS simulator; no archive/clean/test/install/launch action in argv.",
+    "Read actual resulting app+widget Info:1.0(17), ordinarybundleIDs, iPhoneonly,min18,iPhoneSimulator; compare API/legal/livepublickey with qualified16 withoutprintingkey.",
+    "Verify compiledMachO is simulator, signing/adHoc and entitlement scope accurately, sharedAppGroup, packagedprivacy; simulator signatures/profiles are not distribution signing.",
+    "Parse both runtimeSwiftcompiler rows for explicitRelease paths and absenceDEBUG/PREVIOUSLY_QA; missingincrementalrows remainunverified.",
+    "Preserve app/widgetbinary+Info/privacy/entitlement hashes. Do not use unchanged old14 artifact as success.",
+    "No install/run: separately installed ordinary12 app/data/session remain untouched. Future normalUI login/DeviceTrust/deletion requires separate handoff."
+  ],
+  "sourceEvidence": [
+    {
+      "path": "/Users/shan2new/.npm/_npx/6389024b78b4e852/node_modules/xcodebuildmcp/manifests/tools/build_sim.yaml",
+      "sha256": "c6e66f7a4cea1899cc81920b50701a130ea6f44e9856f841cfd625c006944c06"
+    },
+    {
+      "path": "/Users/shan2new/.npm/_npx/6389024b78b4e852/node_modules/xcodebuildmcp/build/mcp/tools/simulator/build_sim.js",
+      "sha256": "189541885f06bef9ebcbf53f04e9c313e87728c79f59b04c78776f9726dbdb95"
+    },
+    {
+      "path": "/Users/shan2new/.npm/_npx/6389024b78b4e852/node_modules/xcodebuildmcp/build/utils/build-utils.js",
+      "sha256": "577bd6f5fa04d95e1c74920a091df7bcf3fe3135741b8b447c41ed9531da7288"
+    },
+    {
+      "path": "/Users/shan2new/.npm/_npx/6389024b78b4e852/node_modules/xcodebuildmcp/build/utils/infer-platform.js",
+      "sha256": "968308f78585a3e766a43f74ac2041567f496ea14e7510c0e1b290f1ecee6018"
+    }
+  ],
+  "actionsPerformed": {
+    "nativeBuild": false,
+    "test": false,
+    "simulatorBootOrUI": false,
+    "installLaunchReset": false,
+    "archive": false,
+    "sourceProjectPackageEdits": false,
+    "productionMutation": false,
+    "onlyDocsArgvPrepared": true
+  },
+  "boundaries": [
+    "The installed official build_sim explicitly compiles only; its preparation may query available simulator metadata, not install or launch an app.",
+    "Production-configured simulator variant has differentMachO/platform/signing/storagecontext fromdevicearchive; compileproof doesnotestablishnormalLogin,realproviderflow,physicaldeviceorAppleReview.",
+    "Root must serialize this future build after finalnativeallanddevicearchive; noexecutionauthorizationwasinferredfrompreparationtask."
+  ]
+}

@@ -1,0 +1,7 @@
+{
+  "measuredAt": "2026-10-15T16:59:40.630892+00:00",
+  "sinceInstalledAt": "2026-10-15T16:56:04.017646+00:00",
+  "safeEvents": [],
+  "failedCronJobsSinceCutover": [],
+  "boundary": "Timestamped records use their own event time; untimestamped cron records are included only from segments created after cutover. Does not prove the next hourly schedule ran."
+}

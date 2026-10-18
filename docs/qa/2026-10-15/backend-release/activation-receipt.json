@@ -1,0 +1,277 @@
+{
+  "startedAt": "2026-10-15T16:56:00.660304+00:00",
+  "activated": true,
+  "rollbackPerformed": false,
+  "applicationDataManuallyWritten": false,
+  "productionRestorePerformed": false,
+  "configurationChanged": false,
+  "schemaChanged": false,
+  "artifact": "/Users/shan2new/Infra/previously/releases/20261015T152739Z/server",
+  "sourceSHA256": "1c93625ad9d87eb48a5fcc300781d0cb8235f7f1bea86ae35ec72b5a198eaeb4",
+  "capacityReceipt": "load-testing/final-results.json",
+  "candidateDirectory": "/Users/shan2new/Infra/previously/install-candidates/20261015T152739Z",
+  "previousArtifact": "/Users/shan2new/Infra/previously/releases/20261006T123751Z/server",
+  "artifactFilesVerified": 466,
+  "preactivationBackupRestore": {
+    "createdAt": "2026-10-15T16:56:01.657Z",
+    "manifestPath": "/Users/shan2new/Infra/previously/backups/previously-20261015T165600737Z-d77296a4355d.manifest.json",
+    "bytes": 13850011,
+    "sha256": "02a03574658d8357a4493a6ca543a5e76e069c24b8115de429944342acc52d47",
+    "tocEntries": 190,
+    "restore": {
+      "scratch": "previously_restore_20261015t165601_c031c4ed86be",
+      "usersBefore": 17,
+      "usersAfter": 17,
+      "deletedUsersSwept": 0,
+      "ledgerRecords": 0,
+      "restoredDeletionRecords": 0,
+      "deletedIdentitiesRemaining": 0,
+      "sha256": "02a03574658d8357a4493a6ca543a5e76e069c24b8115de429944342acc52d47"
+    },
+    "restoreElapsedSeconds": 1.2774293340000002,
+    "scratchRemoved": true
+  },
+  "oldJobsStoppedAt": "2026-10-15T16:56:04.016480+00:00",
+  "installedAt": "2026-10-15T16:56:04.017646+00:00",
+  "newBackup": {
+    "version": 1,
+    "createdAt": "2026-10-15T16:56:11.167Z",
+    "file": "previously-20261015T165607522Z-09f8c26662b8.dump",
+    "bytes": 13850011,
+    "sha256": "ab307f51120411bd0deb94739fd05cd380bf644fb705408a8280d8dcc99ed82d",
+    "tocEntries": 190,
+    "sourceFingerprint": "d21f09b6e96725c99f6addce4c039b817fea2e2f32ae444f30cfb262061af4b7",
+    "deletionLedgerSHA256": "17ae090451ff1fc65a9c9577140056e3e61353842d25161b377795ff7368e1a1",
+    "deletionRecords": 0
+  },
+  "newBackupVerification": {
+    "file": "previously-20261015T165607522Z-09f8c26662b8.dump",
+    "bytes": 13850011,
+    "sha256": "ab307f51120411bd0deb94739fd05cd380bf644fb705408a8280d8dcc99ed82d",
+    "mode": "0600",
+    "ownerVerified": true,
+    "verifiedAt": "2026-10-15T16:56:11.412132+00:00"
+  },
+  "newOperationalSnapshot": {
+    "version": 1,
+    "measuredAt": "2026-10-15T16:56:12.012Z",
+    "publicReady": true,
+    "metrics": {
+      "measuredAt": 1792083371743,
+      "startedAt": 1792083366613,
+      "uptimeSeconds": 7.525610875,
+      "memory": {
+        "rss": 127008768,
+        "heapTotal": 54820864,
+        "heapUsed": 39595184,
+        "external": 4684378,
+        "arrayBuffers": 662626
+      },
+      "cpu": {
+        "user": 2621452,
+        "system": 452171
+      },
+      "eventLoopMs": {
+        "mean": 21.852740120171674,
+        "p95": 22.102015,
+        "p99": 25.772031
+      },
+      "latencyBucketUpperMs": [
+        25,
+        50,
+        100,
+        250,
+        500,
+        1000,
+        2000,
+        5000
+      ],
+      "routes": {
+        "GET /ready": {
+          "requests": 2,
+          "errors": 0,
+          "totalMs": 13.84029099999998,
+          "buckets": [
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2
+          ],
+          "statuses": {
+            "2xx": 2
+          }
+        }
+      }
+    },
+    "usage": {
+      "measuredAt": 1792083371746,
+      "counts": {
+        "registered": 17,
+        "active_24h": 2,
+        "active_7d": 3,
+        "registered_7d": 0,
+        "library_users": 9,
+        "progress_users": 7
+      },
+      "deletion": {
+        "pending": 0
+      }
+    },
+    "deletion": {
+      "sha256": "1a383cd12aceeec9ed6c0d7cdd17f6ea3cc3510a6e25f55f74f49b8b9b487c5f",
+      "total": 0,
+      "pending": 0,
+      "oldestPendingHours": 0,
+      "missingPendingIdentity": 0
+    },
+    "backup": {
+      "createdAt": "2026-10-15T16:56:11.167Z",
+      "bytes": 13850011,
+      "sha256": "ab307f51120411bd0deb94739fd05cd380bf644fb705408a8280d8dcc99ed82d",
+      "ageHours": 0.00023444444444444446
+    },
+    "freeDiskBytes": 10728943616,
+    "healthy": true
+  },
+  "newCollectorStartedAt": "2026-10-15T16:56:11.412207+00:00",
+  "postActivationProof": {
+    "measuredAt": "2026-10-15T16:56:12.736Z",
+    "reportsAggregate": {
+      "count": 0,
+      "oldestAt": null
+    },
+    "commentsEnabled": false,
+    "metrics": {
+      "measuredAt": 1792083372727,
+      "startedAt": 1792083366613,
+      "uptimeSeconds": 8.509200333,
+      "memory": {
+        "rss": 127139840,
+        "heapTotal": 54820864,
+        "heapUsed": 40164856,
+        "external": 4684917,
+        "arrayBuffers": 663125
+      },
+      "cpu": {
+        "user": 2632227,
+        "system": 453993
+      },
+      "eventLoopMs": {
+        "mean": 21.804068834532373,
+        "p95": 22.102015,
+        "p99": 22.396927
+      },
+      "latencyBucketUpperMs": [
+        25,
+        50,
+        100,
+        250,
+        500,
+        1000,
+        2000,
+        5000
+      ],
+      "routes": {
+        "GET /ready": {
+          "requests": 3,
+          "errors": 0,
+          "totalMs": 15.068625000000338,
+          "buckets": [
+            3,
+            3,
+            3,
+            3,
+            3,
+            3,
+            3,
+            3
+          ],
+          "statuses": {
+            "2xx": 3
+          }
+        },
+        "GET /internal/metrics": {
+          "requests": 1,
+          "errors": 0,
+          "totalMs": 2.061333999999988,
+          "buckets": [
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1
+          ],
+          "statuses": {
+            "2xx": 1
+          }
+        },
+        "GET /internal/usage": {
+          "requests": 1,
+          "errors": 0,
+          "totalMs": 7.377250000000458,
+          "buckets": [
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1
+          ],
+          "statuses": {
+            "2xx": 1
+          }
+        }
+      }
+    },
+    "usage": {
+      "measuredAt": 1792083372730,
+      "counts": {
+        "registered": 17,
+        "active_24h": 2,
+        "active_7d": 3,
+        "registered_7d": 0,
+        "library_users": 9,
+        "progress_users": 7
+      },
+      "deletion": {
+        "pending": 0
+      },
+      "definition": "Activity is the most recent confirmed app-open timestamp; no cross-app tracking or per-user event export."
+    },
+    "anonymousMetricsStatus": 404,
+    "anonymousUsageStatus": 404,
+    "sourceFingerprint": "d21f09b6e96725c99f6addce4c039b817fea2e2f32ae444f30cfb262061af4b7"
+  },
+  "jobStates": {
+    "com.shan.previously": {
+      "loaded": true,
+      "state": "running",
+      "pid": 6077,
+      "runs": 1
+    },
+    "com.shan.previously.backup": {
+      "loaded": true,
+      "state": "not running",
+      "runs": 1,
+      "lastExitCode": 0
+    },
+    "com.shan.previously.ops": {
+      "loaded": true,
+      "state": "not running",
+      "runs": 1,
+      "lastExitCode": 0
+    }
+  },
+  "finishedAt": "2026-10-15T16:56:12.792251+00:00",
+  "localReady": true,
+  "publicReady": true
+}

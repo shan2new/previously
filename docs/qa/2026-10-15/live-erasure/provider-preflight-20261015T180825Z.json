@@ -1,0 +1,49 @@
+{
+  "version": 1,
+  "checkedAt": "2026-10-15T18:08:27.426044+00:00",
+  "status": "provider_preflight_passed",
+  "helperPath": "/Users/shan2new/.config/previously/release/live-erasure-qa.py",
+  "helperMode": "preflight",
+  "helperExitCode": 0,
+  "helperReason": null,
+  "providerOperations": [
+    {
+      "method": "GET",
+      "resource": "/instance"
+    },
+    {
+      "method": "GET",
+      "resource": "/v1/environment"
+    },
+    {
+      "method": "GET",
+      "resource": "/users"
+    }
+  ],
+  "providerMutations": 0,
+  "appRequestsOrSessionsCreated": 0,
+  "accountOrSettingsEdits": false,
+  "deletionMarkedStarted": false,
+  "existingDisposableStateMatched": true,
+  "protectedLocalIdentityCount": 5,
+  "currentDisposableProviderPresenceVerified": false,
+  "currentDisposablePasswordVerified": false,
+  "currentAppAccountPresence": null,
+  "currentLibraryEntryCount": null,
+  "currentProgressEntryCount": null,
+  "currentEpisodeSum": null,
+  "freshDBReadPerformed": false,
+  "readyBaselineCreatedOrReplaced": false,
+  "readyBaselineExists": false,
+  "historicalPublicReceiptsUnchanged": true,
+  "DeviceTrustBypassed": false,
+  "IDsEmailsTokensOrPrivateHashesExported": false,
+  "scopeLimit": "Existing preflight CLI enforces provider-read guards but does not report whether an optional matching QA candidate was present. Existing DB CLI baseline would create or replace a ready baseline; post requires deletion-start, so neither was executed.",
+  "productionInstanceMatched": true,
+  "productionTestModeDisabled": true,
+  "ordinaryPasswordFirstFactorAvailable": true,
+  "protectedProviderAccountsPresent": 5,
+  "protectedProviderSecurityUnchanged": true,
+  "currentDisposableProviderPresent": null,
+  "currentDisposablePasswordEnabled": null
+}

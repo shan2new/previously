@@ -1,0 +1,105 @@
+{
+  "capturedAt": "2026-10-15T15:58:18.873234+00:00",
+  "qualification": "failed",
+  "activated": false,
+  "errorClassification": "294 client total-timeout errors at5000ms;0HTTP5xx/non2xx/incorrectresponse/drops",
+  "requestErrors": 294,
+  "errorsByRoute": {
+    "library": 102,
+    "detail": 85,
+    "warm-search": 60,
+    "feed": 30,
+    "notifications": 11,
+    "watch-sessions": 1,
+    "progress-write": 5
+  },
+  "serverErrorEvents": 0,
+  "serverSlowResponseCount": 282,
+  "firstSlowResponseAt": "2026-10-15T15:55:09.940000+00:00",
+  "serverOOMOrCrashObserved": false,
+  "memoryReviewPassed": true,
+  "sampledPostgresLockWaits": 0,
+  "recoveryQueries": {
+    "phase": "recovery",
+    "startedAt": "2026-10-15T15:51:58.442Z",
+    "endedAt": "2026-10-15T15:56:58.808Z",
+    "queries": {
+      "count": 58570,
+      "totalMs": 5028136,
+      "meanMs": 85.848,
+      "p50Ms": 1,
+      "p95Ms": 356,
+      "p99Ms": 2708,
+      "maxMs": 4874.996041999897,
+      "binWidthMs": 1,
+      "overflowBinMs": 60000
+    },
+    "dispatchWait": {
+      "count": 9527,
+      "totalMs": 798444,
+      "meanMs": 83.809,
+      "p50Ms": 1,
+      "p95Ms": 304,
+      "p99Ms": 2723,
+      "maxMs": 4683.810999999987,
+      "binWidthMs": 1,
+      "overflowBinMs": 60000
+    },
+    "dispatchWaitDescription": "Client query handle to postgres onexecute callback; includes client dispatch, connection availability and socket buffering. Callback does not cover every query and is not isolated pool wait.",
+    "dispatchCoverage": 0.16266006487963122,
+    "errors": 0,
+    "inFlight": 0,
+    "peakInFlight": 285
+  },
+  "hostMemoryBefore": "vm.swapusage: total = 4096.00M  used = 3678.00M  free = 418.00M  (encrypted)",
+  "hostMemoryAfter": "vm.swapusage: total = 6144.00M  used = 4949.56M  free = 1194.44M  (encrypted)",
+  "independentNativeContentionSamples": [
+    {
+      "at": "2026-10-15T15:35:44.026532+00:00",
+      "processes": 1,
+      "cpuPercentOfOneCoreSum": 52.7
+    },
+    {
+      "at": "2026-10-15T15:54:58.911990+00:00",
+      "processes": 1,
+      "cpuPercentOfOneCoreSum": 22.3
+    },
+    {
+      "at": "2026-10-15T15:55:14.146114+00:00",
+      "processes": 7,
+      "cpuPercentOfOneCoreSum": 323.4
+    },
+    {
+      "at": "2026-10-15T15:55:29.403893+00:00",
+      "processes": 9,
+      "cpuPercentOfOneCoreSum": 605.5
+    },
+    {
+      "at": "2026-10-15T15:56:15.081040+00:00",
+      "processes": 1,
+      "cpuPercentOfOneCoreSum": 91.0
+    },
+    {
+      "at": "2026-10-15T15:56:30.383941+00:00",
+      "processes": 1,
+      "cpuPercentOfOneCoreSum": 0.4
+    },
+    {
+      "at": "2026-10-15T15:56:45.658357+00:00",
+      "processes": 1,
+      "cpuPercentOfOneCoreSum": 0.0
+    }
+  ],
+  "sourceChanged": [],
+  "cleanup": {
+    "databaseRemoved": true,
+    "ownedOpsRemoved": true,
+    "scratchConnectionsBeforeDrop": 0
+  },
+  "canonicalOracle": {
+    "checked": 798,
+    "mismatchCount": 2,
+    "boundary": "Oracle records successful receipts only. Five progress writes timed out and two final rows exceeded acknowledged expectation; compatible with commit-before-timeout, but removed scratch prevents identity-level reconstruction. Existing focused SQL fault tests cover lost receipts/replay; do not reinterpret the failed capacity oracle as passing."
+  },
+  "conclusion": "Failed shared-host run, preserved. Widespread timeout/DBdispatch delay temporally overlaps independent Kestrel compiler/simulator activity and increased swap. No product defect or definitive causal isolation established. Repeat unchanged criteria after confirming a quiet host; do not activate on this receipt."
+}

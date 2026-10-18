@@ -1,0 +1,25 @@
+{
+  "checkedAt": "2026-10-15T16:24:48.871267+00:00",
+  "pureNegativeClassifierTests": {
+    "passed": 3,
+    "failed": 0
+  },
+  "actualBaseline16Inspection": {
+    "receipt": "docs/qa/2026-10-15/consumer-release/baseline16-verifier-check.json",
+    "artifactChecks": 47,
+    "passed": 47,
+    "compilerEvidencePassed": true,
+    "sourceManifestSupplied": false
+  },
+  "wrongExpectedBuildNegative": {
+    "exitCode": 1,
+    "failedChecks": [
+      "build"
+    ],
+    "correctlyRejected": true
+  },
+  "actual17ArchiveVerified": false,
+  "readOnly": true,
+  "nativeOrSimulatorActivity": false,
+  "verifierSHA256": "24349a1d8ab2d79c671ccaf34002c219be9d6fb828f9bbdf715fc9a61a678be5"
+}

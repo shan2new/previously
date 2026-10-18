@@ -1,0 +1,21 @@
+{
+  "at": "2026-10-15T15:33:54.730096+00:00",
+  "authorization": "Root confirmed native build/test pause before full candidate qualification",
+  "nativeBuildsAndTestsHeld": true,
+  "normalSharedServicesRemainResident": true,
+  "backendSourceAndDistFrozen": true,
+  "productionServiceChanged": false,
+  "profile": {
+    "warmupRPS": 15,
+    "warmupSeconds": 120,
+    "sustainedRPS": 75,
+    "sustainedSeconds": 900,
+    "burstRPS": 150,
+    "burstSeconds": 60,
+    "recoveryRPS": 15,
+    "recoverySeconds": 300,
+    "coldSearches": 200,
+    "concurrentImports": 2
+  },
+  "note": "Record of internal coordination; actual competing process samples are recorded by the load launcher."
+}

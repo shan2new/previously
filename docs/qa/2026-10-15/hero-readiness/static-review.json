@@ -1,0 +1,99 @@
+{
+  "reviewedAt": "2026-10-15T17:34:24.833657+00:00",
+  "status": "no_concrete_material_regression_found_in_scoped_diff",
+  "scope": "Only the new ShowBillboard.swift HomeArrival hit/accessibility fence and settled nil/empty artwork callback; supporting caller/handoff paths read for context.",
+  "findings": [],
+  "reviewedPatchMatchesPreparedReceipt": true,
+  "verifiedSourceBehavior": [
+    {
+      "area": "invisible copy actions",
+      "evidence": [
+        "ios/Sources/DesignSystem/ShowBillboard.swift:38",
+        "ios/Sources/Features/Home/HomeParts.swift:547",
+        "ios/Sources/Features/FranchiseDetail/FranchiseDetailView.swift:2889"
+      ],
+      "observation": "The same shown||reduceMotion condition already used for target opacity/offset now controls hit testing and accessibility. Parent-disabled/noninteractive content is not changed into an enabled action, and existing committing guards remain."
+    },
+    {
+      "area": "nil/empty artwork readiness",
+      "evidence": [
+        "ios/Sources/DesignSystem/ShowBillboard.swift:123",
+        "ios/Sources/DesignSystem/ShowBillboard.swift:139",
+        "ios/Sources/DesignSystem/Primitives.swift:1506"
+      ],
+      "observation": "ArtHeader only instantiates image loading for nonempty URLs. After settle chooses a nil/empty-art fallback, the new call uses existing artLoaded rather than waiting for an impossible image callback. The existing settled==nil and cancellation guards prevent this added settle path from repeating."
+    },
+    {
+      "area": "callback and launch ordering",
+      "evidence": [
+        "ios/Sources/DesignSystem/ShowBillboard.swift:144",
+        "ios/Sources/DesignSystem/ShowBillboard.swift:151",
+        "ios/Sources/DesignSystem/ShowBillboard.swift:227",
+        "ios/Sources/Features/Home/HomeView.swift:741",
+        "ios/Sources/App/LaunchIdent.swift:260"
+      ],
+      "observation": "Existing artLoaded checks reportsChrome before notifying the caller, then sets artIn. stage still requires artIn AND curtainUp, and the task remains keyed by that conjunction. Home markArtReady is idempotent. Launch still also requires auth readiness or its existing bounded ceiling; this diff does not bypass authentication or mutate progress."
+    },
+    {
+      "area": "pager chrome reporting",
+      "evidence": [
+        "ios/Sources/Features/Home/HomeParts.swift:631",
+        "ios/Sources/DesignSystem/ShowBillboard.swift:228"
+      ],
+      "observation": "Only the front page sets reportsChrome. The added fallback callback shares the same check as image arrivals. Existing geometry/lighting reporting and front-page lighting reconciliation remain unchanged."
+    },
+    {
+      "area": "Reduce Motion and image-failure path",
+      "evidence": [
+        "ios/Sources/DesignSystem/ShowBillboard.swift:39",
+        "ios/Sources/DesignSystem/ShowBillboard.swift:215"
+      ],
+      "observation": "Reduce Motion keeps copy immediately visible/interactable without the stagger. Nonempty real-image behavior and the existing3000ms fallback task are unchanged."
+    }
+  ],
+  "sourceFiles": [
+    {
+      "path": "ios/Sources/DesignSystem/ShowBillboard.swift",
+      "sha256": "ddfe5c12c1ef50d0bd5f98d6893f0a5eb20f74522ff96985a4456fd0c1060a65"
+    },
+    {
+      "path": "ios/Sources/DesignSystem/Primitives.swift",
+      "sha256": "79890a877b601900b44ca0cf4ad1444651d6bd1662aedd380cf3c7da7bbfc545"
+    },
+    {
+      "path": "ios/Sources/Features/Home/HomeParts.swift",
+      "sha256": "bf04ea3c427a1f2fb9c8d9e2f7b7f664f13a41c25b32e3960014ce956ba2fadf"
+    },
+    {
+      "path": "ios/Sources/Features/Home/HomeView.swift",
+      "sha256": "8c26d8f36a415393796a3d24830afa0e86991b6fbe8d9c0aa3e7cd9972e3c953"
+    },
+    {
+      "path": "ios/Sources/App/LaunchHandoff.swift",
+      "sha256": "446a5526f93f1ad129f45dcbe0f3c7a3c9700a22aede0075d5649c6b89f5446e"
+    },
+    {
+      "path": "ios/Sources/App/LaunchIdent.swift",
+      "sha256": "40fdedb80224d4850d43d14efcc0136f552c4727d31de1222fcff268a1467013"
+    },
+    {
+      "path": "ios/Sources/Features/FranchiseDetail/FranchiseDetailView.swift",
+      "sha256": "366656373b075852d4455f3f3c434f848b318d40a3ac0ae24d9fb049cfb496c0"
+    }
+  ],
+  "preparedReceiptSHA256": "b1c7ba4240b3e5d6c03db2fa42d3463b6c3d2e0c1bc15e0529861cf689ccd3b8",
+  "priorFailedRun": {
+    "path": "ios/Tools/qa/.runs/20261015T171508872199Z",
+    "passed": 64,
+    "failed": 11,
+    "selected": 75,
+    "monkeysStarted": 0
+  },
+  "boundaries": [
+    "Static review only; no new compiler, runtime, UI, guard test or production action. Root owns focused and fresh full qualification.",
+    "The hit/accessibility fence follows the model shown state, not presentation-layer animation completion. Existing per-line stagger/fade timing remains; this review does not certify pixel-level readiness during the animation.",
+    "The added nil/empty-art callback signals that the fallback has been selected. It is not a screenshot/frame-presentation measurement.",
+    "The prior64/75 failure and its video/source interpretation are preserved. This review does not claim all11 prior failures had one demonstrated cause or count focused passes as full qualification.",
+    "Existing general billboard task/pager lifecycle behavior outside these two changed paths was not redesigned or newly runtime-certified."
+  ]
+}

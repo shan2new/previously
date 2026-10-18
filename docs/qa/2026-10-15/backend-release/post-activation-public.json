@@ -1,0 +1,23 @@
+{
+  "measuredAt": "2026-10-15T16:57:05.916210+00:00",
+  "artifact": "20261015T152739Z",
+  "results": [
+    {
+      "path": "/health",
+      "status": 200,
+      "body": {
+        "ok": true
+      },
+      "durationMs": 286.8
+    },
+    {
+      "path": "/ready",
+      "status": 200,
+      "body": {
+        "ok": true
+      },
+      "durationMs": 633.5
+    }
+  ],
+  "onlyAnonymousGETs": true
+}
