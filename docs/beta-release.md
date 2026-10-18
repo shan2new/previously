@@ -140,6 +140,13 @@ DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer xcodebuild -exportArchi
   -exportPath build/upload -allowProvisioningUpdates    # ends "Upload succeeded."
 ```
 
+**When the CLI says "App Store Connect access for YLPZXZS2F4 is required"** (builds 16 and 18,
+15 and 19 Oct — even with the Apple ID signed in to Xcode → Settings → Accounts), upload from the
+**Organizer**: copy the archive to `~/Library/Developer/Xcode/Archives/<date>/` (or `open` the
+`.xcarchive`), select it, **Distribute App → App Store Connect → Distribute**. The Organizer uses the
+same account and uploads; its logs land in `$TMPDIR/Previously_<stamp>.xcdistributionlogs`
+(`ContentDelivery.log` ends "UPLOAD SUCCEEDED with no errors" and the delivery UUID).
+
 `xcrun altool --upload-app` is the other CLI path and needs an App Store Connect API key (Users and
 Access → Integrations → App Store Connect API → generate, download the `.p8` once).
 
