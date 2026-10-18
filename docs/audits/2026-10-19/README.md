@@ -40,9 +40,15 @@ Captures: `design/calm-2026-10-19/`.
 - Release archive `ios/build/Previously-18.xcarchive` (also in Xcode's Organizer, 2026-10-19):
   1.0 (18), widget 18, `APIBaseURL` https://anime.cognipin.com, a `pk_live_` Clerk key, Hanken
   Grotesk and Outfit bundled and registered.
-- **Upload: not yet done.** `xcodebuild -exportArchive` with `ExportOptions-upload.plist` failed
-  with "App Store Connect access for YLPZXZS2F4 is required" — Xcode's account needs signing in
-  again (the same failure stopped build 16 on 15 Oct). Build 17 was archived on 15 Oct and copied
-  to the Organizer; whether it was uploaded is not recorded, so this build is 18.
+- **Uploaded** 19 Oct 03:16 IST from Xcode's Organizer (Distribute App → App Store Connect):
+  "UPLOAD SUCCEEDED with no errors", delivery UUID `0008fcca-4488-4563-938e-fc19f138f642`,
+  "Uploaded package is processing" — logs in `ios/build/organizer-upload-18.xcdistributionlogs`.
+  The CLI (`xcodebuild -exportArchive` with `ExportOptions-upload.plist`) still fails with "App
+  Store Connect access for YLPZXZS2F4 is required" even after signing in to Xcode → Settings →
+  Accounts, as on 15 Oct for build 16; the Organizer, with the same account, uploads. Build 17
+  was archived on 15 Oct and copied to the Organizer; whether it was uploaded is not recorded, so
+  this build is 18.
+- Not yet confirmed: App Store Connect's processing, and the build showing up in TestFlight for
+  the testers.
 - Not verified: a physical device, VoiceOver and the accessibility text sizes on the new screens,
   the week strip's sync on a long real week, the type sets on a device.
