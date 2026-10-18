@@ -31,10 +31,17 @@ protocol ScrollAwayChrome: AnyObject {
     func reveal()
 }
 
+/// Since 19 Oct it FLOATS, as X's and Instagram's do now ("I told you to make the bottom floating
+/// nav look like X right?… X / Insta", owner — of a flat row of glyphs printed straight onto the
+/// page): a SMALL pill round its icons, centred, lifted off the home indicator, the content running
+/// past it and round it ("It should be much smaller", owner, of a full-width capsule). Its ground is
+/// native LIQUID GLASS: a pitch-black pill was built first ("pitch black not gradient"), then the
+/// same pill on glass beside it ("Show me small liquid glass native floating nav to eye ball the
+/// difference"), and the owner chose the glass. Icons only, one ink, the selected one filled — as
+/// before. It is still not iOS 26's TAB BAR ("not the native iOS one though"): no labels, no
+/// shrinking, no amber; only its material is the system's.
 struct AppTabBar: View {
     let selected: AppTab
-    /// The page's ground, which the bar's veil is painted in (`TabBarVeil`); `.clear` draws none.
-    var ground: Color = ThemeColor.canvas
     /// The scrolling header of the page in front — the feed's, Discover's — else nil. The bar rides
     /// the header's own offset — slid down by the same fraction the header has slid up — so the
     /// two leave together, come back together and settle together.
@@ -47,14 +54,18 @@ struct AppTabBar: View {
 
     @Environment(\.accessibilityVoiceOverEnabled) private var voiceOver
 
-    /// The band above the home indicator — UIKit's tab-bar height, and X's.
-    nonisolated static let height: CGFloat = 49
-    /// The glyph's frame. The 30-pt template pads 3 pt each side, so the drawn glyph is ~20 pt
-    /// at a ~1.9-pt stroke (X: 20.7 / 2.0).
-    static let glyph: CGFloat = 28
-    /// Use part of the bottom safe area to bring the icon row closer to the edge.
-    /// Retain the rest for the home gesture; phones without that inset keep the normal layout.
-    nonisolated static var bottomOverlap: CGFloat { min(18, ThemeMetrics.bottomSafeInset) }
+    /// The pill's height: a ~19-pt glyph with 15 pt of air above and below.
+    nonisolated static let height: CGFloat = 50
+    /// One tab's slot in the pill, and the pill's padding at each end.
+    static let slot: CGFloat = 60
+    static let endPadding: CGFloat = 6
+    /// The glyph's frame. The 30-pt template pads 3 pt each side, so the drawn glyph is ~19 pt.
+    static let glyph: CGFloat = 26
+    /// How far the capsule sits down into the bottom safe area: just clear of the home indicator
+    /// (its foot ~22 pt from the edge, X's). A phone without the indicator lifts it 8 pt instead.
+    nonisolated static var bottomOverlap: CGFloat {
+        ThemeMetrics.bottomSafeInset > 0 ? min(12, ThemeMetrics.bottomSafeInset) : -8
+    }
     /// The space every page reserves above the window's own bottom safe area.
     nonisolated static var reservedHeight: CGFloat { height - bottomOverlap }
 
@@ -84,21 +95,16 @@ struct AppTabBar: View {
     private var bar: some View {
         HStack(spacing: 0) {
             ForEach(tabs, id: \.self) { tab in
-                item(tab)
+                item(tab).frame(width: Self.slot)
             }
         }
-        .frame(maxWidth: .infinity)
+        .padding(.horizontal, Self.endPadding)
         .frame(height: Self.height)
-        .background(alignment: .bottom) {
-            // A page that draws its own window under the bar (Home) reports `.clear`.
-            if ground != .clear {
-                // The band, the home-indicator strip under it (the bar rides `bottomOverlap` of it).
-                EdgeVeil(edge: .bottom, ink: ground,
-                         band: Self.height + ThemeMetrics.bottomSafeInset,
-                         line: ThemeMetrics.bottomSafeInset + Self.height / 2)
-                    .ignoresSafeArea(edges: .bottom)
-            }
-        }
+        // Native Liquid Glass (19 Oct: "Let's ship with Liquid glass variant", owner, after the black
+        // pill and this one were photographed side by side) — the material below iOS 26, opaque
+        // under Reduce Transparency (`chromeGlass`).
+        .chromeGlass(in: Capsule(style: .continuous), interactive: true)
+        .frame(maxWidth: .infinity)
         // VoiceOver reads a real tab bar: "Home, tab, 1 of 5, selected".
         .accessibilityElement(children: .contain)
         .accessibilityAddTraits(.isTabBar)
@@ -113,7 +119,6 @@ struct AppTabBar: View {
                 .resizable()
                 .frame(width: Self.glyph, height: Self.glyph)
                 .foregroundStyle(ThemeColor.feedText)
-                .barInk()
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
                 .contentShape(Rectangle())
         }

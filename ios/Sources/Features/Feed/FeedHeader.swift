@@ -111,7 +111,7 @@ struct FeedHeader: View {
             .accessibilityAddTraits(.isHeader)
             HStack(spacing: ThemeSpace.x1) {
                 Button(action: onProfile) {
-                    AccountDisc(identity: auth.identity, diameter: Self.discDiameter, quiet: true)
+                    AccountGlyph(identity: auth.identity)
                         .frame(width: FeedMetrics.actionHitHeight, height: FeedMetrics.actionHitHeight,
                                alignment: .leading)
                         .contentShape(Rectangle())
@@ -154,7 +154,6 @@ struct FeedHeader: View {
     }
 
     /// X's disc in the bar: 32 pt in a 44-pt target.
-    private static let discDiameter: CGFloat = 32
     private static let ringDelay: Duration = .milliseconds(1100)
 
     private func ring() {

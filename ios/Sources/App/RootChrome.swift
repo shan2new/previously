@@ -13,6 +13,34 @@ import UIKit
 // state (`ScrollAwayChrome`), so the two leave and return together. Home's `HomeChrome` follows the
 // same rule over its billboard.
 
+/// Tells a READER's scroll from the page's own spring (19 Oct: "The bottom floating nav can have an
+/// X / Instagram like floating behaviour. Not the native iOS one though", owner). The bars leave as
+/// the reader scrolls down and come back only when they scroll UP — X's and Instagram's rule, not
+/// iOS 26's tab bar, which shrinks to a pill. A fling into the foot of a page springs back, and the
+/// spring moved the content up exactly as a scroll up does: every short page (Home caught up,
+/// Library's last row) brought the bars back the moment the reader reached its end. Once the finger
+/// is off, a movement against the direction it was last moving in is that spring, and moves nothing.
+struct ScrollAwayMomentum {
+    private var interacting = false
+    /// The way the reader's finger last moved the page: +1 down the page, −1 back up it.
+    private var direction: CGFloat = 0
+
+    mutating func phase(_ phase: ScrollPhase) {
+        interacting = phase == .interacting
+    }
+
+    /// How much of a frame's movement the bars should follow.
+    mutating func movement(_ dy: CGFloat) -> CGFloat {
+        guard dy != 0 else { return 0 }
+        let sign: CGFloat = dy > 0 ? 1 : -1
+        if interacting || direction == 0 {
+            direction = sign
+            return dy
+        }
+        return sign == direction ? dy : 0
+    }
+}
+
 /// How far a single-page root's bar has gone. Written by the page's scroll probe and its scroll
 /// phase; read only by the bar's own small views (`RootChromeSlide`, `RootChromeFade`) and by
 /// `AppTabBar` — a scroll frame never re-runs the screen.
@@ -27,6 +55,7 @@ final class RootChromeState: ScrollAwayChrome {
     /// landing on today, a jump from the month grid, a pop to the top) is not a reader scrolling
     /// away, and must not take the bars with it.
     @ObservationIgnored private var following = false
+    @ObservationIgnored private var momentum = ScrollAwayMomentum()
 
     init(height: CGFloat = FeedMetrics.headerRow) {
         self.height = height
@@ -40,7 +69,7 @@ final class RootChromeState: ScrollAwayChrome {
         lastY = y
         // VoiceOver keeps its bars: one that leaves with a scroll cannot be found again by touch.
         guard following, !UIAccessibility.isVoiceOverRunning else { return }
-        let next: CGFloat = y <= 0 ? 0 : min(max(offset + dy, 0), height)
+        let next: CGFloat = y <= 0 ? 0 : min(max(offset + momentum.movement(dy), 0), height)
         if abs(next - offset) >= 0.5 || (next == 0 && offset != 0) { offset = next }
     }
 
@@ -48,6 +77,7 @@ final class RootChromeState: ScrollAwayChrome {
     /// shown or gone — past halfway it finishes leaving, else it returns.
     func phase(_ phase: ScrollPhase) {
         following = phase == .interacting || phase == .decelerating
+        momentum.phase(phase)
         guard phase == .idle, offset > 0, offset < height else { return }
         let gone = offset > height / 2 && lastY > height
         withAnimation(Self.motion) { offset = gone ? height : 0 }
@@ -196,7 +226,7 @@ struct RootAccountButton: View {
 
     var body: some View {
         Button { openProfile?() } label: {
-            AccountDisc(identity: auth.identity, diameter: 32, quiet: true)
+            AccountGlyph(identity: auth.identity)
                 .frame(width: FeedMetrics.actionHitHeight, height: FeedMetrics.actionHitHeight, alignment: .leading)
                 .contentShape(Rectangle())
         }
@@ -239,7 +269,7 @@ struct RootSearchField: View {
         .padding(.leading, ThemeSpace.x3)
         .padding(.trailing, text.isEmpty ? ThemeSpace.x3 : ThemeSpace.x1)
         .frame(height: DiscoverHeader.fieldHeight)
-        .background(ThemeColor.surfaceRaised, in: Capsule())
+        .chromeGlass(in: Capsule(style: .continuous), interactive: true)
         .contentShape(Capsule())
         .onTapGesture { focused = true }
         .accessibilityElement(children: .contain)

@@ -224,6 +224,8 @@ struct HomeView: View {
                 // stops cards above the icon row, rather than letting artwork compete with it.
                 .ignoresSafeArea(edges: .top)
                 .scrollIndicators(.hidden)
+                // The calm page goes out under both transparent bars rather than reading through them.
+                .modifier(HomeEdgeFadeModifier(chrome: chrome, enabled: appModel.experience.calm))
                 .onScrollPhaseChange { _, phase in chrome.phase(phase) }
                 .laneClearance(appModel, base: ThemeSpace.x3)
                 .previouslyRefreshable { await appModel.reload() }
@@ -351,7 +353,9 @@ struct HomeView: View {
                 .padding(.horizontal, ThemeMetrics.gutter)
                 .padding(.top, band + ThemeSpace.x10 * 2)
         } else if feed.isEmpty {
-            if appModel.experience.doors {
+            if appModel.experience.calm {
+                calmCaughtUp
+            } else if appModel.experience.doors {
                 // The directions: caught up is one line and the way to Schedule, then shows for you —
                 // the moment someone most needs a next show is the moment Home has nothing of theirs.
                 // Stage's language leads with a picture (17 Oct: "the home looks really shitty in
@@ -427,19 +431,54 @@ struct HomeView: View {
             if !feed.queue.isEmpty { upNext(feed.queue, leading: lead && feed.recent.isEmpty).rootArrival(2) }
             if appModel.experience.feedInHome {
                 // Four tabs: the feed is Home's News section (its page is "News ›").
-                HomeNews(onOpenPost: { onOpenRoute(.post(id: $0)) },
+                HomeNews(style: newsStyle,
+                         onOpenPost: { onOpenRoute(.post(id: $0)) },
                          onOpenShow: { onOpenDetail($0, "home-news/\($0)", nil) },
                          onSeeAll: { onOpenRoute(.news) })
                     .id("home/news")
                     .rootArrival(3)
             }
             if appModel.experience.doors {
-                // The directions: your shows first, then two shelves of shows for you.
+                // The directions: your shows first, then shows for you — one shelf in the calm
+                // language, two in Stage's.
                 HomeForYou(leading: !lead && feed.recent.isEmpty && feed.queue.isEmpty,
+                           compact: appModel.experience.calm,
                            onOpen: openRecommendation, onSeeAll: onOpenDiscover)
                     .rootArrival(4)
             }
         }
+    }
+
+    /// The calm language's news is headlines; Stage keeps its shelf of cards.
+    private var newsStyle: HomeNews.Style { appModel.experience.calm ? .rows : .shelf }
+
+    /// Caught up in the calm language (19 Oct, "greeted with overwhelm", owner): today's next airing on
+    /// one of your shows as the page's one card — else the caught-up line, which a card would only
+    /// contradict — then today's news, if any, and one shelf for you.
+    @ViewBuilder private var calmCaughtUp: some View {
+        Group {
+            if let e = HomeComingUp.today(appModel) {
+                HomeComingUpCard(entry: e, now: appModel.nowMinute) {
+                    onOpenDetail(e.franchise.id, "home-coming/\(e.franchise.id)",
+                                 EpisodeFocus(mediaId: e.part.mediaId, episode: e.episode))
+                }
+            } else {
+                HomeCaughtUp()
+            }
+        }
+        .padding(.horizontal, ThemeMetrics.gutter)
+        .padding(.top, band + ThemeSpace.x5)
+        .rootArrival(1)
+        if appModel.experience.feedInHome {
+            HomeNews(style: newsStyle,
+                     onOpenPost: { onOpenRoute(.post(id: $0)) },
+                     onOpenShow: { onOpenDetail($0, "home-news/\($0)", nil) },
+                     onSeeAll: { onOpenRoute(.news) })
+                .id("home/news")
+                .rootArrival(2)
+        }
+        HomeForYou(leading: false, compact: true, onOpen: openRecommendation, onSeeAll: onOpenDiscover)
+            .rootArrival(3)
     }
 
     /// The directions' caught-up line (`Experience.doors`): said once, with the next airing as the way

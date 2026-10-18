@@ -20,9 +20,14 @@ extension Copy {
         /// next airing — which is Schedule's to show, never Home's.
         static let caughtUpLine = "You\u{2019}re all caught up"
         static func nextAiring(_ show: String, _ when: String) -> String { "Next: \(show) \u{00B7} \(when)" }
+        /// Home's one shelf of recommendations (19 Oct); its reason is the line under it.
+        static let forYou = "For you"
+        /// The lead card's strip (19 Oct): the day and the clock, no "at".
+        static let tonight = "Tonight", today = "Today", tomorrow = "Tomorrow"
+        static func inMinutes(_ n: Int) -> String { "In \(n) min" }
 
         static var samples: [String] {
-            [title, upNext, recentlyAired, newEpisode,
+            [title, upNext, recentlyAired, newEpisode, forYou,
              caughtUp.title, caughtUp.supporting ?? "", caughtUp.primaryLabel ?? ""]
         }
     }

@@ -10,13 +10,25 @@ struct HomeForYou: View {
     let leading: Bool
     /// A title already on the page (the caught-up stage's), kept off the shelves.
     var excluding: String? = nil
+    /// The calm Home (19 Oct, "greeted with overwhelm", owner): ONE shelf, headed "For you ›" with
+    /// its reason as the line under the title — two shelves under 20-pt reasons were the heaviest
+    /// words and the biggest block on a page that is meant to be about your own shows.
+    var compact = false
     let onOpen: (RecommendationItem) -> Void
     let onSeeAll: () -> Void
 
     @Environment(AppModel.self) private var appModel
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @Environment(\.dynamicTypeSize) private var typeSize
 
     static let shelves = 2
+
+    /// The calm Home's posters (19 Oct, "For you too big", owner): 112 pt, three and a peek across
+    /// the screen, where the Library's 150 made the shelf the page's biggest block — a suggestion is
+    /// the last and least of what Home says. The accessibility sizes keep the Library's.
+    static func compactWidth(_ typeSize: DynamicTypeSize) -> CGFloat? {
+        typeSize.isAccessibilitySize ? nil : 112
+    }
 
     /// The caught-up stage's show: the first recommendation with art worthy of the stage.
     static func lead(_ appModel: AppModel) -> RecommendationItem? {
@@ -26,7 +38,7 @@ struct HomeForYou: View {
 
     var body: some View {
         let recs = appModel.visibleRecommendations.filter { $0.key != excluding }
-        let groups = Array(ForYouGroup.build(recs, reason: { appModel.spokenReason($0) }).prefix(Self.shelves))
+        let groups = Array(ForYouGroup.build(recs, reason: { appModel.spokenReason($0) }).prefix(compact ? 1 : Self.shelves))
         if !groups.isEmpty {
             VStack(alignment: .leading, spacing: ThemeMetrics.sectionGap) {
                 ForEach(groups) { g in shelf(g) }
@@ -37,12 +49,19 @@ struct HomeForYou: View {
 
     private func shelf(_ g: ForYouGroup) -> some View {
         VStack(alignment: .leading, spacing: ThemeMetrics.labelGap) {
-            SectionHeaderRow(g.title, action: onSeeAll)
-                .padding(.horizontal, ThemeMetrics.gutter)
+            Group {
+                if compact {
+                    HomeSectionHeader(title: Copy.Home.forYou, subline: g.seed == nil ? nil : g.title, action: onSeeAll)
+                } else {
+                    SectionHeaderRow(g.title, action: onSeeAll)
+                }
+            }
+            .padding(.horizontal, ThemeMetrics.gutter)
             ScrollView(.horizontal) {
                 LazyHStack(alignment: .top, spacing: ThemeMetrics.shelfGap) {
                     ForEach(g.items) { r in
-                        ForYouShelfTile(item: r, reason: appModel.spokenReason(r)) { onOpen(r) }
+                        ForYouShelfTile(item: r, reason: appModel.spokenReason(r),
+                                        width: compact ? Self.compactWidth(typeSize) : nil) { onOpen(r) }
                             // Home's shelves' one depth: a card entering from the edge grows into place.
                             .scrollTransition(axis: .horizontal) { content, phase in
                                 content

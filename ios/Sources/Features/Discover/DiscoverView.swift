@@ -135,7 +135,7 @@ struct DiscoverView: View {
                             searchPrompt: Copy.Search.prompt(for: appModel.mediaFilter),
                             onSearch: { fieldPresented = true },
                             // One audience has no scope to choose (`Audience`).
-                            scope: appModel.audience.isSingle ? AnyView(EmptyView()) : AnyView(scopeMenu),
+                            scope: appModel.audience.isSingle ? nil : AnyView(scopeMenu),
                             searching: searching)
                 .opacity(searching ? 0 : 1)
                 .allowsHitTesting(!searching)

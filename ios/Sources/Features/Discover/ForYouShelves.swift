@@ -270,6 +270,7 @@ struct ForYouTopPick: View {
 struct ForYouShelfTile: View {
     let item: RecommendationItem
     let reason: RecommendationItem.Reason
+    var width: CGFloat? = nil
     let onOpen: () -> Void
 
     @Environment(AppModel.self) private var appModel
@@ -278,7 +279,7 @@ struct ForYouShelfTile: View {
         let owned = appModel.isOwned(item)
         ShelfPosterTile(poster: item.posterURL, name: item.stub?.tilePoster.name ?? .type, title: item.tileTitle, facts: item.tileFacts,
                         accessibilityLabel: "\(item.displayTitle), \(Copy.ForYou.reasonList(reason))",
-                        onOpen: onOpen) {
+                        width: width, onOpen: onOpen) {
             if owned {
                 OwnedMark().padding(ThemeSpace.x2).allowsHitTesting(false)
             } else {
@@ -325,6 +326,8 @@ struct ShelfPosterTile<Corner: View>: View {
     let title: String
     let facts: String
     let accessibilityLabel: String
+    /// The tile's width; the Library shelf's (`ForYouShelves.tileWidth`) unless a shelf says.
+    var width: CGFloat? = nil
     let onOpen: () -> Void
     @ViewBuilder var corner: () -> Corner
 
@@ -336,6 +339,6 @@ struct ShelfPosterTile<Corner: View>: View {
                       openLabel: accessibilityLabel) {
             PosterCaptionText(title: title, fact: facts)
         }
-        .frame(width: ForYouShelves.tileWidth(typeSize))
+        .frame(width: width ?? ForYouShelves.tileWidth(typeSize))
     }
 }

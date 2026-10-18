@@ -55,6 +55,8 @@ final class DiscoverChromeState: ScrollAwayChrome {
     @ObservationIgnored private var page: DiscoverSection = .forYou
     /// Each page's last scroll distance (a page keeps its place, so its header picks up from there).
     @ObservationIgnored private var lastY: [DiscoverSection: CGFloat] = [:]
+    /// The page in front's spring is not a scroll up (`ScrollAwayMomentum`).
+    @ObservationIgnored private var momentum = ScrollAwayMomentum()
 
     var awayFraction: CGFloat { offset / DiscoverHeader.height }
 
@@ -63,8 +65,15 @@ final class DiscoverChromeState: ScrollAwayChrome {
         let previous = lastY[p] ?? 0
         lastY[p] = y
         guard p == page else { return }
-        let next: CGFloat = y <= 0 ? 0 : min(max(offset + (y - previous), 0), DiscoverHeader.height)
+        let next: CGFloat = y <= 0 ? 0 : min(max(offset + momentum.movement(y - previous), 0), DiscoverHeader.height)
         if abs(next - offset) >= 0.5 || (next == 0 && offset != 0) { offset = next }
+    }
+
+    /// A page's scroll phase: the momentum reads the page in front's, and at rest the header settles.
+    func phase(_ phase: ScrollPhase, page p: DiscoverSection) {
+        guard p == page else { return }
+        momentum.phase(phase)
+        if phase == .idle { settle(page: p) }
     }
 
     /// At rest the header is either shown or gone: past halfway it finishes leaving, else it returns.
@@ -129,8 +138,8 @@ struct DiscoverExplore: View {
     /// The field's words at rest, and what a tap on its capsule does (the system field takes over).
     let searchPrompt: String
     let onSearch: () -> Void
-    /// The scope menu (All · Anime · TV) beside the field.
-    let scope: AnyView
+    /// The scope menu (All · Anime · TV) beside the field; nil for a single audience, which has none.
+    let scope: AnyView?
     /// The system field is up. While it is, the pages keep their places; when it goes they are put
     /// back EXACTLY there — the system bar that comes up to search left the page in front 59 pt low
     /// (unclamped) when it went, until the next touch (25 Sep).
@@ -226,16 +235,20 @@ struct DiscoverExplore: View {
 
     private func exploreHeader(topInset: CGFloat) -> some View {
         VStack(spacing: 0) {
+            // The field, gutter to gutter (19 Oct: "something is really fucked up with the search bar
+            // in the Discover screen… we don't need the profile icon in the discover screen", owner):
+            // the account disc sat at its leading end and, with one audience, the scope menu's slot
+            // was empty, so the capsule ran to four points from the right edge against the gutter
+            // and the disc on the left. The scope menu follows it only where there is a scope.
             HStack(spacing: ThemeSpace.x1) {
-                // The directions: every root's bar opens with the account disc (X's Explore has it
-                // beside the pill too).
-                if appModel.experience.doors { RootAccountButton() }
                 searchCapsule
-                scope
-                    .frame(width: FeedMetrics.actionHitHeight, height: FeedMetrics.actionHitHeight)
+                if let scope {
+                    scope
+                        .frame(width: FeedMetrics.actionHitHeight, height: FeedMetrics.actionHitHeight)
+                }
             }
             .padding(.leading, ThemeMetrics.gutter)
-            .padding(.trailing, ThemeSpace.x1)
+            .padding(.trailing, scope == nil ? ThemeMetrics.gutter : ThemeSpace.x1)
             .frame(height: FeedMetrics.headerRow)
             .barInk()
             ExploreTabs(selected: section, progress: progress) { next in
@@ -253,6 +266,10 @@ struct DiscoverExplore: View {
         }
         .background { FeedHeaderGround() }
         .offset(y: -chrome.offset)
+        // It FADES as it slides, as every root's header does (`RootChromeFade`): the bars are
+        // transparent (17 Oct), so the 89-pt header slid its own height still left its tab row
+        // under the clock, printed over the page (19 Oct).
+        .modifier(RootChromeFade(chrome: chrome))
         // The status band keeps its own ground, drawn OVER the sliding header, so the header passes
         // under it instead of through the clock — Today's, point for point.
         .overlay(alignment: .top) {
@@ -279,7 +296,7 @@ struct DiscoverExplore: View {
             .foregroundStyle(ThemeColor.feedSecondary)
             .padding(.horizontal, ThemeSpace.x3)
             .frame(height: DiscoverHeader.fieldHeight)
-            .background(ThemeColor.surfaceRaised, in: Capsule())
+            .chromeGlass(in: Capsule(style: .continuous), interactive: true)
             .contentShape(Capsule())
         }
         .buttonStyle(.plain)
@@ -344,7 +361,7 @@ struct DiscoverExplore: View {
             .tabBarContentMargin()
             .laneClearance(appModel)
             .onScrollPhaseChange { _, next in
-                if next == .idle { chrome.settle(page: s) }
+                chrome.phase(next, page: s)
             }
             .previouslyRefreshable(onRefresh)
             .onAppear { proxies[s] = reader }

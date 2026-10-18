@@ -321,6 +321,8 @@ final class AuthManager: TokenProvider {
         /// `nil` means "draw `person.fill`", not "draw a bullet".
         let initial: String?
         let provenance: Provenance
+        /// The account's own photo (Clerk's, from the provider — a Google sign-in's), when it has one.
+        var imageURL: String? = nil
 
         /// The symbol to draw when there is no initial.
         ///
@@ -340,16 +342,19 @@ final class AuthManager: TokenProvider {
         switch mode {
         case .clerk:
             if let user = Clerk.shared.user {
+                // Clerk answers every account with an image URL — a generated one when there is no
+                // photo; `hasImage` says whether it is the person's.
+                let photo = user.hasImage && !user.imageUrl.isEmpty ? user.imageUrl : nil
                 if let name = user.firstName?.trimmingCharacters(in: .whitespacesAndNewlines),
                    let letter = Self.letter(of: name) {
-                    return AccountIdentity(displayName: name, initial: letter, provenance: .name)
+                    return AccountIdentity(displayName: name, initial: letter, provenance: .name, imageURL: photo)
                 }
                 if let email = user.emailAddresses.first?.emailAddress,
                    !email.isEmpty {
                     let local = String(email.prefix(while: { $0 != "@" }))
                     return AccountIdentity(displayName: email,
                                            initial: Self.letter(of: local),
-                                           provenance: .email)
+                                           provenance: .email, imageURL: photo)
                 }
             }
             return AccountIdentity(displayName: "Your account", initial: nil, provenance: .anonymous)

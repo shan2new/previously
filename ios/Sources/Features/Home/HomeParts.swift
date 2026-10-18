@@ -288,6 +288,7 @@ final class HomeChrome: ScrollAwayChrome {
     @ObservationIgnored private var lastY: CGFloat = 0
     /// The READER is moving the page (a finger, or its momentum) — not the app (a scroll to top).
     @ObservationIgnored private var following = false
+    @ObservationIgnored private var momentum = ScrollAwayMomentum()
 
     private var barBottom: CGFloat { ThemeMetrics.topSafeInset + FeedMetrics.headerRow }
     private var rowHeight: CGFloat { FeedMetrics.headerRow }
@@ -304,7 +305,7 @@ final class HomeChrome: ScrollAwayChrome {
         let dy = scrolled - lastY
         lastY = scrolled
         if following, !UIAccessibility.isVoiceOverRunning {
-            let next: CGFloat = scrolled <= 0 ? 0 : min(max(offset + dy, 0), rowHeight)
+            let next: CGFloat = scrolled <= 0 ? 0 : min(max(offset + momentum.movement(dy), 0), rowHeight)
             if abs(next - offset) >= 0.5 || (next == 0 && offset != 0) { offset = next }
         }
         billboardBottom = y + billboard
@@ -333,6 +334,7 @@ final class HomeChrome: ScrollAwayChrome {
     /// shown or gone.
     func phase(_ phase: ScrollPhase) {
         following = phase == .interacting || phase == .decelerating
+        momentum.phase(phase)
         guard phase == .idle, offset > 0, offset < rowHeight else { return }
         let gone = offset > rowHeight / 2 && lastY > rowHeight
         withAnimation(Self.motion) { offset = gone ? rowHeight : 0 }
@@ -385,7 +387,7 @@ struct HomeHeader: View {
             .accessibilityLabel(Copy.Feed.scrollToTop)
             HStack(spacing: 0) {
                 Button(action: onProfile) {
-                    AccountDisc(identity: auth.identity, diameter: 32, quiet: true)
+                    AccountGlyph(identity: auth.identity)
                         .frame(width: FeedMetrics.actionHitHeight, height: FeedMetrics.actionHitHeight,
                                alignment: .leading)
                         .contentShape(Rectangle())

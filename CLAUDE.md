@@ -250,6 +250,54 @@ to `news:` with every social row, in one transaction, when research adopts the p
   #120A09, where `subtle` still measured #160806 and `medium` #1A0705), a fainter pool, and `glow`
   0.11 under the lockup (the stage's 0.26 is the Stage direction's); `-detailGround
   subtle|medium|strong` brings the louder ones back for comparison.
+- **Home was rebuilt again the same evening, build 19 (19 Oct: "What the actual fuck is this trash
+  UX? All of it?… this is the first thing a person opens up and is greeted with overwhelm", owner,
+  of build 18 caught up — a 20-pt "You're all caught up" with the next airing as a grey caption, a
+  shelf of 300-pt news pictures, two For you poster shelves under 20-pt reasons).** Then four rounds
+  of refinement on the sim; what stands (`Features/Home/HomeCalm.swift`; captures 15–24 in
+  `design/calm-2026-10-19/`), superseding the News-shelf and two-shelves lines above:
+  - **Caught up, Home shows at most ONE thing coming, and only if it airs TODAY** (`HomeComingUp
+    .today`, "at most 1 thing… and that too if it is airing the same day. No need to have the title
+    coming up"): `HomeComingUpCard` — the show's scene at 16:9 in the gutters, its logo centred, the
+    episode under it and when it airs on Netflix's RED STRIP at the foot (`HomeAirStrip`,
+    `ThemeColor.strip` #E50914, "Tonight 7:30 PM" — no "at": `homeStrip`); nothing under the card.
+    Two layouts were photographed (Coming up as rows vs one news picture) and Coming up won, then
+    lost its rows, title and calendar column. Nothing today → `HomeCaughtUp`, a MOMENT, not a line:
+    the committed mark's amber disc in a pool of its own light, the words at 24 pt, one sentence,
+    room on both sides ("deserves some space to actually feel caught up"); never both.
+  - **News on Home is today's latest update or nothing** (`HomeNews.today`, "should be only shown
+    for the latest update that came that day otherwise it stays hidden"), one `NewsRow(compact:)`
+    (88×50, Medium 15) — "today" in the stamp's own calendar (`feedStamp`: a date-only post is UTC),
+    so a row stamped "1d" never shows. **Known gap: on a day with no news the News page has no door**
+    (Home's "News ›" was its only one). A trailer's still never wears the show's logo (`NewsArt`):
+    YouTube thumbnails are lettered, and it printed the name twice.
+  - **For you is ONE shelf** (`HomeForYou(compact:)`, the 16 Oct "two shelves, always" overruled),
+    headed "For you ›" with its reason as the line under it (`HomeSectionHeader`), at 112-pt posters.
+  - **The page fades out under the header** (`HomeEdgeFade`, a mask read only by itself), never
+    under the tab bar, which floats on its own ground.
+- **The bar's account is a GLYPH, not a disc (19 Oct: "The Profile icon is extremely poorly built
+  and looks out of place", owner).** `AccountGlyph` (Primitives) on every root header: the account's
+  photo where Clerk has one (`AccountIdentity.imageURL`, only when `hasImage`), else a ring in the
+  bell's ink and stroke with the initial in OUTFIT, else the ring round Tabler's user — never the
+  "Y" of "Your account". The disc it replaced was grey with an SF letter. Profile keeps
+  `AccountDisc` (now Outfit, and the photo). Discover's header has NO account control ("we don't
+  need the profile icon in the discover screen") and its search field runs gutter to gutter; with
+  one audience the scope menu is absent (`scope: nil`), not an empty slot.
+- **The tab bar FLOATS on native Liquid Glass (19 Oct: "The bottom floating nav can have an X /
+  Instagram like floating behaviour. Not the native iOS one though", then "I told you to make the
+  bottom floating nav look like X right?… X / Insta", "It should be much smaller", "Let's ship with
+  Liquid glass variant", owner)** — superseding the band in "The bottom bar is the APP'S" below. A small pill
+  (`AppTabBar.height` 50, `slot` 60 per tab, centred, foot ~22 pt off the edge) round the icons, on
+  `chromeGlass(interactive: true)` — iOS 26's glass, the material below it, opaque under Reduce
+  Transparency. A pitch-black pill was built first and photographed beside it; the glass won. It is
+  still not iOS 26's tab bar (no labels, no shrink, no amber). The search fields (Discover, Library,
+  first run) are the same glass. The page RESERVES the pill's height (`reservedHeight`), content
+  runs past it. **The bars leave with a reader's scroll and come back only on a scroll UP**
+  (`ScrollAwayMomentum`, RootChrome.swift, in `HomeChrome`, `RootChromeState`,
+  `DiscoverChromeState`): once the finger is off, movement against its last direction is the
+  page's spring — a fling into the foot of a short page used to bring both bars back. Discover's
+  header fades as it slides (`RootChromeFade`): slid its own 89 pt it still left its tabs under the
+  clock. The simulator MCP's `swipe` / `touch_path` drive these (`simctl` cannot scroll).
 - **Franchise detail actions are independent of entry point (4 Oct, build 11).** Home/Schedule
   episode context chooses a season only when Episodes is opened; every show starts at its header
   with Posts selected. All generic Add buttons (Search, Trending, Feed, Detail) use Detail's same

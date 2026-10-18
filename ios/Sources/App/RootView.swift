@@ -286,7 +286,6 @@ struct MainTabView: View {
     private var tabBar: some View {
         if !keyboard.covering {
             AppTabBar(selected: selectedTab,
-                      ground: tabGrounds[selectedTab] ?? ThemeColor.canvas,
                       scrollAway: scrollingHeader,
                       tabs: appModel.experience.tabs,
                       compass: appModel.experience.doors) {

@@ -135,7 +135,7 @@ struct FirstRunShowsStep: View {
         .padding(.leading, 14)
         .padding(.trailing, model.query.isEmpty ? 14 : 4)
         .frame(minHeight: 44)
-        .background(ThemeColor.surfaceRaised, in: Capsule())
+        .chromeGlass(in: Capsule(style: .continuous), interactive: true)
         .contentShape(Capsule())
         .onTapGesture { fieldFocused = true }
     }

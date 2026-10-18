@@ -2052,21 +2052,74 @@ struct AccountDisc: View {
     /// Profile — where the disc IS the subject — keeps the accent form.
     var quiet = false
 
+    @Environment(\.displayScale) private var displayScale
+
     var body: some View {
         ZStack {
             Circle().fill(quiet ? ThemeColor.surfaceRaised : ThemeColor.accentSoft)
-            Circle().strokeBorder(ThemeColor.posterEdge, lineWidth: 1)
-            if let monogram = identity.monogram {
+            if let photo = identity.imageURL {
+                RemoteImageView(url: photo, contentMode: .fill, maxPixel: diameter * displayScale,
+                                placeholderHidden: true)
+                    .clipShape(Circle())
+            } else if let monogram = identity.monogram {
+                // The app's face (19 Oct): an SF letter was the one SF word on the screen.
                 Text(monogram)
-                    .font(.system(size: diameter * 0.42, weight: .semibold))
+                    .font(Typeface.fixedFont(.display, .semibold, diameter * 0.44))
                     .foregroundStyle(quiet ? ThemeColor.textSecondary : ThemeColor.accent)
                     .minimumScaleFactor(0.6)
                     .lineLimit(1)
             } else {
                 PreviouslyMark(width: diameter * 0.40, style: .glyph)
             }
+            Circle().strokeBorder(ThemeColor.posterEdge, lineWidth: 1)
         }
         .frame(width: diameter, height: diameter)
+        .accessibilityHidden(true)
+    }
+}
+
+/// The account in a BAR — Home's, every root's, the feed's (19 Oct: "The Profile icon is extremely
+/// poorly built and looks out of place with the app", owner). It was `AccountDisc` at 32 pt: a filled
+/// grey disc with a hairline edge between two bare glyphs (the mark, the bell), its letter in SF —
+/// the one SF letter on the screen — and, on an account with no name, a "Y" taken from "Your
+/// account". Now it is drawn in the bar's own language, at the bell's size: the account's PHOTO
+/// where it has one (X's), else a RING in the bell's ink and stroke with the initial in Outfit, else
+/// the ring round Tabler's user — never a letter that stands for nothing. Profile keeps the disc.
+struct AccountGlyph: View {
+    let identity: AuthManager.AccountIdentity
+
+    /// The bell's ink box (`AppGlyph` at `.title3`), growing with the text size as it does.
+    @ScaledMetric(relativeTo: .title3) private var size: CGFloat = 23
+    @Environment(\.displayScale) private var displayScale
+
+    var body: some View {
+        Group {
+            if let photo = identity.imageURL {
+                RemoteImageView(url: photo, contentMode: .fill, maxPixel: (size + 4) * displayScale,
+                                placeholderHidden: true)
+                    .frame(width: size + 4, height: size + 4)
+                    .background(ThemeColor.surfaceRaised)
+                    .clipShape(Circle())
+                    .overlay(Circle().strokeBorder(ThemeColor.feedText.opacity(0.9), lineWidth: 1.25))
+            } else {
+                ZStack {
+                    // Tabler's stroke: 2 units of 24, at this size.
+                    Circle().strokeBorder(ThemeColor.feedText, lineWidth: size / 12)
+                    if let initial = identity.initial {
+                        Text(initial)
+                            .font(Typeface.fixedFont(.display, .semibold, size * 0.52))
+                            .foregroundStyle(ThemeColor.feedText)
+                    } else {
+                        AppGlyph(systemName: "person.fill")
+                            .font(.system(size: size * 0.5))
+                            .foregroundStyle(ThemeColor.feedText)
+                            .offset(y: size * 0.04)
+                    }
+                }
+                .frame(width: size, height: size)
+            }
+        }
+        .barInk()
         .accessibilityHidden(true)
     }
 }

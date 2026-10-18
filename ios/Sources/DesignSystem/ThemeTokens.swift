@@ -46,6 +46,10 @@ enum ThemeColor {
     /// not amber (amber is a fact or a state) and it is not an action colour: it is the name's.
     static let brandPeriod = Color(hex: 0xF0563F)
     static let accentPressed = Color(hex: 0xD88D3B)
+    /// Netflix's red, for the one tag that borrows its strip (19 Oct, `HomeAirStrip`: "a red strip
+    /// like Netflix does", owner). Not the brand's coral (`brandPeriod`, the name's) and not an
+    /// action colour: it marks when the next episode airs, on its picture.
+    static let strip = Color(hex: 0xE50914)
     /// The accent as a LIT MATERIAL (4 Oct: "the selection ring doesn't feel as premium… improve
     /// the design system and colours everywhere", owner). Flat #F0A24E across a capsule or round a
     /// card is a swatch of orange; the same hue lit from above — a bright crown, a shaded foot — is
@@ -672,6 +676,14 @@ extension ThemeType {
     /// page's lead a step larger, in the set's text face.
     static let newsHeadline = TypeToken(.headline, .semibold, 17, .headline, tracking: -0.20)
     static let newsLeadHeadline = TypeToken(.headline, .semibold, 22, .title2, tracking: -0.35)
+    /// Home's headlines (19 Oct, "News too loud", owner): a step smaller and lighter than a show's
+    /// name, so the news never outweighs your own shows on the page.
+    static let newsHeadlineQuiet = TypeToken(.headline, .medium, 15, .subheadline, tracking: -0.10)
+    /// The words on `HomeAirStrip`: a title's cut at a tag's size.
+    static let stripLabel = TypeToken(.title, .semibold, 13, .footnote, tracking: 0)
+    /// Home's caught-up moment (`HomeCaughtUp`): the screen's one line, set between a section's
+    /// title and the stage's.
+    static let caughtUpTitle = TypeToken(.display, .semibold, 24, .title2, tracking: -0.40)
     /// An inline text action in a section header ("See all", "Clear"). Deliberately smaller than
     /// `button`: a 16-pt semibold word beside an 11-pt grey label wins a fight it should lose.
     /// Rendered in `ThemeColor.interactive` — a link is an action, and actions are not amber.

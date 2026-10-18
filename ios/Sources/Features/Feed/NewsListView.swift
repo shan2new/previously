@@ -104,10 +104,15 @@ struct NewsGroup: Identifiable {
     }
 }
 
-/// Home's News (Four tabs): a shelf of the newest posts about your shows, led by the newest official
-/// announcement, the header opening the page. A single post is not a shelf: its card runs gutter to
-/// gutter (Recently aired's rule).
+/// Home's News (Four tabs), led by the newest official announcement, the header opening the page.
+/// Two STYLES: the 19 Oct morning's SHELF of `NewsCard`s (Stage) — a single post is not a shelf, its
+/// card runs gutter to gutter (Recently aired's rule) — and, since that evening's "greeted with
+/// overwhelm" (owner), the calm Home's HEADLINE: today's latest update as one `NewsRow`, else
+/// nothing (`today`).
 struct HomeNews: View {
+    enum Style { case shelf, rows }
+
+    var style: Style = .shelf
     let onOpenPost: (String) -> Void
     let onOpenShow: (String) -> Void
     let onSeeAll: () -> Void
@@ -116,40 +121,78 @@ struct HomeNews: View {
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     static let limit = 8
+    /// A calm Home's news (19 Oct, third pass: "News should be only shown for the latest update that
+    /// came that day otherwise it stays hidden", owner): the newest post, and only when it is dated
+    /// today — the day its own stamp says.
+    static func today(_ posts: [FeedPostModel], now: Int64) -> [FeedPostModel] {
+        guard let latest = posts.max(by: { $0.post.time.at < $1.post.time.at }) else { return [] }
+        // The stamp's own calendar (`TemporalCopy.feedStamp`): a date-only post is dated in UTC, so a
+        // story stamped "1d" is never Home's "today".
+        let time = latest.post.time
+        let anchor: Formatting.TimeAnchor = time.dateOnly ? .utcDate : .local
+        return Formatting.dayDiff(ts: time.at, now: now, anchor: anchor) >= 0 ? [latest] : []
+    }
 
     var body: some View {
         let all = NewsListView.posts(appModel)
         let lead = NewsListView.lead(all)
-        let posts = Array(([lead].compactMap { $0 } + all.filter { $0.id != lead?.id }).prefix(Self.limit))
+        let ordered = [lead].compactMap { $0 } + all.filter { $0.id != lead?.id }
+        let posts = style == .shelf ? Array(ordered.prefix(Self.limit)) : Self.today(all, now: appModel.nowMinute)
         if !posts.isEmpty {
-            VStack(alignment: .leading, spacing: ThemeMetrics.labelGap) {
-                SectionHeaderRow(Copy.Feed.news, action: onSeeAll)
-                    .padding(.horizontal, ThemeMetrics.gutter)
-                if posts.count == 1, let only = posts.first {
-                    card(only, width: ThemeMetrics.windowWidth - 2 * ThemeMetrics.gutter)
-                        .padding(.horizontal, ThemeMetrics.gutter)
-                } else {
-                    ScrollView(.horizontal) {
-                        LazyHStack(alignment: .top, spacing: ThemeMetrics.shelfGap) {
-                            ForEach(posts, id: \.id) { m in
-                                card(m, width: HomeDropCard.shelfWidth)
-                                    .scrollTransition(axis: .horizontal) { content, phase in
-                                        content
-                                            .scaleEffect(phase.isIdentity || reduceMotion ? 1 : 0.95, anchor: .bottom)
-                                            .opacity(phase.isIdentity ? 1 : 0.75)
-                                    }
-                            }
-                        }
-                        .scrollTargetLayout()
-                    }
-                    .contentMargins(.horizontal, ThemeMetrics.gutter, for: .scrollContent)
-                    .scrollTargetBehavior(.viewAligned)
-                    .scrollIndicators(.hidden)
-                    .scrollClipDisabled()
-                }
+            if style == .shelf {
+                shelf(posts)
+            } else {
+                list(posts)
             }
-            .padding(.top, ThemeMetrics.sectionGap)
         }
+    }
+
+    /// The headlines: the section's header, then a row per post.
+    private func list(_ posts: [FeedPostModel]) -> some View {
+        VStack(alignment: .leading, spacing: 0) {
+            SectionHeaderRow(Copy.Feed.news, action: onSeeAll)
+                .padding(.horizontal, ThemeMetrics.gutter)
+                .padding(.bottom, ThemeSpace.x2)
+            ForEach(posts, id: \.id) { m in
+                NewsRow(model: m, compact: true, onOpen: { open(m) }, onOpenShow: { onOpenShow(m.post.franchiseId) })
+                    .equatable()
+            }
+        }
+        .padding(.top, ThemeMetrics.sectionGap)
+    }
+
+    private func open(_ m: FeedPostModel) {
+        m.post.kind == .episode ? onOpenShow(m.post.franchiseId) : onOpenPost(m.id)
+    }
+
+    private func shelf(_ posts: [FeedPostModel]) -> some View {
+        VStack(alignment: .leading, spacing: ThemeMetrics.labelGap) {
+            SectionHeaderRow(Copy.Feed.news, action: onSeeAll)
+                .padding(.horizontal, ThemeMetrics.gutter)
+            if posts.count == 1, let only = posts.first {
+                card(only, width: ThemeMetrics.windowWidth - 2 * ThemeMetrics.gutter)
+                    .padding(.horizontal, ThemeMetrics.gutter)
+            } else {
+                ScrollView(.horizontal) {
+                    LazyHStack(alignment: .top, spacing: ThemeMetrics.shelfGap) {
+                        ForEach(posts, id: \.id) { m in
+                            card(m, width: HomeDropCard.shelfWidth)
+                                .scrollTransition(axis: .horizontal) { content, phase in
+                                    content
+                                        .scaleEffect(phase.isIdentity || reduceMotion ? 1 : 0.95, anchor: .bottom)
+                                        .opacity(phase.isIdentity ? 1 : 0.75)
+                                }
+                        }
+                    }
+                    .scrollTargetLayout()
+                }
+                .contentMargins(.horizontal, ThemeMetrics.gutter, for: .scrollContent)
+                .scrollTargetBehavior(.viewAligned)
+                .scrollIndicators(.hidden)
+                .scrollClipDisabled()
+            }
+        }
+        .padding(.top, ThemeMetrics.sectionGap)
     }
 
     private func card(_ m: FeedPostModel, width: CGFloat) -> some View {
@@ -226,22 +269,25 @@ struct NewsCard: View, @MainActor Equatable {
 /// the headline beside it — the platform's news list.
 struct NewsRow: View, @MainActor Equatable {
     let model: FeedPostModel
+    /// Home's headlines (19 Oct: "News too loud", owner): a smaller picture and a lighter headline,
+    /// so the news reads as a list under your own shows rather than beside them.
+    var compact = false
     let onOpen: () -> Void
     let onOpenShow: () -> Void
 
-    static func == (a: Self, b: Self) -> Bool { a.model == b.model }
+    static func == (a: Self, b: Self) -> Bool { a.model == b.model && a.compact == b.compact }
 
     var body: some View {
         Button(action: onOpen) {
             HStack(alignment: .top, spacing: ThemeSpace.x3) {
-                NewsArt(model: model, width: 120, height: 68, card: false)
-                VStack(alignment: .leading, spacing: ThemeSpace.x1) {
+                NewsArt(model: model, width: compact ? 88 : 120, height: compact ? 50 : 68, card: false)
+                VStack(alignment: .leading, spacing: compact ? ThemeSpace.x0_5 : ThemeSpace.x1) {
                     NewsByline(model: model)
                     Text(model.headline)
-                        .type(ThemeType.newsHeadline)
+                        .type(compact ? ThemeType.newsHeadlineQuiet : ThemeType.newsHeadline)
                         .foregroundStyle(ThemeColor.textPrimary)
                         .multilineTextAlignment(.leading)
-                        .lineLimit(3)
+                        .lineLimit(compact ? 2 : 3)
                         .fixedSize(horizontal: false, vertical: true)
                 }
                 Spacer(minLength: 0)
@@ -292,6 +338,7 @@ struct NewsArt: View {
 
     private var pixels: CGFloat { min(PostMedia.maxPixels, width * displayScale) }
     private var f: Franchise { model.franchise }
+    private var isTrailer: Bool { if case .trailer = model.media { true } else { false } }
 
     var body: some View {
         let shape = RoundedRectangle(cornerRadius: card ? ThemeRadius.card : 8, style: .continuous)
@@ -299,7 +346,10 @@ struct NewsArt: View {
             picture
                 .frame(width: width, height: height)
                 .clipped()
-            if card {
+            // A trailer's still is the video's own thumbnail, and it is lettered more often than not
+            // ("ONE PUNCH MAN · VIZ OFFICIAL TRAILER"): the show's logo over it printed the name twice
+            // (19 Oct). The byline under the card names the show.
+            if card, !isTrailer {
                 LinearGradient(stops: [.init(color: .clear, location: 0.45),
                                        .init(color: .black.opacity(0.7), location: 1)],
                                startPoint: .top, endPoint: .bottom)

@@ -34,3 +34,19 @@ sections before and after the hierarchy pass (Re:ZERO).
 `13-ground-personality-home.jpg` — the ground before (two corner pools, anime) and after (the
 aurora with grain and a horizon): anime, TV, both; `14-ground-personality-schedule-library.jpg` —
 Schedule and Library, anime and TV.
+
+Build 19 (19 Oct, evening — "greeted with overwhelm", owner, of build 18's caught-up Home). The
+caught-up and "news today" states are the same snapshot with progress moved to what has aired, a
+Bleach airing tonight and the newest post dated today: scratch-server switches, never the app.
+`15-home-caught-up-before-agenda-headline-drops.jpg` — build 18, then the two leads (Coming up as
+rows; one news picture), then an episode waiting. `16-home-scrolled-before-after.jpg` — the same,
+scrolled. `17-home-coming-up-refined.jpg` — Coming up chosen, then refined (one row anatomy, the
+time in amber). `18-home-lead-strip-floating-bars.jpg` — the lead card with the red strip; flung to
+the bottom the bars stay gone; a scroll up brings them back. `19-home-today-only.jpg` — airing
+tonight · with news today · nothing today · an episode waiting with news today.
+`20-home-card-episode-caught-up-moment.jpg` — the episode inside the card; the caught-up moment.
+`21-account-glyph-before-after.jpg` — build 18's grey "Y" disc, then the glyph: no name, a named
+account (a capture-only build), Library's header. `22-floating-tab-bar.jpg` — the first floating
+capsule. `23-black-pill-and-fields.jpg` — the small pitch-black pill and black search fields.
+`24-search-liquid-glass.jpg` — the search fields on native Liquid Glass. `25-tab-bar-black-vs-glass.jpg`
+— the small pill, black then glass, on Home and Library; the owner shipped the glass.
