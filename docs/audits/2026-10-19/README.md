@@ -52,3 +52,33 @@ Captures: `design/calm-2026-10-19/`.
   the testers.
 - Not verified: a physical device, VoiceOver and the accessibility text sizes on the new screens,
   the week strip's sync on a long real week, the type sets on a device.
+
+## Build 19 — the same evening
+
+The owner opened build 18 on a caught-up account: "What the actual fuck is this trash UX? All of
+it?… this is the first thing a person opens up and is greeted with overwhelm". Rebuilt on the sim
+in rounds with the owner (captures 15–25 in `design/calm-2026-10-19/`, decisions in CLAUDE.md):
+
+- **Home, caught up:** today's airing only, as one card (the scene, the logo, the episode, the time
+  on a Netflix-style red strip); with nothing today, the caught-up moment instead. News on Home is
+  today's latest update or nothing; For you is one shelf of 112-pt posters.
+- **The tab bar** floats as a small pill on native Liquid Glass (a black pill was built and
+  photographed beside it; the owner chose glass). The search fields are the same glass.
+- **Bars** leave on a reader's scroll and return only on a scroll up; the end-of-page spring no
+  longer brings them back. Discover's header fades as it slides and has no account control.
+- **The header's account** is a glyph: the photo, else an Outfit initial in a ring, else a user
+  silhouette (never the "Y" of "Your account").
+
+Commit `f5fd9d4`. Release archive `ios/build/Previously-19.xcarchive`: 1.0 (19), widget 19,
+`APIBaseURL` https://anime.cognipin.com, a `pk_live_` Clerk key, Hanken Grotesk and Outfit
+registered. **Uploaded** 19 Oct 05:31 IST from Xcode's Organizer (Distribute App → App Store
+Connect): "UPLOAD SUCCEEDED with no errors", delivery UUID `336bb83a-81ba-4f9b-a1a1-926242ff0ee7`,
+"Uploaded package is processing" — logs in `ios/build/organizer-upload-19.xcdistributionlogs`.
+The CLI export still sees no accounts and no distribution certificate, so the Organizer remains
+the only upload path. Another session's Kestrel upload had the Organizer's distribution sheet
+open first; it finished before this one started.
+
+- Not yet confirmed: App Store Connect's processing, and build 19 in TestFlight for the testers.
+- Not verified: a physical device; the Liquid Glass bar and fields on iOS 18 (the material
+  fallback) and under Reduce Transparency; an account photo in the header glyph (the sim's
+  account has none). Known gap: on a day with no news, the News page has no door.
