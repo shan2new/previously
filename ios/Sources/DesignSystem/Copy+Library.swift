@@ -5,6 +5,11 @@ import Foundation
 // `Copy.Heading.allTitles`, progress lines are `Copy.Progress`.
 extension Copy {
     enum Library {
+        /// The rebuilt root (19 Oct): the shelves' eyebrow, Paused and Dropped as one stack, and
+        /// what a stack does.
+        static let yourShelves = "Your shelves"
+        static let onHold = "On hold"
+        static let opensShelfHint = "Opens this shelf"
         static let title = "Library"
         // The same shelf Today heads "Next up" (review i4): one object, one name across rooms.
         static let continueWatching = "Next up"

@@ -88,30 +88,36 @@ struct LibraryView: View {
         var id: String { "\(status?.rawValue ?? "-")/\(returning?.rawValue ?? "-")/\(unwatchedOnly)/\(sort?.rawValue ?? "-")" }
     }
 
-    /// The directions' root list's seed: a route another screen asked for ("Up next ›" → Watching).
-    @State private var rootRoute = AllTitlesRoute()
 
     var body: some View {
         if appModel.experience.doors {
-            doorsRoot
+            homeRoot
         } else {
             shelvesRoot
         }
     }
 
-    /// The directions (`Experience.doors`): the Library tab IS the list — every show you own,
-    /// findable. Continue watching is Home's, Returning and Announced are Schedule's.
-    private var doorsRoot: some View {
-        LibraryAllView(initialStatus: rootRoute.status, initialReturning: rootRoute.returning,
-                       initialSort: rootRoute.sort ?? .title, initialUnwatchedOnly: rootRoute.unwatchedOnly,
-                       root: true, chrome: chrome, onOpenDetail: onOpenDetail, onAddShow: onAddShow)
-            // A new route re-seeds the list (its filters live in the list's own state).
-            .id(rootRoute.id)
+    /// The Library rebuilt (19 Oct, `LibraryHome`): your shows by where you are with them; the A–Z
+    /// instrument (search, sort, filter) one push away, behind the bar's magnifier or a group's
+    /// header.
+    private var homeRoot: some View {
+        LibraryHome(chrome: chrome, onOpenDetail: onOpenDetail, onOpenAll: { all = $0 }, onAddShow: onAddShow)
+            .onChange(of: all) { _, route in
+                if route != nil { chrome.reveal() }
+            }
+            .navigationDestination(item: $all) { route in
+                LibraryAllView(initialStatus: route.status, initialReturning: route.returning,
+                               initialSort: route.sort ?? .title, initialUnwatchedOnly: route.unwatchedOnly,
+                               onOpenDetail: onOpenDetail, onAddShow: onAddShow)
+                    .perfScreen("AllTitles")
+                    .tabBarReserve()
+            }
             .onChange(of: requestedAll, initial: true) { _, route in
                 guard let route else { return }
-                rootRoute = route
+                all = route
                 requestedAll = nil
             }
+            .onChange(of: popSignal) { _, _ in all = nil }
     }
 
     private var shelvesRoot: some View {

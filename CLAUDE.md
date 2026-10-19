@@ -300,6 +300,24 @@ to `news:` with every social row, in one transaction, when research adopts the p
   `AccountDisc` (now Outfit, and the photo). Discover's header has NO account control ("we don't
   need the profile icon in the discover screen") and its search field runs gutter to gutter; with
   one audience the scope menu is absent (`scope: nil`), not an empty slot.
+- **The Library was rebuilt from the ground up (19 Oct: "overwhelming yet not fun. The worst
+  experience of all!", owner; `design/library-2026-10-19/`).** It was the A–Z instrument as the
+  root: one wall of every poster at 150 pt, "Watched" under 44 of 58, status chips over it. Now
+  `LibraryHome` (Features/Library/LibraryHome.swift) is ONE SCREEN, your shows by where you are:
+  what you are WATCHING as a focus carousel (`LibraryNowWatching` — the front poster at half the
+  window, its name, next step and progress under it, changing as the next card arrives; the side
+  cards turn toward the middle as they leave, cover-flow, in the scroll transition; page dots; no
+  eyebrow — "Now watching is implicit", owner), then YOUR SHELVES as three fanned stacks of their
+  own covers (`LibraryStack`: Planned, Watched, On hold = Paused + Dropped) that FAN OPEN under the
+  finger (`LibraryStackPile`, `StackPressStyle` → `\.stackPressed`) and open a grid page of the
+  shelf (`LibraryShelfPage`). A stack's COUNT is a small dark TAG inside the top cover's upper
+  corner (`LibraryCountChip`: a 5-pt rounded rectangle, Outfit 12 SemiBold, proportional digits),
+  riding the cover as the pile fans — the way a thumbnail carries its duration. On the way: a grey
+  numeral under the name read as a form; a disc standing off the corner "looks awkward"; the lower
+  corner sat on the poster's printed title. Search and the A–Z instrument (`LibraryAllView`: search,
+  sort, filter) are behind the bar's magnifier. Two other layouts (one page of shelves, tabs per
+  status) were photographed and lost ("It doesn't have any wow factor with extreme
+  intuitiveness"); they and the A–Z root are deleted.
 - **Profile was rebuilt from the ground up (19 Oct: "Profile is the worst of all… completely out of
   place with the rest of the app… watching isn't even needed there since Library is already
   there", owner; captures in `design/profile-2026-10-19/`).** It was iOS Settings in the app: a
