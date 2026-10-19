@@ -260,11 +260,25 @@ to `news:` with every social row, in one transaction, when research adopts the p
     .today`, "at most 1 thing… and that too if it is airing the same day. No need to have the title
     coming up"): `HomeComingUpCard` — the show's scene at 16:9 in the gutters, its logo centred, the
     episode under it and when it airs on Netflix's RED STRIP at the foot (`HomeAirStrip`,
-    `ThemeColor.strip` #E50914, "Tonight 7:30 PM" — no "at": `homeStrip`); nothing under the card.
+    `ThemeColor.strip` #E50914, "TONIGHT 7:30 PM" — no "at": `homeStrip`; inside the hour "AIRS IN
+    47 MINUTES", the verb and the whole word ("IN 55 MIN" "feels wrong", owner); since 19 Oct in the tags'
+    11-pt capitals, `heroBadge`, not 13-pt words: "needs to be smaller so that it doesn't compete
+    with the Hero AND still is catchy enough", owner); nothing under the card.
     Two layouts were photographed (Coming up as rows vs one news picture) and Coming up won, then
     lost its rows, title and calendar column. Nothing today → `HomeCaughtUp`, a MOMENT, not a line:
     the committed mark's amber disc in a pool of its own light, the words at 24 pt, one sentence,
     room on both sides ("deserves some space to actually feel caught up"); never both.
+  - **Not caught up, Home LEADS with the same card in one row** (`calmLead`, `HomeLeadCard`, 19 Oct:
+    "make this Hero card similar to the today upcoming one… what if there are multiple that were
+    recently aired and at the same time an upcoming today?", owner): no "Recently aired" title; each
+    drop is the Coming-up anatomy with when it aired on the strip ("Aired Saturday") and its mark in
+    the corner, newest first, then today's next airing ("Tonight 7:30 PM") unless its show is already
+    there; one card runs gutter to gutter, more are a FOCUS carousel (`HomeLeadFocus`: the card in
+    front 0.88 of the page wide, its neighbours at 0.86 of that and dimmed, the step following the
+    finger through `.scrollTransition(.interactive)` and leaning toward the front card — "the current
+    hero could be larger here and as we slide to the next the next becomes bigger", owner; Reduce
+    Motion keeps the sizes). Today's airing used to show only on a caught-up Home — any drop or
+    anything in Up next hid it.
   - **News on Home is today's latest update or nothing** (`HomeNews.today`, "should be only shown
     for the latest update that came that day otherwise it stays hidden"), one `NewsRow(compact:)`
     (88×50, Medium 15) — "today" in the stamp's own calendar (`feedStamp`: a date-only post is UTC),
@@ -272,9 +286,12 @@ to `news:` with every social row, in one transaction, when research adopts the p
     (Home's "News ›" was its only one). A trailer's still never wears the show's logo (`NewsArt`):
     YouTube thumbnails are lettered, and it printed the name twice.
   - **For you is ONE shelf** (`HomeForYou(compact:)`, the 16 Oct "two shelves, always" overruled),
-    headed "For you ›" with its reason as the line under it (`HomeSectionHeader`), at 112-pt posters.
-  - **The page fades out under the header** (`HomeEdgeFade`, a mask read only by itself), never
-    under the tab bar, which floats on its own ground.
+    headed "Your next binge ›" ("For you" until 19 Oct: "to be renamed to something more fun", owner;
+    Discover keeps its For you tab) with its reason as the line under it (`HomeSectionHeader`), at
+    112-pt posters.
+  - **The page fades out under the header** (`HeaderEdgeFade`, App/RootChrome.swift, a mask read
+    only by itself — Discover's pager wears it too), never under the tab bar, which floats on its
+    own ground.
 - **The bar's account is a GLYPH, not a disc (19 Oct: "The Profile icon is extremely poorly built
   and looks out of place", owner).** `AccountGlyph` (Primitives) on every root header: the account's
   photo where Clerk has one (`AccountIdentity.imageURL`, only when `hasImage`), else a ring in the
@@ -283,6 +300,28 @@ to `news:` with every social row, in one transaction, when research adopts the p
   `AccountDisc` (now Outfit, and the photo). Discover's header has NO account control ("we don't
   need the profile icon in the discover screen") and its search field runs gutter to gutter; with
   one audience the scope menu is absent (`scope: nil`), not an empty slot.
+- **Profile was rebuilt from the ground up (19 Oct: "Profile is the worst of all… completely out of
+  place with the rest of the app… watching isn't even needed there since Library is already
+  there", owner; captures in `design/profile-2026-10-19/`).** It was iOS Settings in the app: a
+  "Profile" bar with a text Done, a brown disc with an amber letter, a grey middot line of counts, a
+  Watching shelf repeating the Library, then grey PLATES of 17-pt rows on flat canvas. Now, in the
+  roots' language (`ProfileView`): the viewer's aurora (`AppGround`) behind it; the bar is one glass
+  ✕ disc (no title on screen, VoiceOver keeps it) and rows FADE before it (a mask — the system's
+  frosted edge is a grey band on this ground); YOU centred — the photo, else the initial in Outfit in
+  a ring (`ProfilePortrait`, the bar glyph's anatomy at 88 pt), the name at 24, the handle or the
+  session under it; three COUNTS (episodes · watching · finished, a figure over its small caps,
+  between hairlines; watching and finished open the Library on that shelf); the controls as FLAT
+  rows on the ground under small-caps eyebrows — Preferences (What you watch, Notifications,
+  Haptics), Library (Import, Export), Community, About, DEBUG's Developer — hairlines from the
+  title's edge, no plates (`ProfileGroup`, `ProfileListRow`); Sign out as an outline pill; the
+  colophon with the version AND the sync state ("1.0 (19) · Up to date · Checked just now"); Delete
+  account last, a quiet destructive word. Failed writes still get their own group at the top with
+  Retry / Discard. The Watching shelf, the poster fan and the wash are deleted. **Over it stands
+  the WALL** — the library's posters (finished first, then watching) in a tilted grid behind the
+  portrait, dimmed and fading into the aurora (`ProfileWall`): the plain page "doesn't feel like a
+  previously - the premium TV tracking app at all" (owner, same evening); a split-flap BOARD of the
+  counts (the initial as the mark's "P.") was built beside it and lost ("The 2nd one is really
+  nice"; `design/profile-2026-10-19/directions.jpg`).
 - **The tab bar FLOATS on native Liquid Glass (19 Oct: "The bottom floating nav can have an X /
   Instagram like floating behaviour. Not the native iOS one though", then "I told you to make the
   bottom floating nav look like X right?… X / Insta", "It should be much smaller", "Let's ship with
@@ -505,8 +544,12 @@ to `news:` with every social row, in one transaction, when research adopts the p
     ("sometimes the logo becomes too white that it just appears like a white patch", owner):
     ONE PIECE's mostly-dark logo with its inner detail became one white shape under a white glow
     of the same silhouette. Two more rules came with it: a PLATE (three opaque corners, or nine
-    tenths opaque — a logo with its own background) is not drawn as a logo at all, the name is set
-    in type (`ArtworkLogo.typedName`); and a white, grey or darkened logo stands in a dark SHADE
+    tenths opaque — a logo with its own background) is not drawn as a logo at all — the NEXT of the
+    show's logos is (`ArtworkImage.alternates`, filled by `ArtworkSet.preferredLogo` in the same
+    English-then-untagged order; 19 Oct: "Why is Nos4A2 showing a wordmark instead of the logo
+    image?", owner — TMDB ranks its licence plate first and the letters-only logo second), and the
+    name is set in type (`ArtworkLogo.typedName`) only when every logo is a plate; and a white,
+    grey or darkened logo stands in a dark SHADE
     halo (`LogoHalo.Kind.shade`), only coloured ink keeps its glow. `-verifyLogos 1` (DEBUG) prints
     every library logo's reading (`LOGO … | DARK|PLATE|NEUTRAL|COLOUR`).
   - **The page sits in the show's hue** ("maybe add subtle gradient too", owner): `HomeGround` — the
@@ -752,7 +795,7 @@ to `news:` with every social row, in one transaction, when research adopts the p
     always drawn, `.embedded` notwithstanding — what it is, why, "Add to Planned" + "Details" side
     by side), the notification primer UNDER it (above, it pushed the card's buttons under the bar),
     a shelf per show of yours the rest come from ("Because you're watching …" / "More like …",
-    `ForYouGroup`: two titles or more, else "More for you"), then "Trending now"; every tile
+    `ForYouGroup`: THREE titles or more since 19 Oct, else "More for you"), then "Trending now"; every tile
     IS the Library's poster card (26 Sep, "should be identical to what is in the Library", owner):
     `ShelfPosterTile` wraps `ArtworkPoster` at the Library shelf's 150 pt (210 AX) — the 2:3 poster, its
     edge and shadow, `PosterCaptionText` with ONE fact (`tileFacts`, "Anime · 2019"; the genres wrapped
@@ -934,17 +977,30 @@ to `news:` with every social row, in one transaction, when research adopts the p
     is Home's measure from the bar less the index row and the first section's title, which peek.
   - **Where to watch is the lockup's last line (16 Oct: "where to watch has been removed which
     adds to the chaos", owner)** — the stage had filed it in About, under Episodes and Trailers.
-    `stageWatch` → `StageWatchLine` (DetailEnrichment.swift), under the action row: up to three
-    services' 22-pt marks, "Watch on Netflix and Crunchyroll" (the count form "… and 2 more"
-    past two, and from the second at AX sizes), a chevron, the whole line opening `linkURL`; the
-    JustWatch attribution as its footnote. Only for `.available` with a service; once — not in
+    `stageWatch` → `StageWatchLine` (DetailEnrichment.swift), under the action row, COMPACT since
+    19 Oct ("Make the Watch on part more compact man. Why do you want to overwhelm the users?",
+    owner): "Watch on", up to three services' 18-pt marks STACKED (each tucked 5 pt under the one
+    before, a dark ring between), "+4" for the rest, a chevron, the whole line opening `linkURL`
+    (VoiceOver hears every service). It was 22-pt marks in a row beside the sentence "Watch on
+    Netflix and 6 more", which named Netflix twice. The
+    JustWatch credit TMDB's terms ask for is the PAGE'S FOOT (`watchCredit`, 19 Oct: "Credits to
+    JustWatch is unnecessary at this place which take vital space", owner) — it was the line's
+    footnote, a second grey line in the lockup. Only for `.available` with a service; once — not in
     About, not in its facts row. Its read runs BESIDE the franchise's, and until it answers the
     line's ROOM is held (the same view, hidden), so the answer fades in place and the lockup, the
     index and the page never move; an empty answer that lands after the words are up keeps the
     room empty rather than slide the lockup down. `-detailAnchor watch` lands on it at rest.
   - **ONE page, one scroll, an INDEX that pins** (`ShowIndexRow` — X's tab anatomy, but a tap
     SCROLLS to the section; the underline follows the section in view, written by the sections'
-    geometry probes into `ShowIndexState` on change only, never per frame). **The index is the
+    geometry probes into `ShowIndexState` on change only, never per frame). **Since 19 Oct the index
+    names three sections — Episodes, About, Trailers (`indexSections`; "Posts & Similar doesn't
+    deserve it's own tabs", owner)**: Posts and Similar stay on the page under their headers and the
+    index keeps the last section it names; its slots sit inside the gutters with the underline
+    4 pt past its word ("The tab bottom strip sticking to the edge looks weird" — five edge-to-edge
+    slots ran Episodes' underline into the screen's edge). **A cast photo opens ZOOMED**
+    (`PersonPhotoViewer`, a full-screen cover zoomed out of the disc: the photo at 2:3 on black —
+    TMDB's `h632` cut —, the name, the role; a tap, the ✕ or a drag down closes it; "it should open
+    a dialog of sorts like apps do right to show zoomed in photo", owner). **The index is the
     only name: no section carries a title under it** ("Episodes" over "Episodes" — "Are you kidding
     me?", owner, 9 Oct). Sections for a tracked show: Episodes (the season pill, the bar, "Mark
     all N…", the anchored list, Movies & extras) · Trailers (a headerless shelf of 300-pt cards
@@ -993,6 +1049,50 @@ to `news:` with every social row, in one transaction, when research adopts the p
   "1 4"). Each block centres on the face by its INK, cap top to last baseline (`ScheduleInkCentre`):
   the weekday's capitals stand level with the name's, the numeral's foot with the caption's baseline.
   Rows are 8 pt above and below, a day's break 16. The month grid keeps `feedEyebrow`/`feedDate`.
+  **The last 10 % (19 Oct: "schedule feels 90% stunning but looses out the remaining 10%. I don't
+  know why", owner).** A WEEK is named where the feed crosses into one ("NEXT WEEK", "WEEK OF
+  2 NOV" — the month eyebrow wins where both fall on one day; Sunday-first, as the strip): the
+  same shows in the same order a week apart read as one list drawn twice. Amber is today's disc and
+  the countdown's alone — the strip's and the grid's dots are ink (spent: quieter) and today's
+  weekday letter is ink. The countdown is whole words within the hour ("in 36 minutes"), the
+  clock in the accent past it — never "in 2h 14m". A date-only airing in the window says "All day"
+  where its clock would be ("Episodes 7–9" alone read as cut short; Later's rows keep their date
+  alone). The FILTERS are the title's menu ("Schedule ⌄", `RootHeaderRow(titleMenu:)`), so the
+  bar carries one glyph each side — the account, the month. **The row's face is the show's POSTER**
+  (`AgendaMetrics.poster`, 44×66, the Library card's `tilePoster`): the 56-pt face was the iOS
+  icon's shape (0.22 continuous corners) cut from a poster's busiest square, so the screen read as
+  a column of apps. A 16:9 scene was photographed beside it and lost ("no scene", owner;
+  `design/schedule-faces-2026-10-19/`). Beside the poster the row is THREE LINES, each on one
+  baseline with the date (`posterInline`): the weekday with the NAME, the numeral with WHAT AIRS
+  (with its part where it must be named — the numeral rides that baseline as an overlay so the
+  22-pt figure does not make the line taller), then WHEN in the weekday's small capitals ("7:30
+  PM", "ALL DAY", the countdown in the accent) — a third level under the episode, not a rival to it
+  ("Why aren't these horizontally aligned?… the last row is competing with the 2nd one", owner).
+  The poster's top edge sits on the name's cap line. A week's or month's eyebrow stands 40 pt
+  under the day above it and LATER 48 (`Metrics.sectionGap`, `laterGap`; "more space between
+  current week, next week, later", owner).
+- **Discover's pass (19 Oct: "The button sizing on the Hero suggestions is way too large, Trending
+  list button says Add..., WTF?", owner).** The top pick's "Add to Planned" + "Details" are PILLS
+  that hug their words (`TopPickPill`: the show page's Follow-pill anatomy, 34 pt in a 44-pt target,
+  15-pt SemiBold), not two half-card 44-pt slabs in 17 pt; it draws no reason line ("Like The
+  Witcher and 10 more of yours" — "it makes it appear busy for no good reason", owner; VoiceOver
+  keeps it). Home's NEW tag (`HomeNewTag`, also the news card's) is a flat Netflix-red tag with
+  white `heroBadge` caps, inset 12 pt — it wore the lit amber control gradient and read as a glossy
+  button ("The new strip is poorly built", owner). **`HeroBadge` is the same printed tag** (the show
+  page's lockup, Schedule's card, the stage billboard): flat, 5×2, white `heroBadge` capitals; the
+  NEWS family ("NEW …", "… ANNOUNCED", "OUT NOW") in Netflix red, every other state a step of
+  light (white 0.16, a hairline) — the lit amber chip with its rim "looks out of place with the
+  App UX" (owner, of "SEASON 4 ANNOUNCED"). The attention ring and sweep still play. Every add
+  control says "Add" — `addAsks` ("Add…", the platform's ellipsis for an add that opens the show's
+  chooser) is gone from the chart, the results and the feed: a column of it read as truncated words.
+  Chart rows use Schedule's row scale (`trendTitle` 17 / `trendMeta` 14), not X's 16/16. **The pager
+  re-syncs to the page it SHOWS whenever it comes to rest** (`settlePager`): a tab tap cut short by
+  a scroll left `pagerSection` on the page it never reached, so that tab was dead, and the header
+  followed the wrong page's scroll (it stayed down over a scrolled page, tiles under the tabs).
+  **A suggestion shelf is three titles or more** ("Suggestions should be atleast 3 right?", owner;
+  `ForYouGroup.shelfMinimum`, Discover's shelves and Home's For you): a seed with fewer folds into
+  "More for you", which borrows the last titles of a group that can spare them, else is not drawn
+  (under three only when it is all there is); Trending now needs three too.
 - **The Next up WIDGET (9 Oct, PreviouslyWidgets/NextUpWidget.swift).** The app writes
   `NextUpSnapshot` (Shared/NextUpSnapshot.swift, a member of both targets) into the App Group
   `group.com.cognipin.previously` — up to four shows: Home's drops, the quiet card's show, the

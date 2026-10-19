@@ -98,7 +98,7 @@ struct HomeDropCard: View {
             .buttonStyle(.plain)
             .overlay(alignment: .topLeading) {
                 HomeNewTag(text: Copy.Stories.ringTag(run))
-                    .padding(ThemeSpace.x2)
+                    .padding(HomeNewTag.inset)
                     .allowsHitTesting(false)
             }
             .overlay(alignment: .topTrailing) {

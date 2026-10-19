@@ -1090,7 +1090,6 @@ struct DiscoverView: View {
         AddControl(title: item.title,
                    owned: appModel.isInLibrary(item.id),
                    placement: placement,
-                   asks: true,
                    add: { add(item) }) {
             if let f = appModel.franchise(id: item.id) {
                 FranchiseContextMenu(f: f, appModel: appModel) { part, target in

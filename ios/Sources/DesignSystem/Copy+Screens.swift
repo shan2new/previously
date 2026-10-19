@@ -360,14 +360,11 @@ extension Copy {
         /// The show page's line under the action row (16 Oct): the services by name, the rest
         /// counted — "Watch on Netflix", "… on Netflix and Crunchyroll", "… on Netflix and 2 more";
         /// `compact` (the accessibility sizes) counts from the second.
-        static func watchOn(_ names: [String], compact: Bool = false) -> String {
-            guard let first = names.first else { return Copy.Heading.whereToWatch }
-            switch names.count {
-            case 1: return "Watch on \(first)"
-            case 2 where !compact: return "Watch on \(first) and \(names[1])"
-            default: return "Watch on \(first) and \(names.count - 1) more"
-            }
-        }
+        /// The stage's watch line leads with these words, then the services' marks (19 Oct: the
+        /// sentence "Watch on Netflix and 6 more" beside three marks said every name twice).
+        static let watchOnLead = "Watch on"
+        /// The services past the marks: "+4".
+        static func moreServices(_ n: Int) -> String { "+\(n)" }
         /// VoiceOver hears every service, not the count.
         static func watchOnSpoken(_ names: [String]) -> String {
             names.isEmpty ? Copy.Heading.whereToWatch : "Watch on \(names.formatted(.list(type: .and)))"
@@ -520,7 +517,30 @@ extension Copy {
     }
 }
 
+extension Copy {
+    /// Profile (rebuilt 19 Oct): the counts' words and the groups' eyebrows.
+    enum Profile {
+        static let title = "Profile"
+        static let episodes = "Episodes"
+        static let finished = "Finished"
+        static let opensLibraryHint = "Opens this shelf in your Library"
+        static let preferences = "Preferences"
+        static let library = "Library"
+        static let about = "About"
+        static let notifications = "Notifications"
+        static let haptics = "Haptics"
+    }
+}
+
 extension Copy.Schedule {
-    /// A countdown to today's next airing, where its caption's clock was: "in 2h 14m", "in 27m".
-    static func countdown(_ wait: String) -> String { "in \(wait)" }
+    /// Today's next airing within the hour, where its caption's clock was: "in 42 minutes" — whole
+    /// words, as Home's strip says it (19 Oct: "in 42m" beside Home's "Airs in 47 minutes"). Past the
+    /// hour the clock itself stays, in the accent.
+    static func countdown(minutes n: Int) -> String { "in \(n) \(n == 1 ? "minute" : "minutes")" }
+    /// Where the feed crosses into a later week (19 Oct: the same shows in the same order a week
+    /// apart read as one list drawn twice) — the next one is `nextWeek`, the strip's own word.
+    static func weekOf(_ date: String) -> String { "Week of \(date)" }
+    /// A date-only airing's clock: a calendar's word for an entry with a day and no time — so a
+    /// row's caption keeps its second fact ("Episodes 7–9" alone read as cut short).
+    static let allDay = "All day"
 }

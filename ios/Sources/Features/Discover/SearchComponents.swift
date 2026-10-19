@@ -68,10 +68,6 @@ struct AddControl<OwnedMenu: View>: View {
     let title: String
     let owned: Bool
     var placement: AddControlPlacement = .row
-    /// The add ASKS first ("Where are you in X?", on the show page) — labelled "Add…", the
-    /// ellipsis the platform uses for a command that needs more input (review i4: one "+ Add"
-    /// label for an instant add and for one that opens a page and a question).
-    var asks: Bool = false
     let add: () -> Void
     /// The menu behind an OWNED control: `FranchiseContextMenu` once the franchise is loaded, or
     /// the single Remove while the add is still pending.
@@ -111,7 +107,7 @@ struct AddControl<OwnedMenu: View>: View {
     /// crossfades the control; the tap-to-add and the long-press-for-status are unchanged.
     @ViewBuilder
     private var control: some View {
-        let glyph = AddGlyph(owned: owned, placement: placement, asks: asks)
+        let glyph = AddGlyph(owned: owned, placement: placement)
         if owned {
             Menu(content: { AddMenuContent(owned: owned, add: add, ownedMenu: ownedMenu) }, label: { glyph })
         } else {
@@ -144,13 +140,12 @@ private struct AddMenuContent<OwnedMenu: View>: View {
 private struct AddGlyph: View {
     let owned: Bool
     let placement: AddControlPlacement
-    var asks: Bool = false
 
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     var body: some View {
         if placement == .pill {
-            Text(owned ? Copy.Search.added : (asks ? Copy.Search.addAsks : Copy.Search.add))
+            Text(owned ? Copy.Search.added : Copy.Search.add)
                 .type(ThemeType.feedNoteTitle)
                 .foregroundStyle(owned ? ThemeColor.feedText : ThemeColor.canvas)
                 .lineLimit(1)
@@ -161,7 +156,7 @@ private struct AddGlyph: View {
         } else if placement == .artwork {
             // Labelled on the art (20 Sep); an owned show's check is amber — ownership is STATE.
             Label {
-                Text(owned ? Copy.Search.added : (asks ? Copy.Search.addAsks : Copy.Search.add))
+                Text(owned ? Copy.Search.added : Copy.Search.add)
             } icon: {
                 AppGlyph(systemName: owned ? "checkmark" : "plus", decorative: true)
                     .foregroundStyle(owned ? ThemeColor.accent : ThemeColor.textPrimary)

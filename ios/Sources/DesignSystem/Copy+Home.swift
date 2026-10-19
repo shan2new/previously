@@ -20,11 +20,15 @@ extension Copy {
         /// next airing — which is Schedule's to show, never Home's.
         static let caughtUpLine = "You\u{2019}re all caught up"
         static func nextAiring(_ show: String, _ when: String) -> String { "Next: \(show) \u{00B7} \(when)" }
-        /// Home's one shelf of recommendations (19 Oct); its reason is the line under it.
-        static let forYou = "For you"
+        /// Home's one shelf of recommendations (19 Oct); its reason is the line under it. "For you"
+        /// until the same evening ("For You in home to be renamed to something more fun", owner) — the
+        /// shelf is the show you start when yours run out. Discover keeps its "For you" tab.
+        static let forYou = "Your next binge"
         /// The lead card's strip (19 Oct): the day and the clock, no "at".
         static let tonight = "Tonight", today = "Today", tomorrow = "Tomorrow"
-        static func inMinutes(_ n: Int) -> String { "In \(n) min" }
+        /// An airing within the hour, on the strip: the verb and the whole word (19 Oct: "'IN 55 MIN'
+        /// feels wrong… Airs in 55 minutes is more suited", owner).
+        static func inMinutes(_ n: Int) -> String { "Airs in \(n) \(n == 1 ? "minute" : "minutes")" }
 
         static var samples: [String] {
             [title, upNext, recentlyAired, newEpisode, forYou,

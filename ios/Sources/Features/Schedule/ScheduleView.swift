@@ -117,6 +117,11 @@ struct ScheduleView: View {
         /// opened to 16 pt between faces (`AgendaMetrics.vertical`), and a day's break stays twice
         /// a row's — 32 pt face to face.
         static let dayGap: CGFloat = ThemeSpace.x4
+        /// Above a week's or a month's eyebrow: a section break, not a day's (19 Oct, "more space
+        /// between current week, next week, later", owner).
+        static let sectionGap: CGFloat = ThemeSpace.x10
+        /// Above LATER: past the window, the feed's largest break.
+        static let laterGap: CGFloat = ThemeSpace.x12
         /// How far past today a Later date may be, in days: the date column prints no year.
         static let laterReach = 365
     }
@@ -684,7 +689,10 @@ struct ScheduleView: View {
     /// the clock when the row has gone.
     private func chrome(_ proxy: ScrollViewProxy) -> some View {
         VStack(alignment: .leading, spacing: 0) {
-            RootHeaderRow(title: Copy.Schedule.title, chrome: rootChrome) {
+            // The filters are the TITLE's menu (19 Oct): the bar carried the account on the left
+            // and two glyphs on the right, one of them a calendar over a week strip that already
+            // is one. Now one glyph each side — the account, the month.
+            RootHeaderRow(title: Copy.Schedule.title, chrome: rootChrome, titleMenu: AnyView(filterMenuContent)) {
                 // The directions: every root's bar opens with the account disc.
                 if appModel.experience.doors { RootAccountButton() }
                 // The way back once the reader has scrolled away from today. Ink, not amber: a
@@ -708,10 +716,6 @@ struct ScheduleView: View {
                                 tint: monthOpen ? ThemeColor.accent : ThemeColor.textPrimary) { toggleCalendar() }
                     .accessibilityLabel(Copy.Schedule.calendar)
                     .accessibilityValue(monthOpen ? Copy.Schedule.calendarShown : Copy.Schedule.calendarHidden)
-                filterMenu
-                    .font(.system(size: 20, weight: .medium))
-                    .frame(width: FeedMetrics.actionHitHeight, height: FeedMetrics.actionHitHeight)
-                    .contentShape(Rectangle())
             }
             if !showsWholeScreenState {
                 // The top calendar: the week the list is in, in sync with it both ways.
@@ -752,30 +756,18 @@ struct ScheduleView: View {
         .modifier(RootChromeSlide(chrome: rootChrome))
     }
 
-    private var filterMenu: some View {
-        Menu {
-            Section(Copy.Filter.source) {
-                Picker(Copy.Filter.source, selection: sourceBinding) {
-                    Text(Copy.Filter.all).tag(MediaFilter.all)
-                    Text(Copy.Filter.anime).tag(MediaFilter.anime)
-                    Text(Copy.Filter.tv).tag(MediaFilter.tv)
-                }
-                .pickerStyle(.inline)
+    /// The title menu's filters; an active one shows as the chips under the bar.
+    @ViewBuilder
+    private var filterMenuContent: some View {
+        Section(Copy.Filter.source) {
+            Picker(Copy.Filter.source, selection: sourceBinding) {
+                Text(Copy.Filter.all).tag(MediaFilter.all)
+                Text(Copy.Filter.anime).tag(MediaFilter.anime)
+                Text(Copy.Filter.tv).tag(MediaFilter.tv)
             }
-            Toggle(Copy.Filter.hideWatched, isOn: hideWatchedBinding)
-        } label: {
-            AppGlyph(systemName: filterActive ? "line.3.horizontal.decrease.circle.fill" : "line.3.horizontal.decrease")
+            .pickerStyle(.inline)
         }
-        .tint(filterActive ? ThemeColor.accent : ThemeColor.textPrimary)
-        .accessibilityLabel(Copy.Filter.filter)
-        .accessibilityValue(filterValue)
-    }
-
-    private var filterValue: String {
-        var bits: [String] = []
-        if typeFilter != .all { bits.append(typeFilter.chipLabel) }
-        if unwatchedOnly { bits.append(Copy.Filter.hideWatched) }
-        return bits.isEmpty ? Copy.Filter.off : bits.joined(separator: ", ")
+        Toggle(Copy.Filter.hideWatched, isOn: hideWatchedBinding)
     }
 
     // The haptic fires from the MUTATION, not from an observer, so one transaction is one haptic.
@@ -891,9 +883,9 @@ struct ScheduleView: View {
                     }
                     .frame(width: 38)
                     .opacity(i == 1 ? 0 : 1)
-                    // The face's own rounded square (`ShowAvatar.shape`), not a disc, so it lands in place.
-                    SkeletonBlock(width: AgendaMetrics.avatar, height: AgendaMetrics.avatar,
-                                  radius: AgendaMetrics.avatar * FeedMetrics.showCornerRatio)
+                    // The row's poster, at its size, so it lands in place.
+                    SkeletonBlock(width: AgendaMetrics.poster.width, height: AgendaMetrics.poster.height,
+                                  radius: AgendaMetrics.posterRadius)
                     VStack(alignment: .leading, spacing: ThemeSpace.x1) {
                         SkeletonLine(width: 132, height: 13)
                         SkeletonLine(width: 96, height: 11)
@@ -939,7 +931,8 @@ struct ScheduleView: View {
         let rows: [Row]
         /// The card — today's block only.
         let hero: Hero?
-        /// The month this day opens, where the feed crosses into one: "October".
+        /// The eyebrow over this day: the month it opens, where the feed crosses into one
+        /// ("October"), else the week ("Next week", "Week of 2 Nov").
         var month: String?
         /// Today, or a picked day, with nothing on it says so beside its date.
         let empty: String?
@@ -1009,6 +1002,10 @@ struct ScheduleView: View {
         // a month other than today's. The date column carries no month: "WED 30" then "SAT 3" said
         // nothing about October having begun (review i3).
         var month = Formatting.localParts(now).mo
+        // The week the feed is in, counted from this one (Sunday-first, as the strip above it):
+        // where it crosses into the next, the eyebrow says so (19 Oct) — unless a month says more.
+        let weekday = Formatting.localParts(now).wd
+        var week = 0
         let landing = landingDay
         var order = 0
         for day in daysToDraw(d) {
@@ -1022,8 +1019,16 @@ struct ScheduleView: View {
                 let m = Formatting.localParts(day.noon).mo
                 // Never over the card: a small eyebrow stranded above the stage (9 Oct). The month
                 // the card's day opens is the grid's to say.
-                if m != month, card == nil { block.month = Formatting.formatted(day.noon, skeleton: "MMMM", anchor: .local) }
+                let w = Int((Double(weekday + day.id) / 7).rounded(.down))
+                if m != month, card == nil {
+                    block.month = Formatting.formatted(day.noon, skeleton: "MMMM", anchor: .local)
+                } else if w > week, w >= 1, card == nil {
+                    let sunday = appModel.scheduleTodayNoon + Int64(w * 7 - weekday) * Formatting.D
+                    block.month = w == 1 ? Copy.Schedule.nextWeek
+                        : Copy.Schedule.weekOf(Formatting.formatted(sunday, skeleton: "dMMM", anchor: .local))
+                }
                 month = m
+                week = max(week, w)
                 if day.id >= landing {
                     let lead = card == nil ? 0 : 1
                     block.order = order + lead
@@ -1058,9 +1063,12 @@ struct ScheduleView: View {
             }
             VStack(alignment: .leading, spacing: 0) {
                 if let month = b.month {
+                    // A section's room (19 Oct: "more space between current week, next week, later
+                    // to give it some more breathing room", owner): 40 above the eyebrow — two and
+                    // a half day breaks — and 8 to its first row.
                     ScheduleEyebrow(text: month)
-                        .padding(.top, ThemeSpace.x6)
-                        .padding(.bottom, ThemeSpace.x1)
+                        .padding(.top, Metrics.sectionGap)
+                        .padding(.bottom, ThemeSpace.x2)
                         .modifier(riseIn(b.order))
                         .modifier(ScheduleUnderBarFade(chrome: rootChrome, extra: stripHeight))
                 }
@@ -1133,8 +1141,18 @@ struct ScheduleView: View {
     private func decor(_ r: Row, counting: Bool) -> ScheduleRowDecor {
         var d = ScheduleRowDecor()
         if !appModel.experience.calm { d.hueURL = r.franchise.portraitArt }
-        if counting { d.accentTail = Copy.Schedule.countdown(Formatting.fmtCountdown(target: r.at, now: now)) }
+        if counting { d.accentTail = countdownTail(r) }
         return d
+    }
+
+    /// Today's next airing, in the accent where its clock was: "in 42 minutes" within the hour,
+    /// else the clock itself ("7:30 PM") — no abbreviated "in 2h 14m".
+    private func countdownTail(_ r: Row) -> String {
+        let wait = r.at - now
+        if wait < 60 * Formatting.minuteMs {
+            return Copy.Schedule.countdown(minutes: max(1, Int(wait / Formatting.minuteMs)))
+        }
+        return Formatting.fmtTime(r.at, anchor: r.franchise.timeAnchor)
     }
 
     /// "FRI" over "25" — the day's weekday and numeral, for its first row's date column.
@@ -1151,8 +1169,8 @@ struct ScheduleView: View {
     private func laterGroup(_ rows: [Row], order: Int = 0) -> some View {
         if !rows.isEmpty {
             ScheduleEyebrow(text: Copy.Schedule.later)
-                .padding(.top, ThemeSpace.x8)
-                .padding(.bottom, ThemeSpace.x1)
+                .padding(.top, Metrics.laterGap)
+                .padding(.bottom, ThemeSpace.x2)
                 .modifier(riseIn(order))
                 .modifier(ScheduleUnderBarFade(chrome: rootChrome, extra: stripHeight))
             ForEach(Array(rows.enumerated()), id: \.element.id) { i, r in
@@ -1160,7 +1178,7 @@ struct ScheduleView: View {
                 let firstOfDay = i == 0 || laterDay(rows[i - 1]) != day
                 let p = Formatting.localParts(r.at, anchor: r.franchise.timeAnchor)
                 agendaRow(r, date: firstOfDay ? (monthShort(p.mo), "\(p.d)") : nil, isToday: false,
-                          order: order + i)
+                          order: order + i, later: true)
                     .padding(.top, firstOfDay && i > 0 ? Metrics.dayGap : 0)
                     .id(firstOfDay ? AgendaID.day(day) : AgendaID.row(day, r.id))
             }
@@ -1266,17 +1284,18 @@ struct ScheduleView: View {
     }
 
     private func agendaRow(_ r: Row, date: (top: String, numeral: String)?, isToday: Bool,
-                           order: Int = 0, counting: String? = nil) -> some View {
+                           order: Int = 0, counting: String? = nil, later: Bool = false) -> some View {
         let f = r.franchise
         let x = facts(r)
         let count = max(1, r.episodes.upperBound - r.part.progress)
-        // Today's next airing says how long is left where its clock was.
+        // Today's next airing says how long is left where its clock was. A date-only airing in the
+        // window says it has a day and no time (Later's dates are months out: their day is enough).
         let counts = counting != nil && counting == r.id
-        let line = counts
-            ? "\(episodeLine(r)) \u{00B7} \(Copy.Schedule.countdown(Formatting.fmtCountdown(target: r.at, now: now)))"
-            : [episodeLine(r), x.time].compactMap { $0 }.joined(separator: " \u{00B7} ")
+        let clock = counts ? countdownTail(r) : (x.time ?? (r.dateOnly && !later ? Copy.Schedule.allDay : nil))
+        let line = [episodeLine(r), clock].compactMap { $0 }.joined(separator: " \u{00B7} ")
         let sub = partSub(r)
-        return ScheduleAgendaRow(franchise: f, date: date, isToday: isToday, line: line, sub: sub, state: x.state,
+        return ScheduleAgendaRow(franchise: f, date: date, isToday: isToday, line: line, sub: sub,
+                                 episode: episodeLine(r), when: clock, state: x.state,
                                  spoken: spoken(r, line: [line, sub].compactMap { $0 }.joined(separator: ", "), x),
                                  decor: decor(r, counting: counts),
                                  onOpen: openAction(r, x)) {

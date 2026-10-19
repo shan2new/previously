@@ -547,22 +547,37 @@ struct ArtworkLogo: View {
     /// season", owner). Off for the slots that pin a logo to a corner (tiles, cards).
     var hug: Bool = false
 
-    /// The logo turned out to be a PLATE (`LogoInk.Reading.plate`): its name is set in type instead.
-    @State private var plated = false
+    /// Logos that turned out to be PLATES (`LogoInk.Reading.plate`): the next of the show's logos is
+    /// drawn (`ArtworkImage.alternates`), and the name is set in type only when none is left.
+    @State private var plated: Set<String> = []
+
+    /// The first of the show's logos not known to be a plate.
+    private func drawable(_ logo: ArtworkImage) -> ArtworkImage? {
+        ([logo] + logo.alternates).first { image in
+            (image.width ?? 0) > 0 && (image.height ?? 0) > 0
+                && !plated.contains(image.url) && LogoInk.known(image.url)?.plate != true
+        }
+    }
 
     var body: some View {
-        if case .logo(let logo) = name, name.hasGraphicLogo {
+        if case .logo(let lead) = name, name.hasGraphicLogo {
             Group {
-                if plated || LogoInk.known(logo.url)?.plate == true {
-                    typedName
-                } else if hug, let w = logo.width, let h = logo.height {
-                    LogoImage(url: logo.url, alignment: alignment, halo: halo, onPlate: { plated = true })
-                        .layoutPriority(1)
-                        .modifier(LogoBox(aspect: CGFloat(w) / CGFloat(h), maxHeight: height))
+                if let logo = drawable(lead) {
+                    Group {
+                        if hug, let w = logo.width, let h = logo.height {
+                            LogoImage(url: logo.url, alignment: alignment, halo: halo, onPlate: { plated.insert(logo.url) })
+                                .layoutPriority(1)
+                                .modifier(LogoBox(aspect: CGFloat(w) / CGFloat(h), maxHeight: height))
+                        } else {
+                            LogoImage(url: logo.url, alignment: alignment, halo: halo, onPlate: { plated.insert(logo.url) })
+                                .frame(minWidth: 0, maxWidth: .infinity, alignment: alignment)
+                                .frame(height: height)
+                        }
+                    }
+                    // A new logo is a new image: its own load, reading and halo.
+                    .id(logo.url)
                 } else {
-                    LogoImage(url: logo.url, alignment: alignment, halo: halo, onPlate: { plated = true })
-                        .frame(minWidth: 0, maxWidth: .infinity, alignment: alignment)
-                        .frame(height: height)
+                    typedName
                 }
             }
             .accessibilityElement(children: .ignore)

@@ -5,10 +5,11 @@ import Foundation
 
 extension Copy {
     enum Search {
-        /// The scene card's labelled add control (20 Sep): the command, then the state.
+        /// The add control's word, everywhere — the pill, the scene card, a post. It used to be "Add…"
+        /// where the add opens the show's library chooser (the platform's ellipsis for a command that
+        /// asks for more), and a column of "Add…" down the chart read as a truncated word ("Trending
+        /// list button says Add..., WTF?", owner, 19 Oct). X's Follow does not say what it opens.
         static let add = "Add"
-        /// An add that asks where you are first (an airing show — its page raises the question).
-        static let addAsks = "Add\u{2026}"
         static let added = "Added"
         static let title = "Search"
 

@@ -48,6 +48,9 @@ struct ArtworkImage: Codable, Hashable, Sendable {
     let height: Int?
     let language: String?
     let score: Double?
+    /// The LOGO's runners-up, in the same preference (`ArtworkSet.preferredLogo`): what `ArtworkLogo`
+    /// draws when this one measures as a PLATE (a logo on its own background). Not on the wire.
+    var alternates: [ArtworkImage] = []
 
     /// Only a measured TMDB image has meaningful language metadata. Legacy URL-only
     /// fallbacks also have a nil language; that does not make their lettering disappear.
@@ -140,9 +143,16 @@ struct ArtworkGallery: Codable, Hashable, Sendable {
 
     /// The app's display language is English. Pixel count must not promote an untagged or
     /// foreign-language wordmark over an available English one (Beginning After the End).
+    /// It carries the rest of that ranking as `alternates` (19 Oct: "Why is Nos4A2 showing a
+    /// wordmark instead of the logo image?", owner — TMDB ranks NOS4A2's licence PLATE first, the
+    /// plate rule set the name in type, and the letters-only logo second in the gallery was never
+    /// looked at).
     var preferredLogo: ArtworkImage? {
-        logos.first { $0.language?.lowercased() == "en" }
-            ?? logos.first { ArtworkSet.nonEmpty($0.language) == nil }
+        let ranked = logos.filter { $0.language?.lowercased() == "en" }
+            + logos.filter { ArtworkSet.nonEmpty($0.language) == nil }
+        guard var lead = ranked.first else { return nil }
+        lead.alternates = Array(ranked.dropFirst())
+        return lead
     }
 }
 

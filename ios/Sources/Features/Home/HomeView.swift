@@ -225,7 +225,7 @@ struct HomeView: View {
                 .ignoresSafeArea(edges: .top)
                 .scrollIndicators(.hidden)
                 // The calm page goes out under both transparent bars rather than reading through them.
-                .modifier(HomeEdgeFadeModifier(chrome: chrome, enabled: appModel.experience.calm))
+                .modifier(HeaderEdgeFadeModifier(chrome: chrome, enabled: appModel.experience.calm))
                 .onScrollPhaseChange { _, phase in chrome.phase(phase) }
                 .laneClearance(appModel, base: ThemeSpace.x3)
                 .previouslyRefreshable { await appModel.reload() }
@@ -427,7 +427,11 @@ struct HomeView: View {
             // The first section under the billboard sits close to its mark (the old Today's x4: the
             // pill to the next header ≈ 36 pt), the rest a section's gap apart.
             let lead = feed.hero != nil
-            if !feed.recent.isEmpty { recent(feed.recent, leading: lead).rootArrival(1) }
+            if appModel.experience.calm {
+                calmLead(feed.recent).rootArrival(1)
+            } else if !feed.recent.isEmpty {
+                recent(feed.recent, leading: lead).rootArrival(1)
+            }
             if !feed.queue.isEmpty { upNext(feed.queue, leading: lead && feed.recent.isEmpty).rootArrival(2) }
             if appModel.experience.feedInHome {
                 // Four tabs: the feed is Home's News section (its page is "News ›").
@@ -479,6 +483,79 @@ struct HomeView: View {
         }
         HomeForYou(leading: false, compact: true, onOpen: openRecommendation, onSeeAll: onOpenDiscover)
             .rootArrival(3)
+    }
+
+    /// Calm's LEAD row (19 Oct: "what if there are multiple that were recently aired and at the same
+    /// time an upcoming today?", owner): every card in the one anatomy (`HomeLeadCard`) and in one row,
+    /// under no title — the drops first, newest first (what you can WATCH before what you wait for),
+    /// each with when it aired on its strip and its mark in the corner; then today's next airing, if
+    /// it is not a show already here. One card runs gutter to gutter; more are a shelf. Today's airing
+    /// used to show only on a caught-up Home: anything out, or anything in Up next, hid it.
+    @ViewBuilder
+    private func calmLead(_ drops: [HomeAiring]) -> some View {
+        let shows = Set(drops.map(\.entry.franchise.id))
+        let coming = HomeComingUp.today(appModel).flatMap { shows.contains($0.franchise.id) ? nil : $0 }
+        let count = drops.count + (coming == nil ? 0 : 1)
+        Group {
+            if count == 1 {
+                if let item = drops.first {
+                    leadDrop(item, width: HomeLeadCard<EmptyView>.fullWidth)
+                } else if let coming {
+                    leadComing(coming, width: HomeLeadCard<EmptyView>.fullWidth)
+                }
+            } else if count > 1 {
+                // A FOCUS carousel (`HomeLeadFocus`): the card in front nearly the page's width.
+                let width = HomeLeadFocus.cardWidth
+                ScrollView(.horizontal) {
+                    LazyHStack(alignment: .center, spacing: ThemeMetrics.shelfGap) {
+                        ForEach(drops) { item in
+                            leadDrop(item, width: width)
+                                .modifier(HomeLeadFocus(reduceMotion: reduceMotion))
+                                .transition(.scale(scale: 0.85).combined(with: .opacity))
+                        }
+                        if let coming {
+                            leadComing(coming, width: width)
+                                .modifier(HomeLeadFocus(reduceMotion: reduceMotion))
+                        }
+                    }
+                    .scrollTargetLayout()
+                    .animation(ThemeMotion.pick(ThemeMotion.uiSettle, reduceMotion: reduceMotion), value: drops.map(\.id))
+                }
+                .contentMargins(.horizontal, ThemeMetrics.gutter, for: .scrollContent)
+                .scrollTargetBehavior(.viewAligned)
+                .scrollIndicators(.hidden)
+                .scrollClipDisabled()
+                .padding(.horizontal, -ThemeMetrics.gutter)
+            }
+        }
+        .padding(.horizontal, ThemeMetrics.gutter)
+        .padding(.top, ThemeSpace.x5)
+        .id("home/recent")
+    }
+
+    /// A drop on the lead row: what is out to watch, when it aired, and its mark.
+    private func leadDrop(_ item: HomeAiring, width: CGFloat) -> some View {
+        let e = item.entry
+        let run = max(1, e.episode - e.part.progress)
+        return HomeLeadCard(franchise: e.franchise, what: dropLine(e, run: run),
+                            strip: TemporalCopy.aired(at: e.at, now: appModel.nowMinute, source: e.franchise.source),
+                            width: width,
+                            onOpen: {
+                                onOpenDetail(e.franchise.id, "home-drop/\(item.id)",
+                                             EpisodeFocus(mediaId: e.part.mediaId, episode: e.part.progress + 1))
+                            }) {
+            HomeMarkDisc(committing: committingRows.contains(item.id),
+                         label: Copy.Action.markEpisodeWatched(e.episode)) { markThrough(item) }
+                .padding(ThemeSpace.x1)
+        }
+    }
+
+    /// Today's airing on the lead row.
+    private func leadComing(_ e: AppModel.ScheduleEntry, width: CGFloat) -> some View {
+        HomeComingUpCard(entry: e, now: appModel.nowMinute, width: width) {
+            onOpenDetail(e.franchise.id, "home-coming/\(e.franchise.id)",
+                         EpisodeFocus(mediaId: e.part.mediaId, episode: e.episode))
+        }
     }
 
     /// The directions' caught-up line (`Experience.doors`): said once, with the next airing as the way

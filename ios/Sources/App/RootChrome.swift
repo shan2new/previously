@@ -115,21 +115,98 @@ struct RootChromeFade: ViewModifier {
     }
 }
 
+/// The page fades out under a root's transparent HEADER (19 Oct, Home first, then Discover). The bars
+/// are transparent (17 Oct: "make the top and bottom bars transparent please! It's heavily
+/// distracting otherwise!", owner), so a section title scrolled under Home's disc and bell — and
+/// Discover's genre tiles under its search field and tabs, at rest, after a page settled with the
+/// header back — read straight through them. Nothing is painted over the ground: the CONTENT goes,
+/// and the viewer's ground (`AppGround`) shows under the glyphs. Gone just short of the header's
+/// foot, whole a ramp below it; it follows the header as it slides away, and the status band always
+/// stays clear. Only this view reads the scroll (`awayFraction`); Reduce Transparency keeps the
+/// opaque bands and draws no fade.
+struct HeaderEdgeFade: View {
+    let chrome: any ScrollAwayChrome
+    /// The header under the status band: what slides away (Home's row; Discover's row and tabs).
+    var header: CGFloat = FeedMetrics.headerRow
+    /// From gone to whole.
+    var ramp: CGFloat = 28
+
+    var body: some View {
+        GeometryReader { g in
+            let frame = g.frame(in: .global)
+            let h = max(1, frame.height)
+            let away = min(1, max(0, chrome.awayFraction))
+            // The header slides up by what has gone; the status band always stays.
+            let topGone = ThemeMetrics.topSafeInset + header * (1 - away) - 4 - frame.minY
+            let stops: [CGFloat] = [topGone, topGone + ramp]
+            let at = stops.map { min(1, max(0, $0 / h)) }
+            LinearGradient(stops: [
+                .init(color: .clear, location: at[0]),
+                .init(color: .black, location: max(at[0], at[1])),
+            ], startPoint: .top, endPoint: .bottom)
+        }
+        .allowsHitTesting(false)
+    }
+}
+
+/// Applies `HeaderEdgeFade` to a root's scroll view. A modifier, so the mask comes and goes only with
+/// `enabled` or Reduce Transparency, never with a scroll.
+struct HeaderEdgeFadeModifier: ViewModifier {
+    let chrome: any ScrollAwayChrome
+    var header: CGFloat = FeedMetrics.headerRow
+    var ramp: CGFloat = 28
+    var enabled: Bool = true
+
+    @Environment(\.accessibilityReduceTransparency) private var reduceTransparency
+
+    func body(content: Content) -> some View {
+        if enabled && !reduceTransparency {
+            content.mask { HeaderEdgeFade(chrome: chrome, header: header, ramp: ramp).ignoresSafeArea() }
+        } else {
+            content
+        }
+    }
+}
+
 /// A root's bar row: its title in the app's face, centred, with a control each side — the feed
 /// header's row (44 pt, the gutter, 44-pt targets). No ground of its own (`RootHeader` adds one).
 struct RootHeaderRow<Leading: View, Trailing: View>: View {
     let title: String
     let chrome: RootChromeState
+    /// The title as a MENU (Photos' and Mail's title menu) — Schedule's filters, so the bar keeps one
+    /// glyph each side. Its content is the menu's; the label is the title with a small chevron.
+    var titleMenu: AnyView? = nil
     @ViewBuilder var leading: () -> Leading
     @ViewBuilder var trailing: () -> Trailing
 
     var body: some View {
         ZStack {
-            Text(title)
-                .type(ThemeType.barTitle)
-                .foregroundStyle(ThemeColor.textPrimary)
-                .lineLimit(1)
+            if let titleMenu {
+                Menu {
+                    titleMenu
+                } label: {
+                    HStack(spacing: 5) {
+                        Text(title)
+                            .type(ThemeType.barTitle)
+                            .lineLimit(1)
+                        AppGlyph(systemName: "chevron.down", decorative: true)
+                            .font(.system(size: 11, weight: .bold))
+                            .foregroundStyle(ThemeColor.textSecondary)
+                    }
+                    .foregroundStyle(ThemeColor.textPrimary)
+                    .frame(minHeight: FeedMetrics.actionHitHeight)
+                    .contentShape(Rectangle())
+                }
+                .menuStyle(.button)
+                .buttonStyle(.plain)
                 .accessibilityAddTraits(.isHeader)
+            } else {
+                Text(title)
+                    .type(ThemeType.barTitle)
+                    .foregroundStyle(ThemeColor.textPrimary)
+                    .lineLimit(1)
+                    .accessibilityAddTraits(.isHeader)
+            }
             HStack(spacing: ThemeSpace.x1) {
                 leading()
                 Spacer(minLength: ThemeSpace.x2)

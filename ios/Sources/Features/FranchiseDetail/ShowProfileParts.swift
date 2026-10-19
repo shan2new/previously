@@ -85,7 +85,7 @@ struct ShowTabsRow: View {
                                     .fixedSize()
                                     .hidden()
                                     .frame(height: 3)
-                                    .overlay(Capsule().fill(ThemeColor.feedText).padding(.horizontal, -11))
+                                    .overlay(Capsule().fill(ThemeColor.feedText).padding(.horizontal, -4))
                                     .matchedGeometryEffect(id: "underline", in: underline)
                             }
                         }
@@ -341,7 +341,10 @@ final class ShowIndexState {
 
 /// The page's INDEX, in X's tab row anatomy (`ShowTabsRow`): equal slots, the word in `feedTab`,
 /// ink for the section in view and grey otherwise, the 3-pt underline gliding to it, one pixel of
-/// rule under the row. A tap scrolls to the section; the row never swaps content.
+/// rule under the row. A tap scrolls to the section; the row never swaps content. The slots sit
+/// INSIDE the gutters (19 Oct: "The tab bottom strip sticking to the edge looks weird", owner):
+/// five slots edge to edge put "Episodes" at the screen's edge and its underline, 11 pt wider than
+/// the word, ran into it. Three slots in the gutters, the underline hugging its word.
 struct ShowIndexRow: View {
     let sections: [ShowTab]
     let current: ShowTab
@@ -375,7 +378,7 @@ struct ShowIndexRow: View {
                                     .fixedSize()
                                     .hidden()
                                     .frame(height: 3)
-                                    .overlay(Capsule().fill(ThemeColor.feedText).padding(.horizontal, -11))
+                                    .overlay(Capsule().fill(ThemeColor.feedText).padding(.horizontal, -4))
                                     .matchedGeometryEffect(id: "underline", in: underline)
                             }
                         }
@@ -387,6 +390,7 @@ struct ShowIndexRow: View {
                     .accessibilityHint(Copy.Accessibility.scrollsToSectionHint)
                 }
             }
+            .padding(.horizontal, ThemeMetrics.gutter)
             .frame(height: ShowTabsRow.height)
             .animation(ThemeMotion.pick(ThemeMotion.uiSnappy, reduceMotion: reduceMotion), value: current)
             FeedHairline()

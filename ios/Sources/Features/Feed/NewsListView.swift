@@ -362,7 +362,7 @@ struct NewsArt: View {
         .overlay(shape.strokeBorder(ThemeColor.posterEdge, lineWidth: 1))
         .overlay(alignment: .topLeading) {
             if card, model.fresh {
-                HomeNewTag(text: Copy.Stories.ringTag(1)).padding(ThemeSpace.x2)
+                HomeNewTag(text: Copy.Stories.ringTag(1)).padding(HomeNewTag.inset)
             }
         }
         .overlay {

@@ -193,6 +193,8 @@ struct TrailerCard: View {
 /// person page, so it claims no tap.
 struct PersonCard: View {
     let person: CatalogPerson
+    /// The disc is the source of the photo viewer's zoom (`PersonPhotoViewer`).
+    var zoom: Namespace.ID? = nil
 
     /// Supporting information, a step smaller than the art shelves (24 Sep): 64-pt discs in
     /// 96-pt columns show three and a half people, which says "scrolls" without a sliver.
@@ -232,6 +234,7 @@ struct PersonCard: View {
             .frame(width: Self.disc, height: Self.disc)
             .clipShape(Circle())
             .overlay(Circle().strokeBorder(ThemeColor.posterEdge, lineWidth: 1))
+            .modifier(OptionalZoomSource(id: person.id, namespace: zoom))
             VStack(spacing: 2) {
                 // ONE line each (review i3): Apple TV's cast row. A reserved two-line box gave
                 // four of five names a 24-pt hole; a name compresses a step before it ellipsizes.
@@ -261,6 +264,113 @@ struct PersonCard: View {
         }
         .accessibilityElement(children: .combine)
         .accessibilityLabel(Copy.Accessibility.person(person.name, role: person.role))
+    }
+}
+
+/// `matchedTransitionSource` only where there is a namespace.
+private struct OptionalZoomSource: ViewModifier {
+    let id: String
+    let namespace: Namespace.ID?
+
+    func body(content: Content) -> some View {
+        if let namespace {
+            content.matchedTransitionSource(id: id, in: namespace)
+        } else {
+            content
+        }
+    }
+}
+
+/// A cast or crew member's photo, zoomed out of their disc (19 Oct: "When I click on the Cast &
+/// Crew, it should open a dialog of sorts like apps do right to show zoomed in photo", owner): the
+/// picture at its own 2:3 in the middle of the black, the name and the role under it — the contact
+/// photo of a messaging app. A tap anywhere, the close glyph or a drag down closes it; the drag
+/// carries the picture with the finger and thins the black (the feed's picture viewer).
+struct PersonPhotoViewer: View {
+    let person: CatalogPerson
+
+    @Environment(\.dismiss) private var dismiss
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @State private var drag: CGSize = .zero
+
+    private static let photoWidth: CGFloat = 264
+    private static let closeDistance: CGFloat = 110
+    private static let closePredicted: CGFloat = 320
+    private static let awayDistance: CGFloat = 360
+
+    /// The catalogue's photo at a size worth zooming: a TMDB profile's own size segment asks for
+    /// the 632-pt cut; AniList's `large` is the largest it serves.
+    static func large(_ url: String?) -> String? {
+        guard let url, let range = url.range(of: #"/t/p/[a-z]+\d+/"#, options: .regularExpression) else { return url }
+        return url.replacingCharacters(in: range, with: "/t/p/h632/")
+    }
+
+    var body: some View {
+        let away = min(1, abs(drag.height) / Self.awayDistance)
+        let shape = RoundedRectangle(cornerRadius: ThemeRadius.card, style: .continuous)
+        ZStack {
+            FeedStage.ground
+                .opacity(1 - away * 0.75)
+                .ignoresSafeArea()
+            VStack(spacing: ThemeSpace.x4) {
+                RemoteImageView(url: Self.large(person.image), contentMode: .fill, maxPixel: 900,
+                                alignment: .top, placeholderHidden: true)
+                    .frame(width: Self.photoWidth, height: Self.photoWidth * 1.5)
+                    .background(ThemeColor.surfaceRaised)
+                    .clipShape(shape)
+                    .overlay(shape.strokeBorder(ThemeColor.posterEdge, lineWidth: 1))
+                    .accessibilityHidden(true)
+                VStack(spacing: ThemeSpace.x1) {
+                    Text(person.name)
+                        .type(ThemeType.sectionTitle)
+                        .foregroundStyle(FeedStage.ink)
+                    if let role = person.displayRole {
+                        Text(role)
+                            .type(ThemeType.metadata)
+                            .foregroundStyle(FeedStage.ink.opacity(0.66))
+                    }
+                }
+                .multilineTextAlignment(.center)
+                .padding(.horizontal, ThemeMetrics.gutter)
+                .opacity(1 - away * 1.6)
+            }
+            .scaleEffect(1 - away * 0.18)
+            .offset(drag)
+        }
+        .overlay(alignment: .topLeading) {
+            Button { dismiss() } label: {
+                AppGlyph(systemName: "xmark")
+                    .font(.body.weight(.semibold))
+                    .foregroundStyle(FeedStage.ink)
+                    .frame(width: 36, height: 36)
+                    .background(FeedStage.glyphGround, in: Circle())
+                    .overlay(Circle().strokeBorder(FeedStage.glyphEdge, lineWidth: FeedMetrics.hairline))
+                    .frame(width: FeedMetrics.actionHitHeight, height: FeedMetrics.actionHitHeight)
+                    .contentShape(Rectangle())
+            }
+            .buttonStyle(FeedIconPressStyle())
+            .accessibilityLabel(Copy.Feed.closeViewer)
+            .padding(.leading, ThemeSpace.x2)
+            .opacity(1 - away * 1.6)
+        }
+        .contentShape(Rectangle())
+        .onTapGesture { dismiss() }
+        .gesture(
+            DragGesture()
+                .onChanged { drag = $0.translation }
+                .onEnded { value in
+                    if abs(value.translation.height) > Self.closeDistance
+                        || abs(value.predictedEndTranslation.height) > Self.closePredicted {
+                        dismiss()
+                    } else {
+                        withAnimation(ThemeMotion.pick(ThemeMotion.uiSnappy, reduceMotion: reduceMotion)) { drag = .zero }
+                    }
+                }
+        )
+        .preferredColorScheme(.dark)
+        .accessibilityElement(children: .contain)
+        .accessibilityLabel(Copy.Accessibility.person(person.name, role: person.role))
+        .accessibilityAction(named: Copy.Feed.closeViewer) { dismiss() }
     }
 }
 
@@ -405,11 +515,11 @@ struct StageWatchLine: View {
     let availability: WatchAvailability
     let open: () -> Void
 
-    @Environment(\.dynamicTypeSize) private var typeSize
-
     /// Small enough to sit in a line of type, large enough to read as the brand.
-    static let markSide: CGFloat = 22
-    /// The rest are counted in the words ("and 2 more").
+    static let markSide: CGFloat = 18
+    /// How far each mark tucks under the one before it — a stack, not a row.
+    static let markOverlap: CGFloat = 5
+    /// The rest are counted ("+4").
     static let markLimit = 3
     /// The line is drawn mark-tall; its target is a finger tall (the 44-pt floor) without the
     /// layout growing — the action row is a spacing step above, so the two targets only touch.
@@ -426,52 +536,60 @@ struct StageWatchLine: View {
             .accessibilityHidden(true)
     }
 
+    /// COMPACT (19 Oct: "Make the Watch on part more compact man. Why do you want to overwhelm the
+    /// users?", owner): "Watch on", the services' marks stacked (18 pt, each tucked under the one
+    /// before), "+4" for the rest, the chevron — about half the width of the sentence it replaced
+    /// ("Watch on Netflix and 6 more" beside three 22-pt marks, which named Netflix twice). The
+    /// words are quiet; the marks are the line. VoiceOver still hears every service.
     var body: some View {
         let services = WatchProvidersRow.distinct(availability.providers)
         let names = services.map(WatchProvidersRow.displayName)
+        let shown = Array(services.prefix(Self.markLimit))
+        let more = services.count - shown.count
         let linked = availability.linkURL != nil
         let slop = max(0, (Self.target - Self.markSide) / 2)
-        VStack(spacing: ThemeSpace.x1) {
-            Button(action: open) {
-                HStack(spacing: ThemeSpace.x2) {
-                    HStack(spacing: ThemeSpace.x1) {
-                        ForEach(services.prefix(Self.markLimit)) { provider in
-                            ProviderMark(provider: provider, side: Self.markSide)
-                        }
-                    }
-                    .accessibilityHidden(true)
-                    // The count form at the accessibility sizes: one line, never cut mid-name.
-                    Text(Copy.Watch.watchOn(names, compact: typeSize.isAccessibilitySize))
-                        .type(ThemeType.feedSubhead)
-                        .lineLimit(1)
-                        .minimumScaleFactor(0.85)
-                        .shadow(.art)
-                    if linked {
-                        AppGlyph(systemName: "chevron.forward")
-                            .font(ThemeType.feedSmall.font.weight(.bold))
-                            .foregroundStyle(ThemeColor.textPrimary.opacity(0.66))
-                            .accessibilityHidden(true)
+        let ring: CGFloat = 1.5
+        let markShape = RoundedRectangle(cornerRadius: ThemeRadius.compactControl * Self.markSide / ProviderMark.size + ring,
+                                         style: .continuous)
+        Button(action: open) {
+            HStack(spacing: ThemeSpace.x1 + 2) {
+                Text(Copy.Watch.watchOnLead)
+                    .type(ThemeType.metadata)
+                    .foregroundStyle(ThemeColor.textPrimary.opacity(0.78))
+                HStack(spacing: -Self.markOverlap) {
+                    ForEach(Array(shown.enumerated()), id: \.element.id) { i, provider in
+                        ProviderMark(provider: provider, side: Self.markSide)
+                            // A ring of dark between stacked marks, so each reads as its own.
+                            .padding(ring)
+                            .background(Color.black.opacity(0.85), in: markShape)
+                            .zIndex(Double(shown.count - i))
                     }
                 }
-                .foregroundStyle(ThemeColor.interactive)
-                .frame(minHeight: Self.markSide)
-                .padding(.vertical, slop)
-                .contentShape(Rectangle())
-                .padding(.vertical, -slop)
+                .accessibilityHidden(true)
+                if more > 0 {
+                    Text(Copy.Watch.moreServices(more))
+                        .type(ThemeType.metadataEmphasis)
+                        .foregroundStyle(ThemeColor.textPrimary.opacity(0.78))
+                }
+                if linked {
+                    AppGlyph(systemName: "chevron.forward")
+                        .font(.system(size: 10, weight: .bold))
+                        .foregroundStyle(ThemeColor.textPrimary.opacity(0.6))
+                        .accessibilityHidden(true)
+                }
             }
-            .buttonStyle(OverArtPressStyle())
-            .disabled(!linked)
-            .qaIdentifier("qa.detail.watch")
-            .accessibilityLabel(Copy.Watch.watchOnSpoken(names))
-            .accessibilityHint(linked ? Copy.Accessibility.opensStreamingOptionsHint : "")
-            Text(Copy.Watch.attribution(availability.attribution))
-                .type(ThemeType.feedSmall)
-                .foregroundStyle(ThemeColor.textTertiary)
-                .lineLimit(1)
-                .minimumScaleFactor(0.85)
-                .shadow(.art)
+            .lineLimit(1)
+            .shadow(.art)
+            .frame(minHeight: Self.markSide)
+            .padding(.vertical, slop)
+            .contentShape(Rectangle())
+            .padding(.vertical, -slop)
         }
-        .multilineTextAlignment(.center)
+        .buttonStyle(OverArtPressStyle())
+        .disabled(!linked)
+        .qaIdentifier("qa.detail.watch")
+        .accessibilityLabel(Copy.Watch.watchOnSpoken(names))
+        .accessibilityHint(linked ? Copy.Accessibility.opensStreamingOptionsHint : "")
     }
 }
 

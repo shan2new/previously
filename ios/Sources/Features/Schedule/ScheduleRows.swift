@@ -23,9 +23,14 @@ import SwiftUI
 /// The agenda's columns, shared by the airing row and the empty day's row so the two line up. (Not
 /// on the row: it is generic over its trailing view, and a generic type may not carry statics.)
 enum AgendaMetrics {
-    /// The show's face: 56 since 9 Oct (was X's 40 — "the Schedule screen just feels poorly made",
-    /// owner; the rows had lost their art to a row of badges).
-    static var avatar: CGFloat { 56 }
+    /// The show's face is its POSTER, 44×66 (19 Oct: "schedule feels 90% stunning but looses out the
+    /// remaining 10%", owner). It was a 56-pt `ShowAvatar` — the iOS app icon's shape, 0.22
+    /// continuous corners, cut from a poster's busiest square — so the screen read as a column of
+    /// apps. Three faces were photographed on the owner's shows (that square, the poster, a 16:9
+    /// scene; `design/schedule-faces-2026-10-19/`) and the owner chose the poster: the Library
+    /// card's (`tilePoster`, titled where there is one), beside three lines of words.
+    static let poster = CGSize(width: 44, height: 66)
+    static let posterRadius: CGFloat = 6
     static var leading: CGFloat { ThemeMetrics.gutter - ThemeSpace.x1 }
     static var trailing: CGFloat { ThemeSpace.x3 }
     /// 8 above and below (was 6, 16 Oct): two 56-pt faces 12 pt apart read as one stack of tiles;
@@ -66,6 +71,10 @@ struct ScheduleAgendaRow<Trailing: View>: View {
     /// season ("Season 2"), so the caption keeps its time whatever the name's length (9 Oct: "Season
     /// 2 · Episode 2 · 7:30…" cut the one fact a schedule exists to give).
     var sub: String? = nil
+    /// The line's two facts apart — what airs ("Episode 9", "Episodes 7–9") and when ("7:30 PM", "in
+    /// 28 minutes", "All day") — for the poster's three stacked lines. Nil: the one `line`.
+    var episode: String? = nil
+    var when: String? = nil
     let state: AiringState
     /// What VoiceOver says for the row (the date column is hidden from it).
     let spoken: String
@@ -102,18 +111,105 @@ struct ScheduleAgendaRow<Trailing: View>: View {
         withAnimation(ThemeMotion.uiPoster) { resolvedHue = resolved }
     }
 
-    /// Date, face, words, ladder — four columns at four fixed x's.
+    /// Date, face, words, ladder — four columns at four fixed x's, the words centred on the face by
+    /// their ink.
+    @ViewBuilder
     private var inline: some View {
-        HStack(spacing: ThemeSpace.x3) {
-            dateColumn
+        if let episode {
+            posterInline(episode)
+        } else {
+            HStack(spacing: ThemeSpace.x3) {
+                dateColumn
+                Button(action: onOpen) {
+                    HStack(spacing: ThemeSpace.x3) {
+                        face
+                        // The lane runs to the ladder (a trailing `Spacer` took 12 pt of the name's
+                        // width for nothing), and the words centre on the face by their ink.
+                        words
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .modifier(ScheduleInkCentre(capHeight: titleCap))
+                    }
+                    .contentShape(Rectangle())
+                }
+                .buttonStyle(RowPressStyle())
+                .accessibilityLabel(spoken)
+                .accessibilityHint(Copy.Accessibility.opensTheShowHint)
+                trailing()
+            }
+        }
+    }
+
+    /// The air Outfit sets above the name's capitals (0.30 em, `ScheduleInkCentre`).
+    @ScaledMetric(relativeTo: .headline) private var titleAir: CGFloat = ScheduleTypeScale.title * 0.30
+
+    /// The date column's width (`ScheduleDateColumn`'s, capped the same way).
+    @ScaledMetric(relativeTo: .subheadline) private var dateScale: CGFloat = 1
+    private var dateWidth: CGFloat { min(38 * dateScale, 38 + 16) }
+
+    /// Beside a POSTER the row is THREE text lines, the date in them (19 Oct: "Why aren't
+    /// these horizontally aligned?… the last row is competing with the 2nd one", owner): the date
+    /// and the words were each centred on the poster on their own, so "MON" and "19" shared no line
+    /// with "Bleach" and "Episode 9". Now each line is a row on one baseline — the weekday with the
+    /// name, the numeral with the episode — and the poster stands in its column, its top edge on the
+    /// capitals' line. The third line, WHEN, is the weekday's small capitals ("7:30 PM", "ALL DAY", the
+    /// countdown in the accent): a third level under the episode, not a second one beside it.
+    private func posterInline(_ episode: String) -> some View {
+        let watched = state.isWatched
+        let poster = AgendaMetrics.poster
+        return HStack(spacing: ThemeSpace.x3) {
             Button(action: onOpen) {
-                HStack(spacing: ThemeSpace.x3) {
-                    face
-                    // The lane runs to the ladder (a trailing `Spacer` took 12 pt of the name's
-                    // width for nothing), and the words centre on the face by their ink.
-                    words
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        .modifier(ScheduleInkCentre(capHeight: titleCap))
+                VStack(alignment: .leading, spacing: ThemeSpace.x1) {
+                    posterLine(poster.width) {
+                        Text(date?.top ?? "")
+                            .type(ThemeType.scheduleCaps)
+                            .textCase(.uppercase)
+                            .foregroundStyle(isToday ? ThemeColor.accent : ThemeColor.textTertiary)
+                    } words: {
+                        Text(franchise.displayTitle)
+                            .type(ThemeType.scheduleTitle)
+                            .foregroundStyle(watched ? ThemeColor.textTertiary : ThemeColor.textPrimary)
+                            .lineLimit(2)
+                    }
+                    posterLine(poster.width) {
+                        // The numeral sits ON the episode's baseline without making its line any
+                        // taller: a 22-pt line pushed "Episode 9" a line's air away from the name.
+                        Text(verbatim: "0")
+                            .type(ThemeType.scheduleMeta)
+                            .hidden()
+                            .overlay(alignment: Alignment(horizontal: .center, vertical: .firstTextBaseline)) {
+                                Text(date?.numeral ?? "")
+                                    .type(ThemeType.scheduleDate)
+                                    .foregroundStyle(isToday ? ThemeColor.accent : ThemeColor.textSecondary)
+                                    .lineLimit(1)
+                                    .fixedSize()
+                            }
+                    } words: {
+                        Text([sub, episode].compactMap { $0 }.joined(separator: " \u{00B7} "))
+                            .type(ThemeType.scheduleMeta)
+                            .foregroundStyle(watched ? ThemeColor.textTertiary : ThemeColor.textSecondary)
+                            .lineLimit(2)
+                    }
+                    if let when {
+                        posterLine(poster.width) {
+                            Color.clear.frame(height: 0)
+                        } words: {
+                            Text(when)
+                                .type(ThemeType.scheduleCaps)
+                                .textCase(.uppercase)
+                                .foregroundStyle(when == decor.accentTail ? ThemeColor.accent : ThemeColor.textTertiary)
+                                .lineLimit(1)
+                        }
+                        .padding(.top, 2)
+                    }
+                }
+                .multilineTextAlignment(.leading)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                // ONE top line: the weekday's capitals, the poster's top edge and the name's
+                // capitals (Outfit sets 0.30 em of air above its capitals; the block gives it back).
+                .padding(.top, -titleAir)
+                .frame(minHeight: poster.height, alignment: .top)
+                .overlay(alignment: .topLeading) {
+                    face.padding(.leading, dateWidth + ThemeSpace.x3)
                 }
                 .contentShape(Rectangle())
             }
@@ -121,6 +217,19 @@ struct ScheduleAgendaRow<Trailing: View>: View {
             .accessibilityLabel(spoken)
             .accessibilityHint(Copy.Accessibility.opensTheShowHint)
             trailing()
+        }
+    }
+
+    /// One line of the poster row: the date's part, the poster's column, the words — on ONE baseline.
+    private func posterLine<D: View, W: View>(_ posterWidth: CGFloat, @ViewBuilder date: () -> D,
+                                              @ViewBuilder words: () -> W) -> some View {
+        HStack(alignment: .firstTextBaseline, spacing: ThemeSpace.x3) {
+            date()
+                .lineLimit(1)
+                .frame(width: dateWidth)
+            Color.clear.frame(width: posterWidth, height: 0)
+            words()
+                .frame(maxWidth: .infinity, alignment: .leading)
         }
     }
 
@@ -150,19 +259,18 @@ struct ScheduleAgendaRow<Trailing: View>: View {
         ScheduleDateColumn(weekday: date?.top, numeral: date?.numeral, isToday: isToday)
     }
 
-    /// The show as an ACCOUNT — the feed's rounded square (`ShowAvatar`; circles are people and
-    /// the story tray), so a show wears one face on every screen. A watched airing gives it up a
-    /// step, as the ladder's disc says it is spent.
+    /// The show's face, its poster (`faceArt`). A watched airing gives it up a step, as the ladder's
+    /// disc says it is spent.
     ///
     /// Lit: the face sits in a breath of its own colour — the palette colour as light under it,
     /// drawn by a canvas-filled copy of its shape (the shadow is the colour; the fill is the page,
     /// so a watched face's lowered opacity never shows the colour through it).
     private var face: some View {
-        ShowAvatar(franchise: franchise, size: AgendaMetrics.avatar)
+        faceArt
             .opacity(state.isWatched ? 0.55 : 1)
             .background {
                 if decor.hueURL != nil, let light = ScheduleHue.glow(hue) {
-                    ShowAvatar.shape(AgendaMetrics.avatar)
+                    RoundedRectangle(cornerRadius: AgendaMetrics.posterRadius, style: .continuous)
                         .fill(ThemeColor.canvas.shadow(.drop(
                             color: light.opacity(state.isWatched ? ScheduleWhisperMetrics.glowOpacityWatched
                                                                  : ScheduleWhisperMetrics.glowOpacity),
@@ -170,6 +278,18 @@ struct ScheduleAgendaRow<Trailing: View>: View {
                         .transition(.opacity)
                 }
             }
+    }
+
+    /// The show's poster, the Library card's (`tilePoster`, the titled one where there is one): at
+    /// 44 pt a billboard's textless pick is a dark field of nothing.
+    private var faceArt: some View {
+        let shape = RoundedRectangle(cornerRadius: AgendaMetrics.posterRadius, style: .continuous)
+        return RemoteImageView(url: franchise.tilePoster.url ?? franchise.portraitArt,
+                               contentMode: .fill, maxPixel: 200, alignment: .top, placeholderHidden: true)
+            .frame(width: AgendaMetrics.poster.width, height: AgendaMetrics.poster.height)
+            .background(ThemeColor.surfaceRaised)
+            .clipShape(shape)
+            .overlay(shape.strokeBorder(ThemeColor.posterEdge, lineWidth: FeedMetrics.hairline))
     }
 
     /// The name, then its line — and the part under the line where it must be named, at the line's
@@ -233,7 +353,7 @@ struct ScheduleEmptyDayRow: View {
     var body: some View {
         HStack(spacing: ThemeSpace.x3) {
             ScheduleDateColumn(weekday: weekday, numeral: numeral, isToday: isToday)
-            Color.clear.frame(width: AgendaMetrics.avatar, height: 1)
+            Color.clear.frame(width: AgendaMetrics.poster.width, height: 1)
             // The airing row's line, in the quietest ink: an absence, not a fact.
             Text(text)
                 .type(ThemeType.scheduleMeta)
@@ -241,7 +361,6 @@ struct ScheduleEmptyDayRow: View {
                 .modifier(ScheduleInkCentre(capHeight: metaCap))
             Spacer(minLength: 0)
         }
-        .frame(minHeight: AgendaMetrics.avatar)
         .padding(.leading, AgendaMetrics.leading)
         .padding(.trailing, AgendaMetrics.trailing)
         .padding(.vertical, AgendaMetrics.vertical)

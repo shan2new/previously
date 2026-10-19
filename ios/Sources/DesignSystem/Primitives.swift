@@ -1628,35 +1628,38 @@ struct HeroBadge: View {
     @State private var ring = false
     @State private var sheen = false
 
-    private var shape: RoundedRectangle { RoundedRectangle(cornerRadius: 4, style: .continuous) }
+    private var shape: RoundedRectangle { RoundedRectangle(cornerRadius: 3, style: .continuous) }
 
-    /// The NEWS family — a new episode, season or series — wears red; every other state amber.
-    private var isNews: Bool { text.lowercased().hasPrefix("new ") }
-    private var fill: Color { isNews ? ThemeColor.news : ThemeColor.accent }
-    private var fillDeep: Color { isNews ? ThemeColor.newsDeep : ThemeColor.accentPressed }
+    /// The NEWS family — something new, an announcement, an episode out now — wears Netflix's red;
+    /// every other state ("COMPLETE", "3 EPISODES LEFT", "TRENDING") is a quiet tag of light.
+    private var isNews: Bool {
+        let t = text.lowercased()
+        return t.hasPrefix("new ") || t.contains("announced") || t == "out now"
+    }
+    private var fill: Color { isNews ? ThemeColor.strip : ThemeColor.textPrimary.opacity(0.16) }
 
+    /// PRINTED, not lit (19 Oct: "this strip's design looks out of place with the App UX", owner,
+    /// of "SEASON 4 ANNOUNCED"): the tag wore the lit control material — a top-lit amber gradient, a
+    /// white rim, near-black capitals at 7×3 — and read as a glossy button beside the page's ivory
+    /// pill and glass. Now Home's NEW tag (`HomeNewTag`): one flat fill, white capitals, tight to
+    /// its words; red for news, a step of light for every other state.
     var body: some View {
         Text(text)
             .type(ThemeType.heroBadge)
             .textCase(.uppercase)
-            .foregroundStyle(isNews ? ThemeColor.onNews : ThemeColor.onAccent)
+            .foregroundStyle(.white)
             // Grows with the type: a fixed 20-pt strip let AX-XL capitals stand out of the tag
             // above and below it (review, 23 Sep). Two lines at the accessibility sizes, never a
             // truncated state.
             .lineLimit(2)
             .multilineTextAlignment(.center)
             .fixedSize(horizontal: false, vertical: true)
-            .padding(.horizontal, 7)
-            .padding(.vertical, 3)
-            .frame(minHeight: 20)
-            // A CHIP, not a swatch: the fill carries a top-lit gradient and a hairline rim, so
-            // the tag reads as a struck object at rest. This is where the prominence lives —
-            // motion cannot be the carrier, because motion has to stop (see `AttentionBeat`).
+            .padding(.horizontal, 5)
+            .padding(.vertical, 2)
+            .frame(minHeight: 18)
             .background {
-                shape.fill(isNews ? AnyShapeStyle(LinearGradient(colors: [fill, fillDeep],
-                                                                 startPoint: .top, endPoint: .bottom))
-                                  : AnyShapeStyle(ThemeGradient.accent))
-                .overlay(shape.strokeBorder(.white.opacity(0.28), lineWidth: 0.5))
+                shape.fill(fill)
+                    .overlay { if !isNews { shape.strokeBorder(ThemeColor.textPrimary.opacity(0.18), lineWidth: FeedMetrics.hairline) } }
             }
             // The sheen rides ON the tag, clipped to it: one light band crossing a metallic
             // surface. `plusLighter` over an opaque fill, so it brightens rather than washes.

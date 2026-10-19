@@ -209,6 +209,11 @@ extension ThemeType {
     static let feedDate = TypeToken(.text, .semibold, 18, .subheadline, monospacedDigits: true)
     /// A chart row's rank numeral (Discover's Trending).
     static let trendRank = TypeToken(.display, .semibold, 20, .title3, monospacedDigits: true)
+    /// A chart row's name and its facts — Schedule's row scale (17 · 14, `ScheduleTypeScale`), not
+    /// X's one-line 16/16 pair (19 Oct): set on three lines, "Airing now" and "Animation · Comedy"
+    /// were as big as "The Simpsons", three names to a row.
+    static let trendTitle = TypeToken(.title, .semibold, ScheduleTypeScale.title, .headline, tracking: -0.20)
+    static let trendMeta = TypeToken(.text, .regular, ScheduleTypeScale.meta, .subheadline, tracking: 0.10)
     /// A genre tile's name. SemiBold 17, not Bold 18: Outfit's Bold is rounder and heavier than
     /// SF's, and at 18 the names read chunky, like a template ("genre card copy text font needs
     /// rework, it's poorly built", owner, 26 Sep; four treatments compared on the real art).

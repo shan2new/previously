@@ -385,7 +385,7 @@ struct ShowAddCapsule: View {
         Button {
             addFromFeed(model, appModel: appModel, onOpenShow: onOpenShow)
         } label: {
-            Text(owned ? Copy.Search.added : Copy.Search.addAsks)
+            Text(owned ? Copy.Search.added : Copy.Search.add)
                 .type(ThemeType.feedSmall)
                 .fontWeight(.bold)
                 .foregroundStyle(owned ? ThemeColor.feedText : ThemeColor.onAccent)

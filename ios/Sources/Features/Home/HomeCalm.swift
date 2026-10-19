@@ -12,7 +12,7 @@ import SwiftUI
 //
 // What it is now: your shows first; the news as headlines (`NewsRow`), not pictures; ONE shelf for
 // you, last, headed by a short title with its reason under it; and the page fading out under both
-// bars (`HomeEdgeFade`) — the bars stay transparent, the ground shows through, and nothing reads under
+// bars (`HeaderEdgeFade`) — the bars stay transparent, the ground shows through, and nothing reads under
 // a glyph. Caught up, the state is one quiet line and YOUR next airings lead (`HomeComingUp`). Two
 // leads were photographed the same evening — that, and the state in one line over the news led by
 // one picture — and the owner chose COMING UP ("Coming up is better but needs refinement"). Its first
@@ -123,7 +123,7 @@ extension AppModel.ScheduleEntry {
 
     /// When it airs as a LABEL, for the lead card's strip (19 Oct: "remove at from tonight at 7:30PM
     /// and move it to the hero with a red strip like Netflix does", owner): the day and the clock,
-    /// no preposition — "Tonight 7:30 PM", "Tomorrow 7:30 PM", "Thursday 7:30 PM", "In 9 min"; a
+    /// no preposition — "Tonight 7:30 PM", "Tomorrow 7:30 PM", "Thursday 7:30 PM", "Airs in 9 minutes"; a
     /// date-only airing is its day alone. The same ladder as `homeWhen`, cut for a tag.
     func homeStrip(now: Int64) -> String {
         let f = franchise
@@ -152,27 +152,34 @@ extension AppModel.ScheduleEntry {
     }
 }
 
-/// Coming up's LEAD (19 Oct, "no clear lead", owner): the soonest airing as Recently aired's card —
-/// the show's scene gutter to gutter at 16:9 — so a caught-up Home opens on a picture of YOUR next
-/// show, as a Home with an episode waiting opens on that episode's. WHEN rides the picture on a red
-/// STRIP at its foot, Netflix's "New Episode" tag ("…move it to the hero with a red strip like
-/// Netflix does", owner): "Tonight 7:30 PM", centred, touching the edge, the show's logo centred
-/// over it and what airs between them ("The Episode info needs to be moved within the Hero card
-/// itself", owner) — nothing hangs under the card. No glow and no mark: nothing can be marked yet.
-struct HomeComingUpCard: View {
-    let entry: AppModel.ScheduleEntry
-    let now: Int64
+/// Home's LEAD card, one anatomy for what is OUT and what airs TODAY (19 Oct: "can we make this Hero
+/// card similar to the today upcoming one?", owner — a drop was a picture with a NEW tag and two
+/// lines hung under it, under a "Recently aired" title; today's airing was this): the show's scene
+/// in the gutters at 16:9, its logo centred, what to watch under it, and WHEN on Netflix's red STRIP
+/// at the foot ("…move it to the hero with a red strip like Netflix does", owner) — "Aired Saturday"
+/// for a drop, "Tonight 7:30 PM" for today's airing. Nothing hangs under the card and it carries no
+/// section title: the strip says what it is. A drop can be marked (`corner`); an airing cannot.
+struct HomeLeadCard<Corner: View>: View {
+    let franchise: Franchise
+    /// "Season 2 · Episode 3", "Episodes 22–24", "Episode 9", "Season 2 premiere".
+    let what: String
+    let strip: String
+    var width: CGFloat = HomeLeadCard.fullWidth
     let onOpen: () -> Void
+    @ViewBuilder var corner: () -> Corner
 
     @Environment(AppModel.self) private var appModel
 
-    private var f: Franchise { entry.franchise }
-    private var width: CGFloat { ThemeMetrics.windowWidth - 2 * ThemeMetrics.gutter }
+    /// Gutter to gutter: the card when it is the only one.
+    static var fullWidth: CGFloat { ThemeMetrics.windowWidth - 2 * ThemeMetrics.gutter }
+
+    private var f: Franchise { franchise }
     private var height: CGFloat { (width * 9 / 16).rounded() }
+    /// The logo keeps its share of the card on a shelf's narrower one.
+    private var logoHeight: CGFloat { max(32, (44 * width / Self.fullWidth).rounded()) }
 
     var body: some View {
         let shape = RoundedRectangle(cornerRadius: ThemeRadius.card, style: .continuous)
-        let strip = entry.homeStrip(now: now)
         Button(action: onOpen) {
             ZStack(alignment: .bottom) {
                 HomeShowScene(franchise: f, width: width, height: height)
@@ -181,11 +188,12 @@ struct HomeComingUpCard: View {
                                startPoint: .top, endPoint: .bottom)
                 VStack(spacing: 0) {
                     name
-                    Text(entry.homeWhat)
+                    Text(what)
                         .type(ThemeType.metadataEmphasis)
                         .foregroundStyle(.white.opacity(0.9))
                         .lineLimit(1)
                         .shadow(.art)
+                        .contentTransition(.numericText())
                         .padding(.top, ThemeSpace.x1)
                         .padding(.bottom, ThemeSpace.x2)
                     HomeAirStrip(text: strip)
@@ -197,16 +205,18 @@ struct HomeComingUpCard: View {
             .overlay(shape.strokeBorder(ThemeColor.posterEdge, lineWidth: 1))
         }
         .buttonStyle(OverArtPressStyle())
+        .overlay(alignment: .topTrailing) { corner() }
         .frame(width: width, alignment: .leading)
         .franchiseQuickActions(appModel.isInLibrary(f.id) ? f : nil, appModel: appModel)
-        .accessibilityLabel("\(f.displayTitle), \(entry.homeWhat), \(entry.homeWhen(now: now))")
+        .accessibilityElement(children: .contain)
+        .accessibilityLabel("\(f.displayTitle), \(what), \(strip)")
         .accessibilityHint(Copy.Accessibility.opensTheShowHint)
     }
 
     /// The show's logo on its scene, centred over the strip; the name in type where it has none.
     @ViewBuilder private var name: some View {
         if f.hasDrawableLogo, let logo = f.billboardLogo {
-            ArtworkLogo(name: .logo(logo), title: f.displayTitle, height: 44, alignment: .bottom)
+            ArtworkLogo(name: .logo(logo), title: f.displayTitle, height: logoHeight, alignment: .bottom)
                 .frame(maxWidth: width * 0.6)
         } else {
             Text(f.displayTitle)
@@ -220,21 +230,64 @@ struct HomeComingUpCard: View {
     }
 }
 
+/// The lead row as a FOCUS carousel (19 Oct: "the current hero could be larger here and as we slide
+/// to the next the next becomes bigger", owner): the card in front at full size and nearly the
+/// page's width, the next a step smaller beside it, and the step follows the finger
+/// (`.interactive`) — the card coming in grows as it arrives, the one leaving shrinks. A side card
+/// leans toward the one in front (scaled from its near edge), so the peek stays a peek. A render
+/// pass, never a body re-run. Reduce Motion keeps every card its size and only dims the sides.
+struct HomeLeadFocus: ViewModifier {
+    let reduceMotion: Bool
+
+    /// The card in front: most of the page, with the next one's edge in view.
+    static var cardWidth: CGFloat { (HomeLeadCard<EmptyView>.fullWidth * 0.88).rounded() }
+    /// A side card's size against the one in front.
+    static let sideScale: CGFloat = 0.86
+
+    func body(content: Content) -> some View {
+        content.scrollTransition(.interactive, axis: .horizontal) { card, phase in
+            let t = min(1, abs(phase.value))
+            return card
+                .scaleEffect(reduceMotion ? 1 : 1 - (1 - Self.sideScale) * t,
+                             anchor: phase.value > 0 ? .leading : .trailing)
+                .opacity(1 - 0.3 * t)
+        }
+    }
+}
+
+/// Today's airing as the lead card (`HomeLeadCard`): nothing to mark yet.
+struct HomeComingUpCard: View {
+    let entry: AppModel.ScheduleEntry
+    let now: Int64
+    var width: CGFloat = HomeLeadCard<EmptyView>.fullWidth
+    let onOpen: () -> Void
+
+    var body: some View {
+        HomeLeadCard(franchise: entry.franchise, what: entry.homeWhat, strip: entry.homeStrip(now: now),
+                     width: width, onOpen: onOpen) { EmptyView() }
+    }
+}
+
 /// Netflix's tag on a picture's foot: a red strip, its top corners rounded, touching the edge, the
-/// words in white — here, when the next episode airs.
+/// words in white — when the episode aired, or when it airs. The tags' capitals (`heroBadge`, 11-pt
+/// bold, the NEW tag's and the show page's badge's), not 13-pt words (19 Oct: "Aired Saturday strip
+/// needs to be smaller so that it doesn't compete with the Hero AND still is catchy enough",
+/// owner): smaller, and the red and the capitals keep it the first thing the eye finds.
 struct HomeAirStrip: View {
     let text: String
 
     var body: some View {
         Text(text)
-            .type(ThemeType.stripLabel)
+            .type(ThemeType.heroBadge)
+            .textCase(.uppercase)
             .foregroundStyle(.white)
             .lineLimit(1)
             // Tight to its words (third pass: "the Tonight strip has too much padding", owner).
-            .padding(.horizontal, ThemeSpace.x2)
-            .padding(.vertical, 3)
+            .padding(.horizontal, 6)
+            .padding(.top, 3)
+            .padding(.bottom, 2)
             .background(ThemeColor.strip,
-                        in: UnevenRoundedRectangle(topLeadingRadius: 4, topTrailingRadius: 4, style: .continuous))
+                        in: UnevenRoundedRectangle(topLeadingRadius: 3, topTrailingRadius: 3, style: .continuous))
     }
 }
 
@@ -263,51 +316,3 @@ struct HomeShowScene: View {
     }
 }
 
-/// The page fades out under Home's HEADER (19 Oct). The header is transparent (17 Oct: "make the top
-/// and bottom bars transparent please! It's heavily distracting otherwise!", owner), so a section
-/// title scrolled under its disc and bell read straight through them. Nothing is painted over the
-/// ground: the CONTENT goes, and the viewer's ground (`AppGround`) shows under the glyphs. Gone just
-/// short of a glyph's ink, whole a ramp below the row; it follows the header as it slides away.
-/// (It faded under the tab bar too until the same evening, when the bar became a floating capsule
-/// with its own ground and the page began to run past it.) Only this view reads the scroll
-/// (`HomeChrome.awayFraction`); Reduce Transparency keeps its opaque bands and draws no fade.
-struct HomeEdgeFade: View {
-    let chrome: HomeChrome
-
-    /// From gone to whole.
-    static let ramp: CGFloat = 28
-
-    var body: some View {
-        GeometryReader { g in
-            let frame = g.frame(in: .global)
-            let h = max(1, frame.height)
-            let away = min(1, max(0, chrome.awayFraction))
-            // The header's row slides up by what has gone; the status band always stays.
-            let topGone = ThemeMetrics.topSafeInset + FeedMetrics.headerRow * (1 - away) - 4 - frame.minY
-            let stops: [CGFloat] = [topGone, topGone + Self.ramp]
-            let at = stops.map { min(1, max(0, $0 / h)) }
-            LinearGradient(stops: [
-                .init(color: .clear, location: at[0]),
-                .init(color: .black, location: max(at[0], at[1])),
-            ], startPoint: .top, endPoint: .bottom)
-        }
-        .allowsHitTesting(false)
-    }
-}
-
-/// Applies `HomeEdgeFade` to Home's scroll view in the calm language. A modifier, so the mask comes
-/// and goes only with the language or Reduce Transparency, never with a scroll.
-struct HomeEdgeFadeModifier: ViewModifier {
-    let chrome: HomeChrome
-    let enabled: Bool
-
-    @Environment(\.accessibilityReduceTransparency) private var reduceTransparency
-
-    func body(content: Content) -> some View {
-        if enabled && !reduceTransparency {
-            content.mask { HomeEdgeFade(chrome: chrome).ignoresSafeArea() }
-        } else {
-            content
-        }
-    }
-}

@@ -917,7 +917,7 @@ struct HomeUpNextTile: View {
         .overlay(alignment: .topLeading) {
             if item.fresh > 0 {
                 HomeNewTag(text: Copy.Stories.ringTag(item.fresh))
-                    .padding(ThemeSpace.x2)
+                    .padding(HomeNewTag.inset)
                     .allowsHitTesting(false)
             }
         }
@@ -957,20 +957,27 @@ struct HomeMarkDisc: View {
     }
 }
 
-/// The NEW tag on a fresh drop's art — the episode list's tag (`onAccent` on `accent`): amber is
-/// STATE here, never an action.
+/// The NEW tag on a fresh drop's art: a flat tag in Netflix's red, white capitals — the red of
+/// Home's air strip (`HomeAirStrip`) and of the NEW family of `HeroBadge` (19 Oct: "The new strip is
+/// poorly built", owner). It wore the lit control material (`ThemeGradient.accent`, a top-lit amber)
+/// with the eyebrow's 12-pt caps in near-black, so a label read as a glossy button. A tag is printed,
+/// not lit: one fill, no gradient, no rim, tight to its word.
 struct HomeNewTag: View {
     let text: String
 
+    /// Inset from the card's corner, clear of its curve.
+    static let inset: CGFloat = ThemeSpace.x3
+
     var body: some View {
         Text(text)
-            .type(ThemeType.feedEyebrow)
-            .foregroundStyle(ThemeColor.onAccent)
+            .type(ThemeType.heroBadge)
+            .textCase(.uppercase)
+            .foregroundStyle(.white)
             .lineLimit(1)
             .fixedSize()
-            .padding(.horizontal, 6)
-            .padding(.vertical, 3)
-            .background(ThemeGradient.accent, in: RoundedRectangle(cornerRadius: 4, style: .continuous))
+            .padding(.horizontal, 5)
+            .padding(.vertical, 2)
+            .background(ThemeColor.strip, in: RoundedRectangle(cornerRadius: 3, style: .continuous))
             .accessibilityHidden(true)
     }
 }

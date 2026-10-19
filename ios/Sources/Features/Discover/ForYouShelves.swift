@@ -15,16 +15,22 @@ import SwiftUI
 // MARK: - Grouping
 
 /// The recommendations grouped by the show of yours they come from (the reason's first seed), in
-/// the server's order: a group sits where its best title ranks. Seeds with one title each fold into
-/// "More for you" at the end.
+/// the server's order: a group sits where its best title ranks. A shelf is THREE titles or more
+/// (19 Oct: "Suggestions should be atleast 3 right?", owner — a shelf of two left a third of the
+/// screen empty beside it, on Discover and on Home): a seed with fewer folds into "More for you" at
+/// the end, and where that is short too it takes the last titles of a group that can spare them,
+/// else it is not drawn — a shelf under three only when it is all there is.
 struct ForYouGroup: Identifiable {
     let seed: RecommendationItem.Seed?
     let kind: RecommendationItem.Reason.Kind
     var items: [RecommendationItem]
     var id: String { seed?.franchiseId ?? "more" }
 
+    /// The fewest titles a suggestion shelf is drawn with.
+    static let shelfMinimum = 3
+
     static func build(_ recs: [RecommendationItem], reason: (RecommendationItem) -> RecommendationItem.Reason,
-                      minimum: Int = 2, limit: Int = 6) -> [ForYouGroup] {
+                      minimum: Int = shelfMinimum, limit: Int = 6) -> [ForYouGroup] {
         var order: [String] = []
         var groups: [String: ForYouGroup] = [:]
         var rest: [RecommendationItem] = []
@@ -42,7 +48,20 @@ struct ForYouGroup: Identifiable {
             guard let g = groups[id] else { continue }
             if g.items.count >= minimum, out.count < limit { out.append(g) } else { rest.append(contentsOf: g.items) }
         }
-        if !rest.isEmpty { out.append(ForYouGroup(seed: nil, kind: .consensus, items: rest)) }
+        // "More for you" short of the minimum borrows from the fullest group that stays at the
+        // minimum without its last title (every one of them is still for you), then sits in the
+        // server's order again.
+        if !rest.isEmpty, rest.count < minimum, !out.isEmpty {
+            while rest.count < minimum,
+                  let donor = out.indices.filter({ out[$0].items.count > minimum }).max(by: { out[$0].items.count < out[$1].items.count }) {
+                rest.append(out[donor].items.removeLast())
+            }
+            let rank = Dictionary(recs.enumerated().map { ($1.key, $0) }, uniquingKeysWith: { a, _ in a })
+            rest.sort { (rank[$0.key] ?? .max) < (rank[$1.key] ?? .max) }
+        }
+        if !rest.isEmpty, rest.count >= minimum || out.isEmpty {
+            out.append(ForYouGroup(seed: nil, kind: .consensus, items: rest))
+        }
         return out
     }
 
@@ -117,7 +136,7 @@ struct ForYouShelves: View {
                 }
                 .rootArrival(1 + i)
             }
-            if !trend.isEmpty {
+            if trend.count >= ForYouGroup.shelfMinimum {
                 shelf(Copy.Search.trendingNow) {
                     ForEach(trend) { s in
                         TrendingShelfTile(item: s, spoken: spoken(s), add: trendAdd(s)) { onOpenShow(s) }
@@ -155,7 +174,7 @@ struct ForYouShelves: View {
 
 /// Netflix's hero card: the poster whole to the card's edges, and at its foot the show's own logo
 /// (its name in type where it has none; nothing where the poster already prints it), what it is,
-/// why it is here, then "Add to Planned" and "Details" side by side.
+/// then "Add to Planned" and "Details" side by side. Why it is here is VoiceOver's alone (19 Oct).
 struct ForYouTopPick: View {
     let item: RecommendationItem
     let reason: RecommendationItem.Reason
@@ -191,15 +210,13 @@ struct ForYouTopPick: View {
             .accessibilityHint(Copy.Accessibility.opensTheShowHint)
             VStack(spacing: ThemeSpace.x2) {
                 name
+                // What it is, and no more: the reason line under it ("Like The Witcher and 10
+                // more of yours") is gone (19 Oct: "it makes it appear busy for no good reason",
+                // owner) — the card is FOR YOU by where it sits; VoiceOver still says why.
                 Text(item.factsLine)
                     .type(ThemeType.metadata)
                     .foregroundStyle(ThemeColor.textPrimary.opacity(0.86))
                     .lineLimit(1)
-                Text(Copy.ForYou.reason(reason))
-                    .type(ThemeType.caption)
-                    .foregroundStyle(ThemeColor.textPrimary.opacity(0.7))
-                    .multilineTextAlignment(.center)
-                    .lineLimit(2)
                 buttons
                     .padding(.top, ThemeSpace.x2)
             }
@@ -235,31 +252,59 @@ struct ForYouTopPick: View {
         }
     }
 
+    /// Two PILLS that hug their words, centred under the copy — the show page's action row (19 Oct:
+    /// "The button sizing on the Hero suggestions is way too large", owner). They were two halves
+    /// of the card's width at 44 pt in 17-pt SemiBold: the heaviest objects on the screen, louder
+    /// than the show they were selling. Now the Follow pill's anatomy (`ShowFollowPillLabel`): 34
+    /// tall in a 44-pt target, 15-pt SemiBold, the add on ivory and Details a quiet glass step.
+    /// Side by side; stacked where the words no longer fit across the card (the accessibility sizes).
     private var buttons: some View {
-        let owned = appModel.isOwned(item)
-        return HStack(spacing: ThemeSpace.x3) {
-            Button { if !owned { appModel.addRecommendation(item) } } label: {
-                AppGlyphLabel(owned ? Copy.ForYou.addedToPlanned : Copy.ForYou.addToPlanned, systemName: owned ? "checkmark" : "plus")
-                    .type(ThemeType.bodyEmphasis)
-                    .foregroundStyle(owned ? ThemeColor.textPrimary : ThemeColor.canvas)
-                    .lineLimit(1)
-                    .frame(maxWidth: .infinity, minHeight: 44)
-                    .background(owned ? AnyShapeStyle(ThemeColor.textPrimary.opacity(0.2)) : AnyShapeStyle(ThemeGradient.ivory), in: Capsule())
-                    .contentShape(Capsule())
-            }
-            .buttonStyle(FeedIconPressStyle())
-            .accessibilityHint(owned ? "" : Copy.ForYou.addHint)
-            Button(action: onOpen) {
-                AppGlyphLabel(Copy.ForYou.details, systemName: "info.circle")
-                    .type(ThemeType.bodyEmphasis)
-                    .foregroundStyle(ThemeColor.textPrimary)
-                    .lineLimit(1)
-                    .frame(maxWidth: .infinity, minHeight: 44)
-                    .background(ThemeColor.textPrimary.opacity(0.2), in: Capsule())
-                    .contentShape(Capsule())
-            }
-            .buttonStyle(FeedIconPressStyle())
+        ViewThatFits(in: .horizontal) {
+            HStack(spacing: ThemeSpace.x2) { pills }
+            VStack(spacing: ThemeSpace.x1) { pills }
         }
+    }
+
+    @ViewBuilder
+    private var pills: some View {
+        let owned = appModel.isOwned(item)
+        Button { if !owned { appModel.addRecommendation(item) } } label: {
+            TopPickPill(text: owned ? Copy.ForYou.addedToPlanned : Copy.ForYou.addToPlanned,
+                        glyph: owned ? "checkmark" : "plus", filled: !owned)
+        }
+        .buttonStyle(FeedIconPressStyle())
+        .accessibilityHint(owned ? "" : Copy.ForYou.addHint)
+        Button(action: onOpen) {
+            TopPickPill(text: Copy.ForYou.details, glyph: "info.circle", filled: false)
+        }
+        .buttonStyle(FeedIconPressStyle())
+    }
+}
+
+/// One of the top pick's two pills: the glyph a step under the word, ivory when it is the offer,
+/// else a quiet step of light over the art with a one-pixel crown.
+private struct TopPickPill: View {
+    let text: String
+    let glyph: String
+    let filled: Bool
+
+    var body: some View {
+        HStack(spacing: 6) {
+            AppGlyph(systemName: glyph, decorative: true)
+                .font(.system(size: 13, weight: .bold))
+            Text(text)
+                .type(ThemeType.feedNoteTitle)
+        }
+        .lineLimit(1)
+        .fixedSize()
+        .foregroundStyle(filled ? ThemeColor.canvas : ThemeColor.textPrimary)
+        .padding(.horizontal, ThemeSpace.x4)
+        .frame(height: 34)
+        .background(filled ? AnyShapeStyle(ThemeGradient.ivory) : AnyShapeStyle(ThemeColor.textPrimary.opacity(0.16)),
+                    in: Capsule())
+        .overlay(Capsule().strokeBorder(filled ? .clear : ThemeColor.textPrimary.opacity(0.18), lineWidth: FeedMetrics.hairline))
+        .frame(minHeight: 44)
+        .contentShape(Capsule())
     }
 }
 

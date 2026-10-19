@@ -40,6 +40,9 @@ struct FranchiseDetailView: View {
     @State private var heroLightness: Double?
     /// The trailer card → stage zoom (`VideoSheet`).
     @Namespace private var trailerZoom
+    /// The cast member whose photo is open (`PersonPhotoViewer`), zoomed out of their disc.
+    @State private var castPhoto: CatalogPerson?
+    @Namespace private var castZoom
 
     // Mark timeline (identical to Today)
     @State private var pinned: Franchise?
@@ -186,7 +189,7 @@ struct FranchiseDetailView: View {
                     if Direction.current == .profile {
                         ShowTabsRow(selected: $showTab)
                     } else {
-                        ShowIndexRow(sections: sectionOrder(f), current: indexState.current, onSelect: jump)
+                        ShowIndexRow(sections: indexSections(f), current: indexState.current, onSelect: jump)
                     }
                 }
                 .padding(.top, Self.pinTop)
@@ -275,6 +278,10 @@ struct FranchiseDetailView: View {
                               onClosed: { trailers.fullScreenClosed(playback) })
                 .navigationTransition(.zoom(sourceID: playback.key, in: trailerZoom))
                 .perfScreen("Trailer")
+        }
+        .fullScreenCover(item: $castPhoto) { person in
+            PersonPhotoViewer(person: person)
+                .navigationTransition(.zoom(sourceID: person.id, in: castZoom))
         }
         // Nothing plays under a push or in the background.
         .onAppear { onScreen = true }
@@ -1492,7 +1499,15 @@ struct FranchiseDetailView: View {
         if !people.isEmpty {
             DetailShelf(title: Copy.Heading.castAndCrew, subheader: true,
                         leading: ThemeMetrics.gutter - PersonCard.columnInset) {
-                ForEach(people) { PersonCard(person: $0).frame(maxHeight: .infinity, alignment: .top) }
+                ForEach(people) { person in
+                    // A tap opens the photo, zoomed (19 Oct); a person with no photo is not a control.
+                    Button { castPhoto = person } label: {
+                        PersonCard(person: person, zoom: castZoom)
+                    }
+                    .buttonStyle(OverArtPressStyle())
+                    .disabled(person.image == nil)
+                    .frame(maxHeight: .infinity, alignment: .top)
+                }
             }
             .id("anchor-people")
         }
@@ -2844,6 +2859,13 @@ extension FranchiseDetailView {
         return inLibrary ? [.episodes] + media + [.about, .posts] : media + [.about, .episodes, .posts]
     }
 
+    /// The sections the INDEX names (19 Oct: "Posts & Similar doesn't deserve it's own tabs",
+    /// owner): Episodes, About, Trailers. Posts and Similar stay on the page, under their own
+    /// headers, below them; scrolled into them, the index keeps the last section it names.
+    func indexSections(_ f: Franchise) -> [ShowTab] {
+        sectionOrder(f).filter { $0 != .posts && $0 != .similar }
+    }
+
     static func sectionAnchor(_ section: ShowTab) -> String { "section-\(section)" }
 
     func jump(_ section: ShowTab) {
@@ -3021,7 +3043,7 @@ extension FranchiseDetailView {
 
     /// The index in the page; a copy pins under the bar once this one reaches it (`tabsPinned`).
     private func stageIndex(_ f: Franchise) -> some View {
-        ShowIndexRow(sections: sectionOrder(f), current: indexState.current, onSelect: jump)
+        ShowIndexRow(sections: indexSections(f), current: indexState.current, onSelect: jump)
             .opacity(tabsPinned ? 0 : 1)
             .background(alignment: .bottom) {
                 Color.clear
@@ -3037,6 +3059,7 @@ extension FranchiseDetailView {
 
     private func stageSections(_ f: Franchise) -> some View {
         let order = sectionOrder(f)
+        let indexed = indexSections(f)
         // A section is the one in view once its top is within a chapter's air of the pinned index
         // — the landing puts it a hair under the row, and a tighter line left the underline on the
         // section before (the About capture read "Trailers").
@@ -3069,14 +3092,30 @@ extension FranchiseDetailView {
                         }
                 }
                 // Which section is in view: the probe writes the index's one fact, on change only.
+                // Only the sections the index names are tracked.
                 .onGeometryChange(for: CGFloat.self) { $0.frame(in: .global).minY } action: { top in
-                    indexState.track(section, top: top, threshold: threshold)
+                    if indexed.contains(section) { indexState.track(section, top: top, threshold: threshold) }
                 }
             }
+            watchCredit
         }
         .padding(.top, ThemeSpace.x4)
-        .onAppear { indexState.reset(order: order) }
-        .onChange(of: order) { _, next in indexState.reset(order: next) }
+        .onAppear { indexState.reset(order: indexed) }
+        .onChange(of: indexed) { _, next in indexState.reset(order: next) }
+    }
+
+    /// Where to watch's data credit, at the page's FOOT (19 Oct): the provider list is TMDB's
+    /// JustWatch partnership, whose terms ask for the credit (`docs/api-contract.md`), but under the
+    /// lockup's watch line it was a second line of grey in the one place a viewer looks. Drawn only
+    /// when the line is.
+    @ViewBuilder
+    private var watchCredit: some View {
+        if let availability = Self.streamable(providers) {
+            Text(Copy.Watch.attribution(availability.attribution))
+                .type(ThemeType.feedSmall)
+                .foregroundStyle(ThemeColor.textTertiary)
+                .padding(.horizontal, ThemeMetrics.gutter)
+        }
     }
 
     @ViewBuilder

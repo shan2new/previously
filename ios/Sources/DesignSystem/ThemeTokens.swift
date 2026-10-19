@@ -679,8 +679,6 @@ extension ThemeType {
     /// Home's headlines (19 Oct, "News too loud", owner): a step smaller and lighter than a show's
     /// name, so the news never outweighs your own shows on the page.
     static let newsHeadlineQuiet = TypeToken(.headline, .medium, 15, .subheadline, tracking: -0.10)
-    /// The words on `HomeAirStrip`: a title's cut at a tag's size.
-    static let stripLabel = TypeToken(.title, .semibold, 13, .footnote, tracking: 0)
     /// Home's caught-up moment (`HomeCaughtUp`): the screen's one line, set between a section's
     /// title and the stage's.
     static let caughtUpTitle = TypeToken(.display, .semibold, 24, .title2, tracking: -0.40)

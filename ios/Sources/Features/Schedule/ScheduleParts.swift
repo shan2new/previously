@@ -487,11 +487,12 @@ struct ScheduleMonthGrid: View {
                         .minimumScaleFactor(0.6)
                 }
                 .frame(width: discSize, height: discSize)
-                // The day's content: amber while something on it is still to come or still to
-                // watch, quiet once it is spent, nothing at all where there is none.
+                // The day's content: ink while something on it is still to come or still to
+                // watch, quiet once it is spent, nothing at all where there is none — the strip's
+                // dots (19 Oct: amber is today's and the countdown's alone).
                 Circle()
                     .fill(n == 0 ? .clear
-                          : (live.contains(offset) ? ThemeColor.accent : ThemeColor.textTertiary))
+                          : (live.contains(offset) ? ThemeColor.textSecondary : ThemeColor.textTertiary.opacity(0.6)))
                     .frame(width: 6, height: 6)
             }
             .frame(maxWidth: .infinity)
@@ -642,10 +643,12 @@ struct ScheduleWeekStrip: View {
             onPick(offset)
         } label: {
             VStack(spacing: 4) {
+                // Today's letter in ink, not amber: the disc under it already says today (19 Oct —
+                // the strip spent amber four times in the top fifth of the screen).
                 Text(Formatting.weekdayLetter(column))
                     .type(ThemeType.scheduleCaps)
                     .textCase(.uppercase)
-                    .foregroundStyle(isToday ? ThemeColor.accent : ThemeColor.textTertiary)
+                    .foregroundStyle(isToday ? ThemeColor.textPrimary : ThemeColor.textTertiary)
                 ZStack {
                     if isSelected {
                         Circle().fill(isToday ? ThemeColor.accent : ThemeColor.textPrimary)
@@ -658,8 +661,10 @@ struct ScheduleWeekStrip: View {
                 }
                 .frame(width: disc, height: disc)
                 .animation(ThemeMotion.pick(ThemeMotion.uiMicro, reduceMotion: reduceMotion), value: isSelected)
+                // Content, not state: ink while something on it is to come or to watch, quieter
+                // once spent. Amber is today's disc and the countdown's alone.
                 Circle()
-                    .fill(n == 0 ? .clear : (live.contains(offset) ? ThemeColor.accent : ThemeColor.textTertiary))
+                    .fill(n == 0 ? .clear : (live.contains(offset) ? ThemeColor.textSecondary : ThemeColor.textTertiary.opacity(0.6)))
                     .frame(width: 5, height: 5)
             }
             .frame(maxWidth: .infinity)

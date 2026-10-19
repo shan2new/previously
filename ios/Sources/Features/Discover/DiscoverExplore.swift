@@ -252,7 +252,9 @@ struct DiscoverExplore: View {
             .frame(height: FeedMetrics.headerRow)
             .barInk()
             ExploreTabs(selected: section, progress: progress) { next in
-                if next == section {
+                // The page the pager SHOWS, not the one last asked for: the two part when a change
+                // is cut short (`settlePager`).
+                if next == shownSection {
                     chrome.reveal()
                     withAnimation(ThemeMotion.pick(ThemeMotion.uiSnappy, reduceMotion: reduceMotion)) {
                         proxies[next]?.scrollTo(Self.top, anchor: .top)
@@ -329,7 +331,31 @@ struct DiscoverExplore: View {
         .scrollTargetBehavior(.paging)
         .scrollPosition(id: $pagerSection)
         .scrollIndicators(.hidden)
+        .onScrollPhaseChange { _, phase in
+            if phase == .idle { settlePager() }
+        }
         .ignoresSafeArea(.container, edges: .vertical)
+        // The pages go out under the transparent header and the status band (19 Oct): settled with
+        // the header back, Genres' tiles sat under the field and the tabs, and a shelf's title ran
+        // through the clock. The ramp is short — every page's first content starts 12 pt or more
+        // under the header's foot, so at rest nothing is faded.
+        .modifier(HeaderEdgeFadeModifier(chrome: chrome, header: DiscoverHeader.height, ramp: 16))
+    }
+
+    /// The page the pager is on, read from where it actually stands.
+    private var shownSection: DiscoverSection {
+        let all = DiscoverSection.allCases
+        return all[min(max(Int(progress.value.rounded()), 0), all.count - 1)]
+    }
+
+    /// At rest the pager's position IS the selection (19 Oct). A tab tap sets `pagerSection` and the
+    /// pager animates there; a scroll that began before it landed stopped it a page short with
+    /// `pagerSection` still on the target — so that tab's next tap changed nothing (the binding
+    /// already held it) and read as "same tab", scrolling a page nobody could see. Every tab was
+    /// dead until another was tapped first.
+    private func settlePager() {
+        let shown = shownSection
+        if pagerSection != shown { pagerSection = shown }
     }
 
     /// One page: its own list, its own place, its own pull — under the header's room.
@@ -561,18 +587,18 @@ private struct TrendRow: View {
                             // Three lines: anime titles run long, and a chart that cuts the
                             // name it ranks has not said what is trending.
                             Text(item.title)
-                                .type(ThemeType.feedName)
+                                .type(ThemeType.trendTitle)
                                 .foregroundStyle(ThemeColor.feedText)
                                 .lineLimit(3)
                                 .multilineTextAlignment(.leading)
                                 .fixedSize(horizontal: false, vertical: true)
                             if let now = facts.now {
                                 Text(now)
-                                    .type(ThemeType.feedMeta)
+                                    .type(ThemeType.trendMeta)
                                     .foregroundStyle(facts.nowLeads ? ThemeColor.accent : ThemeColor.feedSecondary)
                                     .lineLimit(1)
                             }
-                            FactLine(facts: facts.what, token: ThemeType.feedMeta, tint: ThemeColor.feedSecondary)
+                            FactLine(facts: facts.what, token: ThemeType.trendMeta, tint: ThemeColor.feedSecondary)
                         }
                         .frame(maxWidth: .infinity, alignment: .leading)
                     }
