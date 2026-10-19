@@ -82,3 +82,24 @@ open first; it finished before this one started.
 - Not verified: a physical device; the Liquid Glass bar and fields on iOS 18 (the material
   fallback) and under Reduce Transparency; an account photo in the header glyph (the sim's
   account has none). Known gap: on a day with no news, the News page has no door.
+
+## Builds 20 and 21 — the late evening
+
+The owner went screen by screen on the simulator (decisions in CLAUDE.md, captures in
+`design/schedule-faces-2026-10-19/`, `design/profile-2026-10-19/`, `design/library-2026-10-19/`):
+
+- **Build 20** (commit `95e990f`): Discover (hugging top-pick pills, "Add" not "Add…", chart type
+  scale, header fade, a dead-tab pager bug, three-title shelves); Home (a focus carousel of drops
+  and today's airing, "Your next binge", a flat red NEW tag); the show page (a three-section index,
+  a compact watch line with the JustWatch credit at the foot, flat badges, zoomed cast photos, the
+  NOS4A2 plate logo); Schedule (the poster face with three baseline-aligned lines, week eyebrows,
+  calmer amber, "in 36 minutes", "All day", title-menu filters); Profile rebuilt with a wall of
+  your shows. **Uploaded** from the Organizer: "Previously 1.0 (20) uploaded".
+- **Build 21** (commit `9cd643b`): the Library rebuilt as one screen — a Now-watching carousel and
+  three fanned stacks of your shelves. Release archive 1.0 (21), widget 21, `APIBaseURL`
+  https://anime.cognipin.com, a `pk_live_` Clerk key. **Uploaded** 19 Oct ~20:40 IST from the
+  Organizer: "Previously 1.0 (21) uploaded".
+
+- Not yet confirmed: App Store Connect's processing of 20 and 21, and either in TestFlight.
+- Not verified: a physical device; both builds were checked on the iOS 27 simulator only.
+- Not pushed: `main` is ahead of `origin/main` by these commits.
