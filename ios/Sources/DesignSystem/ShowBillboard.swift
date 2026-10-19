@@ -144,6 +144,7 @@ struct ShowBillboard<Lockup: View>: View {
     /// The picture is on screen (the launch waits for this). Its arrival — into focus, then the
     /// logo, then the words — plays once the curtain is up (`stage`).
     private func artLoaded() {
+        PerfProbe.mark("billboard-art")
         if reportsChrome { onArtLoaded?() }
         if !artIn { artIn = true }
     }

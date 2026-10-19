@@ -239,6 +239,17 @@ enum Copy {
         /// grows where it is, twelve rows a tap, and nothing is pushed (6 Sep).
         static let showEarlierEpisodes = "Show earlier episodes"
         static let showMoreEpisodes = "Show more episodes"
+        /// The show page's folded list (20 Oct): the door under the window names what it opens.
+        static func showMoreEpisodes(_ n: Int) -> String {
+            n == 1 ? "Show 1 more episode" : "Show \(n) more episodes"
+        }
+        /// The folded history row: "Episodes 1–7 watched", "All 24 episodes watched".
+        static func episodesWatched(_ a: Int, _ b: Int) -> String {
+            a == b ? "\(Copy.episode(a)) watched" : "\(Copy.episodeRange(a, b)) watched"
+        }
+        static func allEpisodesWatched(_ n: Int) -> String {
+            n == 1 ? "\(Copy.episode(1)) watched" : "All \(Copy.episodes(n)) watched"
+        }
         static func markAllUnwatched(_ n: Int) -> String { "Mark all \(Copy.episodes(n)) as unwatched\u{2026}" }
         static let markCaughtUp = "Mark as caught up"
         /// A Planned show whose every released episode is marked (3 Body Problem, Season 2 "late
@@ -782,6 +793,8 @@ enum Copy {
         /// The episode row's tap opens the row in place — it never marks (6 Sep).
         static let showsEpisodeDetails = "Shows episode details"
         static let hidesEpisodeDetails = "Hides episode details"
+        /// The folded history row (20 Oct): a tap lays its episodes out in place.
+        static let showsTheseEpisodes = "Shows these episodes"
         static let retryHint = "Tries the request again"
         static let changeStatus = "Change status"
         static let playsTrailerHint = "Plays the video"

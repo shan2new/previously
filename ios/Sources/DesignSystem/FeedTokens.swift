@@ -218,6 +218,9 @@ extension ThemeType {
     /// SF's, and at 18 the names read chunky, like a template ("genre card copy text font needs
     /// rework, it's poorly built", owner, 26 Sep; four treatments compared on the real art).
     static let genreName = TypeToken(.display, .semibold, 17, .headline, tracking: -0.15)
+    /// A genre on a show's About (`ShowGenreCard`, 20 Oct): the tile's name a step down, for a
+    /// card under half Discover's width.
+    static let genreCardName = TypeToken(.display, .semibold, 15, .subheadline, tracking: -0.1)
     /// A show page's name — X's profile name, a step above the page title.
     static let feedProfileName = TypeToken(.display, .bold, 22, .title2, tracking: -0.35)
     /// X's page title beside its back arrow ("Post").

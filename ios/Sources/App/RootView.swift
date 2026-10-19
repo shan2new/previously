@@ -695,6 +695,11 @@ private extension View {
                     case .recommendations:
                         RecommendationsView { id in push(FranchiseDetailView.DetailPush.detail(franchiseId: id)) }
                             .perfScreen("ForYou")
+                    case .genre(let key, let name):
+                        // A genre from a show's About: Discover's own genre page, in the viewer's scope.
+                        GenreResultsView(genreKey: key, name: name,
+                                         onOpenDetail: { push(FranchiseDetailView.DetailPush.detail(franchiseId: $0)) })
+                            .perfScreen("Genre")
                     case .post(let id):
                         // A post from a show's timeline: its page, as the feed opens it.
                         FeedThreadView(postId: id, focusCommentId: nil, push: push)

@@ -185,6 +185,35 @@ extension Copy {
     }
 
     /// The show page — the show's X profile (25 Sep): X's tabs and pinned post, in the app's words.
+    /// The show's own sheet (`ShowActionsSheet`, 20 Oct): what the show page's `···` opens.
+    enum ShowSheet {
+        static let statusEyebrow = "Status"
+        static let addAsEyebrow = "Add to your library as"
+        static func addAs(_ status: String) -> String { "Add as \(status)" }
+        static let progressEyebrow = "Your progress"
+        /// Everything that has aired, marked.
+        static let caughtUp = "I\u{2019}m caught up"
+        static func finished(_ season: String) -> String { "I finished \(season)" }
+        static func startOver(_ season: String) -> String { "Start \(season) over" }
+        /// A season with no name of its own.
+        static let thisSeason = "this season"
+        static func marksEpisodes(_ n: Int) -> String { "Marks \(Copy.episodes(n)) as watched" }
+        static func marksRange(_ a: Int, _ b: Int) -> String {
+            a == b ? "Marks \(Copy.episode(a)) as watched" : "Marks \(Copy.episodeRange(a, b)) as watched"
+        }
+        static func clears(_ n: Int) -> String { "Clears \(Copy.episodes(n))" }
+        static let watchAgain = "Watch it again"
+        static let watchAgainDetail = "Starts a rewatch \u{2014} what you\u{2019}ve seen stays"
+        static let restartRewatch = "Restart this rewatch"
+        static let stopRewatch = "Stop rewatching"
+        static let history = "Watch history"
+        static let removeKeeps = "Your watch history is kept"
+        static let notInterested = "Not for me"
+        static let notInterestedDetail = "Stops suggesting this show"
+        /// Where you are, in the sheet's header.
+        static func next(_ context: String) -> String { "\(context) next" }
+    }
+
     enum ShowPage {
         static let posts = "Posts"
         static let media = "Media"
@@ -197,6 +226,12 @@ extension Copy {
         static let infoThemes = "Themes"
         static let infoSeasons = "Seasons"
         static let infoNext = "Next episode"
+        /// The calm About's figures (20 Oct): a figure over its word, the Profile's counts.
+        static let figurePremiered = "Premiered"
+        static func figureSeasons(_ n: Int) -> String { n == 1 ? "Season" : "Seasons" }
+        static func figureEpisodes(_ n: Int) -> String { n == 1 ? "Episode" : "Episodes" }
+        static let figureRated = "Rated"
+        static let opensGenreHint = "Opens the genre"
         /// X's label over a pinned post — here, the next episode.
         static let pinned = "Pinned"
         /// X's empty timeline: a bold line and one grey sentence.

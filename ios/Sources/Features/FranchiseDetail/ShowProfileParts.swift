@@ -456,6 +456,258 @@ struct ShowSubheader: View {
     }
 }
 
+/// About's facts, CALM (20 Oct: "The details part is just shit as if no attention has been paid to
+/// it at all!", owner, of `ShowInfoList` — a grey label column, white values and a hairline under
+/// every row: a settings form in the middle of the show). Now the FIGURES — premiered, seasons,
+/// episodes, the rating — each its small-caps word over its figure ("Nice but invert it", owner,
+/// of the figure-over-word first cut), between two hairlines: Profile's counts, read the way a
+/// spec sheet is read, name first. The genres follow as Discover's own tiles (`ShowGenreShelf`);
+/// the themes and the next airing are not here — TMDB's keywords were the block's noise, and the
+/// episode list's next row states the airing. At the accessibility sizes the figures stack.
+struct ShowAboutFacts: View {
+    struct Figure: Identifiable {
+        let value: String
+        let word: String
+        var id: String { word }
+    }
+
+    let figures: [Figure]
+
+    @Environment(\.dynamicTypeSize) private var typeSize
+
+    var body: some View {
+        if !figures.isEmpty {
+            Group {
+                if typeSize.isAccessibilitySize {
+                    VStack(alignment: .leading, spacing: ThemeSpace.x3) {
+                        ForEach(figures) { figure($0, alignment: .leading) }
+                    }
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                } else {
+                    // JUSTIFIED (20 Oct: "Not horizontally centered yet. In fact it's aligned to
+                    // nothing, just hanging randomly", owner): equal columns centred a short "A" in
+                    // as much room as "PREMIERED", so the run sat left of the page and its first and
+                    // last words met neither edge. The first figure starts on the gutter, the last
+                    // ends on it, the gaps between are equal, and each rule stands in the middle of
+                    // its gap — the run is centred on the page because both its ends are on its edges.
+                    HStack(alignment: .center, spacing: 0) {
+                        ForEach(Array(figures.enumerated()), id: \.element.id) { i, f in
+                            if i > 0 {
+                                Spacer(minLength: ThemeSpace.x2)
+                                Rectangle().fill(ThemeColor.hairline).frame(width: ThemeMetrics.pixel, height: 36)
+                                Spacer(minLength: ThemeSpace.x2)
+                            }
+                            figure(f, alignment: .center).fixedSize()
+                        }
+                    }
+                    .frame(maxWidth: .infinity)
+                }
+            }
+            .padding(.vertical, ThemeSpace.x4)
+            .overlay(alignment: .top) { Rectangle().fill(ThemeColor.hairline).frame(height: ThemeMetrics.pixel) }
+            .overlay(alignment: .bottom) { Rectangle().fill(ThemeColor.hairline).frame(height: ThemeMetrics.pixel) }
+        }
+    }
+
+    private func figure(_ f: Figure, alignment: HorizontalAlignment) -> some View {
+        VStack(alignment: alignment, spacing: ThemeSpace.x1) {
+            Text(f.word)
+                .type(ThemeType.scheduleCaps)
+                .textCase(.uppercase)
+                .foregroundStyle(ThemeColor.textTertiary)
+                .lineLimit(1)
+            Text(f.value)
+                .type(ThemeType.showTitleL)
+                .foregroundStyle(ThemeColor.textPrimary)
+                .lineLimit(1)
+                .minimumScaleFactor(0.7)
+        }
+        .accessibilityElement(children: .combine)
+    }
+}
+
+/// A show's genres as DISCOVER's keys (`server/src/discover/genres.ts`, mirrored): source-aware —
+/// an anime joins a key through its AniList names, a TV show through its TMDB names, where one
+/// name can feed two keys ("Sci-Fi & Fantasy" is Sci-Fi and Fantasy). Names the catalogue never
+/// browses (Ecchi, Soap, Talk…) have no key and are dropped. The show's own order, no repeats.
+enum ShowGenres {
+    struct Genre: Identifiable, Equatable {
+        let key: String
+        let name: String
+        var id: String { key }
+    }
+
+    private static let table: [(key: String, name: String, anilist: [String], tmdb: [String])] = [
+        ("action", "Action", ["Action"], ["Action & Adventure"]),
+        ("adventure", "Adventure", ["Adventure"], ["Action & Adventure"]),
+        ("comedy", "Comedy", ["Comedy"], ["Comedy"]),
+        ("drama", "Drama", ["Drama"], ["Drama"]),
+        ("fantasy", "Fantasy", ["Fantasy"], ["Sci-Fi & Fantasy"]),
+        ("sci-fi", "Sci-Fi", ["Sci-Fi"], ["Sci-Fi & Fantasy"]),
+        ("mystery", "Mystery", ["Mystery"], ["Mystery"]),
+        ("romance", "Romance", ["Romance"], []),
+        ("horror", "Horror", ["Horror"], []),
+        ("thriller", "Thriller", ["Thriller"], []),
+        ("psychological", "Psychological", ["Psychological"], []),
+        ("supernatural", "Supernatural", ["Supernatural"], []),
+        ("slice-of-life", "Slice of Life", ["Slice of Life"], []),
+        ("sports", "Sports", ["Sports"], []),
+        ("mecha", "Mecha", ["Mecha"], []),
+        ("music", "Music", ["Music"], []),
+        ("mahou-shoujo", "Mahou Shoujo", ["Mahou Shoujo"], []),
+        ("crime", "Crime", [], ["Crime"]),
+        ("documentary", "Documentary", [], ["Documentary"]),
+        ("family", "Family", [], ["Family", "Kids"]),
+        ("reality", "Reality", [], ["Reality"]),
+        ("war-politics", "War & Politics", [], ["War & Politics"]),
+        ("western", "Western", [], ["Western"]),
+        ("animation", "Animation", [], ["Animation"]),
+    ]
+
+    static func of(_ f: Franchise) -> [Genre] {
+        let names = (f.genres + f.parts.flatMap(\.genres))
+            .reduce(into: [String]()) { if !$0.contains($1) { $0.append($1) } }
+        var out: [Genre] = []
+        for name in names {
+            for def in table where (f.source == .tmdb ? def.tmdb : def.anilist).contains(name) {
+                if !out.contains(where: { $0.key == def.key }) { out.append(Genre(key: def.key, name: def.name)) }
+            }
+        }
+        return out
+    }
+}
+
+/// About's genres as a shelf of DISCOVER's genre tiles (`GenreTile`: the genre's own duotone art in
+/// the show's flavour, the name at its foot), each opening that genre's page — the genres were a
+/// comma run beside a label, then a wrap of mixed capsules ("the genres UX is poorly built.
+/// Direction isn't totally bad but build it abysmal", owner, 20 Oct). One line that scrolls, never
+/// a ragged wrap; the same picture a reader meets in Discover, so a genre looks like itself.
+struct ShowGenreShelf: View {
+    let genres: [ShowGenres.Genre]
+    let flavour: GenreArt.Flavour
+    let onOpen: (ShowGenres.Genre) -> Void
+
+    @Environment(\.dynamicTypeSize) private var typeSize
+
+    /// Smaller than Discover's half-width tile, so two and a half sit across and the shelf says
+    /// it scrolls; at the accessibility sizes, wide enough for the name.
+    private var width: CGFloat { typeSize.isAccessibilitySize ? 220 : 148 }
+
+    var body: some View {
+        if !genres.isEmpty {
+            ScrollView(.horizontal) {
+                LazyHStack(spacing: ThemeSpace.x3) {
+                    ForEach(genres) { g in
+                        Button { onOpen(g) } label: {
+                            ShowGenreCard(key: g.key, name: g.name, flavour: flavour, width: width)
+                        }
+                        .buttonStyle(OverArtPressStyle())
+                        .accessibilityLabel(g.name)
+                        .accessibilityHint(Copy.ShowPage.opensGenreHint)
+                    }
+                }
+                .padding(.horizontal, ThemeMetrics.gutter)
+            }
+            .scrollIndicators(.hidden)
+            .scrollClipDisabled()
+            // The section sits inside the page gutter; the shelf runs edge to edge.
+            .padding(.horizontal, -ThemeMetrics.gutter)
+        }
+    }
+}
+
+/// One genre on a show's About: Discover's art for it (`GenreArt`, the show's flavour), built as a
+/// CONTROL in the app's materials rather than pasted in (20 Oct: "the Genre cards look poorly
+/// built", owner, of Discover's `GenreTile` dropped onto the page — three flat, fully saturated
+/// fields with 17-pt names, the loudest thing on a page made quiet, with no edge and no depth).
+/// The picture is held down — a shade of the canvas over it, deepening toward the name so the
+/// colour stays a hue and the words sit on a ground of their own — and the card is lit from above
+/// with the one-pixel edge every raised control wears (`ThemeGradient.litEdge`), casting a soft
+/// shadow from its shape. The name is the title face a step under Discover's.
+struct ShowGenreCard: View {
+    let key: String
+    let name: String
+    let flavour: GenreArt.Flavour
+    let width: CGFloat
+
+    static let aspect: CGFloat = 16 / 9
+    static let radius: CGFloat = ThemeRadius.poster
+
+    var body: some View {
+        let shape = RoundedRectangle(cornerRadius: Self.radius, style: .continuous)
+        let height = (width / Self.aspect).rounded()
+        ZStack(alignment: .bottomLeading) {
+            if let art = GenreArt.image(key, flavour: flavour) {
+                Image(uiImage: art)
+                    .resizable()
+                    .scaledToFill()
+                    .frame(width: width, height: height)
+                    .accessibilityHidden(true)
+            } else {
+                ThemeColor.surfaceRaised
+            }
+            // The canvas over the picture: a breath at the top, most of the way to the ground at
+            // the foot, so a red or a green reads as the genre's colour, not a slab of it.
+            LinearGradient(stops: [.init(color: ThemeColor.canvas.opacity(0.22), location: 0),
+                                   .init(color: ThemeColor.canvas.opacity(0.34), location: 0.45),
+                                   .init(color: ThemeColor.canvas.opacity(0.78), location: 1)],
+                           startPoint: .top, endPoint: .bottom)
+            Text(name)
+                .type(ThemeType.genreCardName)
+                .foregroundStyle(ThemeColor.textPrimary)
+                .lineLimit(name.contains(" ") ? 2 : 1)
+                .minimumScaleFactor(0.8)
+                .multilineTextAlignment(.leading)
+                .padding(.horizontal, ThemeSpace.x3)
+                .padding(.bottom, ThemeSpace.x3 - 2)
+        }
+        .frame(width: width, height: height)
+        .clipShape(shape)
+        .overlay(shape.strokeBorder(ThemeGradient.litEdge, lineWidth: 1))
+        .cardShadow(.art, shape: shape, fill: ThemeColor.canvas)
+        .contentShape(shape)
+    }
+}
+
+/// The stage's two pills — the mark (or Start watching, Start rewatch, Add) and the status — in
+/// ONE geometry (20 Oct: "Mark as Watched CTA and Watching CTAs don't have the same core
+/// dimensions? Why? It looks so visually weird", owner): the mark was Schedule's pill (36 pt and a
+/// glyph) beside the profile's 34-pt Follow pill, an outline that reads smaller again beside a
+/// fill. Now both are 40 pt in a 44-pt target, one type, one padding; the second is a fill of the
+/// page's light with a crisp edge (the season pill's material), so the pair has one mass.
+struct StagePillLabel: View {
+    let text: String
+    var glyph: String? = nil
+    let filled: Bool
+    var chevron: Bool = false
+
+    static let height: CGFloat = 40
+
+    var body: some View {
+        HStack(spacing: 6) {
+            if let glyph {
+                AppGlyph(systemName: glyph).font(.system(size: 13, weight: .bold))
+            }
+            Text(text)
+            if chevron {
+                AppGlyph(systemName: "chevron.down").font(.system(size: 10, weight: .bold))
+            }
+        }
+        .type(ThemeType.feedNoteTitle)
+        .lineLimit(1)
+        .fixedSize()
+        .foregroundStyle(filled ? ThemeColor.canvas : ThemeColor.textPrimary)
+        .padding(.horizontal, ThemeSpace.x5)
+        .frame(height: Self.height)
+        .background(filled ? AnyShapeStyle(ThemeGradient.ivory) : AnyShapeStyle(ThemeColor.textPrimary.opacity(0.12)),
+                    in: Capsule())
+        .overlay(Capsule().strokeBorder(filled ? AnyShapeStyle(Color.clear) : AnyShapeStyle(ThemeGradient.litEdge),
+                                        lineWidth: 1))
+        .frame(minHeight: 44)
+        .contentShape(Capsule())
+    }
+}
+
 /// About's facts as a labelled list — the App Store's Information block: each fact under its name
 /// in a column of its own, one hairline between rows, so a reader looking for the seasons or the
 /// next episode finds the word, not a middot run. At the accessibility sizes the name sits above

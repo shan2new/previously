@@ -40,6 +40,7 @@ GLYPHS = {
     "arrow.left": "arrow-left", "arrow.up": "arrow-up", "arrow.up.backward": "arrow-up-left",
     "arrow.up.forward": "arrow-up-right", "arrow.up.right": "arrow-up-right",
     "arrow.triangle.2.circlepath": "refresh", "at": "at",
+    "backward.end": "player-skip-back",   # Start <season> over (the show sheet, 20 Oct)
     "bell": "bell", "bell.badge": "bell-ringing", "bell.fill": "bell-filled",
     "bookmark": "bookmark", "bookmark.fill": "bookmark-filled", "bookmark.slash": "bookmark-off",
     "bubble.left": "message-circle", "bubble.left.fill": "message-circle-filled", "bubble.left.and.bubble.right": "messages",

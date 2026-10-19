@@ -469,43 +469,81 @@ enum DetailTint {
 
 // MARK: - Withheld still
 
-/// The 96×54 rectangle that stands in for a still the app is deliberately NOT showing.
+/// The tile that stands in for a still the app is deliberately NOT showing yet (an episode past
+/// the one you are up to).
 ///
-/// The tile it replaces printed an identifier — `S7 · E2` — built from `sequence`, the raw ordinal
-/// among all parts, where OVAs and films occupy slots. On every AniList franchise with an OVA it
-/// disagreed with the fact line 8 pt away ("Season 4 · Episode 19" beside "S5 · E19"), broke the
-/// copy table's own notation rule twice over, and was the screenshot attached to the one-star
-/// review. A string that cannot contradict its neighbour is the one that does not exist: the
-/// episode's identity is stated once, in the row's text, and the rectangle says only what it is
-/// doing — withholding a picture.
+/// 20 Oct ("The hidden cards feel so utterly ugly, yuck. So offputting", owner): it was the show's
+/// quiet tint as a flat brown box with an `eye.slash` in its middle — four of them down an unstarted
+/// season, each the same slab. Now it is the episode's OWN still, frosted into a field of its
+/// colours (blurred once, off-main, cached — `BlurredArt`; at this radius on a 120-pt tile nothing
+/// in it can be read), under the episode's number: the same chip a season the catalogue did not
+/// illustrate draws (`EpisodeStill`'s frosted tile), so a column of episodes is one family whether
+/// it has stills or not, and every hidden one is a different colour instead of one slab repeated.
+/// The reveal stays beside the title (`revealGlyph`), where the control that reverses it is.
 ///
-/// Distinct from the shared `EpisodeGlyphTile` (`play.rectangle` = there is no still at all): a
-/// withheld still is a choice the user can reverse, and `eye.slash` is the glyph on the control
-/// that reverses it.
+/// It once printed `S7 · E2` from `sequence` — the raw ordinal among parts, OVAs included — and
+/// contradicted the row's own "Season 4 · Episode 19"; the numeral here is the episode's number,
+/// which the row states too, as every frosted chip does.
 struct WithheldStillTile: View {
-    /// Already quieted — this sits over a `.art` ground and must not out-shout it.
+    /// The still being withheld: drawn only as its blurred colours.
+    let still: String?
+    let number: Int
+    /// Already quieted — the ground under the field while the blur decodes.
     let tint: Color?
 
+    /// The still's own quiet colour and its mean OKLab lightness (`PaletteCache`, one cached read).
+    @State private var ground: Color?
+    @State private var lightness: Double?
+
+    /// The exposure every chip is brought to. Stills run from a night scene (L ≈ 0.12) to a
+    /// sunlit one (L ≈ 0.8): frosted as they came, the column read black, red, blue, pale grey,
+    /// with the white numeral lost on the last (20 Oct capture, Percy Jackson).
+    private static let bright = 0.46
+    private static let dark = 0.30
+
     var body: some View {
-        RoundedRectangle(cornerRadius: ThemeRadius.episodeStill, style: .continuous)
-            .fill(tint ?? ThemeColor.surfaceRaised)
-            .frame(width: EpisodeArtwork.slot.width, height: EpisodeArtwork.slot.height)
-            .overlay {
-                LinearGradient(colors: [.black.opacity(0.10), .black.opacity(0.34)],
-                               startPoint: .top, endPoint: .bottom)
+        let shape = RoundedRectangle(cornerRadius: ThemeRadius.episodeStill, style: .continuous)
+        ZStack {
+            shape.fill(ground ?? tint ?? ThemeColor.surfaceRaised)
+            // Heavier than the season chip's (0.18) and zoomed a little past the tile's edges, so
+            // the blur's own falloff never shows as a dark rim.
+            BlurredArt(url: still, sourceMaxPixel: 360, fraction: 0.24, saturation: 1.5, brightness: 0)
+                .scaleEffect(1.5)
+            // A bright still under a veil to the common exposure; a dark one lifted with its OWN
+            // colour (a white lift greys it).
+            if let l = lightness {
+                if l > Self.bright {
+                    Color.black.opacity(min(0.55, 1 - Self.bright / l))
+                } else if l < Self.dark, let lift = ground ?? tint {
+                    lift.opacity(min(0.7, (Self.dark - l) / max(0.43 - l, 0.05)))
+                }
             }
-            .overlay {
-                AppGlyph(systemName: "eye.slash")
-                    .font(.system(size: 16, weight: .regular))
-                    .foregroundStyle(ThemeColor.textPrimary.opacity(0.62))
-            }
-            .clipShape(RoundedRectangle(cornerRadius: ThemeRadius.episodeStill, style: .continuous))
-            .overlay(RoundedRectangle(cornerRadius: ThemeRadius.episodeStill, style: .continuous)
-                .strokeBorder(ThemeColor.posterEdge, lineWidth: 1))
-            .accessibilityHidden(true)
+            LinearGradient(colors: [.black.opacity(0.06), .black.opacity(0.34)],
+                           startPoint: .top, endPoint: .bottom)
+            RadialGradient(colors: [.white.opacity(0.10), .clear], center: .topLeading,
+                           startRadius: 0, endRadius: 96)
+                .blendMode(.plusLighter)
+            Text("\(number)")
+                .font(.custom("Outfit-Medium", fixedSize: number >= 1000 ? 18 : 22))
+                .monospacedDigit()
+                .tracking(-0.3)
+                .foregroundStyle(ThemeColor.textPrimary.opacity(0.92))
+                .shadow(color: .black.opacity(0.30), radius: 6, y: 1)
+                .minimumScaleFactor(0.6)
+                .lineLimit(1)
+                .padding(.horizontal, 8)
+        }
+        .frame(width: EpisodeArtwork.slot.width, height: EpisodeArtwork.slot.height)
+        .clipShape(shape)
+        .overlay(shape.strokeBorder(ThemeColor.posterEdge, lineWidth: 1))
+        .animation(.easeOut(duration: 0.2), value: lightness)
+        .task(id: still) {
+            ground = DetailTint.quiet(await PaletteCache.shared.resolve(url: still, maxPixel: 288))
+            lightness = still.flatMap { PaletteCache.shared.lightness(for: $0) }
+        }
+        .accessibilityHidden(true)
     }
 }
-
 
 // MARK: - The episode rows
 
@@ -565,6 +603,17 @@ struct EpisodeList: View {
     static let windowBefore = 3
     static let windowAfter = 8
     static let growBy = 12
+
+    /// The show page FOLDS (20 Oct: "the details section is heavily crammed. It needs to be
+    /// beautiful, polished yet easy to use everyday and not overloaded", owner). Every season opens
+    /// where you are, whatever its length: the watched run is ONE row ("Episodes 1–7 watched"),
+    /// then the last watched episode (its disc is the one-tap undo), the episode you are up to, and
+    /// up to `foldAfter` rows after it — never more than one past what has aired, the dated one. A
+    /// season watched through is the history row alone. `wholeBelow` drew a twelve-episode season
+    /// from Episode 1: Bleach's Calamity put Episode 9, the one with NEW on it, under eight watched
+    /// rows and the tab bar, a screen and a half down. The season screen keeps the whole list.
+    var folds: Bool = false
+    static let foldAfter = 4
 
     @State private var revealed: Set<Int> = []
     @State private var expanded: Set<Int> = []
@@ -627,6 +676,37 @@ struct EpisodeList: View {
         return Self.initialWindow(anchor: anchorEpisode, total: total)
     }
 
+    /// The folded list: the history row's run (nil when there is none) and the rows drawn (nil when
+    /// the season is watched through and nothing has been opened).
+    struct Fold: Equatable {
+        let history: ClosedRange<Int>?
+        let rows: ClosedRange<Int>?
+    }
+
+    private var fold: Fold? {
+        let total = total
+        guard folds, total > 0, !part.isUpcoming else { return nil }
+        if let shown {
+            let r = Self.clamp(shown, total: total)
+            return Fold(history: r.lowerBound > 1 ? 1...(r.lowerBound - 1) : nil, rows: r)
+        }
+        return Self.foldWindow(anchor: anchorEpisode, progress: part.progress, total: total,
+                               aired: part.isReleasing ? min(max(part.provenAiredCount(now: now), part.airedEpisodes), total) : nil,
+                               focused: focusEpisode != nil)
+    }
+
+    static func foldWindow(anchor: Int, progress: Int, total: Int, aired: Int?, focused: Bool) -> Fold {
+        // Watched through, and no route asked for an episode: a browse, folded to one row.
+        if !focused, progress >= total { return Fold(history: 1...total, rows: nil) }
+        let a = min(max(1, anchor), total)
+        let lower = max(1, a - 1)
+        var upper = min(total, a + foldAfter)
+        // A running season shows the next airing and stops: rows of undated numbers after it say
+        // only that the season goes on, which the door beneath says in one line.
+        if let aired { upper = min(upper, max(a, aired + 1)) }
+        return Fold(history: lower > 1 ? 1...(lower - 1) : nil, rows: lower...upper)
+    }
+
     static func initialWindow(anchor: Int, total: Int) -> ClosedRange<Int> {
         let a = min(max(1, anchor), total)
         return clamp((a - windowBefore)...(a + windowAfter), total: total)
@@ -641,7 +721,20 @@ struct EpisodeList: View {
         // A plain stack: the window keeps a long run to a dozen rows, and an eager stack is what
         // lets `scrollTo("ep-n")` land on a row that has not been on screen yet (a Schedule card).
         VStack(spacing: 0) {
-            if let range {
+            if let fold {
+                if let history = fold.history { historyRow(history) }
+                if let rows = fold.rows {
+                    ForEach(Array(rows), id: \.self) { n in
+                        row(franchise, part: part, n: n, isLast: n == rows.upperBound)
+                            .id("ep-\(n)")
+                    }
+                    if rows.upperBound < total {
+                        expander(Copy.Action.showMoreEpisodes(total - rows.upperBound), glyph: "chevron.down") {
+                            grow(earlier: false)
+                        }
+                    }
+                }
+            } else if let range {
                 if range.lowerBound > 1 {
                     expander(Copy.Action.showEarlierEpisodes, glyph: "chevron.up") { grow(earlier: true) }
                 }
@@ -704,7 +797,62 @@ struct EpisodeList: View {
         .frame(maxWidth: .infinity, alignment: .leading)
     }
 
+    /// The watched run, folded into ONE row: the history disc the rows it stands for wear, "Episodes
+    /// 1–7 watched", and a chevron in the rings' column. A tap lays the rows out where it is.
+    private func historyRow(_ run: ClosedRange<Int>) -> some View {
+        let watched = run.upperBound <= part.progress
+        let title: String = {
+            guard watched else {
+                return run.lowerBound == run.upperBound ? Copy.episode(run.lowerBound)
+                    : Copy.episodeRange(run.lowerBound, run.upperBound)
+            }
+            return run.lowerBound == 1 && run.upperBound == total ? Copy.Action.allEpisodesWatched(total)
+                : Copy.Action.episodesWatched(run.lowerBound, run.upperBound)
+        }()
+        return Button { grow(earlier: true) } label: {
+            HStack(spacing: ThemeSpace.x3) {
+                if watched {
+                    ZStack {
+                        Circle().fill(tint ?? ThemeColor.surfaceFloating)
+                        AppGlyph(systemName: "checkmark")
+                            .font(.system(size: 11, weight: .bold))
+                            .foregroundStyle(ThemeColor.textPrimary)
+                    }
+                    .frame(width: 22, height: 22)
+                }
+                Text(title)
+                    .type(ThemeType.metadataEmphasis)
+                    .foregroundStyle(ThemeColor.textSecondary)
+                    .lineLimit(typeSize.isAccessibilitySize ? nil : 1)
+                Spacer(minLength: ThemeSpace.x2)
+                AppGlyph(systemName: "chevron.down")
+                    .font(.system(size: 12, weight: .semibold))
+                    .foregroundStyle(ThemeColor.textTertiary)
+                    .frame(width: 44)
+                    .padding(.trailing, -9)
+            }
+            .frame(minHeight: 52)
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(RowPressStyle())
+        .overlay(alignment: .bottom) {
+            if fold?.rows != nil { Rectangle().fill(ThemeColor.separatorQuiet).frame(height: 1) }
+        }
+        .accessibilityHint(Copy.Accessibility.showsTheseEpisodes)
+    }
+
     private func grow(earlier: Bool) {
+        if let fold {
+            // The history row opens the whole run above in one tap — the reader asked for it;
+            // the door beneath grows the list by `growBy`.
+            let upper = fold.rows?.upperBound ?? total
+            let lower = fold.rows?.lowerBound ?? 1
+            withAnimation(ThemeMotion.pick(ThemeMotion.uiSnappy, reduceMotion: reduceMotion)) {
+                shown = earlier ? Self.clamp(1...upper, total: total)
+                                : Self.clamp(lower...(upper + Self.growBy), total: total)
+            }
+            return
+        }
         guard let current = range else { return }
         let next = earlier ? (current.lowerBound - Self.growBy)...current.upperBound
                            : current.lowerBound...(current.upperBound + Self.growBy)
@@ -846,8 +994,8 @@ struct EpisodeList: View {
                          poster: part.portraitArt ?? f.portraitArt, tint: tint, number: n, featured: isNext,
                          dimmed: n <= part.progress)
         } else if aired, episode?.still?.isEmpty == false {
-            // Withheld, and it says so: `eye.slash`, the glyph on the control that reverses it.
-            WithheldStillTile(tint: tint)
+            // Withheld: its own colours, frosted, under its number (the reveal is beside the title).
+            WithheldStillTile(still: episode?.still, number: n, tint: tint)
         } else {
             EpisodeStill(url: nil, landscape: part.stillLandscape(within: f),
                          poster: part.portraitArt ?? f.portraitArt, tint: tint, number: n)
@@ -933,7 +1081,14 @@ struct EpisodeList: View {
         if watched { return nil }
         if isNext { return (Copy.Label.nextUp, true) }
         if !aired {
-            if n == part.airedEpisodes + 1, let at = part.scheduledAiring(now: now, anchor: f.source.timeAnchor) {
+            // The episode's own slot first, then the next one the part knows — against what has
+            // aired BY NOW: the catalogue's count trails a drop by a sync, and the row after the
+            // newest episode printed no date at all for that hour (20 Oct, Bleach's Episode 10).
+            // It is the page's one statement of the next airing since the calm stage left it out.
+            let anchor = f.source.timeAnchor
+            if n == max(part.airedByNow(now: now, anchor: anchor), part.airedEpisodes) + 1,
+               let at = part.airings.first(where: { $0.episode == n && $0.at > now })?.at
+                    ?? part.upcomingAiring(now: now, anchor: anchor) {
                 return (TemporalCopy.airsSentence(at: at, now: now, source: f.source), false)
             }
             // Nothing: "Upcoming" says only what the row's position below the dated ones says.

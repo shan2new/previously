@@ -1033,6 +1033,54 @@ to `news:` with every social row, in one transaction, when research adopts the p
     pinned tweet, the Media tab's full-width stack, tabs that swap content, `tabMinHeight`.
   - The page is painted from the STAGE's picture (`pageArt`: the settled pick, else the stored
     pick, else the catalogue's billboard), not the banner's. `-detailTab` jumps to a section.
+- **The show page is CALM (20 Oct: "the details section is heavily crammed… beautiful, polished
+  yet easy to use everyday and not overloaded", then "the hidden cards feel so utterly ugly" and
+  "the details part is just shit", owner; `design/show-page-2026-10-20/`).** One rule: the page says
+  each thing once and shows what is next before what is past (`FranchiseDetailView.calm`;
+  `-detailCalm 0`, DEBUG, draws build 21's page for comparison). **Episodes FOLD on the show page**
+  (`EpisodeList(folds: true)`, `foldWindow`), superseding `wholeBelow`'s "a season of twelve or
+  fewer is drawn whole" there: the watched run is ONE row ("Episodes 1–7 watched", a tap lays it
+  out), then the last watched episode (its disc is the one-tap undo), the one you are up to and up
+  to four after it — never more than one past what has aired, the dated one — then "Show N more
+  episodes". A season watched through is the history row alone. The season screen keeps the whole
+  list. The next unaired row's date reads `airedByNow` and the part's own `airings`, never the
+  catalogue's count alone (it went blank for the hour after a drop). **The stage** drops a CADENCE
+  support line (`NextUp.cadence`: "Episode 10 airs Monday…" — the list's row says it; news lines
+  stay), parts its words and its controls by x4, and ends so the season row clears the floating
+  bar. The season row is the season alone (no inline "Mark all N…"). **A withheld still**
+  (`WithheldStillTile`) is the episode's own still frosted into its colours under its number, every
+  one brought to one exposure by its measured lightness — never a flat box with `eye.slash`.
+  **About's facts are FIGURES** (`ShowAboutFacts`: premiered · seasons · episodes · rated, the
+  small-caps WORD OVER the figure — "invert it", owner — between hairlines, JUSTIFIED: the first
+  starts on the gutter, the last ends on it, each rule midway — equal columns "aligned to nothing")
+  and **the genres are Discover's ART on a card of the app's own** (`ShowGenreShelf` of
+  `ShowGenreCard`: 148 pt, the art held down under the canvas toward the name, a lit edge, a cast
+  shadow, `genreCardName` 15 — Discover's loud `GenreTile` dropped in "looked poorly built"; one
+  scrolling line, each opening `GenreResultsView` through `DetailPush.genre`), then a chapter's air
+  before Cast & crew. **The stage has ONE action, centred** ("Why do we need watching dropdown
+  here? It's taking unnecessary space and adding visual clutter", owner): the mark, Start watching,
+  Start rewatch, or Add for a show you do not own — `StagePillLabel`, 40 pt (ivory, or a fill of the
+  page's light with a lit edge). The STATUS is not on the stage: the marks move it, and the `···`
+  menu's first row changes it; a Paused or Dropped show says so on its badge while its state is
+  where-you-are (`stageBadge`), and a caught-up show draws no action row (`stageHasActions`).
+  **The `···` opens THE SHOW'S OWN SHEET, never the system menu** (`ShowActionsSheet`; "feels like a
+  SaaS app from early 2000s… rethought from the ground up", then "brilliant direction, absolutely
+  trashy implementation" of the first build, owner): the show's picture blurred at its CROWN, its
+  poster and name; its STATUS as five discs in one glyph family (the chosen one the committed amber
+  disc, gliding — the sheet stays up); then ONE list in round glyph wells, in the viewer's words with
+  what each changes under it ("I'm caught up · Marks 3 episodes as watched", "I finished The
+  Calamity", "Watch it again"), one rule, then what undoes ("Start The Calamity over", "Stop
+  rewatching") and Remove from Library as the last row, in its own ink. A show you do not own gets
+  three discs that add it. A row that writes closes the sheet first and raises its confirmation
+  after (`afterSheet`): every batch still confirms its exact count. No eyebrows, no bordered tiles,
+  no floating red text; the sheet's height hugs its content. It opens while the page refreshes. ONE episode is
+  never a batch: "I'm caught up · Marks Episode 9 as watched" runs the stage's own mark (no alert,
+  Undo in the lane). Start over is skip-to-start (`backward.end` → Tabler `player-skip-back`, an SVG
+  template asset — `rsvg-convert` is not on this Mac); Tabler's rotate arrow reads as a "G". **The sections are built a beat after the lockup arrives** (`sectionsLive`,
+  `liveSectionsAfterArrival`; at once for a focus route, an index tap — `jump` — or a capture
+  flag): built with the stage they held the picture back 0.5–0.8 s (the probe's `billboard-art`). `ShowGenres` mirrors
+  `server/src/discover/genres.ts` — change both together. Themes and the next airing are not in the
+  calm About; `ShowInfoList` is the old page's. Posts show the newest three.
 - **Home's billboard is for DROPS only (9 Oct: "only the most recently aired franchise(s) should be
   shown in full bleed hero… upcoming and otherwise… loses the significance", owner).**
   `HomeFeed.heroes` are the week's drops, newest first, up to `billboardLimit` (3): a fresh drop on

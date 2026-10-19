@@ -13,6 +13,7 @@ enum AppGlyphCatalog {
         "arrow.up.left.and.arrow.down.right": "Glyph-arrow-up-left-and-arrow-down-right",
         "arrow.up.right": "Glyph-arrow-up-right",
         "at": "Glyph-at",
+        "backward.end": "Glyph-backward-end",
         "bell": "Glyph-bell",
         "bell.badge": "Glyph-bell-badge",
         "bell.fill": "Glyph-bell-fill",

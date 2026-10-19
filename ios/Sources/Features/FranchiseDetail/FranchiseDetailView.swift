@@ -56,6 +56,10 @@ struct FranchiseDetailView: View {
     @State private var scrollToEpisodes: UUID?
     enum PromptAnchor { case page, series, episodes, add }
     @State private var showStartRewatch = false
+    /// The show's own sheet (`ShowActionsSheet`, what the calm page's `···` opens), and the write a
+    /// row asked for — raised once the sheet has gone, so its confirmation is not under the sheet.
+    @State private var showActions = false
+    @State private var afterActions: (() -> Void)?
     /// Minted when a mark completes a season; the hairline sweep draws once per token.
     @State private var sweepToken: UUID?
     /// Minted when a mark completes the LAST part of the last season — the series milestone the
@@ -84,6 +88,13 @@ struct FranchiseDetailView: View {
     /// to stream that came after them, which keeps the line's room rather than slide the lockup.
     @State private var providersSettled = false
     @State private var lockupArrived = false
+    /// The sections under the stage are BUILT a beat after its picture has arrived (20 Oct: "it
+    /// takes a lot of time before the hero image becomes visible", owner). Built with the stage,
+    /// every episode row, shelf and card was laid out in the same main-thread frames as the
+    /// picture, which could not be drawn until they were done (the probe: 0.5–0.8 s of stalls
+    /// between the push and the picture). They are below the fold at rest; a route that lands on
+    /// an episode, an index tap or a capture builds them at once (`sectionsAtOnce`, `jump`).
+    @State private var sectionsLive = false
     @State private var holdWatchRoom = false
     /// The page's trailers: the one card that plays in place (a tap — nothing starts by itself
     /// here), and its full screen.
@@ -136,6 +147,8 @@ struct FranchiseDetailView: View {
         case recommendations
         /// A post on the show's timeline (its Posts tab), opened to its page.
         case post(id: String)
+        /// One of the show's genres, from About's genre shelf: Discover's genre page (20 Oct).
+        case genre(key: String, name: String)
     }
 
     // MARK: - Body
@@ -232,7 +245,9 @@ struct FranchiseDetailView: View {
                     .chromeSharedBackgroundHidden()
             }
             if let f = franchise {
-                ToolbarItem(placement: .topBarTrailing) { overflowMenu(f) }
+                ToolbarItem(placement: .topBarTrailing) {
+                    if Self.calm { actionsButton(f) } else { overflowMenu(f) }
+                }
             }
         }
         // Where to watch is read BESIDE the franchise, not after it: its line is in the lockup now,
@@ -295,6 +310,16 @@ struct FranchiseDetailView: View {
             if let lib = appModel.franchise(id: franchiseId) { lastLibraryCopy = lib }
         }
         .modifier(PromptDialog(prompt: $prompt, shown: true))
+        .sheet(isPresented: $showActions, onDismiss: {
+            guard let next = afterActions else { return }
+            afterActions = nil
+            Task { @MainActor in
+                try? await Task.sleep(for: .milliseconds(120))
+                next()
+            }
+        }) {
+            if let f = franchise { actionsSheet(f) }
+        }
         .sheet(isPresented: $showStartRewatch) {
             if let f = franchise {
                 StartRewatchSheet(franchise: f) { scope, startedAt in startRewatch(f, scope: scope, startedAt: startedAt) }
@@ -473,7 +498,13 @@ struct FranchiseDetailView: View {
                             .padding(.horizontal, ThemeMetrics.gutter)
                             .padding(.top, ThemeSpace.x3)
                     }
-                    stageSections(f)
+                    if sectionsLive {
+                        stageSections(f)
+                    } else {
+                        // The page's room while the sections wait: a scroll in the first beat
+                        // still moves, onto the page's own ground.
+                        Color.clear.frame(height: viewportH)
+                    }
                 }
             }
             // The scroll probe — geometry-based, because `onScrollGeometryChange` never fires on
@@ -501,6 +532,7 @@ struct FranchiseDetailView: View {
         .ignoresSafeArea(edges: .top)
         .onGeometryChange(for: CGFloat.self, of: { $0.size.height }, action: { viewportH = $0 })
         .task(id: f.portraitArt) { tint = await PaletteCache.shared.resolve(url: f.portraitArt, maxPixel: 420) }
+        .task(id: f.id) { if Direction.current == .billboard { await liveSectionsAfterArrival() } }
         .task(id: pageArt(f)) {
             let url = pageArt(f)
             heroTint = await PaletteCache.shared.resolve(url: url, maxPixel: 420)
@@ -716,6 +748,159 @@ struct FranchiseDetailView: View {
         .disabled(loading || appModel.pendingAdds.contains(f.id))
     }
 
+    // MARK: - The show's own sheet (20 Oct, `ShowActionsSheet` has the why)
+
+    /// The `···` on the calm page: the same glyph in the same glass circle, opening the sheet.
+    private func actionsButton(_ f: Franchise) -> some View {
+        Button { showActions = true } label: {
+            AppGlyph(systemName: "ellipsis")
+                .font(.system(size: 15, weight: .semibold))
+                .foregroundStyle(ThemeColor.textPrimary)
+                .frame(width: 44, height: 44)
+        }
+        .buttonBorderShape(.circle)
+        .accessibilityLabel("More actions")
+        .qaIdentifier("qa.detail.more")
+        // Not while an add is in flight; WHILE the page refreshes, yes — the sheet reads the copy
+        // already on screen, and a `···` dimmed for the seconds a detail read takes read as broken.
+        .disabled(appModel.pendingAdds.contains(f.id))
+    }
+
+    /// Close the sheet, then do what a row asked (its confirmation needs the page, not the sheet).
+    private func afterSheet(_ action: @escaping () -> Void) {
+        afterActions = action
+        showActions = false
+    }
+
+    private func actionsSheet(_ f: Franchise) -> some View {
+        let owned = inLibrary
+        return ShowActionsSheet(
+            franchise: f,
+            poster: f.tilePoster.url ?? f.portraitArt,
+            crownArt: pageArt(f),
+            whereYouAre: sheetWhereYouAre(f),
+            status: owned ? f.effectiveStatus : nil,
+            statuses: owned ? WatchStatus.menuOrder : [.planned, .watching, .completed],
+            onStatus: { status in
+                if owned {
+                    // The sheet stays: the lit tile moving IS the receipt.
+                    if status != f.effectiveStatus { appModel.setStatus(franchiseId: f.id, status: status) }
+                } else {
+                    afterSheet { addAs(f, status) }
+                }
+            },
+            progress: (owned ? sheetProgress(f) : []) + sheetMore(f),
+            undo: owned ? sheetUndo(f) : [],
+            onRemove: owned ? { afterSheet { appModel.removeWithUndo(f, reduceMotion: reduceMotion) } } : nil,
+            tint: pageTint)
+    }
+
+    /// Where you are, in the sheet's header: the episode you are up to, else the stage's line, else
+    /// (a show you do not own) what it is.
+    private func sheetWhereYouAre(_ f: Franchise) -> String? {
+        guard inLibrary else { return identityLine(f) }
+        let state = nextUpState(f)
+        if let state, let part = state.part, let episode = state.episode, state.kind == .actionable || state.kind == .backlog {
+            return Copy.ShowSheet.next(f.watchContext(part: part, episode: episode))
+        }
+        return stageLine(f, state)
+    }
+
+    /// A show you do not own, added from the sheet: Planned and Watching straight in; Watched is the
+    /// page's own add chooser, where marking what has aired is said with its count.
+    private func addAs(_ f: Franchise, _ status: WatchStatus) {
+        guard !isReadOnlyPreview else { return }
+        switch status {
+        case .planned, .watching:
+            appModel.addToLibrary(franchiseId: f.id, title: f.title, isReleasing: f.isReleasing, status: status)
+        default:
+            add(f, anchor: .add)
+        }
+    }
+
+    /// Your progress, in your words: caught up with everything out; this season finished (only
+    /// where it says less than caught up).
+    private func sheetProgress(_ f: Franchise) -> [ShowActionsSheet.Row] {
+        var rows: [ShowActionsSheet.Row] = []
+        let seriesLeft = seriesBehind(f)
+        if seriesLeft > 0 {
+            // ONE episode is the stage's own mark — named, no confirmation, its Undo in the lane —
+            // never "Mark 1 episode as watched?" in the batch's grammar.
+            if seriesLeft == 1, let pin = pinnedContent(f), pin.action == .mark, let part = pin.part, let episode = pin.episode {
+                rows.append(.init(id: "caught-up", glyph: "checkmark", title: Copy.ShowSheet.caughtUp,
+                                  detail: Copy.ShowSheet.marksRange(episode, episode)) {
+                    afterSheet { mark(f, part: part) }
+                })
+            } else {
+                rows.append(.init(id: "caught-up", glyph: "checkmark", title: Copy.ShowSheet.caughtUp,
+                                  detail: Copy.ShowSheet.marksEpisodes(seriesLeft)) {
+                    afterSheet { promptMarkSeries(f, anchor: .series) }
+                })
+            }
+        }
+        if let part = progressActionPart(f), !part.isUpcoming {
+            // The season pill's short form ("The Calamity", not "Thousand-Year Blood War - The Calamity").
+            let name = part.canonicalLabel.isEmpty && part.title.isEmpty ? Copy.ShowSheet.thisSeason
+                : Copy.compactPartLabel(SeasonPill.name(part))
+            let target = part.markTarget(now: now)
+            let left = target - part.progress
+            if left > 0, left != seriesLeft {
+                rows.append(.init(id: "season", glyph: "rectangle.stack", title: Copy.ShowSheet.finished(name),
+                                  detail: Copy.ShowSheet.marksRange(part.progress + 1, target)) {
+                    afterSheet { promptBatchMark(f, part: part, through: target) }
+                })
+            }
+        }
+        return rows
+    }
+
+    /// What undoes: this season from the start, a rewatch stopped — quiet, beside Remove.
+    private func sheetUndo(_ f: Franchise) -> [ShowActionsSheet.Row] {
+        var rows: [ShowActionsSheet.Row] = []
+        if let part = progressActionPart(f), !part.isUpcoming, part.progress > 0 {
+            let name = part.canonicalLabel.isEmpty && part.title.isEmpty ? Copy.ShowSheet.thisSeason
+                : Copy.compactPartLabel(SeasonPill.name(part))
+            rows.append(.init(id: "over", glyph: "backward.end", title: Copy.ShowSheet.startOver(name),
+                              detail: Copy.ShowSheet.clears(part.progress)) {
+                afterSheet { promptResetSeason(f, part: part) }
+            })
+        }
+        if let session = RewatchStore.shared.activeSession(for: f.id) {
+            rows.append(.init(id: "stop", glyph: "xmark", title: Copy.ShowSheet.stopRewatch) {
+                afterSheet { promptCancelRewatch(f, session: session) }
+            })
+        }
+        return rows
+    }
+
+    /// Watching it again, its history; for a suggestion you do not own, "Not for me".
+    private func sheetMore(_ f: Franchise) -> [ShowActionsSheet.Row] {
+        var rows: [ShowActionsSheet.Row] = []
+        if inLibrary {
+            if let session = RewatchStore.shared.activeSession(for: f.id) {
+                rows.append(.init(id: "restart", glyph: "arrow.triangle.2.circlepath", title: Copy.ShowSheet.restartRewatch) {
+                    afterSheet { promptRestartRewatch(f, session: session) }
+                })
+            } else if watchedReleased(f) {
+                rows.append(.init(id: "again", glyph: "arrow.triangle.2.circlepath", title: Copy.ShowSheet.watchAgain,
+                                  detail: Copy.ShowSheet.watchAgainDetail) {
+                    afterSheet { showStartRewatch = true }
+                })
+            }
+            if !RewatchStore.shared.sessions(for: f.id).isEmpty {
+                rows.append(.init(id: "history", glyph: "clock.arrow.circlepath", title: Copy.ShowSheet.history, opens: true) {
+                    afterSheet { push(.history(franchiseId: f.id)) }
+                })
+            }
+        } else if let rec = appModel.recommendation(forShow: f.id) {
+            rows.append(.init(id: "not-for-me", glyph: "hand.thumbsdown", title: Copy.ShowSheet.notInterested,
+                              detail: Copy.ShowSheet.notInterestedDetail) {
+                afterSheet { appModel.hideRecommendation(rec, seen: false) }
+            })
+        }
+        return rows
+    }
+
     /// The same season/series commands in the toolbar and the pinned post.
     private func progressActionPart(_ f: Franchise) -> FranchisePart? {
         // A chosen season is explicit intent. Short episode sections can leave the scroll
@@ -766,6 +951,9 @@ struct FranchiseDetailView: View {
         let line3: String?
         let episode: Int?
         let behind: Int
+        /// `line2` is the airing CADENCE ("Episode 10 airs Monday at 7:30 PM"), not news — the
+        /// calm stage leaves it to the episode list's next row and About's facts (20 Oct).
+        var cadence: Bool = false
         var identity: String { "\(kind)/\(part?.mediaId ?? 0)/\(episode ?? 0)" }
         static func == (a: NextUp, b: NextUp) -> Bool { a.identity == b.identity && a.line2 == b.line2 }
     }
@@ -835,7 +1023,7 @@ struct FranchiseDetailView: View {
             }
             return NextUp(kind: .waiting, part: part, eyebrow: Copy.Status(.planned),
                           line1: f.watchContext(part: part, episode: part.progress + 1),
-                          line2: next, line3: nil, episode: nil, behind: 0)
+                          line2: next, line3: nil, episode: nil, behind: 0, cadence: next != nil)
         }
         guard let part = f.currentPart else {
             // Nothing to resume: an announced installment waits; a finished run (with extras the
@@ -922,7 +1110,7 @@ struct FranchiseDetailView: View {
                           eyebrow: part.isReleasing ? Copy.Progress.behind(behind)
                               : Copy.Progress.left(max(behind, f.seriesLeft(now: now))),
                           line1: context, line2: drop ?? newEpisodeLine(f),
-                          line3: nil, episode: episode, behind: behind)
+                          line3: nil, episode: episode, behind: behind, cadence: drop == nil)
         }
         // Today's fresh-hero grammar, verbatim (5 Sep): a drop that struck today is "NEW EPISODE"
         // on the badge with its recency leading the line ("Aired 2h ago · Season 4 · Episode
@@ -956,7 +1144,7 @@ struct FranchiseDetailView: View {
                       dot: true,
                       moment: part.isReleasing ? recency : nil,
                       line1: context, line2: newEpisodeLine(f),
-                      line3: nil, episode: episode, behind: 1)
+                      line3: nil, episode: episode, behind: 1, cadence: true)
     }
 
     /// One grammar with the catalogue news a Planned show wears: the announcement ON the badge,
@@ -1466,9 +1654,12 @@ struct FranchiseDetailView: View {
                 // The season's command, with the words the capsule's menu, the "…" menu and the long
                 // press use — only while there is something to mark, and only where it says more
                 // than the stage's pill: a run of more than one, or a season the stage is not on.
+                // Calm (20 Oct): the season row is the season alone. The batch is the "···" menu's,
+                // and a ring further down the list marks through itself with its count confirmed;
+                // a grey sentence at the row's end beside the pill was a second control in one line.
                 let target = part.markTarget(now: now)
                 let stagePart = nextUpState(f)?.part?.mediaId
-                if !part.isUpcoming, target > part.progress,
+                if !Self.calm, !part.isUpcoming, target > part.progress,
                    target - part.progress > 1 || stagePart != part.mediaId {
                     Button(Copy.Action.markAll(target - part.progress)) {
                         promptBatchMark(f, part: part, through: target, anchor: .episodes)
@@ -1896,13 +2087,13 @@ extension FranchiseDetailView {
     }
 
     @ViewBuilder
-    private func followPill(_ f: Franchise) -> some View {
+    private func followPill(_ f: Franchise, stage: Bool = false) -> some View {
         if appModel.pendingAdds.contains(f.id) {
-            ShowFollowPillLabel(text: Copy.Search.adding, filled: false)
+            pillLabel(Copy.Search.adding, filled: false, stage: stage)
                 .accessibilityLabel(Copy.Search.adding)
         } else if inLibrary {
             Menu { statusChoices(f) } label: {
-                ShowFollowPillLabel(text: f.effectiveStatus.displayName, filled: false, chevron: true)
+                pillLabel(f.effectiveStatus.displayName, filled: false, chevron: true, stage: stage)
             }
             .buttonStyle(.plain)
             // Finishing a series is the payoff the app is built around: the pill settles with the
@@ -1911,12 +2102,22 @@ extension FranchiseDetailView {
             .accessibilityLabel("Change status, \(f.effectiveStatus.displayName)")
         } else {
             Button { add(f, anchor: .add) } label: {
-                ShowFollowPillLabel(text: Copy.Search.addToLibrary, filled: true)
+                pillLabel(Copy.Search.addToLibrary, filled: true, stage: stage)
             }
             .buttonStyle(FeedIconPressStyle())
             .disabled(loading || appModel.pendingAdds.contains(f.id))
             .accessibilityLabel("Add \(f.title) to Library")
             .accessibilityHint(Copy.Search.addHint)
+        }
+    }
+
+    /// The stage's pills share one geometry (`StagePillLabel`); the profile keeps X's Follow pill.
+    @ViewBuilder
+    private func pillLabel(_ text: String, filled: Bool, chevron: Bool = false, stage: Bool) -> some View {
+        if stage {
+            StagePillLabel(text: text, filled: filled, chevron: chevron)
+        } else {
+            ShowFollowPillLabel(text: text, filled: filled, chevron: chevron)
         }
     }
 
@@ -2219,24 +2420,34 @@ extension FranchiseDetailView {
     }
 
     @ViewBuilder
-    private func pinnedAction(_ f: Franchise, _ pin: PinnedContent) -> some View {
+    private func pinnedAction(_ f: Franchise, _ pin: PinnedContent, stage: Bool = false) -> some View {
         switch pin.action {
         case .mark:
             if let part = pin.part, let episode = pin.episode {
                 let committed = committedEpisode != nil && pinned != nil
-                ScheduleMarkPill(watched: committed, label: Copy.Action.markEpisodeWatched(episode)) {
-                    mark(f, part: part)
+                if stage {
+                    Button { mark(f, part: part) } label: {
+                        StagePillLabel(text: committed ? Copy.Action.watched : Copy.Action.markWatched,
+                                       glyph: committed ? "checkmark" : "plus", filled: !committed)
+                    }
+                    .buttonStyle(FeedIconPressStyle())
+                    .accessibilityLabel(Copy.Action.markEpisodeWatched(episode))
+                    .qaIdentifier("qa.progress.mark.\(part.mediaId)")
+                } else {
+                    ScheduleMarkPill(watched: committed, label: Copy.Action.markEpisodeWatched(episode)) {
+                        mark(f, part: part)
+                    }
+                    .qaIdentifier("qa.progress.mark.\(part.mediaId)")
                 }
-                .qaIdentifier("qa.progress.mark.\(part.mediaId)")
             }
         case .start:
             Button { appModel.setStatus(franchiseId: f.id, status: .watching) } label: {
-                ShowFollowPillLabel(text: Copy.Today.startOrContinue(f), filled: true)
+                pillLabel(Copy.Today.startOrContinue(f), filled: true, stage: stage)
             }
             .buttonStyle(FeedIconPressStyle())
         case .rewatch:
             Button { showStartRewatch = true } label: {
-                ShowFollowPillLabel(text: Copy.Action.startRewatch, filled: false)
+                pillLabel(Copy.Action.startRewatch, filled: false, stage: stage)
             }
             .buttonStyle(FeedIconPressStyle())
         case nil:
@@ -2832,10 +3043,29 @@ extension FranchiseDetailView {
         }
     }
 
+    /// The CALM page (20 Oct: "the details section is heavily crammed. It needs to be beautiful,
+    /// polished yet easy to use everyday and not overloaded", owner). One rule: the page says each
+    /// thing once, and shows what is next before what is past. The episode list folds its history
+    /// (`EpisodeList.folds`); the stage drops the cadence line the list's next row already states;
+    /// the season row is the season alone; a fact is one line. `-detailCalm 0` (DEBUG) draws the
+    /// page as it was, for the side-by-side photographs.
+    static var calm: Bool {
+        #if DEBUG
+        if UserDefaults.standard.string(forKey: "detailCalm") == "0" { return false }
+        #endif
+        return true
+    }
+
     /// The stage's height — Home's measure (the screen above the tab bar), less the index row and
     /// the first section's title, which peek under its foot so the page says there is more.
+    /// Calm: the first section opens on the season row (a 44-pt capsule, 16 under the index), not a
+    /// title line — measured as a title, it sat half under the floating bar on every show.
     var stageHeight: CGFloat {
-        (ThemeMetrics.windowHeight - ThemeMetrics.tabBarVisualHeight - ShowTabsRow.height - ThemeSpace.x3
+        if Self.calm {
+            return (ThemeMetrics.windowHeight - ThemeMetrics.tabBarVisualHeight - ShowTabsRow.height
+                - ThemeSpace.x4 - 44 - ThemeSpace.x3).rounded()
+        }
+        return (ThemeMetrics.windowHeight - ThemeMetrics.tabBarVisualHeight - ShowTabsRow.height - ThemeSpace.x3
             - sectionTitleLine - ThemeMetrics.labelGap + 3).rounded()
     }
 
@@ -2871,7 +3101,40 @@ extension FranchiseDetailView {
     func jump(_ section: ShowTab) {
         // The underline moves with the tap (App Store's); the probes keep it honest from there.
         indexState.select(section)
+        guard sectionsLive else {
+            // The sections are not built yet: build them, then land on one once it exists.
+            sectionsLive = true
+            Task { @MainActor in
+                try? await Task.sleep(for: .milliseconds(80))
+                indexJump = IndexJump(section: section, token: UUID())
+            }
+            return
+        }
         indexJump = IndexJump(section: section, token: UUID())
+    }
+
+    /// A page that must land somewhere below the stage builds its sections with it.
+    private var sectionsAtOnce: Bool {
+        if focus != nil { return true }
+        #if DEBUG
+        let d = UserDefaults.standard
+        if d.object(forKey: "detailAnchor") != nil || d.object(forKey: "detailScrollY") != nil
+            || d.object(forKey: "detailTab") != nil || d.object(forKey: "detailTrailer") != nil
+            || d.object(forKey: "detailOpenRelated") != nil { return true }
+        #endif
+        return false
+    }
+
+    /// The beat after the lockup has arrived, else a net for a picture that never comes.
+    func liveSectionsAfterArrival() async {
+        if sectionsLive { return }
+        if sectionsAtOnce { sectionsLive = true; return }
+        let deadline = ContinuousClock.now + .milliseconds(1800)
+        while !lockupArrived, ContinuousClock.now < deadline, !Task.isCancelled {
+            try? await Task.sleep(for: .milliseconds(50))
+        }
+        try? await Task.sleep(for: .milliseconds(lockupArrived ? 250 : 0))
+        if !Task.isCancelled { sectionsLive = true }
     }
 
     // MARK: The stage
@@ -2900,7 +3163,28 @@ extension FranchiseDetailView {
 
     private func stageSpoken(_ f: Franchise) -> String {
         let state = inLibrary ? nextUpState(f) : nil
-        return [state?.eyebrow, f.displayTitle, stageLine(f, state)].compactMap { $0 }.joined(separator: ", ")
+        return [state.map { stageBadge(f, $0) }, f.displayTitle, stageLine(f, state)].compactMap { $0 }.joined(separator: ", ")
+    }
+
+    /// The stage's badge. Calm (20 Oct): the status pill is gone from the stage ("Why do we need
+    /// watching dropdown here? It's taking unnecessary space and adding visual clutter", owner) —
+    /// the status moves by itself with the marks (a mark files Planned under Watching, the last one
+    /// files it under Watched), and the `···` menu's first row changes it by hand. So a show filed
+    /// PAUSED or DROPPED says so on its badge while its state is where-you-are (behind, caught up,
+    /// a season done) — the pill was the only place that said it. News keeps the badge.
+    private func stageBadge(_ f: Franchise, _ state: NextUp) -> String {
+        guard Self.calm, inLibrary, [.paused, .dropped].contains(f.effectiveStatus) else { return state.eyebrow }
+        switch state.kind {
+        case .actionable, .backlog, .caughtUp, .seasonComplete: return Copy.Status(f.effectiveStatus)
+        case .waiting, .seriesComplete: return state.eyebrow
+        }
+    }
+
+    /// The stage has a control to draw: the episode's mark (or Start watching, Start rewatch), else
+    /// — for a show you do not own — Add. A caught-up show has nothing to do and draws nothing.
+    private func stageHasActions(_ f: Franchise, _ pin: PinnedContent?) -> Bool {
+        guard Self.calm else { return true }
+        return !inLibrary || appModel.pendingAdds.contains(f.id) || pin?.action != nil
     }
 
     /// The lockup: the state in its badge, the show's logo else its name, the one line (the moment,
@@ -2909,10 +3193,12 @@ extension FranchiseDetailView {
     private func stageLockup(_ f: Franchise, name: BillboardName, arrival: BillboardArrival) -> some View {
         let state = inLibrary ? nextUpState(f) : nil
         let pin = inLibrary ? pinnedContent(f) : nil
-        return VStack(spacing: ThemeSpace.x3) {
+        // Calm: the words and the controls are two groups, a step apart.
+        return VStack(spacing: Self.calm ? ThemeSpace.x4 : ThemeSpace.x3) {
             VStack(spacing: ThemeSpace.x2) {
                 if let state {
-                    HeroBadge(text: state.eyebrow, attention: state.dot)
+                    let badge = stageBadge(f, state)
+                    HeroBadge(text: badge, attention: state.dot && badge == state.eyebrow)
                         .contentTransition(.numericText(countsDown: true))
                         .modifier(arrival.line(0))
                 } else if isTrending(f) {
@@ -2949,7 +3235,7 @@ extension FranchiseDetailView {
                         .padding(.top, ThemeSpace.x1)
                         .modifier(arrival.line(2))
                 }
-                if let support = state?.line2 {
+                if let support = state?.line2, !(Self.calm && state?.cadence == true) {
                     Text(support)
                         .type(ThemeType.feedSmall)
                         .foregroundStyle(ThemeColor.textPrimary.opacity(0.66))
@@ -2960,8 +3246,10 @@ extension FranchiseDetailView {
             }
             .multilineTextAlignment(.center)
             .allowsHitTesting(false)
-            stageActions(f, pin)
-                .modifier(arrival.line(4))
+            if stageHasActions(f, pin) {
+                stageActions(f, pin)
+                    .modifier(arrival.line(4))
+            }
             stageWatch(arrival)
         }
         .frame(maxWidth: .infinity)
@@ -3026,12 +3314,16 @@ extension FranchiseDetailView {
         return total > 0 && part.progress > 0 && part.progress < total ? Double(part.progress) / Double(total) : nil
     }
 
-    /// The ivory pill (the mark, Start watching, Start rewatch — the pinned post's verbs) beside the
-    /// status capsule; a show you do not own gets the Add pill alone.
+    /// The ivory pill (the mark, Start watching, Start rewatch — the pinned post's verbs); a show you
+    /// do not own gets the Add pill. The calm stage draws it ALONE, centred — the status capsule
+    /// beside it is the `···` menu's now; the old page keeps the pair.
     private func stageActions(_ f: Franchise, _ pin: PinnedContent?) -> some View {
         HStack(spacing: ThemeSpace.x3) {
-            if inLibrary, let pin { pinnedAction(f, pin) }
-            followPill(f)
+            if inLibrary, let pin { pinnedAction(f, pin, stage: Self.calm) }
+            // Calm: the status is the `···` menu's (`stageBadge` has the why); the stage keeps Add.
+            if !Self.calm || !inLibrary || appModel.pendingAdds.contains(f.id) {
+                followPill(f, stage: Self.calm)
+            }
         }
     }
 
@@ -3141,7 +3433,8 @@ extension FranchiseDetailView {
                     episodesHeader(f, part: part)
                         .id("anchor-episodes-header")
                     EpisodeList(franchise: f, part: part, tint: DetailTint.quiet(pageTint),
-                                focusEpisode: focus?.mediaId == part.mediaId ? focus?.episode : nil)
+                                focusEpisode: focus?.mediaId == part.mediaId ? focus?.episode : nil,
+                                folds: Self.calm)
                         .id(part.mediaId)
                         .disabled(appModel.pendingAdds.contains(f.id))
                 }
@@ -3185,7 +3478,20 @@ extension FranchiseDetailView {
     private func stageAbout(_ f: Franchise) -> some View {
         VStack(alignment: .leading, spacing: Self.shelfRhythm) {
             profileBio(f)
-            ShowInfoList(rows: infoRows(f))
+            if Self.calm {
+                ShowAboutFacts(figures: aboutFigures(f))
+                let genres = ShowGenres.of(f)
+                if !genres.isEmpty {
+                    ShowGenreShelf(genres: genres, flavour: f.source == .tmdb ? .tv : .anime) { g in
+                        push(.genre(key: g.key, name: g.name))
+                    }
+                    // A part of About begins after the genres: a chapter's air, not a shelf's
+                    // ("more space between the genres and the Cast & Crew", owner, 20 Oct).
+                    .padding(.bottom, Self.chapterBreak)
+                }
+            } else {
+                ShowInfoList(rows: infoRows(f))
+            }
             historyRow(f)
             // The directions move these two to their own section (`stageSimilar`).
             if !appModel.experience.doors { becauseYouFinished(f) }
@@ -3193,6 +3499,24 @@ extension FranchiseDetailView {
             if !appModel.experience.doors { relatedShelf(f) }
         }
         .padding(.horizontal, ThemeMetrics.gutter)
+    }
+
+    /// The calm About's figures: when it premiered, how many seasons, how many episodes in the
+    /// story (`mainStoryEpisodicParts` — recap OVAs are not the story), and the rating. A figure the
+    /// catalogue does not state is not drawn.
+    private func aboutFigures(_ f: Franchise) -> [ShowAboutFacts.Figure] {
+        var figures: [ShowAboutFacts.Figure] = []
+        if let y = premiereYear(f) { figures.append(.init(value: String(y), word: Copy.ShowPage.figurePremiered)) }
+        let seasons = f.seasonPartsInOrder.count
+        if seasons > 0 { figures.append(.init(value: "\(seasons)", word: Copy.ShowPage.figureSeasons(seasons))) }
+        let episodes = f.mainStoryEpisodicParts.reduce(0) { $0 + max($1.totalEpisodes, $1.airedEpisodes, $1.progress) }
+        if episodes > 0 {
+            figures.append(.init(value: episodes.formatted(.number.grouping(.automatic)),
+                                 word: Copy.ShowPage.figureEpisodes(episodes)))
+        }
+        // The market's certificate, where the catalogue states one: a fact among the figures.
+        if let rating = f.contentRatingLabel { figures.append(.init(value: rating, word: Copy.ShowPage.figureRated)) }
+        return figures
     }
 
     /// About's facts, each with its name; a fact the catalogue does not state is not a row.
@@ -3251,7 +3575,8 @@ extension FranchiseDetailView {
     /// column, name line and action bar under every post were the page's heaviest block, for
     /// news a tap away on its page); an empty section is one grey line.
     private func stagePosts(_ f: Franchise) -> some View {
-        let posts = showPosts(f)
+        // Calm: the newest three — the show's news, not its archive (each opens its page).
+        let posts = Self.calm ? Array(showPosts(f).prefix(3)) : showPosts(f)
         return VStack(alignment: .leading, spacing: 0) {
             if posts.isEmpty {
                 Text(Copy.ShowPage.noPostsMessage(f.displayTitle))
