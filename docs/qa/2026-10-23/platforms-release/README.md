@@ -38,7 +38,19 @@ release time, split by the show's origin) replaces the evening's 20261023T160259
    ([readback](readback.json)): of the 53 followed TV shows, 31 are timed by their platform (25
    before — Daredevil: Born Again, Peacemaker, Percy Jackson, Silo, Stuart Fails to Save the
    Universe and Ted Lasso joined), 16 by TVmaze, 6 stay dates. No row had a country yet (0 of
-   3,232): the hourly TV refresh writes them, oldest first; until then the US time applies, which
-   is right for every followed Disney+, HBO Max and Apple show (all US originals).
+   3,232).
+7. **Country backfill** ("Do it man what are you waiting for?", owner) with
+   [countries-backfill.mjs](countries-backfill.mjs): the live release's compiled modules and
+   production config, TMDB's show record for each of the 852 TV franchises, and one `UPDATE` of
+   `media.origin_countries` per show — no other column. A dry run on five shows first; the first
+   `--apply` wrote nothing (the client refused a bare array — 852 failed, 0 rows changed); the
+   second, with the list cast from JSON text, wrote 3,189 of 3,232 TV rows in 63 s, 0 failed
+   ([result](countries-backfill-result.json); 9 shows TMDB no longer has, 8 with no country).
+   Read back ([after](readback-after-backfill.json)): Deadly Tag and Made in Korea (Disney+, KR)
+   at 07:00 UTC — 4 PM in Seoul; Paolo (HBO Max, FR) at 08:00 UTC — 9 AM in Paris; Collision
+   (MX, US), The Pitt and Hacks at 9 PM Eastern; Dark Matter at midnight Eastern after TMDB's
+   Pacific date; Slow Horses (GB) at midnight Eastern on its own; Crystal Lake at 3 AM Eastern.
+   Public `/ready` 200 throughout. The hourly TV refresh keeps the column current.
 
 No account, report, configuration, credential, DNS or provider change; no live-database restore.
+The one data write outside the app is step 7's country backfill, asked for by the owner.
