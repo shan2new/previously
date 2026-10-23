@@ -1,44 +1,77 @@
 // When a streaming platform's new episodes become watchable (23 Oct: "Let's have platform specific
 // table", owner, of Avatar: Seven Havens — Paramount+ — reading "Airs today" with no time). TMDB
 // dates a streaming drop with no clock and TVmaze leaves a web channel's airtime blank, so a
-// platform's own release CONVENTION is the best fact there is: one wall-clock time in one zone for
-// every original it drops. Only platforms whose convention is reported consistently are listed;
-// every other network stays a date (services/broadcast.ts). Pure and import-free, so the slot rule
-// (airingSlot.ts) and the feed's composer can share it.
+// platform's own release CONVENTION is the best fact there is: one wall-clock time in one zone, on
+// TMDB's date, for every original it drops. Only platforms whose convention TheTVDB records
+// consistently are listed; every other network stays a date (services/broadcast.ts). Pure and
+// import-free, so the slot rule (airingSlot.ts) and the feed's composer can share it.
 //
-// Sources (23 Oct 2026):
-//   Netflix — 12:00 AM Pacific / 3:00 AM Eastern, worldwide at once; live events and anime are the
-//     exceptions (Dexerto, "What time does Netflix release new shows"; Netflix Life). Anime is
-//     AniList's, never a TMDB show here.
-//   Prime Video — 12:00 AM Pacific / 3:00 AM Eastern, 8:00 AM in the UK (Invincible S4, Fallout S2
-//     guides; National World's Clarkson's Farm release-time piece). Some premieres move to 6 PM
-//     Pacific the evening before: the app is then later than the platform, never earlier.
-//   Paramount+ — 3:00 AM Eastern / 12:00 AM Pacific (Avatar: Seven Havens release guides).
-// Left out for want of one convention: Apple TV, Disney+, HBO Max, Hulu, Peacock — their originals
-// drop at different times show by show (9 PM Eastern the evening before is common).
+// Checked 23 Oct 2026 against TheTVDB's per-show "Airs" time (US Eastern) for 133 shows, and TMDB's
+// episode dates against TVmaze's for 31 (docs/audits/2026-10-23/README.md):
+//   Netflix, Prime Video, Paramount+, Peacock — 3:00 AM Eastern (12:00 AM Pacific), worldwide.
+//     Netflix's event drops (Stranger Things' 8 PM Eastern finale) are the known exception.
+//   HBO Max ("Max" until 2025) and Disney+ — 9:00 PM Eastern for a US original (The Pitt, Hacks,
+//     Andor, Daredevil: Born Again); an international original drops at the global 3:00 AM
+//     Eastern (Disney+'s Korean series at 4 PM in Seoul, HBO Max's Paolo, Collision).
+//   Hulu — 12:00 AM Eastern; TMDB and TVmaze date its episodes alike.
+//   Apple TV — 12:00 AM Eastern, but TMDB files a US original under the PACIFIC date, the evening
+//     before (Severance, Silo, Dark Matter, Pluribus: 8 of 10), so its rule is 9:00 PM Pacific on
+//     TMDB's date; a British original (Slow Horses, Last Seen) carries the Eastern date.
+// A show of unknown origin (`media.origin_countries` not yet written) and a co-production that lists
+// the US (Collision: MX, US) read the US rule, which is never earlier than the international one. Left out: MGM+, STARZ (broadcast slots TVmaze times),
+// the Chinese and Korean platforms (a different time per show) and YouTube.
 
-/** One platform's convention: its TMDB network names and the local wall-clock time of a drop. */
+/** A wall-clock time in one zone (DST-aware). */
 export interface StreamingDrop {
-  /** TMDB network names, exactly as `media.studios` stores them. */
-  networks: readonly string[]
   hour: number
   minute: number
-  /** IANA zone the wall-clock time is in (DST-aware). */
+  /** IANA zone the wall-clock time is in. */
   zone: string
 }
 
-export const STREAMING_DROPS: readonly StreamingDrop[] = [
-  { networks: ['Netflix'], hour: 0, minute: 0, zone: 'America/Los_Angeles' },
-  { networks: ['Prime Video'], hour: 0, minute: 0, zone: 'America/Los_Angeles' },
-  { networks: ['Paramount+'], hour: 3, minute: 0, zone: 'America/New_York' },
+/** One platform's convention: its TMDB network names, the drop of a US original, and the drop of
+ *  an original made elsewhere when that differs. */
+export interface StreamingPlatform {
+  /** TMDB network names, exactly as `media.studios` stores them. */
+  networks: readonly string[]
+  drop: StreamingDrop
+  international?: StreamingDrop
+}
+
+const PACIFIC_MIDNIGHT: StreamingDrop = { hour: 0, minute: 0, zone: 'America/Los_Angeles' }
+const EASTERN_3AM: StreamingDrop = { hour: 3, minute: 0, zone: 'America/New_York' }
+const EASTERN_9PM: StreamingDrop = { hour: 21, minute: 0, zone: 'America/New_York' }
+
+export const STREAMING_PLATFORMS: readonly StreamingPlatform[] = [
+  { networks: ['Netflix'], drop: PACIFIC_MIDNIGHT },
+  { networks: ['Prime Video'], drop: PACIFIC_MIDNIGHT },
+  { networks: ['Paramount+'], drop: EASTERN_3AM },
+  { networks: ['Peacock'], drop: EASTERN_3AM },
+  { networks: ['HBO Max', 'Max'], drop: EASTERN_9PM, international: EASTERN_3AM },
+  { networks: ['Disney+'], drop: EASTERN_9PM, international: EASTERN_3AM },
+  { networks: ['Hulu'], drop: { hour: 0, minute: 0, zone: 'America/New_York' } },
+  {
+    networks: ['Apple TV'],
+    drop: { hour: 21, minute: 0, zone: 'America/Los_Angeles' },
+    international: { hour: 0, minute: 0, zone: 'America/New_York' },
+  },
 ]
 
-/** The platform a TMDB season drops on: its FIRST network (the original one — a show that moved
- *  from broadcast to a platform lists the broadcaster first and stays a date), when it is listed. */
-export function streamingDrop(networks: readonly string[] | null | undefined): StreamingDrop | null {
+/**
+ * When a TMDB season drops: the platform of its FIRST network (the original one — a show that moved
+ * from broadcast to a platform lists the broadcaster first and stays a date), at the international
+ * time for a show made outside the US (`countries`: TMDB's origin countries), else the US time.
+ */
+export function streamingDrop(
+  networks: readonly string[] | null | undefined,
+  countries?: readonly string[] | null,
+): StreamingDrop | null {
   const first = networks?.[0]
   if (!first) return null
-  return STREAMING_DROPS.find((drop) => drop.networks.includes(first)) ?? null
+  const platform = STREAMING_PLATFORMS.find((entry) => entry.networks.includes(first))
+  if (!platform) return null
+  const abroad = countries != null && countries.length > 0 && !countries.includes('US')
+  return abroad && platform.international ? platform.international : platform.drop
 }
 
 const DAY_MS = 86_400_000

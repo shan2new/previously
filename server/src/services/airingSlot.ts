@@ -7,6 +7,13 @@ import { dropInstant, streamingDrop } from './streamingDrops.js'
 
 const DAY_MS = 86_400_000
 
+/** A TMDB season's origin, for the drop table (services/streamingDrops.ts): `media.studios` and
+ *  `media.origin_countries`. */
+export interface SlotOrigin {
+  networks?: readonly string[] | null
+  countries?: readonly string[] | null
+}
+
 /** The earliest instant ANY time zone's local date passes a date-only slot's UTC date (UTC+14). */
 export const DATE_ONLY_LEAD_MS = 14 * 3_600_000
 
@@ -16,15 +23,16 @@ export const DATE_ONLY_LEAD_MS = 14 * 3_600_000
  * iOS client counts a date-only slot from the day after that date in the DEVICE's local day, and the
  * earliest zone on Earth (UTC+14) reaches that day at 10:00 UTC on the slot's own UTC date.
  *
- * `networks` (`media.studios`): a TMDB season on a platform in the drop table strikes at that
- * platform's drop instant when it is earlier (12 AM Pacific is 07:00–08:00 UTC) — the clients read
- * such a show at the drop instant (franchiseView, `timesExact`), and the server is never stricter.
+ * `origin`: a TMDB season on a platform in the drop table strikes at that platform's drop instant
+ * when it is earlier (12 AM Pacific is 07:00–08:00 UTC; Disney+'s 9 PM Eastern is later and changes
+ * nothing) — the clients read such a show at the drop instant (franchiseView, `timesExact`), and the
+ * server is never stricter.
  */
-export function slotStrikesAt(atMs: number, source: string, networks?: readonly string[] | null): number {
+export function slotStrikesAt(atMs: number, source: string, origin?: SlotOrigin): number {
   if (source === 'tmdb') {
     const utcMidnight = Math.floor(atMs / DAY_MS) * DAY_MS
     const dateStrike = utcMidnight + DAY_MS - DATE_ONLY_LEAD_MS
-    const drop = streamingDrop(networks)
+    const drop = streamingDrop(origin?.networks, origin?.countries)
     return drop ? Math.min(dateStrike, dropInstant(drop, atMs)) : dateStrike
   }
   return atMs
@@ -43,6 +51,6 @@ export function slotSource(source: string, timesExact: boolean): string {
  * Whether an airing slot has struck by `nowMs` (`slotStrikesAt`). Never stricter than any client —
  * a room the app shows unlocked, the server accepts.
  */
-export function slotPassed(atMs: number, source: string, nowMs: number, networks?: readonly string[] | null): boolean {
-  return slotStrikesAt(atMs, source, networks) <= nowMs
+export function slotPassed(atMs: number, source: string, nowMs: number, origin?: SlotOrigin): boolean {
+  return slotStrikesAt(atMs, source, origin) <= nowMs
 }

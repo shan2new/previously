@@ -53,15 +53,22 @@ iOS keeps ONE calendar per show: `Franchise.timeAnchor` is `.local` for an exact
 "clock or not" decision — `TemporalCopy`, episode alerts, the Live Activity, story reminders —
 reads the anchor, never `source == .anilist`. **Streaming drops come from a PLATFORM TABLE** (23 Oct:
 "Let's have platform specific table", owner — Trakt was considered and dropped):
-`services/streamingDrops.ts` holds each platform's release convention (Netflix and Prime Video
-12 AM Pacific, Paramount+ 3 AM Eastern, DST-aware), applied when a season's FIRST network
-(`media.studios[0]`) is listed and TVmaze has no usable time (`dropSchedule`). Unlike TVmaze's
-slots these strike BEFORE the date-only 10:00 UTC, so the server's slot rule takes the networks
-too (`slotStrikesAt(at, 'tmdb', networks)` = the earlier of the two) and every aired-rule select
-carries `networks: media.studios` — a new caller of `airedCount` must pass it, or the server is
-stricter than the app. Only platforms with ONE reported convention are listed: Apple TV, Disney+,
-HBO Max, Hulu and Peacock drop show by show and stay dates. `timesSource` (`tvmaze` | `platform`)
-says which; only TVmaze's is credited.
+`services/streamingDrops.ts` holds each platform's release convention on TMDB's date, DST-aware —
+Netflix, Prime Video, Paramount+ and Peacock 3 AM Eastern; HBO Max (and "Max") and Disney+ 9 PM
+Eastern for a US original, 3 AM Eastern for one made abroad; Hulu 12 AM Eastern; Apple TV 9 PM
+Pacific (TMDB files Apple's US originals under the Pacific date, the evening before its midnight-
+Eastern drop) or 12 AM Eastern for one made abroad — checked against TheTVDB's per-show times and
+TVmaze's dates on 23 Oct ("I don't think there are infinite platforms", owner: of ~45 streaming
+networks in the catalogue only these eight have one time). Applied when a season's FIRST network
+(`media.studios[0]`) is listed and TVmaze has no usable time (`dropSchedule`); "abroad" reads
+`media.origin_countries` (TMDB's origin countries, migration 0018, written by the TV refresh — null
+until then, and null or a list with the US reads the US time, never the earlier one). Some drops
+strike BEFORE the date-only 10:00 UTC, so the server's slot rule takes the origin too
+(`slotStrikesAt(at, 'tmdb', { networks, countries })` = the earlier of the two) and every
+aired-rule select carries `networks: media.studios, countries: media.originCountries` — a new
+caller of `airedCount` must pass both, or the server is stricter than the app. Left as dates:
+MGM+ and STARZ (broadcast slots TVmaze times), the Chinese and Korean platforms (a time per show),
+YouTube. `timesSource` (`tvmaze` | `platform`) says which; only TVmaze's is credited.
 TVmaze is CC BY-SA: the show page's foot credits it ("Air times from TVmaze"). AniList's `airingAt`
 is the JAPANESE TV broadcast, not the streaming release a viewer outside Japan watches (23 Oct,
 checked: Black Clover S2 airs 23:00 JST, Crunchyroll streams it an hour later). AnimeSchedule.net

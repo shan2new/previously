@@ -50,6 +50,10 @@ export const media = pgTable(
     genres: jsonb('genres').$type<string[]>().default([]),
     // Studios (AniList animation studios) or networks (TMDB) — names only, for the detail meta line.
     studios: jsonb('studios').$type<string[]>().default([]),
+    // TMDB: the show's countries of origin (ISO 3166-1, TMDB's order), which pick a platform's drop
+    // time for its international originals (services/streamingDrops.ts). Null = unknown: AniList,
+    // or a TV row the hourly refresh has not rewritten since migration 0018.
+    originCountries: jsonb('origin_countries').$type<string[]>(),
     // Per-episode metadata. TMDB: full (title/overview/air_date/still/runtime) from the season
     // endpoint. AniList: best-effort titles/thumbnails from streamingEpisodes (no per-ep overview).
     episodesList: jsonb('episodes_list').$type<EpisodeMeta[]>().default([]),

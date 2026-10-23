@@ -167,6 +167,7 @@ export async function upsertMediaRows(rows: MediaRow[], opts: { setLastAired?: b
         description: sqlExcluded('description'),
         genres: sqlExcluded('genres'),
         studios: sqlExcluded('studios'),
+        originCountries: sqlExcluded('origin_countries'),
         episodesList: sqlExcluded('episodes_list'),
         videos: sqlExcluded('videos'),
         nextAiringEpisode: sqlExcluded('next_airing_episode'),

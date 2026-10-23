@@ -567,6 +567,7 @@ export function tmdbSeasonToMediaRow(
     description: season.overview || show.overview || null,
     genres: (show.genres ?? []).map((g) => g.name),
     studios: tmdbNetworks(show),
+    originCountries: (show.origin_country ?? []).map((country) => country.toUpperCase()),
     episodesList: episodes,
     videos,
     nextAiringEpisode:

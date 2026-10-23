@@ -64,3 +64,35 @@ Airs today. Time is also not provided. Why is there no time man?", then, of a Tr
   Xcode (`APIBaseURL` `https://anime.cognipin.com`, the live Clerk key) and uploaded from the CLI
   ("Upload succeeded." / `** EXPORT SUCCEEDED **`, 16:18 UTC). Build 22 stays in App Review; build
   24 was not attached to any submission.
+
+## Night: every streaming platform with one release time
+
+The owner: "I don't think there are infinite platforms. Maybe you can confirm this with TVDB", then
+"What about other streaming platforms?", then "Add the five, and store each show's country so
+Disney+ and HBO Max international originals use 3 AM ET instead of 9 PM ET."
+
+- **The count.** The catalogue's 209 TV networks include about 45 streaming services. TheTVDB's
+  per-show "Airs" time (US Eastern) was read for 133 shows across them, and TMDB's episode dates
+  were compared with TVmaze's for 31. Eight platforms have one time: Netflix at 3 AM Eastern (8 of
+  12; two Spanish originals at 4 AM, Stranger Things' 8 PM event finale, Squid Game at 5 PM), Prime
+  Video (8 of 10), Paramount+ (7 of 7) and Peacock (5 of 6) at 3 AM Eastern; HBO Max and Disney+ at
+  9 PM Eastern for US originals (5 of 6 each) and around 3 AM Eastern for international ones
+  (Disney+'s Korean series at 4–5 PM in Seoul, HBO Max's Paolo and Collision); Hulu at 12 AM
+  Eastern (5 of 6); Apple TV at 12 AM Eastern (9 of 11; Severance and Pluribus at 9 PM the evening
+  before).
+- **Apple TV is dated the evening before.** For 8 of 10 Apple shows TMDB files the episode a day
+  earlier than TVmaze and TheTVDB — the Pacific date of a midnight-Eastern drop — so its rule is
+  9 PM Pacific on TMDB's date; the British exceptions (Slow Horses, Last Seen) carry the Eastern
+  date and read 12 AM Eastern. A "12 AM Eastern on TMDB's date" rule would have shown eight of ten
+  a day early.
+- **Left as dates:** MGM+ and STARZ (their times are broadcast slots, which TVmaze already gives
+  when it matches the show); Tencent Video, iQiyi, Youku, bilibili and the other Chinese platforms
+  (daily drops at a different time per show); TVING, wavve and the Korean platforms (mixed);
+  YouTube; about twenty services with one show each and no followers.
+- **Origin countries** are stored per TV season (`media.origin_countries`, migration 0018), written
+  by the hourly TV refresh. Until a row is rewritten, and for a co-production that lists the US,
+  the US time applies — never earlier than the international one.
+- Verified on the scratch copy after refreshing ten shows from TMDB: Deadly Tag and Made in Korea
+  at 4 PM in Seoul, Paolo at 9 AM in Paris, The Pitt and Hacks at 9 PM Eastern, Dark Matter at
+  midnight Eastern after TMDB's Pacific date, Slow Horses at midnight Eastern on its own date,
+  Crystal Lake at 3 AM Eastern.

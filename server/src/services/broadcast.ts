@@ -84,18 +84,20 @@ export function exactSchedule(m: {
 
 /**
  * A TMDB part's schedule at its platform's drop instant (services/streamingDrops.ts): every dated
- * episode and the next slot at the platform's wall-clock time on TMDB's date. Null when the part is
- * not TMDB, its first network is not in the drop table, or it carries no date at all. The server's
- * slot rule strikes such a season at the same instant (`slotStrikesAt` with its networks). Pure.
+ * episode and the next slot at the platform's wall-clock time on TMDB's date (the international
+ * time for a show made outside the US). Null when the part is not TMDB, its first network is not in
+ * the drop table, or it carries no date at all. The server's slot rule strikes such a season no
+ * later than that instant (`slotStrikesAt` with its origin). Pure.
  */
 export function dropSchedule(m: {
   source: string
   networks: readonly string[] | null | undefined
+  countries?: readonly string[] | null
   episodes: EpisodeMeta[] | null
   next: { episode: number; airingAt: number } | null
 }): ExactSchedule | null {
   if (m.source !== 'tmdb') return null
-  const drop = streamingDrop(m.networks)
+  const drop = streamingDrop(m.networks, m.countries)
   if (!drop) return null
   let dated = 0
   const episodes = (m.episodes ?? []).map((e) => {

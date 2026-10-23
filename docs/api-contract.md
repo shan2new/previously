@@ -31,10 +31,12 @@ keep decoding):
   exact (specials, which TVmaze numbers its own way, never count — and in such a show they carry
   no schedule at all); otherwise the whole show stays on dates, so a client reads ONE calendar per
   show. **Streaming drops (23 Oct)**: a season whose first network is a platform in the server's
-  drop table (Netflix and Prime Video at 12:00 AM America/Los_Angeles, Paramount+ at 3:00 AM
-  America/New_York) and that TVmaze does not time is read at that wall-clock time on TMDB's date,
-  every dated episode and the next slot alike — `timesExact: true` with `timesSource: "platform"`.
-  Other platforms (Apple TV, Disney+, HBO Max, Hulu, Peacock) stay dates. `timesSource` is
+  drop table and that TVmaze does not time is read at that platform's wall-clock time on TMDB's
+  date, every dated episode and the next slot alike — `timesExact: true` with `timesSource:
+  "platform"`. The table: Netflix, Prime Video, Paramount+, Peacock 3:00 AM Eastern; HBO Max / Max
+  and Disney+ 9:00 PM Eastern, or 3:00 AM Eastern for a show whose TMDB origin countries do not
+  include the US; Hulu 12:00 AM Eastern; Apple TV 9:00 PM Pacific, or 12:00 AM Eastern for a show
+  made outside the US. Every other network stays dates. `timesSource` is
   `"tvmaze"` | `"platform"` | null on parts and franchises (a franchise is `"tvmaze"` when any part
   is). `episodes[].airDate` is TMDB's date either way. **TVmaze is CC BY-SA**: a client surface
   showing a `timesSource: "tvmaze"` time must credit TVmaze ("Air times from TVmaze"); a platform
@@ -1541,7 +1543,8 @@ cannot be liked.
   and clamp keep this rule for a TVmaze-exact TV season too; the season is exact only when every
   broadcast instant falls at or after it, so a client striking at the instant is still never earlier.
   A season on a platform in the drop table strikes at the EARLIER of that rule and the platform's
-  drop instant (12 AM Pacific is 07:00–08:00 UTC) — the instant the app reads it at.
+  drop instant (12 AM Pacific is 07:00–08:00 UTC; a 9 PM Eastern drop is later and changes
+  nothing) — never after the instant the app reads it at.
 - A NOT_YET_RELEASED part has aired nothing. Only a FINISHED part counts as its size.
 - A part whose episodes are still (or were only partly) coming — RELEASING, HIATUS, CANCELLED —
   counts from **evidence only**: the episode before its next slot, a slot that has struck, and any

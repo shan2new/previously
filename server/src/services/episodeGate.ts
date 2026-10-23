@@ -38,6 +38,7 @@ export async function getEpisodeAccess(
       next: media.nextAiringEpisode,
       episodesList: media.episodesList,
       networks: media.studios,
+      countries: media.originCountries,
       watched: progress.episodesWatched,
     })
     .from(media)
@@ -56,6 +57,7 @@ export async function getEpisodeAccess(
       next: row.next ?? null,
       episodesList: row.episodesList ?? null,
       networks: row.networks,
+      countries: row.countries,
     },
     nowMs,
   )
@@ -93,6 +95,7 @@ export async function episodeOpenChecker(
       next: media.nextAiringEpisode,
       episodesList: media.episodesList,
       networks: media.studios,
+      countries: media.originCountries,
       watched: progress.episodesWatched,
     })
     .from(media)
@@ -108,6 +111,7 @@ export async function episodeOpenChecker(
         next: row.next ?? null,
         episodesList: row.episodesList ?? null,
         networks: row.networks,
+        countries: row.countries,
       },
       nowMs,
     )

@@ -257,7 +257,7 @@ function toPart(
   // the clients read as calendar days.
   const exact = timed
     ? exactSchedule({ source, episodes: listed, next: catalogNext, broadcast })
-      ?? dropSchedule({ source, networks: m.studios, episodes: listed, next: catalogNext })
+      ?? dropSchedule({ source, networks: m.studios, countries: m.originCountries, episodes: listed, next: catalogNext })
     : null
   const eps = exact?.episodes ?? listed
   const next = exact ? exact.next : catalogNext

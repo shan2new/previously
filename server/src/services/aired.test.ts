@@ -109,6 +109,16 @@ describe('airedCount', () => {
     expect(airedCount(row({ source: 'tmdb', episodes: 10, next, networks: ['Paramount+'] }), Date.UTC(2026, 8, 25, 7)).aired).toBe(6)
   })
 
+  it('never waits past the date-only rule for a platform that drops later (Disney+\'s 9 PM Eastern)', () => {
+    const list = eps(10, Date.UTC(2026, 8, 4, 17))
+    const american = row({ source: 'tmdb', episodes: 10, episodesList: list, networks: ['Disney+'], countries: ['US'] })
+    expect(airedCount(american, NOW).aired).toBe(4)
+    // Made abroad, the same platform drops at 3 AM Eastern: 07:00 UTC in September.
+    const korean = row({ source: 'tmdb', episodes: 10, episodesList: list, networks: ['Disney+'], countries: ['KR'] })
+    expect(airedCount(korean, Date.UTC(2026, 8, 25, 7)).aired).toBe(4)
+    expect(airedCount(american, Date.UTC(2026, 8, 25, 7)).aired).toBe(3)
+  })
+
   it('counts a TMDB next slot on the date-only rule', () => {
     const next = { episode: 6, airingAt: sec(Date.UTC(2026, 8, 25, 17)) }
     const tmdb = row({ source: 'tmdb', episodes: 10, next })

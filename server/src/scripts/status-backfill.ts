@@ -39,6 +39,7 @@ try {
       .select({
         mediaId: media.id, source: media.source, status: media.status, episodes: media.episodes,
         next: media.nextAiringEpisode, episodesList: media.episodesList, networks: media.studios,
+        countries: media.originCountries,
         watched: progress.episodesWatched,
         partKind: franchiseMember.partKind, relationship: franchiseMember.relationship, optional: franchiseMember.optional,
       })

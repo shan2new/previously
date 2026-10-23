@@ -62,15 +62,22 @@ describe('dropSchedule', () => {
   })
 
   it('needs a listed platform as the first network, TMDB and a date', () => {
-    expect(dropSchedule({ source: 'tmdb', networks: ['HBO Max'], episodes: season, next })).toBeNull()
+    expect(dropSchedule({ source: 'tmdb', networks: ['MGM+'], episodes: season, next })).toBeNull()
     expect(dropSchedule({ source: 'tmdb', networks: ['CBS', 'Paramount+'], episodes: season, next })).toBeNull()
     expect(dropSchedule({ source: 'anilist', networks: ['Netflix'], episodes: season, next })).toBeNull()
     expect(dropSchedule({ source: 'tmdb', networks: ['Netflix'], episodes: [ep(1, null)], next: null })).toBeNull()
   })
 
+  it('reads an international original at the platform\'s global time', () => {
+    const korean = dropSchedule({ source: 'tmdb', networks: ['Disney+'], countries: ['KR'], episodes: season, next })
+    expect(korean?.next).toEqual({ episode: 7, airingAt: Date.UTC(2026, 9, 23, 7) / 1000 })
+    const american = dropSchedule({ source: 'tmdb', networks: ['Disney+'], countries: ['US'], episodes: season, next })
+    expect(american?.next).toEqual({ episode: 7, airingAt: Date.UTC(2026, 9, 24, 1) / 1000 })
+  })
+
   it('strikes where the server\'s slot rule does, so a client is never earlier than the gate', () => {
     const out = dropSchedule({ source: 'tmdb', networks: ['Netflix'], episodes: season, next })!
-    expect(out.next!.airingAt * 1000).toBe(slotStrikesAt(ep7, 'tmdb', ['Netflix']))
-    expect(slotStrikesAt(ep7, 'tmdb', ['Netflix'])).toBeLessThan(slotStrikesAt(ep7, 'tmdb'))
+    expect(out.next!.airingAt * 1000).toBe(slotStrikesAt(ep7, 'tmdb', { networks: ['Netflix'] }))
+    expect(slotStrikesAt(ep7, 'tmdb', { networks: ['Netflix'] })).toBeLessThan(slotStrikesAt(ep7, 'tmdb'))
   })
 })
