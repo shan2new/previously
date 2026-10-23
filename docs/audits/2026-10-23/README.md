@@ -24,6 +24,8 @@ now", and "Commit push and deploy everything."
 ## Release
 
 - **Backend:** activated 14:33:20 UTC — see [the backend release record](../../qa/2026-10-23/backend-release/README.md).
+- **Dependency patch:** `fastify` 5.12.7 and `ip-address` 10.7.4 (commit `6647665`), production audit 0,
+  activated 15:06:23 UTC — see [the dependency release record](../../qa/2026-10-23/dependency-release/README.md).
 - **iOS 1.0 (23):** archived with the release Xcode (`APIBaseURL` `https://anime.cognipin.com`,
   the live Clerk key, team YLPZXZS2F4) and **uploaded from the CLI** — `xcodebuild -exportArchive`
   with `ios/ExportOptions-upload.plist` ended "Upload succeeded." / `** EXPORT SUCCEEDED **` at
