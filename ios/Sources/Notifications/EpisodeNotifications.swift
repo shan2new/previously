@@ -85,7 +85,7 @@ final class EpisodeNotifications {
         }
 
         // Real instants only: a TV show on TMDB's dates alone (synthesized 17:00 UTC) would alert at
-        // a meaningless instant; one at TVmaze broadcast times (`timesExact`) alerts like anime.
+        // a meaningless instant; one at real instants (`timesExact`: a broadcast slot or a platform drop) alerts like anime.
         let perShow: [[UpcomingAiring]] = library
             .filter { $0.effectiveStatus == .watching && !$0.timeAnchor.isDateOnly }
             .compactMap { f -> [UpcomingAiring]? in

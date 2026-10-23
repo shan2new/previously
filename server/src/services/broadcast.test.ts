@@ -2,7 +2,8 @@ import { describe, expect, it, vi } from 'vitest'
 
 vi.mock('../db/index.js', () => ({ db: {}, sql: {} }))
 
-const { exactSchedule } = await import('./broadcast.js')
+const { dropSchedule, exactSchedule } = await import('./broadcast.js')
+const { slotStrikesAt } = await import('./airingSlot.js')
 
 // TMDB's synthesized instant for a calendar date (tmdb/mapping.ts: 17:00 UTC).
 const date = (y: number, m: number, d: number) => Date.UTC(y, m - 1, d, 17)
@@ -45,5 +46,31 @@ describe('exactSchedule', () => {
   it('never touches AniList, and needs times to exist', () => {
     expect(exactSchedule({ source: 'anilist', episodes: season, next: null, broadcast: times })).toBeNull()
     expect(exactSchedule({ source: 'tmdb', episodes: season, next: null, broadcast: null })).toBeNull()
+  })
+})
+
+describe('dropSchedule', () => {
+  const ep7 = date(2026, 10, 23)
+  const season = [ep(6, ep7 - 7 * 24 * H), ep(7, ep7), ep(8, null)]
+  const next = { episode: 7, airingAt: ep7 / 1000 }
+
+  it('puts every dated episode and the next slot at the platform\'s drop instant', () => {
+    const out = dropSchedule({ source: 'tmdb', networks: ['Paramount+'], episodes: season, next })
+    expect(out?.via).toBe('platform')
+    expect(out?.episodes.map((e) => e.airDate)).toEqual([Date.UTC(2026, 9, 16, 7), Date.UTC(2026, 9, 23, 7), null])
+    expect(out?.next).toEqual({ episode: 7, airingAt: Date.UTC(2026, 9, 23, 7) / 1000 })
+  })
+
+  it('needs a listed platform as the first network, TMDB and a date', () => {
+    expect(dropSchedule({ source: 'tmdb', networks: ['HBO Max'], episodes: season, next })).toBeNull()
+    expect(dropSchedule({ source: 'tmdb', networks: ['CBS', 'Paramount+'], episodes: season, next })).toBeNull()
+    expect(dropSchedule({ source: 'anilist', networks: ['Netflix'], episodes: season, next })).toBeNull()
+    expect(dropSchedule({ source: 'tmdb', networks: ['Netflix'], episodes: [ep(1, null)], next: null })).toBeNull()
+  })
+
+  it('strikes where the server\'s slot rule does, so a client is never earlier than the gate', () => {
+    const out = dropSchedule({ source: 'tmdb', networks: ['Netflix'], episodes: season, next })!
+    expect(out.next!.airingAt * 1000).toBe(slotStrikesAt(ep7, 'tmdb', ['Netflix']))
+    expect(slotStrikesAt(ep7, 'tmdb', ['Netflix'])).toBeLessThan(slotStrikesAt(ep7, 'tmdb'))
   })
 })

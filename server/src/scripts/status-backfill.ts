@@ -38,7 +38,8 @@ try {
     const members: StatusMemberRow[] = await db
       .select({
         mediaId: media.id, source: media.source, status: media.status, episodes: media.episodes,
-        next: media.nextAiringEpisode, episodesList: media.episodesList, watched: progress.episodesWatched,
+        next: media.nextAiringEpisode, episodesList: media.episodesList, networks: media.studios,
+        watched: progress.episodesWatched,
         partKind: franchiseMember.partKind, relationship: franchiseMember.relationship, optional: franchiseMember.optional,
       })
       .from(franchiseMember)

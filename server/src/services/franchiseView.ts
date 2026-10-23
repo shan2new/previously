@@ -31,7 +31,7 @@ import { withReleaseWindow } from './releaseWindow.js'
 import { resolveRelatedFranchiseIds } from './catalogEnrichment.js'
 import { stripHtml } from '../util/text.js'
 import { catalogLinkViews } from './catalogLinks.js'
-import { exactSchedule, loadBroadcastTimes, type BroadcastTimes } from './broadcast.js'
+import { dropSchedule, exactSchedule, loadBroadcastTimes, type BroadcastTimes } from './broadcast.js'
 import { limitArtwork, rankLogos } from '../util/artwork.js'
 import { consumerFranchiseConditions } from './consumerContent.js'
 
@@ -236,7 +236,8 @@ function releasePrecision(nextAiringAt: number | null, source: MediaSource, broa
 
 /** Derive a FranchisePart's airing fields from a media row + the user's progress. Mirrors legacy `toShow`.
  *  `opts.episodes` includes the full per-episode list (detail only; omitted from lean list payloads).
- *  `broadcast`: the season's TVmaze broadcast times, which make its schedule exact (`exactSchedule`). */
+ *  `timed`: whether a TMDB season may be read at real instants — its TVmaze broadcast times
+ *  (`broadcast`, `exactSchedule`), else its platform's drop time (`dropSchedule`). */
 function toPart(
   m: MediaRow,
   member: MemberRow,
@@ -244,15 +245,20 @@ function toPart(
   source: MediaSource,
   opts?: { episodes?: boolean },
   broadcast?: BroadcastTimes | null,
+  timed = true,
 ): FranchisePart {
   const title = m.titleEnglish || m.titleRomaji || `Anime #${m.id}`
   const isReleasing = m.status === 'RELEASING'
   const total = m.episodes ?? 0
   const listed = m.episodesList ?? []
   const catalogNext = m.nextAiringEpisode && m.nextAiringEpisode.airingAt > 0 ? m.nextAiringEpisode : null
-  // The schedule (next slot, airings, last aired) at real broadcast instants when the season has
-  // them; the episode LIST keeps TMDB's dates, which the clients read as calendar days.
-  const exact = exactSchedule({ source, episodes: listed, next: catalogNext, broadcast })
+  // The schedule (next slot, airings, last aired) at real instants when the season has them — the
+  // network's broadcast slot, else the platform's drop; the episode LIST keeps TMDB's dates, which
+  // the clients read as calendar days.
+  const exact = timed
+    ? exactSchedule({ source, episodes: listed, next: catalogNext, broadcast })
+      ?? dropSchedule({ source, networks: m.studios, episodes: listed, next: catalogNext })
+    : null
   const eps = exact?.episodes ?? listed
   const next = exact ? exact.next : catalogNext
   const airedEpisodes = deriveAiredEpisodes({
@@ -309,6 +315,7 @@ function toPart(
     episodes: opts?.episodes ? listed : [],
     airings,
     timesExact: source !== 'tmdb' || exact != null,
+    timesSource: exact?.via ?? null,
     videos: scopedPartVideos(m, member),
   }
 }
@@ -391,11 +398,11 @@ function buildFranchise(
   broadcastById?: Map<number, BroadcastTimes>,
 ): Franchise {
   const source: MediaSource = (f.source as MediaSource) ?? 'anilist'
-  const partsWith = (broadcast: Map<number, BroadcastTimes> | undefined) => sortParts(
+  const partsWith = (timed: boolean) => sortParts(
     mems
       .map((mem) => {
         const m = mediaById.get(mem.mediaId)
-        return m ? toPart(m, mem, watchedById.get(mem.mediaId) ?? 0, source, opts, broadcast?.get(mem.mediaId)) : null
+        return m ? toPart(m, mem, watchedById.get(mem.mediaId) ?? 0, source, opts, broadcastById?.get(mem.mediaId), timed) : null
       })
       .filter((p): p is FranchisePart => p !== null),
   )
@@ -405,12 +412,16 @@ function buildFranchise(
   // Specials (TMDB's season 0) never count: TVmaze numbers them its own way, so they never carry
   // broadcast times — and in a show read at real instants they keep no schedule of their own,
   // since a date read as an instant would print a clock nobody published.
-  let parts = partsWith(broadcastById)
+  let parts = partsWith(true)
   const scheduled = parts.filter((p) =>
     (p.nextAiringAt != null || p.lastAiredAt != null || p.airings.length > 0) && !(source === 'tmdb' && p.kind === 'special'))
   const timesExact = scheduled.every((p) => p.timesExact) && (source !== 'tmdb' || scheduled.length > 0)
-  if (source === 'tmdb' && !timesExact && parts.some((p) => p.timesExact)) parts = partsWith(undefined)
+  if (source === 'tmdb' && !timesExact && parts.some((p) => p.timesExact)) parts = partsWith(false)
   if (source === 'tmdb' && timesExact) parts = parts.map((p) => (p.timesExact ? p : unscheduled(p)))
+  // TVmaze's credit is owed wherever one of its slots is shown (CC BY-SA); else the platform's.
+  const timesSource = !timesExact || source !== 'tmdb' ? null
+    : parts.some((p) => p.timesSource === 'tvmaze') ? 'tvmaze'
+      : parts.some((p) => p.timesSource === 'platform') ? 'platform' : null
 
   const partCounts: Partial<Record<PartKind, number>> = {}
   for (const p of parts) partCounts[p.kind] = (partCounts[p.kind] ?? 0) + 1
@@ -449,6 +460,7 @@ function buildFranchise(
     id: f.id,
     source,
     timesExact,
+    timesSource,
     title: f.title,
     cover: f.cover ?? '',
     banner: f.banner ?? '',

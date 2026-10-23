@@ -1265,8 +1265,10 @@ final class AppModel {
         let episode: Int
         let at: Int64
         /// It has happened: an exact instant that has passed, or a date-only release whose day is
-        /// today or earlier — a TMDB drop is out at some point on its day, and the calendar cannot
-        /// know when, so the whole day counts (the row can be marked from the morning on).
+        /// BEFORE today — the show page's rule (`FranchisePart.passedAirings`). On its own day a
+        /// date-only drop has no instant to have passed, so it is today's, not out: Home called
+        /// Seven Havens' Episode 7 "Aired today" beside the show page's "Airs today" (23 Oct,
+        /// owner), and the row could be marked before the server's gate opens for that date.
         let aired: Bool
         var id: String { "\(franchise.id)/\(part.mediaId)/\(episode)" }
         var dateOnly: Bool { franchise.timeAnchor.isDateOnly }
@@ -1339,7 +1341,7 @@ final class AppModel {
                     // instant locally filed it a day late east of UTC+7.
                     let offset = Int((f.dayKey(of: a.at) - todayKey) / Formatting.D)
                     guard (AppModel.scheduleBack...AppModel.scheduleAhead).contains(offset) else { continue }
-                    let aired = f.timeAnchor.isDateOnly ? offset <= 0 : a.at <= now
+                    let aired = f.timeAnchor.isDateOnly ? offset < 0 : a.at <= now
                     buckets[offset, default: []].append(
                         ScheduleEntry(franchise: f, part: part, episode: a.episode, at: a.at, aired: aired))
                 }

@@ -131,6 +131,7 @@ async function planProgressWrite(connection: MutationConnection, userId: string,
       episodes: media.episodes,
       next: media.nextAiringEpisode,
       episodesList: media.episodesList,
+      networks: media.studios,
       watched: progress.episodesWatched,
     })
     .from(media)
@@ -179,6 +180,7 @@ async function statusMemberRows(connection: MutationConnection, userId: string, 
       episodes: media.episodes,
       next: media.nextAiringEpisode,
       episodesList: media.episodesList,
+      networks: media.studios,
       watched: progress.episodesWatched,
       partKind: franchiseMember.partKind,
       relationship: franchiseMember.relationship,
@@ -198,6 +200,8 @@ export interface ProgressMediaRow {
   episodes: number | null
   next: { episode: number; airingAt: number } | null
   episodesList: EpisodeMeta[] | null
+  /** media.studios — a TMDB season's networks: a streaming platform's drop instant counts. */
+  networks?: string[] | null
   /** The caller's stored count for the part (null / absent = none): a write never pulls it down. */
   watched?: number | null
 }
@@ -210,6 +214,7 @@ function toAiredInput(row: Omit<ProgressMediaRow, 'mediaId'>): AiredInput {
     episodes: row.episodes,
     next: row.next ?? null,
     episodesList: row.episodesList ?? null,
+    networks: row.networks ?? null,
   }
 }
 
@@ -305,6 +310,7 @@ export async function clampUnairedProgress(): Promise<number> {
       episodes: media.episodes,
       next: media.nextAiringEpisode,
       episodesList: media.episodesList,
+      networks: media.studios,
     })
     .from(progress)
     .innerJoin(media, eq(media.id, progress.mediaId))

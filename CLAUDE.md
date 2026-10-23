@@ -51,7 +51,17 @@ server's gate and clamp keep their date-only rule and an exact client is still n
 A show is exact only when every scheduled season is (specials excluded, and stripped of schedule);
 iOS keeps ONE calendar per show: `Franchise.timeAnchor` is `.local` for an exact show, and every
 "clock or not" decision — `TemporalCopy`, episode alerts, the Live Activity, story reminders —
-reads the anchor, never `source == .anilist`. Streaming drops have no TVmaze time and stay dates.
+reads the anchor, never `source == .anilist`. **Streaming drops come from a PLATFORM TABLE** (23 Oct:
+"Let's have platform specific table", owner — Trakt was considered and dropped):
+`services/streamingDrops.ts` holds each platform's release convention (Netflix and Prime Video
+12 AM Pacific, Paramount+ 3 AM Eastern, DST-aware), applied when a season's FIRST network
+(`media.studios[0]`) is listed and TVmaze has no usable time (`dropSchedule`). Unlike TVmaze's
+slots these strike BEFORE the date-only 10:00 UTC, so the server's slot rule takes the networks
+too (`slotStrikesAt(at, 'tmdb', networks)` = the earlier of the two) and every aired-rule select
+carries `networks: media.studios` — a new caller of `airedCount` must pass it, or the server is
+stricter than the app. Only platforms with ONE reported convention are listed: Apple TV, Disney+,
+HBO Max, Hulu and Peacock drop show by show and stay dates. `timesSource` (`tvmaze` | `platform`)
+says which; only TVmaze's is credited.
 TVmaze is CC BY-SA: the show page's foot credits it ("Air times from TVmaze"). AniList's `airingAt`
 is the JAPANESE TV broadcast, not the streaming release a viewer outside Japan watches (23 Oct,
 checked: Black Clover S2 airs 23:00 JST, Crunchyroll streams it an hour later). AnimeSchedule.net

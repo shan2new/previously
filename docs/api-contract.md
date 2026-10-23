@@ -30,9 +30,16 @@ keep decoding):
   `timesExact: true`. The franchise says `timesExact: true` only when EVERY part with a schedule is
   exact (specials, which TVmaze numbers its own way, never count — and in such a show they carry
   no schedule at all); otherwise the whole show stays on dates, so a client reads ONE calendar per
-  show. Streaming drops (Netflix, Paramount+…) have no time on TVmaze and stay dates.
-  `episodes[].airDate` is TMDB's date either way. **TVmaze is CC BY-SA**: a client surface showing
-  a `timesExact` TV time must credit TVmaze ("Air times from TVmaze").
+  show. **Streaming drops (23 Oct)**: a season whose first network is a platform in the server's
+  drop table (Netflix and Prime Video at 12:00 AM America/Los_Angeles, Paramount+ at 3:00 AM
+  America/New_York) and that TVmaze does not time is read at that wall-clock time on TMDB's date,
+  every dated episode and the next slot alike — `timesExact: true` with `timesSource: "platform"`.
+  Other platforms (Apple TV, Disney+, HBO Max, Hulu, Peacock) stay dates. `timesSource` is
+  `"tvmaze"` | `"platform"` | null on parts and franchises (a franchise is `"tvmaze"` when any part
+  is). `episodes[].airDate` is TMDB's date either way. **TVmaze is CC BY-SA**: a client surface
+  showing a `timesSource: "tvmaze"` time must credit TVmaze ("Air times from TVmaze"); a platform
+  time needs no credit. A server from before this field sends no `timesSource`; its exact TV shows
+  are all TVmaze's.
   **Announced seasons**: a season with a known future air date ships that premiere as its next
   slot (`nextEpisodeNumber: 1`, `nextAiringAt` = premiere at 17:00 UTC), matching how AniList
   announces a season — so clients read the premiere date off `nextAiringAt` for either source.
@@ -179,7 +186,9 @@ authenticated user's progress.
   "episodes": [ EpisodeMeta, … ], // FULL list on GET /franchises/:id ONLY; [] on list/library payloads
   "airings": [ Airing, … ],    // dated episodes inside Schedule's window, oldest first — on EVERY payload
   "timesExact": true,          // the schedule above is at real instants: always for AniList; for TMDB,
-                              // when TVmaze's broadcast times cover the season (see "tmdb" above)
+                              // when TVmaze's broadcast times cover the season or its platform has a
+                              // drop time (see "tmdb" above)
+  "timesSource": null,        // TMDB only: "tvmaze" | "platform" when timesExact; null otherwise
   "videos": [ FranchiseVideo, … ] // trailers/teasers scoped to this exact part
 }
 ```
@@ -221,7 +230,9 @@ next. Empty when nothing in the window is dated.
   "id": "uuid",
   "source": "anilist",             // anilist | tmdb (default anilist)
   "timesExact": true,              // every scheduled part is `timesExact`: read the whole show at real
-                                   // instants (anime always; TV when TVmaze covers it). Summaries stay dates.
+                                   // instants (anime always; TV when TVmaze or a platform drop time covers
+                                   // it). Summaries stay dates.
+  "timesSource": null,             // TV: "tvmaze" if any part's times are TVmaze's (credit it), else "platform"
   "title": "Attack on Titan",
   "cover": "https://…",
   "banner": "https://…",
@@ -1527,8 +1538,10 @@ cannot be liked.
   time zone on Earth (UTC+14) reaches the day after it. The client counts a date-only episode from
   the day after its date in the device's local day, which is never earlier, so **the server is never
   stricter than the client**: a room the app shows unlocked, the server accepts. The server's gate
-  and clamp keep this rule for a `timesExact` TV season too; the season is exact only when every
+  and clamp keep this rule for a TVmaze-exact TV season too; the season is exact only when every
   broadcast instant falls at or after it, so a client striking at the instant is still never earlier.
+  A season on a platform in the drop table strikes at the EARLIER of that rule and the platform's
+  drop instant (12 AM Pacific is 07:00–08:00 UTC) — the instant the app reads it at.
 - A NOT_YET_RELEASED part has aired nothing. Only a FINISHED part counts as its size.
 - A part whose episodes are still (or were only partly) coming — RELEASING, HIATUS, CANCELLED —
   counts from **evidence only**: the episode before its next slot, a slot that has struck, and any

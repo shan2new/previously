@@ -130,6 +130,7 @@ function part(overrides: Partial<FranchisePart> = {}): FranchisePart {
   return {
     mediaId: 1,
     timesExact: false,
+    timesSource: null,
     kind: 'season',
     sequence: 1,
     watchOrder: 1,

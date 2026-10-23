@@ -37,6 +37,7 @@ function part(overrides: Partial<FranchisePart> = {}): FranchisePart {
   return {
     mediaId: 100,
     timesExact: false,
+    timesSource: null,
     kind: 'season',
     sequence: 1,
     watchOrder: 1,
@@ -91,6 +92,7 @@ function franchise(overrides: Partial<Franchise> = {}): Franchise {
     id: FID,
     source: 'anilist',
     timesExact: false,
+    timesSource: null,
     title: 'Show',
     cover: 'https://img.example/f.jpg',
     banner: '',

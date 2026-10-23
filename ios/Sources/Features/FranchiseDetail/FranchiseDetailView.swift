@@ -3401,11 +3401,12 @@ extension FranchiseDetailView {
     /// lockup's watch line it was a second line of grey in the one place a viewer looks. Drawn only
     /// when the line is.
     /// The page's data credits as one block at its foot: JustWatch's (`watchCredit`) and TVmaze's —
-    /// a TV show read at real broadcast times (`Franchise.timesExact`, 23 Oct) takes them from
-    /// TVmaze, whose CC BY-SA licence asks for credit. Nothing when neither applies.
+    /// a TV show read at TVmaze's broadcast times (`Franchise.timesFromTVmaze`, 23 Oct), whose CC
+    /// BY-SA licence asks for credit. A platform's drop time is the app's own table: no credit.
+    /// Nothing when neither applies.
     @ViewBuilder
     private func pageCredits(_ f: Franchise) -> some View {
-        let broadcast = f.source == .tmdb && f.timesExact
+        let broadcast = f.timesFromTVmaze
         if Self.streamable(providers) != nil || broadcast {
             VStack(alignment: .leading, spacing: ThemeSpace.x2) {
                 watchCredit

@@ -323,13 +323,19 @@ export interface FranchisePart {
   /**
    * The schedule (`nextAiringAt`, `lastAiredAt`, `airings`, `release`) is at real broadcast
    * instants: always for AniList; for a TMDB season, when TVmaze's broadcast times cover it whole
-   * (services/broadcast.ts). False for a TMDB season read as calendar dates. `episodes[].airDate`
-   * stays TMDB's date either way.
+   * or its platform has a drop time (services/broadcast.ts, services/streamingDrops.ts). False for
+   * a TMDB season read as calendar dates. `episodes[].airDate` stays TMDB's date either way.
    */
   timesExact: boolean
+  /** Where a TMDB season's instants come from: `tvmaze` (broadcast slots), `platform` (the
+   *  platform's drop convention); null for a date-only season and for AniList. */
+  timesSource: TimesSource | null
   /** Part-specific trailers/teasers. Populated on detail/library; safe to ignore when empty. */
   videos: FranchiseVideo[]
 }
+
+/** Where a TMDB schedule's real instants come from (`timesExact`). */
+export type TimesSource = 'tvmaze' | 'platform'
 
 /** One dated episode: its number and its air instant (ms epoch; TMDB's is date-only at 17:00 UTC
  *  unless its part is `timesExact`). */
@@ -344,9 +350,12 @@ export interface Franchise {
   /**
    * Every part with a schedule is `timesExact`, so the whole show is read at real instants — a
    * client keeps ONE calendar per show (`MediaSource.timeAnchor` on iOS). Always true for AniList;
-   * for TMDB, true only when TVmaze covers every scheduled season (and some season is scheduled).
+   * for TMDB, true only when every scheduled season has real instants (and some season is scheduled).
    */
   timesExact: boolean
+  /** A TMDB show's times: `tvmaze` when any season shows a TVmaze slot (its credit is owed),
+   *  else `platform`; null when the show is dates, and for AniList. */
+  timesSource: TimesSource | null
   title: string
   cover: string
   banner: string

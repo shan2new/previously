@@ -164,13 +164,17 @@ async function membersOf(franchiseIds: string[], nowMs: number): Promise<Map<str
         episodes: media.episodes,
         next: media.nextAiringEpisode,
         episodesList: media.episodesList,
+        networks: media.studios,
       })
       .from(franchiseMember)
       .innerJoin(media, eq(media.id, franchiseMember.mediaId))
       .where(inArray(franchiseMember.franchiseId, unique.slice(i, i + 400)))
     for (const row of rows) {
       const count = airedCount(
-        { source: row.source, status: row.status, episodes: row.episodes, next: row.next ?? null, episodesList: row.episodesList ?? null },
+        {
+          source: row.source, status: row.status, episodes: row.episodes, next: row.next ?? null,
+          episodesList: row.episodesList ?? null, networks: row.networks,
+        },
         nowMs,
       )
       const member: MemberRow = {
@@ -535,6 +539,7 @@ export async function applyPlan(
         episodes: media.episodes,
         next: media.nextAiringEpisode,
         episodesList: media.episodesList,
+        networks: media.studios,
         watched: progress.episodesWatched,
         genres: media.genres,
       })

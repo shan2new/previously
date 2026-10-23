@@ -5,6 +5,7 @@ import { TMDB_ID_OFFSET } from '../tmdb/mapping.js'
 import type { EpisodeMeta } from '../types/api.js'
 import { slotStrikesAt } from './airingSlot.js'
 import { isMissingTable } from './audience.js'
+import { dropInstant, streamingDrop } from './streamingDrops.js'
 
 // Real broadcast instants for TMDB seasons (23 Oct: "It shows incorrect airing time and date… it
 // doesn't match the timezone and the actual airing time well", owner). TMDB dates an episode with no
@@ -17,6 +18,11 @@ import { isMissingTable } from './audience.js'
 // (`slotStrikesAt`, the earliest any time zone reaches the next day). A season whose broadcast would
 // strike BEFORE that is left date-only, so an exact client is only ever later than the server —
 // the contract's "a client may unlock later than the server, never earlier".
+//
+// A season TVmaze cannot time (a streaming drop: its web channels carry no airtime) may still be
+// exact on its platform's release convention (`dropSchedule`, services/streamingDrops.ts). Those
+// instants come BEFORE the date-only strike, so the slot rule takes the season's networks and
+// strikes it at the drop instant too (airingSlot.ts).
 
 /** TMDB episode number (a string key, as jsonb keeps it) → broadcast instant, ms epoch. */
 export type BroadcastTimes = Record<string, number>
@@ -30,6 +36,8 @@ export interface ExactSchedule {
   episodes: EpisodeMeta[]
   /** The next slot at its broadcast instant (`airingAt` in seconds), when there is one. */
   next: { episode: number; airingAt: number } | null
+  /** Where the instants come from: TVmaze's broadcast slots, or the platform's drop convention. */
+  via: 'tvmaze' | 'platform'
 }
 
 /**
@@ -71,7 +79,35 @@ export function exactSchedule(m: {
     next = { episode: m.next.episode, airingAt: Math.round(t / 1000) }
   }
   if (dated === 0 && !next) return null
-  return { episodes, next }
+  return { episodes, next, via: 'tvmaze' }
+}
+
+/**
+ * A TMDB part's schedule at its platform's drop instant (services/streamingDrops.ts): every dated
+ * episode and the next slot at the platform's wall-clock time on TMDB's date. Null when the part is
+ * not TMDB, its first network is not in the drop table, or it carries no date at all. The server's
+ * slot rule strikes such a season at the same instant (`slotStrikesAt` with its networks). Pure.
+ */
+export function dropSchedule(m: {
+  source: string
+  networks: readonly string[] | null | undefined
+  episodes: EpisodeMeta[] | null
+  next: { episode: number; airingAt: number } | null
+}): ExactSchedule | null {
+  if (m.source !== 'tmdb') return null
+  const drop = streamingDrop(m.networks)
+  if (!drop) return null
+  let dated = 0
+  const episodes = (m.episodes ?? []).map((e) => {
+    if (e.airDate == null) return e
+    dated++
+    return { ...e, airDate: dropInstant(drop, e.airDate) }
+  })
+  const next = m.next && m.next.airingAt > 0
+    ? { episode: m.next.episode, airingAt: Math.round(dropInstant(drop, m.next.airingAt * 1000) / 1000) }
+    : null
+  if (dated === 0 && !next) return null
+  return { episodes, next, via: 'platform' }
 }
 
 let missingWarned = false

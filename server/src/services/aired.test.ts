@@ -96,6 +96,19 @@ describe('airedCount', () => {
     expect(airedCount(tmdb, Date.UTC(2026, 8, 25, 9))).toEqual({ aired: 3, known: true })
   })
 
+  it('counts a TMDB season on a listed platform from its drop instant (12 AM Pacific)', () => {
+    // 25 Sep 2026 is PDT: Netflix's midnight is 07:00 UTC, before the date-only 10:00 UTC.
+    const list = eps(10, Date.UTC(2026, 8, 4, 17))
+    const netflix = row({ source: 'tmdb', episodes: 10, episodesList: list, networks: ['Netflix'] })
+    expect(airedCount(netflix, Date.UTC(2026, 8, 25, 7)).aired).toBe(4)
+    expect(airedCount(netflix, Date.UTC(2026, 8, 25, 6, 59)).aired).toBe(3)
+    // A broadcaster first is still a date.
+    const fox = row({ source: 'tmdb', episodes: 10, episodesList: list, networks: ['FOX', 'Netflix'] })
+    expect(airedCount(fox, Date.UTC(2026, 8, 25, 9)).aired).toBe(3)
+    const next = { episode: 6, airingAt: sec(Date.UTC(2026, 8, 25, 17)) }
+    expect(airedCount(row({ source: 'tmdb', episodes: 10, next, networks: ['Paramount+'] }), Date.UTC(2026, 8, 25, 7)).aired).toBe(6)
+  })
+
   it('counts a TMDB next slot on the date-only rule', () => {
     const next = { episode: 6, airingAt: sec(Date.UTC(2026, 8, 25, 17)) }
     const tmdb = row({ source: 'tmdb', episodes: 10, next })

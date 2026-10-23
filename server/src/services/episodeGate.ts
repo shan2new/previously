@@ -37,6 +37,7 @@ export async function getEpisodeAccess(
       episodes: media.episodes,
       next: media.nextAiringEpisode,
       episodesList: media.episodesList,
+      networks: media.studios,
       watched: progress.episodesWatched,
     })
     .from(media)
@@ -54,6 +55,7 @@ export async function getEpisodeAccess(
       episodes: row.episodes,
       next: row.next ?? null,
       episodesList: row.episodesList ?? null,
+      networks: row.networks,
     },
     nowMs,
   )
@@ -90,6 +92,7 @@ export async function episodeOpenChecker(
       episodes: media.episodes,
       next: media.nextAiringEpisode,
       episodesList: media.episodesList,
+      networks: media.studios,
       watched: progress.episodesWatched,
     })
     .from(media)
@@ -104,6 +107,7 @@ export async function episodeOpenChecker(
         episodes: row.episodes,
         next: row.next ?? null,
         episodesList: row.episodesList ?? null,
+        networks: row.networks,
       },
       nowMs,
     )

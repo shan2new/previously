@@ -27,6 +27,9 @@ export interface AiredInput {
   /** media.next_airing_episode — `airingAt` in SECONDS. */
   next: { episode: number; airingAt: number } | null
   episodesList: EpisodeMeta[] | null
+  /** media.studios — a TMDB season's networks; a platform in the drop table strikes at its drop
+   *  instant (services/streamingDrops.ts). Omitted: the date-only rule. */
+  networks?: readonly string[] | null
 }
 
 /** `aired`: episodes out by now. `known`: whether the row carries any evidence of a count at all. */
@@ -59,9 +62,9 @@ export function airedCount(row: AiredInput, nowMs: number): AiredCount {
   if (row.status != null && OPEN_ENDED.has(row.status)) {
     // Evidence only — never the catalogue's total, which counts announced episodes as aired.
     let aired = next ? Math.max(0, next.episode - 1) : 0
-    if (next && next.episode > aired && slotPassed(next.airingAt * 1000, row.source, nowMs)) aired = next.episode
+    if (next && next.episode > aired && slotPassed(next.airingAt * 1000, row.source, nowMs, row.networks)) aired = next.episode
     for (const e of list) {
-      if (e.airDate != null && e.number > aired && slotPassed(e.airDate, row.source, nowMs)) aired = e.number
+      if (e.airDate != null && e.number > aired && slotPassed(e.airDate, row.source, nowMs, row.networks)) aired = e.number
     }
     return { aired, known: next != null || list.some((e) => e.airDate != null) }
   }

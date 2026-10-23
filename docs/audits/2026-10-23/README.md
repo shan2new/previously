@@ -32,3 +32,30 @@ now", and "Commit push and deploy everything."
   14:39 UTC. The Organizer was not used: Xcode was behind a Screen Time limit, and the CLI path,
   which failed for builds 16 and 18, worked this time. Build 22 stays in App Review; build 23 was not
   attached to any submission.
+
+## Evening: streaming drop times, and Home's "Aired today" (build 24)
+
+The owner: "in the Home shows Aired today for Seven Havens but shows correctly that the Episode 7
+Airs today. Time is also not provided. Why is there no time man?", then, of a Trakt integration,
+"ditch Trakt for now please. Let's have platform specific table."
+
+- **Home agreed with the show page.** Home's airing rule read a date-only drop as out the moment its
+  synthesized 17:00 UTC passed — before its day had ended anywhere — while the show page counts a
+  date only once the day is over. Home now uses the show page's rule (`AppModel.swift`).
+- **A platform table for streaming drops** (`server/src/services/streamingDrops.ts`). TMDB has no
+  clock for a streaming release and TVmaze leaves a web channel's airtime blank, so the server now
+  reads a season whose first network is Netflix or Prime Video at 12:00 AM Pacific, and Paramount+
+  at 3:00 AM Eastern (DST-aware), as `timesExact` with `timesSource: "platform"`. These are each
+  platform's reported convention for its originals, not per-episode data: a premiere moved to the
+  evening before shows later than the platform, never earlier. Apple TV, Disney+, HBO Max, Hulu and
+  Peacock have no single convention and stay dates. Avatar: Seven Havens now reads "Airs 30 Oct at
+  12:30 PM" in India; Episodes 7–9 struck at 07:00 UTC on 23 Oct.
+- **The server agrees to the minute.** Those instants come before the date-only strike (10:00 UTC),
+  so the slot rule takes the season's networks and strikes at the earlier of the two; every
+  aired-rule read (the gate, the progress clamp, the import) now selects `media.studios`. Checked on
+  the scratch copy: Avatar's count goes from 6 to 9 at exactly 07:00 UTC.
+- **Credit.** Only TVmaze's times carry "Air times from TVmaze" (`Franchise.timesFromTVmaze`); a
+  build 23 client against this server credits TVmaze for a platform time too (harmless, fixed in 24).
+- Verified: server typecheck, 1,365 unit tests (the Clerk-migration file timed out once under a load
+  average of 237 and passed alone); scratch server + QA simulator (Home's lead card "Episode 7 ·
+  Aired 9h ago"; the show page's rows "Aired today" and "Airs 30 Oct at 12:30 PM").
