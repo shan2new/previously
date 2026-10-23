@@ -17,7 +17,7 @@ import type {
   WatchStatus,
 } from '../types/api.js'
 import { announcementForPart, installmentName, matchPart } from '../news/installment.js'
-import { slotPassed, slotStrikesAt } from '../services/airingSlot.js'
+import { slotPassed, slotSource, slotStrikesAt } from '../services/airingSlot.js'
 import { catalogProviderUrl, currentUpcoming, pickCatalogUpcomingPart } from '../services/catalogUpcoming.js'
 import { resolveReleaseWindow } from '../services/releaseWindow.js'
 import { formatSubject, parseSubject } from '../social/subjects.js'
@@ -167,7 +167,8 @@ export function toFeedFranchise(f: Franchise, status: WatchStatus | null): FeedF
   }
 }
 
-const precisionFor = (f: Franchise): FeedPremiere['precision'] => (f.source === 'tmdb' ? 'date_only' : 'exact')
+/** A show's slots are dates unless it is TMDB at real broadcast instants (`timesExact`, one calendar per show). */
+const precisionFor = (f: Franchise): FeedPremiere['precision'] => (f.source === 'tmdb' && !f.timesExact ? 'date_only' : 'exact')
 
 /** A part's own premiere slot: its next airing, else its first dated airing. */
 const slotOf = (p: FranchisePart): number | null => p.nextAiringAt ?? p.airings[0]?.at ?? null
@@ -740,7 +741,7 @@ function latestAired(p: FranchisePart, source: Franchise['source'], nowMs: numbe
   if (p.status === 'NOT_YET_RELEASED') return null
   let latest: Airing | null = null
   for (const a of p.airings) {
-    if (!slotPassed(a.at, source, nowMs)) continue
+    if (!slotPassed(a.at, slotSource(source, p.timesExact), nowMs)) continue
     if (!latest || a.at > latest.at || (a.at === latest.at && a.episode > latest.episode)) latest = a
   }
   return latest
@@ -779,9 +780,9 @@ function episodePost(f: Franchise, p: FranchisePart, episode: number, time: Feed
  * episode that is before its noon, so a visit between the two does not see it as new twice.
  */
 function airedEpisodePost(f: Franchise, p: FranchisePart, airing: Airing, nowMs: number): ComposedPost | null {
-  const dateOnly = f.source === 'tmdb'
+  const dateOnly = f.source === 'tmdb' && !p.timesExact
   const at = dateOnly ? Math.min(Math.floor(airing.at / DAY_MS) * DAY_MS + DAY_MS / 2, nowMs) : airing.at
-  return episodePost(f, p, airing.episode, { at, dateOnly, basis: 'aired' }, slotStrikesAt(airing.at, f.source))
+  return episodePost(f, p, airing.episode, { at, dateOnly, basis: 'aired' }, slotStrikesAt(airing.at, slotSource(f.source, p.timesExact)))
 }
 
 /**
@@ -795,7 +796,7 @@ function episodePosts(f: Franchise, nowMs: number): ComposedPost[] {
   const posts: ComposedPost[] = []
   for (const p of episodicParts(f)) {
     const airing = latestAired(p, f.source, nowMs)
-    if (!airing || nowMs - slotStrikesAt(airing.at, f.source) > EPISODE_NEWS_MS) continue
+    if (!airing || nowMs - slotStrikesAt(airing.at, slotSource(f.source, p.timesExact)) > EPISODE_NEWS_MS) continue
     const post = airedEpisodePost(f, p, airing, nowMs)
     if (post) posts.push(post)
   }
@@ -812,7 +813,7 @@ function episodePosts(f: Franchise, nowMs: number): ComposedPost[] {
 function episodePostById(f: Franchise, p: FranchisePart, episode: number, nowMs: number, orphanAt: number | null): ComposedPost | null {
   if (p.status === 'NOT_YET_RELEASED') return null
   const airing = p.airings.find((a) => a.episode === episode)
-  if (airing) return slotPassed(airing.at, f.source, nowMs) ? airedEpisodePost(f, p, airing, nowMs) : null
+  if (airing) return slotPassed(airing.at, slotSource(f.source, p.timesExact), nowMs) ? airedEpisodePost(f, p, airing, nowMs) : null
   if (episode > p.airedEpisodes || orphanAt == null) return null
   return episodePost(f, p, episode, { at: Math.min(orphanAt, nowMs), dateOnly: false, basis: 'observed' }, 0)
 }

@@ -151,10 +151,10 @@ describe('DELETE /me — the account is erased, not deactivated', () => {
   })
 
   it('erases a table whose migration has not run yet without failing: that step alone is skipped', async () => {
-    // `user_audience` arrives with migration 0012; the API is served from the working tree, so
-    // this code can run before the table exists. Its step runs in a savepoint and is the only one.
+    // `user_audience` arrives with migration 0012 and `recommendation_impressions` with 0016; the
+    // API can run before either table exists. Their steps run in savepoints and are the only ones.
     const optional = accountErasurePlan.filter((s) => s.optional).map((s) => getTableName(s.table))
-    expect(optional).toEqual(['user_audience'])
+    expect(optional).toEqual(['user_audience', 'recommendation_impressions'])
 
     recorded.savepointFailure = 'missing'
     const app = await appWithUser()
@@ -162,7 +162,7 @@ describe('DELETE /me — the account is erased, not deactivated', () => {
 
     expect(res.statusCode).toBe(200)
     expect(res.json()).toEqual({ deleted: true, status: 'complete', appleRevocation: 'manual_required' })
-    expect(recorded.savepoints).toBe(1)
+    expect(recorded.savepoints).toBe(2)
     // Every other table, in order, then the user row — and the erasure committed.
     expect(recorded.deletes.map((d) => d.table)).toEqual([
       ...accountErasurePlan.filter((s) => !s.optional).map((s) => getTableName(s.table)),

@@ -36,6 +36,7 @@ const iso = (ms: number) => new Date(ms).toISOString()
 function part(overrides: Partial<FranchisePart> = {}): FranchisePart {
   return {
     mediaId: 100,
+    timesExact: false,
     kind: 'season',
     sequence: 1,
     watchOrder: 1,
@@ -89,6 +90,7 @@ function franchise(overrides: Partial<Franchise> = {}): Franchise {
   return {
     id: FID,
     source: 'anilist',
+    timesExact: false,
     title: 'Show',
     cover: 'https://img.example/f.jpg',
     banner: '',
@@ -1027,6 +1029,15 @@ describe('episode posts ("Episode N is out")', () => {
     // The week runs from the instant it struck.
     expect(episodes(f, today + 10 * H + 7 * D)).toHaveLength(1)
     expect(episodes(f, today + 10 * H + 7 * D + 60_000)).toEqual([])
+  })
+
+  it('counts a TMDB season at real broadcast instants (timesExact) from its instant, with its clock', () => {
+    // TVmaze's slot: Sunday 9 PM ET = 01:00 UTC Monday. A date-only reading would have struck it at
+    // 10:00 UTC Sunday and carried it at Sunday noon.
+    const at = Date.UTC(2026, 8, 28, 1)
+    const f = franchise({ source: 'tmdb', subscription: watching, parts: [airing({ timesExact: true, airings: [{ episode: 3, at }] })] })
+    expect(episodes(f, at - 60_000)).toEqual([])
+    expect(episodes(f, at + H)).toMatchObject([{ id: 'ep:100:3', time: { at, dateOnly: false, basis: 'aired' }, discoveredAt: at }])
   })
 
   it('posts for watching, watched and paused shows only', () => {

@@ -1,16 +1,15 @@
 import Foundation
 
-// One temporal expression per item (spec board 03/09). Exact instants (AniList) get a clock;
-// date-only releases (TMDB) get a day word; unknown says unknown. Evaluated in the user's current
+// One temporal expression per item (spec board 03/09). Exact instants (AniList, and TV at real
+// broadcast times) get a clock; date-only releases (TMDB's dates) get a day word; unknown says unknown. Evaluated in the user's current
 // calendar; precedence for the past is top-down: relative → same calendar day → yesterday → weekday → date.
 enum TemporalCopy {
     /// "Airs in 27 min" · "Today at 8:30 PM" · "Tomorrow at 8:30 PM" · "Friday at 8:30 PM" ·
     /// "Aug 28 at 8:30 PM" · "Aug 28, 2027 at 8:30 PM" — or for date-only: "Today" · "Tomorrow" ·
     /// "Friday" · "Aug 28" · "Aug 28, 2027".
-    static func airs(at ts: Int64, now: Int64, source: MediaSource) -> String {
-        let anchor = source.timeAnchor
+    static func airs(at ts: Int64, now: Int64, anchor: Formatting.TimeAnchor) -> String {
         let delta = ts - now
-        if source == .anilist {
+        if !anchor.isDateOnly {
             if delta < 60 * Formatting.minuteMs && delta > 0 {
                 return "Airs in \(max(1, Int(delta / Formatting.minuteMs))) min"
             }
@@ -34,8 +33,8 @@ enum TemporalCopy {
     /// "Airs today at 8:30 PM" · "Airs Friday at 8:30 PM" · "Airs 30 Sep at 6:30 PM" · "Airs in
     /// 27 min". A bare "30 Sep at 6:30 PM" under "Aired 16 Sep" and "Aired today" read as a
     /// fragment (review, 23 Sep).
-    static func airsSentence(at ts: Int64, now: Int64, source: MediaSource) -> String {
-        let bare = airs(at: ts, now: now, source: source)
+    static func airsSentence(at ts: Int64, now: Int64, anchor: Formatting.TimeAnchor) -> String {
+        let bare = airs(at: ts, now: now, anchor: anchor)
         if bare.hasPrefix("Airs ") { return bare }
         for word in ["Today", "Tomorrow"] where bare.hasPrefix(word) {
             return "Airs " + word.lowercased() + bare.dropFirst(word.count)
@@ -55,8 +54,7 @@ enum TemporalCopy {
     /// caption genuinely has no room for, and the part the schedule already states elsewhere.
     ///
     /// The day ladder is `airs`'s ladder verbatim, so the two can never drift again.
-    static func airsCompact(at ts: Int64, now: Int64, source: MediaSource) -> String {
-        let anchor = source.timeAnchor
+    static func airsCompact(at ts: Int64, now: Int64, anchor: Formatting.TimeAnchor) -> String {
         switch Formatting.dayDiff(ts: ts, now: now, anchor: anchor) {
         case 0: return "Today"
         case 1: return "Tomorrow"
@@ -67,11 +65,10 @@ enum TemporalCopy {
 
     /// "Aired just now" · "Aired 27 min ago" · "Aired 10h ago" · "Aired yesterday" · "Aired Wednesday" ·
     /// "Aired Aug 19". Date-only sources never get a clock: "Aired today" · "Aired yesterday" · …
-    static func aired(at ts: Int64, now: Int64, source: MediaSource) -> String {
-        let anchor = source.timeAnchor
+    static func aired(at ts: Int64, now: Int64, anchor: Formatting.TimeAnchor) -> String {
         let elapsed = now - ts
         let days = -Formatting.dayDiff(ts: ts, now: now, anchor: anchor)
-        if source == .anilist {
+        if !anchor.isDateOnly {
             if elapsed < 5 * Formatting.minuteMs { return "Aired just now" }
             if elapsed < 60 * Formatting.minuteMs { return "Aired \(Int(elapsed / Formatting.minuteMs)) min ago" }
             // ROUNDED, never truncated: 1 h 55 min read "Aired 1h ago" (review, 23 Sep).
@@ -96,9 +93,8 @@ enum TemporalCopy {
     /// "Returns tomorrow" · "Returns Friday" · "Returns Oct 2" · "Returns in 2027" · "No date announced".
     /// A date that has passed says so ("Returned Jul 5") — the catalogue's note can outlive the
     /// premiere by weeks, and every past day used to read "Returns today".
-    static func returns(at ts: Int64?, now: Int64, source: MediaSource) -> String {
+    static func returns(at ts: Int64?, now: Int64, anchor: Formatting.TimeAnchor) -> String {
         guard let ts else { return noDateAnnounced }
-        let anchor = source.timeAnchor
         switch Formatting.dayDiff(ts: ts, now: now, anchor: anchor) {
         case ..<0: return "Returned \(dateWord(ts, now: now, anchor: anchor))"
         case 0: return "Returns today"

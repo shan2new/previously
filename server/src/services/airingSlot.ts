@@ -22,6 +22,14 @@ export function slotStrikesAt(atMs: number, source: string): number {
 }
 
 /**
+ * The slot rule's `source` for one part: a TMDB season at real broadcast instants (`timesExact`,
+ * services/broadcast.ts) strikes at its instant, as AniList's do; any other TMDB season is a date.
+ */
+export function slotSource(source: string, timesExact: boolean): string {
+  return source === 'tmdb' && timesExact ? 'tmdb:broadcast' : source
+}
+
+/**
  * Whether an airing slot has struck by `nowMs` (`slotStrikesAt`). Never stricter than any client —
  * a room the app shows unlocked, the server accepts.
  */

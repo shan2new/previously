@@ -1151,7 +1151,7 @@ struct DiscoverView: View {
     private func when(_ item: FranchiseSummary) -> String? {
         guard item.isReleasing else { return nil }
         guard let at = item.nextAiringAt, at > now else { return Copy.Search.airingNow }
-        let word = TemporalCopy.airsCompact(at: at, now: now, source: item.source)
+        let word = TemporalCopy.airsCompact(at: at, now: now, anchor: item.timeAnchor)
         // "today" and "tomorrow" are common nouns mid-sentence; a weekday and a month are not.
         let cased = (word == "Today" || word == "Tomorrow") ? word.lowercased() : word
         return Copy.Search.airs(day: cased)

@@ -92,6 +92,23 @@ export const mediaRelations = pgTable(
   ],
 )
 
+/**
+ * A TMDB season's real broadcast instants (23 Oct): TMDB dates an episode with no clock, so the sync
+ * synthesises 17:00 UTC (tmdb/mapping.ts); TVmaze publishes the network's slot. One row per season,
+ * keyed by TMDB's episode number, timed episodes only — read through `exactSchedule`
+ * (services/broadcast.ts), which uses them only when they cover the whole season. Its own table, not
+ * a `media` column: readers tolerate it missing until migration 0017 is applied.
+ */
+export const mediaBroadcastTimes = pgTable('media_broadcast_times', {
+  mediaId: integer('media_id')
+    .primaryKey()
+    .references(() => media.id, { onDelete: 'cascade' }),
+  provider: text('provider').notNull().default('tvmaze'),
+  /** TMDB episode number → broadcast instant, ms epoch. */
+  times: jsonb('times').$type<Record<string, number>>().notNull(),
+  checkedAt: timestamp('checked_at', { withTimezone: true }).defaultNow().notNull(),
+})
+
 // ---------- Canonical franchises ----------
 
 export const franchise = pgTable(
@@ -389,6 +406,27 @@ export const recommendationFeedback = pgTable(
     key: text('key').notNull(),
     kind: text('kind').notNull(), // dismissed | seen
     createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+  },
+  (t) => [primaryKey({ columns: [t.userId, t.key] })],
+)
+
+/**
+ * The recommendations a viewer has been SHOWN: a tile the app reports stayed on screen. One row
+ * per title — on how many visits it was shown (`visits`, a visit being a sitting at least
+ * `IMPRESSION_VISIT_GAP_MS` after the last) and when last. The ranker lets a title the viewer keeps
+ * passing over yield its place to the next ones, and brings it back as the visits age
+ * (`exposureFatigue`, services/recommendationRank.ts). Not a verdict: feedback stays its own table.
+ */
+export const recommendationImpressions = pgTable(
+  'recommendation_impressions',
+  {
+    userId: uuid('user_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    key: text('key').notNull(),
+    visits: integer('visits').notNull().default(1),
+    firstShownAt: timestamp('first_shown_at', { withTimezone: true }).defaultNow().notNull(),
+    lastShownAt: timestamp('last_shown_at', { withTimezone: true }).defaultNow().notNull(),
   },
   (t) => [primaryKey({ columns: [t.userId, t.key] })],
 )

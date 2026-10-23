@@ -392,6 +392,8 @@ extension Copy {
             }
         }
         static func attribution(_ provider: String) -> String { "Streaming availability by \(provider)" }
+        /// TVmaze's credit (CC BY-SA) under a TV show whose air times are its broadcasts.
+        static let broadcastAttribution = "Air times from TVmaze"
         /// The show page's line under the action row (16 Oct): the services by name, the rest
         /// counted — "Watch on Netflix", "… on Netflix and Crunchyroll", "… on Netflix and 2 more";
         /// `compact` (the accessibility sizes) counts from the second.

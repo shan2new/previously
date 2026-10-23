@@ -118,7 +118,7 @@ extension AppModel.ScheduleEntry {
            Formatting.isEvening(hour: Formatting.localParts(at, anchor: f.timeAnchor).hour) {
             return Copy.Schedule.tonightAt(Formatting.fmtTime(at, anchor: f.timeAnchor))
         }
-        return TemporalCopy.airs(at: at, now: now, source: f.source)
+        return TemporalCopy.airs(at: at, now: now, anchor: f.timeAnchor)
     }
 
     /// When it airs as a LABEL, for the lead card's strip (19 Oct: "remove at from tonight at 7:30PM

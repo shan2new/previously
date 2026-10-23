@@ -124,6 +124,7 @@ struct ForYouTile: View {
         .accessibilityLabel("\(r.displayTitle), \(Copy.ForYou.reasonList(reason))")
         .accessibilityHint(Copy.Accessibility.opensTheShowHint)
         .contextMenu { ForYouMenu(item: r, reason: reason, onOpen: onOpen) }
+        .modifier(RecommendationImpression(key: r.key))
     }
 }
 

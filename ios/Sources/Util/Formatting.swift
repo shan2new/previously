@@ -30,7 +30,8 @@ enum Formatting {
     static var tz: TimeZone { TimeZone.current }
 
     /// Which calendar a timestamp's day (and clock, if it has one) must be read in.
-    /// Derive it from a `MediaSource` via `source.timeAnchor` (Models.swift) — never guess.
+    /// Take it from the show (`Franchise.timeAnchor`, which knows a TV show at broadcast times), else
+    /// from a `MediaSource` (`source.timeAnchor`, Models.swift) — never guess.
     enum TimeAnchor: Hashable, Sendable {
         /// A real instant: device-local calendar and clock.
         case local

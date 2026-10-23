@@ -415,9 +415,9 @@ struct FranchisePart: Codable, Identifiable, Sendable {
     var premiereAt: Int64? { isUpcoming ? nextAiringAt : nil }
 
     /// "Jun 24, 2026" premiere date for an announced part, read in its source's calendar.
-    /// A part doesn't know its own source, so the franchise supplies it.
-    func premiereDateLabel(source: MediaSource) -> String? {
-        premiereAt.map { Formatting.fmtFullDate($0, anchor: source.timeAnchor) }
+    /// A part doesn't know its own calendar, so the franchise supplies it (`Franchise.timeAnchor`).
+    func premiereDateLabel(anchor: Formatting.TimeAnchor) -> String? {
+        premiereAt.map { Formatting.fmtFullDate($0, anchor: anchor) }
     }
 
     /// The next airing you can still count down to, or nil when there isn't one.
@@ -695,6 +695,9 @@ struct FranchiseUpcoming: Codable, Sendable {
 struct Franchise: Codable, Identifiable, Sendable {
     let id: String
     let source: MediaSource
+    /// The server reads the whole show at real instants (docs/api-contract.md): always for anime;
+    /// for TV, when TVmaze's broadcast times cover every scheduled season. False from an older server.
+    let timesExact: Bool
     let title: String
     let cover: String?
     let banner: String?
@@ -728,7 +731,7 @@ struct Franchise: Codable, Identifiable, Sendable {
     let newParts: Int?
 
     enum CodingKeys: String, CodingKey {
-        case id, source, title, cover, banner, synopsis, genres, isReleasing, partCounts, parts, subscription, upcoming
+        case id, source, timesExact, title, cover, banner, synopsis, genres, isReleasing, partCounts, parts, subscription, upcoming
         case year, studios
         case images, artwork, themes, featuredVideo, videos, audience, people, related, continueWatching
         case status, behind, newParts
@@ -738,6 +741,7 @@ struct Franchise: Codable, Identifiable, Sendable {
         let c = try decoder.container(keyedBy: CodingKeys.self)
         id = try c.decode(String.self, forKey: .id)
         source = (try? c.decode(MediaSource.self, forKey: .source)) ?? .anilist
+        timesExact = (try? c.decode(Bool.self, forKey: .timesExact)) ?? false
         title = (try? c.decode(String.self, forKey: .title)) ?? "Untitled"
         cover = try? c.decodeIfPresent(String.self, forKey: .cover)
         banner = try? c.decodeIfPresent(String.self, forKey: .banner)
@@ -773,8 +777,8 @@ struct Franchise: Codable, Identifiable, Sendable {
          themes: [String] = [], featuredVideo: FranchiseVideo? = nil,
          videos: [FranchiseVideo] = [], audience: AudienceInfo? = nil, people: FranchisePeople? = nil,
          related: [RelatedTitle] = [], continueWatching: ContinueWatching? = nil,
-         status: WatchStatus?, behind: Int?, newParts: Int?) {
-        self.id = id; self.source = source; self.title = title; self.cover = cover; self.banner = banner
+         status: WatchStatus?, behind: Int?, newParts: Int?, timesExact: Bool = false) {
+        self.id = id; self.source = source; self.timesExact = timesExact; self.title = title; self.cover = cover; self.banner = banner
         self.synopsis = synopsis; self.genres = genres; self.isReleasing = isReleasing
         self.partCounts = partCounts; self.parts = parts; self.subscription = subscription
         self.upcoming = upcoming
@@ -806,7 +810,8 @@ struct Franchise: Codable, Identifiable, Sendable {
                   featuredVideo: featuredVideo ?? other.featuredVideo, videos: videos ?? other.videos,
                   audience: audience ?? other.audience, people: people ?? other.people,
                   related: related ?? other.related, continueWatching: continueWatching ?? other.continueWatching,
-                  status: status ?? other.status, behind: other.behind, newParts: other.newParts)
+                  status: status ?? other.status, behind: other.behind, newParts: other.newParts,
+                  timesExact: other.timesExact)
     }
 }
 
@@ -932,6 +937,10 @@ struct RecommendationFeedbackBody: Encodable, Sendable {
     let kind: String?
 }
 
+struct RecommendationImpressionsBody: Encodable, Sendable {
+    let keys: [String]
+}
+
 struct ResolveBody: Encodable, Sendable {
     let source: String
     let externalId: Int
@@ -954,8 +963,10 @@ struct ProgressBody: Encodable, Sendable {
 // MARK: - Franchise derivation helpers
 
 extension Franchise {
-    /// The calendar this franchise's timestamps must be read in — see `MediaSource.timeAnchor`.
-    var timeAnchor: Formatting.TimeAnchor { source.timeAnchor }
+    /// The calendar this franchise's timestamps must be read in: its source's (`MediaSource.timeAnchor`),
+    /// except a TV show the server reads at TVmaze broadcast instants (`timesExact`), which is
+    /// read like anime — a real clock in the device's own time zone. ONE calendar per show.
+    var timeAnchor: Formatting.TimeAnchor { source == .tmdb && !timesExact ? .utcDate : .local }
 
     /// The next airing you can still count down to, read in this franchise's own calendar.
     /// Prefer this over `releasingPart?.scheduledAiring(now:)`, which defaults to `.local` and so

@@ -13,6 +13,7 @@ import {
   notifications,
   progress,
   recommendationFeedback,
+  recommendationImpressions,
   reminders,
   reports,
   saves,
@@ -152,6 +153,24 @@ export async function buildAccountExport(userId: string, nowMs: number = Date.no
         .from(recommendationFeedback)
         .where(eq(recommendationFeedback.userId, userId))
         .orderBy(asc(recommendationFeedback.createdAt), asc(recommendationFeedback.key))
+
+      // Migration 0016's table, read in a SAVEPOINT for the audience's reason above.
+      let impressionRows: { key: string; visits: number; firstShownAt: Date; lastShownAt: Date }[] = []
+      try {
+        impressionRows = await tx.transaction((savepoint) =>
+          savepoint
+            .select({
+              key: recommendationImpressions.key,
+              visits: recommendationImpressions.visits,
+              firstShownAt: recommendationImpressions.firstShownAt,
+              lastShownAt: recommendationImpressions.lastShownAt,
+            })
+            .from(recommendationImpressions)
+            .where(eq(recommendationImpressions.userId, userId))
+            .orderBy(asc(recommendationImpressions.firstShownAt), asc(recommendationImpressions.key)))
+      } catch (error) {
+        if (!isMissingTable(error)) throw error
+      }
 
       // Deleted sessions are included as the tombstones they are, like comments.
       const sessionRows = await tx
@@ -298,6 +317,12 @@ export async function buildAccountExport(userId: string, nowMs: number = Date.no
               )
             : null,
           recommendationFeedback: feedbackRows.map((r) => ({ key: r.key, kind: r.kind, createdAt: ms(r.createdAt) })),
+          recommendationImpressions: impressionRows.map((r) => ({
+            key: r.key,
+            visits: r.visits,
+            firstShownAt: ms(r.firstShownAt),
+            lastShownAt: ms(r.lastShownAt),
+          })),
           watchSessions: sessionRows.map((r) => ({ ...toWatchSession(r), deletedAt: msOrNull(r.deletedAt) })),
         },
         social: {

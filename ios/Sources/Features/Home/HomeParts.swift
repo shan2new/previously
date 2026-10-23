@@ -250,7 +250,7 @@ enum HomeCompose {
         var drop: String?
         if behind > 1, let last = part.lastAired(now: now, anchor: f.timeAnchor) {
             drop = Copy.Progress.dropAired(episode: part.airedByNow(now: now, anchor: f.timeAnchor),
-                                           when: TemporalCopy.aired(at: last, now: now, source: f.source))
+                                           when: TemporalCopy.aired(at: last, now: now, anchor: f.timeAnchor))
         }
         return HomeHero(franchise: f, part: part, episode: item.episode, kind: .outNow(behind: behind), drop: drop)
     }
@@ -631,7 +631,7 @@ struct HomeBillboard: View {
                Formatting.isEvening(hour: Formatting.localParts(at, anchor: f.timeAnchor).hour) {
                 return Copy.Schedule.tonightAt(Formatting.fmtTime(at, anchor: f.timeAnchor))
             }
-            return TemporalCopy.airs(at: at, now: now, source: f.source)
+            return TemporalCopy.airs(at: at, now: now, anchor: f.timeAnchor)
         }
     }
 

@@ -42,7 +42,7 @@ extension Franchise {
             let release = !news.isRumored && news.releaseWindow.map { $0.precision != .unknown } == true
                 ? premiereLine(news, now: now) : nil
             let date = seasonPartsInOrder.first { $0.isUpcoming && $0.canonicalLabel == name }?
-                .announcedDateLabel(source: source).map { newsLine($0) }
+                .announcedDateLabel(anchor: timeAnchor).map { newsLine($0) }
             let when = release ?? date ?? TemporalCopy.noDateAnnounced
             let detail = [news.isRumored || newSeries ? nil : split.subject, news.isRumored ? nil : when]
                 .compactMap { $0 }.joined(separator: " \u{00B7} ")
@@ -50,7 +50,7 @@ extension Franchise {
         }
         if let part = seasonPartsInOrder.first(where: \.isUpcoming) {
             return ReleaseNews(headline: newSeries ? Copy.Release.newSeries : part.announcementLabel,
-                               detail: part.announcedDateLabel(source: source).map { newsLine($0) }
+                               detail: part.announcedDateLabel(anchor: timeAnchor).map { newsLine($0) }
                                    ?? TemporalCopy.noDateAnnounced)
         }
         if let at = nextAiring(now: now) {
@@ -59,7 +59,7 @@ extension Franchise {
             let part = releasingPart
             let episode = part?.airings.first(where: { $0.at == at })?.episode ?? part?.nextEpisodeNumber
             return ReleaseNews(headline: Copy.Label.airing,
-                               detail: Copy.Progress.episodeAirs(episode, when: TemporalCopy.airs(at: at, now: now, source: source)))
+                               detail: Copy.Progress.episodeAirs(episode, when: TemporalCopy.airs(at: at, now: now, anchor: timeAnchor)))
         }
         if let news = upcoming, news.status == "recently_aired", let name = ArtworkSet.nonEmpty(news.next) {
             return ReleaseNews(headline: Copy.Release.available(name), detail: nil)
@@ -335,8 +335,8 @@ extension FranchisePart {
     /// `premiereDateLabel` reads the catalogue's own premiere slot, which TMDB frequently leaves
     /// null while still dating the season through its first episode. Falling back to the earliest
     /// episode air date is the difference between a real date and a bare "TBA".
-    func announcedDateLabel(source: MediaSource) -> String? {
-        if let label = premiereDateLabel(source: source) { return label }
+    func announcedDateLabel(anchor: Formatting.TimeAnchor) -> String? {
+        if let label = premiereDateLabel(anchor: anchor) { return label }
         guard let first = episodes.compactMap({ $0.airDate }).min() else { return nil }
         return Formatting.fmtFullDate(first, anchor: Episode.airDateAnchor)
     }

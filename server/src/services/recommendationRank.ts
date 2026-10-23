@@ -23,7 +23,8 @@ import { displayTitle } from '../util/text.js'
 //               unreleased, adult.
 //   5 RELEVANCE consensus x Bayesian quality x genre fit x freshness x popularity damper.
 //   6 SELECT    MMR (<= 2 per show, <= 1 same-universe), a TV quota with one TV title in the
-//               first 4, daily jitter, then a seeded draw of the 4 visible tiles.
+//               first 4, daily jitter, exposure fatigue (what the viewer was already shown gives
+//               way), then a seeded draw of the 4 visible tiles.
 //   7 REASON    an honest reason in the user's own shows: the kind (consensus / finished /
 //               watching / watched / planned / world), how many agree, and up to three of them,
 //               strongest first — the client picks which to name by Today's state.
@@ -80,6 +81,16 @@ const TV_CREDIBLE_RANK = 2
 const VISIBLE = 4
 const VISIBLE_HEAD = 8
 const YESTERDAY_DAMP = 0.6
+/**
+ * Exposure fatigue (23 Oct: "Recommendations are completely static. If the user has seen a
+ * recommendation, they should be rotated", owner — the daily jitter alone kept 13–16 of the same
+ * 16 titles all week). Each visit a title was SHOWN on and passed over keeps ×0.6 of its standing,
+ * so the next titles take its place; the visits halve every 10 days it is not shown, so a strong
+ * title comes back rather than being lost.
+ */
+const FATIGUE_PER_VISIT = 0.6
+const FATIGUE_FLOOR = 0.15
+const FATIGUE_HALF_LIFE_DAYS = 10
 
 /** The only formats served: series. MOVIE / OVA / SPECIAL / MUSIC / TV_SHORT never are. */
 const SERIES_FORMATS = new Set(['TV', 'ONA'])
@@ -176,12 +187,21 @@ export interface RankFeedback {
   kind: RecommendationFeedbackKind
 }
 
+/** A title the viewer was shown (`recommendation_impressions`): on how many visits, and when last. */
+export interface RankImpression {
+  key: string
+  visits: number
+  lastShownAt: number
+}
+
 export interface RankInput {
   now: number
   seeds: RankSeed[]
   edges: RankEdge[]
   targets: RankTarget[]
   feedback: RankFeedback[]
+  /** What the viewer has been shown; read only by the rotating list (`exposureFatigue`). */
+  impressions?: RankImpression[]
 }
 
 export interface RankOptions {
@@ -217,6 +237,7 @@ export interface RankBreakdown {
   sameWorld: string | null
   rel: number
   jitter: number
+  fatigue: number
   contributions: { franchiseId: string; title: string; value: number }[]
 }
 
@@ -291,6 +312,14 @@ function hashBytes(value: string): Buffer {
 /** Daily rotation: +/-12% seeded by (user, item, day) — reorders near-ties, never a strong item under a weak one. */
 function dailyJitter(userId: string, key: string, day: string): number {
   return 1 + JITTER * (2 * (hashBytes(`${userId}:${key}:${day}`)[0]! / 255) - 1)
+}
+
+/** How much of its standing a title keeps after being shown on `visits` visits (1 = never shown). */
+export function exposureFatigue(visits: number, lastShownAt: number, now: number): number {
+  if (visits <= 0) return 1
+  const days = Math.max(0, (now - lastShownAt) / DAY_MS)
+  const effective = visits * 0.5 ** (days / FATIGUE_HALF_LIFE_DAYS)
+  return Math.max(FATIGUE_FLOOR, FATIGUE_PER_VISIT ** effective)
 }
 
 /** A deterministic uniform draw in [0, 1) for (user, day, n). */
@@ -627,6 +656,25 @@ function primarySeed(c: Candidate): string {
   return best
 }
 
+/**
+ * Each candidate's exposure fatigue, matched like feedback (by any identity of the series, so a
+ * title whose key drifted to its root keeps what it was shown as). Candidates never shown are absent.
+ */
+function fatigueOf(candidates: Candidate[], impressions: RankImpression[], now: number): Map<Candidate, number> {
+  const out = new Map<Candidate, number>()
+  if (impressions.length === 0) return out
+  const byKey = new Map(impressions.map((i) => [i.key, i]))
+  for (const c of candidates) {
+    let kept = 1
+    for (const id of identities(c)) {
+      const shown = byKey.get(id)
+      if (shown) kept = Math.min(kept, exposureFatigue(shown.visits, shown.lastShownAt, now))
+    }
+    if (kept < 1) out.set(c, kept)
+  }
+  return out
+}
+
 /** Every identity a recommendation answers to, so feedback survives a key drifting to a root. */
 function identities(c: Candidate): Set<string> {
   const out = new Set<string>([c.key])
@@ -703,9 +751,15 @@ function mmrSelect(
  * The 4 visible tiles are a seeded weighted draw from the top 8 (yesterday's four count x0.6), so
  * the shelf a person actually sees changes day to day; the rest keeps MMR order.
  */
-function visibleDraw(list: Candidate[], userId: string, day: string, yesterday: Set<string>): Candidate[] {
+function visibleDraw(
+  list: Candidate[],
+  userId: string,
+  day: string,
+  yesterday: Set<string>,
+  fatigue: Map<Candidate, number> = new Map(),
+): Candidate[] {
   const head = list.slice(0, VISIBLE_HEAD)
-  const weight = new Map(head.map((c) => [c, c.rel * (yesterday.has(c.key) ? YESTERDAY_DAMP : 1)]))
+  const weight = new Map(head.map((c) => [c, c.rel * (fatigue.get(c) ?? 1) * (yesterday.has(c.key) ? YESTERDAY_DAMP : 1)]))
   const first: Candidate[] = []
   const pool = [...head]
   let draw = 0
@@ -866,12 +920,23 @@ export function rankRecommendations(input: RankInput, options: RankOptions): Ran
   const today = utcDay(input.now)
   let list: Candidate[]
   const jitters = new Map<Candidate, number>()
+  let fatigue = new Map<Candidate, number>()
   if (rotation) {
     const yesterdayDay = utcDay(input.now - DAY_MS)
     const yesterdayList = mmrSelect(candidates, limit, quota, (c) => c.rel * dailyJitter(options.userId, c.key, yesterdayDay))
     const yesterdayFour = new Set(visibleDraw(yesterdayList, options.userId, yesterdayDay, new Set()).slice(0, VISIBLE).map((c) => c.key))
     for (const c of candidates) jitters.set(c, dailyJitter(options.userId, c.key, today))
-    list = visibleDraw(mmrSelect(candidates, limit, quota, (c) => c.rel * jitters.get(c)!), options.userId, today, yesterdayFour)
+    // What the viewer has already been shown gives way (`exposureFatigue`) — in the selection and
+    // in the visible draw both, so a strong title passed over does not keep a front tile.
+    fatigue = fatigueOf(candidates, input.impressions ?? [], input.now)
+    const tired = (c: Candidate) => fatigue.get(c) ?? 1
+    list = visibleDraw(
+      mmrSelect(candidates, limit, quota, (c) => c.rel * jitters.get(c)! * tired(c)),
+      options.userId,
+      today,
+      yesterdayFour,
+      fatigue,
+    )
   } else {
     list = mmrSelect(candidates, limit, quota, (c) => c.rel)
   }
@@ -895,6 +960,7 @@ export function rankRecommendations(input: RankInput, options: RankOptions): Ran
       sameWorld: c.sameWorld,
       rel: round4(c.rel),
       jitter: round4(jitters.get(c) ?? 1),
+      fatigue: round4(fatigue.get(c) ?? 1),
       contributions: [...c.contrib]
         .sort((a, b) => b[1] - a[1])
         .map(([seedId, value]) => ({ franchiseId: seedId, title: ctx.seeds.get(seedId)!.title, value: round4(value) })),

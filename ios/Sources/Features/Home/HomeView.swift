@@ -538,7 +538,7 @@ struct HomeView: View {
         let e = item.entry
         let run = max(1, e.episode - e.part.progress)
         return HomeLeadCard(franchise: e.franchise, what: dropLine(e, run: run),
-                            strip: TemporalCopy.aired(at: e.at, now: appModel.nowMinute, source: e.franchise.source),
+                            strip: TemporalCopy.aired(at: e.at, now: appModel.nowMinute, anchor: e.franchise.timeAnchor),
                             width: width,
                             onOpen: {
                                 onOpenDetail(e.franchise.id, "home-drop/\(item.id)",
@@ -570,7 +570,7 @@ struct HomeView: View {
                     HStack(spacing: ThemeSpace.x1) {
                         Text(Copy.Home.nextAiring(next.franchise.displayTitle,
                                                   TemporalCopy.airs(at: next.at, now: appModel.nowMinute,
-                                                                    source: next.franchise.source)))
+                                                                    anchor: next.franchise.timeAnchor)))
                             .lineLimit(2)
                         AppGlyph(systemName: "chevron.forward")
                             .font(.system(size: 12, weight: .semibold))

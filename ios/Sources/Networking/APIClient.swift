@@ -483,6 +483,14 @@ final class APIClient: @unchecked Sendable {
                                              idempotent: true)
     }
 
+    /// The titles whose tiles stayed on screen during a visit: the next list lets them give way.
+    /// A repeat inside one sitting counts once on the server, so a retry is harmless.
+    func recommendationImpressions(keys: [String]) async throws {
+        let _: NoContent = try await request("/me/recommendations/impressions", method: "POST",
+                                             body: RecommendationImpressionsBody(keys: keys),
+                                             idempotent: true)
+    }
+
     /// Takes a "Not interested" / "Already seen" back (the receipt's Undo).
     func removeRecommendationFeedback(key: String) async throws {
         let _: NoContent = try await request("/me/recommendations/feedback", method: "DELETE",

@@ -1019,7 +1019,7 @@ struct FranchiseDetailView: View {
             let next: String? = f.nextAiring(now: now).map { at in
                 let airing = f.releasingPart
                 let episode = airing?.airings.first(where: { $0.at == at })?.episode ?? airing?.nextEpisodeNumber
-                return Copy.Progress.episodeAirs(episode, when: TemporalCopy.airs(at: at, now: now, source: f.source))
+                return Copy.Progress.episodeAirs(episode, when: TemporalCopy.airs(at: at, now: now, anchor: f.timeAnchor))
             }
             return NextUp(kind: .waiting, part: part, eyebrow: Copy.Status(.planned),
                           line1: f.watchContext(part: part, episode: part.progress + 1),
@@ -1054,7 +1054,7 @@ struct FranchiseDetailView: View {
                 return NextUp(kind: .seasonComplete, part: part, eyebrow: Copy.Label.complete,
                               line1: Copy.Progress.complete(part.canonicalLabel),
                               line2: "\(part.canonicalLabel) · \(Copy.Progress.watchedOf(part.progress, max(part.totalEpisodes, part.progress)))",
-                              line3: next.map { "\($0.canonicalLabel) \(TemporalCopy.returns(at: $0.premiereAt, now: now, source: f.source).lowercasedFirst())" },
+                              line3: next.map { "\($0.canonicalLabel) \(TemporalCopy.returns(at: $0.premiereAt, now: now, anchor: f.timeAnchor).lowercasedFirst())" },
                               episode: nil, behind: 0)
             }
             let nextEp = part.nextEpisodeNumber ?? part.progress + 1
@@ -1065,7 +1065,7 @@ struct FranchiseDetailView: View {
             // (The shared watch-context rule: a multi-season show names its season here too.)
             // The next airing is the MOMENT, leading the line ("Friday at 7:30 PM · Season 5 ·
             // Episode 10"); only its absence is a support line.
-            let next = f.nextAiring(now: now).map { TemporalCopy.airs(at: $0, now: now, source: f.source) }
+            let next = f.nextAiring(now: now).map { TemporalCopy.airs(at: $0, now: now, anchor: f.timeAnchor) }
             return NextUp(kind: .caughtUp, part: part, eyebrow: Copy.Progress.caughtUp,
                           moment: next,
                           line1: f.watchContext(part: part, episode: nextEp),
@@ -1087,7 +1087,7 @@ struct FranchiseDetailView: View {
             let fresh = last.map { now - $0 <= AppModel.outNowWindow } ?? false
             let drop = fresh && part.isReleasing
                 ? last.map { Copy.Progress.dropAired(episode: part.airedByNow(now: now, anchor: f.timeAnchor),
-                                                     when: TemporalCopy.aired(at: $0, now: now, source: f.source)) } : nil
+                                                     when: TemporalCopy.aired(at: $0, now: now, anchor: f.timeAnchor)) } : nil
             // A show filed WATCHED with seasons unmarked says so under its own status — never a
             // backlog's "16 EPISODES LEFT" under a "Watched" pill (review i3: The Witcher, Seasons
             // 3–4 at 0; SAKAMOTO DAYS at 0 of 22). A mark moves it to Watching and says so.
@@ -1116,7 +1116,7 @@ struct FranchiseDetailView: View {
         // on the badge with its recency leading the line ("Aired 2h ago · Season 4 · Episode
         // 19"); an older single drop wears its day on the badge and has no moment.
         let last = part.lastAired(now: now, anchor: f.timeAnchor)
-        let recency = last.map { TemporalCopy.aired(at: $0, now: now, source: f.source) }
+        let recency = last.map { TemporalCopy.aired(at: $0, now: now, anchor: f.timeAnchor) }
         let struck = last.map { Formatting.dayDiff(ts: $0, now: now, anchor: f.timeAnchor) == 0 } ?? false
         // No third line. "Caught up after this episode" restated what the badge and the
         // one-episode CTA already say; the capsule is the sentence.
@@ -1167,7 +1167,7 @@ struct FranchiseDetailView: View {
         }
         guard let part else { return completeState(f) }
         let split = Copy.Release.announcement(part.canonicalLabel)
-        let release = part.announcedDateLabel(source: f.source).map(TemporalCopy.premieres)
+        let release = part.announcedDateLabel(anchor: f.timeAnchor).map(TemporalCopy.premieres)
             ?? TemporalCopy.noDateAnnounced
         return NextUp(kind: .waiting, part: part, eyebrow: split.badge,
                       line1: [split.subject, release].compactMap { $0 }.joined(separator: " \u{00B7} "),
@@ -1184,7 +1184,7 @@ struct FranchiseDetailView: View {
         guard f.tracksAirings, let at = f.nextAiring(now: now) else { return nil }
         let part = f.releasingPart
         let episode = part?.airings.first(where: { $0.at == at })?.episode ?? part?.nextEpisodeNumber
-        return Copy.Progress.episodeAirs(episode, when: TemporalCopy.airs(at: at, now: now, source: f.source))
+        return Copy.Progress.episodeAirs(episode, when: TemporalCopy.airs(at: at, now: now, anchor: f.timeAnchor))
     }
 
     /// The name the bar can hold: `displayTitle` when it fits at a step of scale, else the
@@ -1961,7 +1961,7 @@ struct FranchiseDetailView: View {
     /// Netflix and Apple TV draw the position as a bar and say nothing.
     private func partFacts(_ f: Franchise, part: FranchisePart) -> (meta: String?, lead: String?, progress: Double?, spokenProgress: String?) {
         if part.isUpcoming {
-            if let d = part.announcedDateLabel(source: f.source) { return (nil, TemporalCopy.premieres(d), nil, nil) }
+            if let d = part.announcedDateLabel(anchor: f.timeAnchor) { return (nil, TemporalCopy.premieres(d), nil, nil) }
             return (TemporalCopy.noDateAnnounced, nil, nil, nil)
         }
         // The specials bucket is a CATALOGUE, not a run. It lives under its own EXTRAS label now,
@@ -1984,7 +1984,7 @@ struct FranchiseDetailView: View {
             let behind = part.behind(now: now, anchor: f.timeAnchor)
             if behind > 0 { return (nil, Copy.Progress.behind(behind), ratio, spoken) }
             if let at = f.nextAiring(now: now), f.releasingPart?.mediaId == part.mediaId {
-                return (nil, TemporalCopy.airs(at: at, now: now, source: f.source), ratio, spoken)
+                return (nil, TemporalCopy.airs(at: at, now: now, anchor: f.timeAnchor), ratio, spoken)
             }
             return (Copy.Progress.caughtUp, nil, ratio, spoken)
         }
@@ -2195,7 +2195,7 @@ extension FranchiseDetailView {
         let next: String? = f.nextAiring(now: now).map { at in
             let airing = f.releasingPart
             let episode = airing?.airings.first(where: { $0.at == at })?.episode ?? airing?.nextEpisodeNumber
-            return Copy.Progress.episodeAirs(episode, when: TemporalCopy.airs(at: at, now: now, source: f.source))
+            return Copy.Progress.episodeAirs(episode, when: TemporalCopy.airs(at: at, now: now, anchor: f.timeAnchor))
         }
         let seasons = f.seasonPartsInOrder.count
         let provider = showsProvider ? providers.flatMap { $0.status == .available ? $0.providers.first : nil } : nil
@@ -3389,7 +3389,7 @@ extension FranchiseDetailView {
                     if indexed.contains(section) { indexState.track(section, top: top, threshold: threshold) }
                 }
             }
-            watchCredit
+            pageCredits(f)
         }
         .padding(.top, ThemeSpace.x4)
         .onAppear { indexState.reset(order: indexed) }
@@ -3400,6 +3400,27 @@ extension FranchiseDetailView {
     /// JustWatch partnership, whose terms ask for the credit (`docs/api-contract.md`), but under the
     /// lockup's watch line it was a second line of grey in the one place a viewer looks. Drawn only
     /// when the line is.
+    /// The page's data credits as one block at its foot: JustWatch's (`watchCredit`) and TVmaze's —
+    /// a TV show read at real broadcast times (`Franchise.timesExact`, 23 Oct) takes them from
+    /// TVmaze, whose CC BY-SA licence asks for credit. Nothing when neither applies.
+    @ViewBuilder
+    private func pageCredits(_ f: Franchise) -> some View {
+        let broadcast = f.source == .tmdb && f.timesExact
+        if Self.streamable(providers) != nil || broadcast {
+            VStack(alignment: .leading, spacing: ThemeSpace.x2) {
+                watchCredit
+                if broadcast, let site = URL(string: "https://www.tvmaze.com") {
+                    Link(destination: site) {
+                        Text(Copy.Watch.broadcastAttribution)
+                            .type(ThemeType.feedSmall)
+                            .foregroundStyle(ThemeColor.textTertiary)
+                    }
+                    .padding(.horizontal, ThemeMetrics.gutter)
+                }
+            }
+        }
+    }
+
     @ViewBuilder
     private var watchCredit: some View {
         if let availability = Self.streamable(providers) {
@@ -3537,7 +3558,7 @@ extension FranchiseDetailView {
         if let at = f.nextAiring(now: now) {
             let airing = f.releasingPart
             let episode = airing?.airings.first(where: { $0.at == at })?.episode ?? airing?.nextEpisodeNumber
-            let when = TemporalCopy.airs(at: at, now: now, source: f.source)
+            let when = TemporalCopy.airs(at: at, now: now, anchor: f.timeAnchor)
             rows.append(.init(label: Copy.ShowPage.infoNext,
                               value: episode.map { "\(Copy.episode($0)) \u{00B7} \(when)" } ?? when))
         }

@@ -125,7 +125,7 @@ export interface RelatedTitle {
   score?: number | null
 }
 
-export type CatalogProvider = 'anilist' | 'tmdb'
+export type CatalogProvider = 'anilist' | 'tmdb' | 'tvmaze'
 export type CatalogMediaType = 'tv' | 'movie' | 'anime'
 
 export interface CatalogLinkView {
@@ -320,11 +320,19 @@ export interface FranchisePart {
    * Empty when nothing in the window is dated.
    */
   airings: Airing[]
+  /**
+   * The schedule (`nextAiringAt`, `lastAiredAt`, `airings`, `release`) is at real broadcast
+   * instants: always for AniList; for a TMDB season, when TVmaze's broadcast times cover it whole
+   * (services/broadcast.ts). False for a TMDB season read as calendar dates. `episodes[].airDate`
+   * stays TMDB's date either way.
+   */
+  timesExact: boolean
   /** Part-specific trailers/teasers. Populated on detail/library; safe to ignore when empty. */
   videos: FranchiseVideo[]
 }
 
-/** One dated episode: its number and its air instant (ms epoch; TMDB's is date-only at 17:00 UTC). */
+/** One dated episode: its number and its air instant (ms epoch; TMDB's is date-only at 17:00 UTC
+ *  unless its part is `timesExact`). */
 export interface Airing {
   episode: number
   at: number
@@ -333,6 +341,12 @@ export interface Airing {
 export interface Franchise {
   id: string
   source: MediaSource
+  /**
+   * Every part with a schedule is `timesExact`, so the whole show is read at real instants — a
+   * client keeps ONE calendar per show (`MediaSource.timeAnchor` on iOS). Always true for AniList;
+   * for TMDB, true only when TVmaze covers every scheduled season (and some season is scheduled).
+   */
+  timesExact: boolean
   title: string
   cover: string
   banner: string
@@ -959,6 +973,8 @@ export interface AccountExport {
     progress: { mediaId: number; episodes: number; updatedAt: number }[]
     preferences: UserPreferences | null
     recommendationFeedback: { key: string; kind: string; createdAt: number }[]
+    /** The recommendations the caller was shown, on how many visits (`POST /me/recommendations/impressions`). */
+    recommendationImpressions: { key: string; visits: number; firstShownAt: number; lastShownAt: number }[]
     /** Every session the server holds, deleted ones included as the tombstones they are. */
     watchSessions: (WatchSession & { deletedAt: number | null })[]
   }

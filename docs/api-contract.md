@@ -21,7 +21,18 @@ keep decoding):
   "Specials"). `mediaId` = `1_000_000_000 + TMDB season id`. Grouping is deterministic (no LLM).
   **Date precision caveat**: TMDB publishes air *dates* only, so `nextAiringAt`/`lastAiredAt`
   for tmdb parts are synthesized at **17:00 UTC** of the air date. Clients must not show
-  minute-level countdowns or schedule time-of-day notifications for `source: "tmdb"`.
+  minute-level countdowns or schedule time-of-day notifications for a tmdb part UNLESS it is
+  `timesExact` (below). **Broadcast times (23 Oct)**: for followed shows the server matches the
+  show to **TVmaze** (by TMDB's TheTVDB/IMDb ids) and stores each episode's network slot. A season
+  whose every dated episode has a TVmaze time that agrees with TMDB's date (±36 h, and never before
+  the date-only strike below) is read at those instants: its `nextAiringAt`, `lastAiredAt`,
+  `airings` and `release` (`precision: "exact"`) become real broadcast instants and the part says
+  `timesExact: true`. The franchise says `timesExact: true` only when EVERY part with a schedule is
+  exact (specials, which TVmaze numbers its own way, never count — and in such a show they carry
+  no schedule at all); otherwise the whole show stays on dates, so a client reads ONE calendar per
+  show. Streaming drops (Netflix, Paramount+…) have no time on TVmaze and stay dates.
+  `episodes[].airDate` is TMDB's date either way. **TVmaze is CC BY-SA**: a client surface showing
+  a `timesExact` TV time must credit TVmaze ("Air times from TVmaze").
   **Announced seasons**: a season with a known future air date ships that premiere as its next
   slot (`nextEpisodeNumber: 1`, `nextAiringAt` = premiere at 17:00 UTC), matching how AniList
   announces a season — so clients read the premiere date off `nextAiringAt` for either source.
@@ -167,6 +178,8 @@ authenticated user's progress.
   "nextAiringCount": 1,       // episodes sharing the next airing date; >1 ⇒ a full-season "drop"
   "episodes": [ EpisodeMeta, … ], // FULL list on GET /franchises/:id ONLY; [] on list/library payloads
   "airings": [ Airing, … ],    // dated episodes inside Schedule's window, oldest first — on EVERY payload
+  "timesExact": true,          // the schedule above is at real instants: always for AniList; for TMDB,
+                              // when TVmaze's broadcast times cover the season (see "tmdb" above)
   "videos": [ FranchiseVideo, … ] // trailers/teasers scoped to this exact part
 }
 ```
@@ -197,7 +210,8 @@ next. Empty when nothing in the window is dated.
 ```jsonc
 {
   "episode": 14,
-  "at": 1756226400000    // ms epoch; TMDB's is date-only (17:00 UTC) — read it in the source's calendar
+  "at": 1756226400000    // ms epoch; TMDB's is date-only (17:00 UTC) unless its part is `timesExact` —
+                         // read it in the show's calendar
 }
 ```
 
@@ -206,6 +220,8 @@ next. Empty when nothing in the window is dated.
 {
   "id": "uuid",
   "source": "anilist",             // anilist | tmdb (default anilist)
+  "timesExact": true,              // every scheduled part is `timesExact`: read the whole show at real
+                                   // instants (anime always; TV when TVmaze covers it). Summaries stay dates.
   "title": "Attack on Titan",
   "cover": "https://…",
   "banner": "https://…",
@@ -356,9 +372,13 @@ list, with no TV quota.
 }
 ```
 
-- **Deterministic for (user, UTC calendar day).** The shelf rotates daily: a ±12% jitter reorders
-  near-ties, and the first four (visible) tiles are a seeded draw from the top eight in which
-  yesterday's four count ×0.6. The same user on the same UTC day always gets the same list.
+- **Deterministic for (user, UTC calendar day, what they have been shown).** The shelf rotates
+  daily — a ±12% jitter reorders near-ties, and the first four (visible) tiles are a seeded draw
+  from the top eight in which yesterday's four count ×0.6 — and, above all, by what the viewer has
+  SEEN (`POST /me/recommendations/impressions`, below): each visit a title was shown on keeps ×0.6
+  of its standing (never below ×0.15), and those visits halve every 10 days it is not shown, so a
+  shelf passed over gives way to the next titles and a strong one comes back. The same user, on
+  the same UTC day, with the same impressions, always gets the same list.
 - **Never served:** anything the user owns — including other seasons of an owned franchise and
   normalised-title twins across sources (the anime of a live-action show they have) — anything they
   gave feedback on (matched by the key or by any id of the same series), films / OVAs / specials /
@@ -402,6 +422,19 @@ Both verdicts hide the title (by its key or any id of its series) until undone. 
 it: to record the show as watched, also add it to the library. Three dismissals whose main reason is
 the same show halve that show's weight. The key must be `anilist:<id>` or `tmdb:<id>`; an unknown
 field, kind or key shape is a `400`. Feedback is user data and is erased by `DELETE /me`.
+
+```jsonc
+// POST /me/recommendations/impressions   → 204   (the tiles that stayed on screen)
+{ "keys": ["anilist:20832", "tmdb:1399"] }   // 1–60 keys
+```
+
+An impression is not a verdict: nothing is hidden, the title just gives way (the rotation above).
+The apps report a tile at least half on screen for a second, and send a visit's impressions when
+it ends — never during it, so a shelf does not turn over under the reader — then refetch the list
+when they come back after 30 minutes. Reports within 30 minutes of a title's last one are the same
+visit and count once, so a retry or a repeat is harmless. Matched like feedback (any id of the
+series). Impressions are user data: erased by `DELETE /me`, listed in the export. Until migration
+0016 has been applied the route answers `204` and records nothing, and the list rotates daily only.
 
 - AniList tags marked as general spoilers, media spoilers, or adult are excluded. TMDB has no
   spoiler bit, so only genres and a conservative allow-list of broad keywords become themes.
@@ -538,6 +571,7 @@ Detail do a current bounded lookup. Use the batch endpoint to warm a visible she
 | GET | `/me/recommendations?limit=12` | — | `{ items: RecommendationItem[], generatedAt }` — see **Recommended for you**; `limit` 1–30 |
 | POST | `/me/recommendations/feedback` | `{ key, kind: "dismissed" \| "seen" }` | `204` |
 | DELETE | `/me/recommendations/feedback` | `{ key }` | `204` (undo) |
+| POST | `/me/recommendations/impressions` | `{ keys: string[] }` (1–60) | `204` — the tiles that stayed on screen; see **Recommended for you** |
 | GET | `/me/watch-sessions` | — | `{ sessions: WatchSession[] }` — live sessions only, by franchise then ordinal — see **Watch sessions** |
 | PUT | `/me/watch-sessions/:id` | `WatchSessionBody` (`:id` a client-generated uuid) | `204`; `410 {"error":"session deleted"}`, `404 {"error":"franchise not found"}`, `404 {"error":"session not found"}` (the id is someone else's), `400` on a bad id or body. All final |
 | DELETE | `/me/watch-sessions/:id` | — | `204`, always (idempotent; a repeat, an unknown id or someone else's id changes nothing) |
@@ -759,6 +793,7 @@ interface AccountExport {
     preferences: UserPreferences | null  // incl. `audience` (see Audience); null = neither a
                                          // preferences row nor an audience choice is stored
     recommendationFeedback: { key: string; kind: string; createdAt: number }[]
+    recommendationImpressions: { key: string; visits: number; firstShownAt: number; lastShownAt: number }[]
     watchSessions: (WatchSession & { deletedAt: number | null })[]  // tombstones included
   }
   social: {
@@ -1491,7 +1526,9 @@ cannot be liked.
 - A **date-only** slot (TMDB) counts from **10:00 UTC on its UTC date** — the moment the earliest
   time zone on Earth (UTC+14) reaches the day after it. The client counts a date-only episode from
   the day after its date in the device's local day, which is never earlier, so **the server is never
-  stricter than the client**: a room the app shows unlocked, the server accepts.
+  stricter than the client**: a room the app shows unlocked, the server accepts. The server's gate
+  and clamp keep this rule for a `timesExact` TV season too; the season is exact only when every
+  broadcast instant falls at or after it, so a client striking at the instant is still never earlier.
 - A NOT_YET_RELEASED part has aired nothing. Only a FINISHED part counts as its size.
 - A part whose episodes are still (or were only partly) coming — RELEASING, HIATUS, CANCELLED —
   counts from **evidence only**: the episode before its next slot, a slot that has struck, and any

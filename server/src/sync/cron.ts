@@ -12,6 +12,7 @@ import { clampUnairedProgress } from '../services/library.js'
 import { purgeCommentTombstones } from '../services/commentRetention.js'
 import { alertStaleReports } from '../services/moderationAlert.js'
 import { tmdbEnabled } from '../tmdb/client.js'
+import { syncBroadcastTimes } from '../tvmaze/service.js'
 import {
   attachNewSeasons,
   refreshAiring,
@@ -172,6 +173,20 @@ export function startCron(): () => Promise<void> {
         jobLog('tv-recommendations', 'completed', refreshed)
       } catch {
         jobLog('tv-recommendations', 'failed')
+      }
+    })
+  }
+
+  // Every six hours at :50: TVmaze broadcast times for followed TV shows (tvmaze/service.ts) —
+  // a network's slot rarely moves, and a season is read at its times only while they agree with
+  // TMDB's dates, so a stale list is never shown, only left on dates.
+  if (tmdbEnabled() && !env.TVMAZE_DISABLED) {
+    schedule('broadcast-times', '50 */6 * * *', async () => {
+      try {
+        const { seasons } = await syncBroadcastTimes()
+        jobLog('broadcast-times', 'completed', seasons)
+      } catch {
+        jobLog('broadcast-times', 'failed')
       }
     })
   }

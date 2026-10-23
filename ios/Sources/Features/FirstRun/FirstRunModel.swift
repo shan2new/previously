@@ -531,12 +531,12 @@ final class FirstRunModel {
                          detail: f.effectiveStatus == .completed ? Copy.Status(.completed) : Copy.Progress.caughtUp)
     }
 
-    /// The show whose next episode an alert would announce: a Watching anime with a timed airing
-    /// ahead (TV's dates carry no clock, so there is no moment to announce).
+    /// The show whose next episode an alert would announce: a Watching show with a timed airing
+    /// ahead (a TV show on dates alone carries no clock, so there is no moment to announce).
     func alertShow(now: Int64) -> Franchise? {
         let ids = Set(picks.map(\.id))
         return appModel.library
-            .filter { (imported || ids.contains($0.id)) && $0.source == .anilist && $0.effectiveStatus == .watching }
+            .filter { (imported || ids.contains($0.id)) && !$0.timeAnchor.isDateOnly && $0.effectiveStatus == .watching }
             .compactMap { f in f.nextAiring(now: now).map { (f, $0) } }
             .min { $0.1 < $1.1 }?.0
     }

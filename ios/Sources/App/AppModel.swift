@@ -30,6 +30,9 @@ final class AppModel {
     // brief app switches don't wipe "Out now").
     static let staleReloadAfter: Int64 = 2 * Formatting.minuteMs
     static let newVisitAfter: Int64 = 6 * Formatting.H
+    /// Away this long, the recommendations are a new sitting: refetched, so what was seen in the
+    /// last one gives way. The server's `IMPRESSION_VISIT_GAP_MS` — the two count visits alike.
+    static let recommendationVisitAfter: Int64 = 30 * Formatting.minuteMs
 
     let api: APIClient
 
@@ -72,6 +75,11 @@ final class AppModel {
     @ObservationIgnored var recommendationsTask: Task<Void, Never>?
     /// Hidden at once on "Not interested" / "Already seen", until the next list leaves them out.
     var hiddenRecommendationKeys: Set<String> = []
+    /// Titles whose tiles stayed on screen THIS visit (`noteRecommendationShown`), told to the
+    /// server when the visit ends — never during it, or the shelf would turn over under the reader.
+    @ObservationIgnored var shownRecommendationKeys: Set<String> = []
+    /// The list on screen is the offline copy (the last visit's), not yet replaced by a fresh one.
+    @ObservationIgnored var recommendationsFromCache = false
     /// The recommendation being turned into a show page (a tap or an add on a title with none).
     var resolvingRecommendations: Set<String> = []
     /// Titles added from the shelf this session: they stay on it, ticked, until the next list
@@ -718,6 +726,7 @@ final class AppModel {
 
     func sceneEnteredBackground() {
         backgroundedAt = .nowMs
+        endRecommendationVisit()
     }
 
     /// Called when the scene becomes active. Snaps the countdown clock immediately (the 20s tick
@@ -729,6 +738,7 @@ final class AppModel {
         guard let bg = backgroundedAt else { return }  // launch activation — start() covers it
         backgroundedAt = nil
         let away = now - bg
+        if away >= AppModel.recommendationVisitAfter { refreshRecommendationsIfNeeded(force: true) }
         guard away >= AppModel.staleReloadAfter else { return }
         Task {
             // A new visit stamps FIRST, so the feed that follows is ordered against the real

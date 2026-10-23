@@ -8,6 +8,7 @@ const mocks = vi.hoisted(() => ({
   getRecommendations: vi.fn(),
   recordRecommendationFeedback: vi.fn(),
   clearRecommendationFeedback: vi.fn(),
+  recordRecommendationImpressions: vi.fn(),
 }))
 
 vi.mock('../db/index.js', () => ({ db: {}, sql: {} }))
@@ -32,6 +33,7 @@ beforeEach(() => {
   mocks.getRecommendations.mockReset().mockResolvedValue({ items: [], generatedAt: 1 })
   mocks.recordRecommendationFeedback.mockReset().mockResolvedValue(undefined)
   mocks.clearRecommendationFeedback.mockReset().mockResolvedValue(undefined)
+  mocks.recordRecommendationImpressions.mockReset().mockResolvedValue(undefined)
 })
 
 describe('GET /me/recommendations', () => {
@@ -102,6 +104,38 @@ describe('recommendation feedback', () => {
     }
     expect(mocks.recordRecommendationFeedback).not.toHaveBeenCalled()
     expect(mocks.clearRecommendationFeedback).not.toHaveBeenCalled()
+    await server.close()
+  })
+})
+
+describe('recommendation impressions', () => {
+  it('records the titles that were on screen for the bearer with 204', async () => {
+    const server = await app()
+    const res = await server.inject({
+      method: 'POST',
+      url: '/me/recommendations/impressions',
+      payload: { keys: ['anilist:20832', 'tmdb:1399'] },
+    })
+    expect(res.statusCode).toBe(204)
+    expect(res.body).toBe('')
+    expect(mocks.recordRecommendationImpressions).toHaveBeenCalledWith(CALLER, ['anilist:20832', 'tmdb:1399'])
+    await server.close()
+  })
+
+  it('rejects an empty, oversized or malformed batch and writes nothing', async () => {
+    const server = await app()
+    const bad = [
+      { keys: [] },
+      { keys: Array.from({ length: 61 }, (_, i) => `anilist:${i + 1}`) },
+      { keys: ['mal:1'] },
+      { keys: ['anilist:1'], userId: 'someone-else' },
+      { key: 'anilist:1' },
+      {},
+    ]
+    for (const payload of bad) {
+      expect((await server.inject({ method: 'POST', url: '/me/recommendations/impressions', payload })).statusCode).toBe(400)
+    }
+    expect(mocks.recordRecommendationImpressions).not.toHaveBeenCalled()
     await server.close()
   })
 })

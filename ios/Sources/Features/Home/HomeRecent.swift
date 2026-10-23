@@ -66,7 +66,7 @@ struct HomeDropCard: View {
     private var scene: String? { f.sceneArt }
     private var poster: String? { PosterPick.shared.choice(for: f)?.url ?? f.portraitArt }
 
-    private var aired: String { TemporalCopy.aired(at: entry.at, now: now, source: f.source) }
+    private var aired: String { TemporalCopy.aired(at: entry.at, now: now, anchor: f.timeAnchor) }
 
     var body: some View {
         let shape = RoundedRectangle(cornerRadius: ThemeRadius.card, style: .continuous)

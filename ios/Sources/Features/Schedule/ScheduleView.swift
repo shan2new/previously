@@ -993,7 +993,7 @@ struct ScheduleView: View {
            Formatting.isEvening(hour: Formatting.localParts(r.at, anchor: f.timeAnchor).hour) {
             return Copy.Schedule.tonightAt(Formatting.fmtTime(r.at, anchor: f.timeAnchor))
         }
-        return TemporalCopy.airs(at: r.at, now: now, source: f.source)
+        return TemporalCopy.airs(at: r.at, now: now, anchor: f.timeAnchor)
     }
 
     private func blocks(_ d: Derived, hero: Hero?) -> [DayBlock] {

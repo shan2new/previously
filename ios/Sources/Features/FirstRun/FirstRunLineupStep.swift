@@ -194,8 +194,7 @@ private struct LineupRowView: View {
 
     /// The flap's two lines: the day over the time, or a word over its sign.
     private var face: FlapFace.Value {
-        let source = row.franchise.source
-        let anchor = source.timeAnchor
+        let anchor = row.franchise.timeAnchor
         switch row.when {
         case .now:
             return .init(top: Copy.FirstRun.now, bottom: nil, glyph: "play.fill", lit: true)
@@ -209,7 +208,7 @@ private struct LineupRowView: View {
             // its day of the month instead). Further out: the month over the day.
             if days <= 6 {
                 let day = days == 0 ? "Today" : Formatting.formatted(ts, skeleton: "EEE", anchor: anchor)
-                let under = source == .anilist ? Formatting.fmtTime(ts, anchor: anchor)
+                let under = !anchor.isDateOnly ? Formatting.fmtTime(ts, anchor: anchor)
                                                : Formatting.formatted(ts, skeleton: "dMMM", anchor: anchor)
                 return .init(top: day, bottom: under, glyph: nil, lit: true)
             }
@@ -221,7 +220,7 @@ private struct LineupRowView: View {
     private var spoken: String {
         switch row.when {
         case .now: "\(row.detail), \(Copy.Schedule.outNow)"
-        case .at(let ts): "\(row.detail), \(TemporalCopy.airsSentence(at: ts, now: now, source: row.franchise.source))"
+        case .at(let ts): "\(row.detail), \(TemporalCopy.airsSentence(at: ts, now: now, anchor: row.franchise.timeAnchor))"
         case .later, .done: row.detail
         }
     }

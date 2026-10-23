@@ -380,10 +380,10 @@ struct StoryPage: View, @MainActor Equatable {
         case .episode:
             guard let at = f.at else { return Copy.Stories.meta(season: reel.partLabel, moment: Copy.Stories.outNow) }
             return Copy.Stories.meta(season: reel.partLabel,
-                                     moment: TemporalCopy.aired(at: at, now: now, source: reel.source))
+                                     moment: TemporalCopy.aired(at: at, now: now, anchor: reel.anchor))
         case .next:
             guard let at = f.at else { return Copy.Stories.meta(season: reel.partLabel, moment: "") }
-            let airs = TemporalCopy.airsSentence(at: at, now: now, source: reel.source)
+            let airs = TemporalCopy.airsSentence(at: at, now: now, anchor: reel.anchor)
             // "Airs in 27 min" already counts down; a date-only slot has no clock to count to.
             let counts = !reel.anchor.isDateOnly && at - now >= 60 * Formatting.minuteMs
             let moment = counts
@@ -403,7 +403,7 @@ struct StoryPage: View, @MainActor Equatable {
         case .next:
             guard let at = f.at else { return Copy.Stories.meta(season: reel.partLabel, moment: "") }
             return Copy.Stories.meta(season: reel.partLabel,
-                                     moment: TemporalCopy.airsSentence(at: at, now: now, source: reel.source))
+                                     moment: TemporalCopy.airsSentence(at: at, now: now, anchor: reel.anchor))
         }
     }
 
@@ -753,7 +753,7 @@ private struct StoryCountdownSticker: View {
 
     @ViewBuilder
     private var reminder: some View {
-        if reel.source == .anilist {
+        if !reel.anchor.isDateOnly {
             if ScheduleReminders.shared.has(mediaId: reel.mediaId, episode: frame.episode) {
                 AppGlyphLabel(Copy.Stories.alertOn, systemName: "bell.fill")
                     .type(ThemeType.metadataEmphasis)

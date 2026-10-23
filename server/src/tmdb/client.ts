@@ -115,6 +115,23 @@ export async function findTvByTvdbId(
   return json.tv_results?.[0] ?? null
 }
 
+/** A show's ids in other catalogues (`/tv/{id}/external_ids`): how TVmaze finds it. Null on a missing show. */
+export async function getTvExternalIds(
+  showId: number,
+  options: TmdbRequestOptions = {},
+): Promise<{ tvdbId: number | null; imdbId: string | null } | null> {
+  try {
+    const json = await tmdbGet<{ tvdb_id?: number | null; imdb_id?: string | null }>(`/tv/${showId}/external_ids`, {}, options)
+    return {
+      tvdbId: typeof json.tvdb_id === 'number' && json.tvdb_id > 0 ? json.tvdb_id : null,
+      imdbId: typeof json.imdb_id === 'string' && /^tt\d+$/.test(json.imdb_id) ? json.imdb_id : null,
+    }
+  } catch (err) {
+    if ((err as Error).message === 'TMDB 404') return null
+    throw err
+  }
+}
+
 /** Search movies by name (used to resolve anime franchises whose primary work is a film). */
 export async function searchMovies(
   query: string,

@@ -41,8 +41,22 @@ change `TMDB_ID_OFFSET`. JP animation belongs to AniList, so its TMDB twin is su
 inside `ensureTvFranchise` (the only thing that creates a TMDB franchise), *not* in its callers, so
 `npm run tv` and any future call site inherit the rule. Search/trending pre-filter too, to skip the
 `/tv/{id}` fetch.
-TMDB air dates are **date-only**; `airingAt` is synthesized at 17:00 UTC, so iOS gates episode
-notifications/Live Activities to `source == .anilist`. `TMDB_ACCESS_TOKEN` unset = TV disabled
+TMDB air dates are **date-only**; `airingAt` is synthesized at 17:00 UTC, so iOS reads a TV show
+as calendar days — UNLESS the server says `timesExact` (23 Oct): followed TV shows are matched to
+**TVmaze** (`tvmaze/service.ts`, every 6 h, `npm run broadcast`; the match lives in `catalog_links`
+as provider `tvmaze`, the times in `media_broadcast_times`, migration 0017), and a season is read
+at its network slot only when TVmaze times EVERY dated episode within 36 h of TMDB's date and no
+earlier than the server's date-only strike (`exactSchedule`, services/broadcast.ts — so the
+server's gate and clamp keep their date-only rule and an exact client is still never earlier).
+A show is exact only when every scheduled season is (specials excluded, and stripped of schedule);
+iOS keeps ONE calendar per show: `Franchise.timeAnchor` is `.local` for an exact show, and every
+"clock or not" decision — `TemporalCopy`, episode alerts, the Live Activity, story reminders —
+reads the anchor, never `source == .anilist`. Streaming drops have no TVmaze time and stay dates.
+TVmaze is CC BY-SA: the show page's foot credits it ("Air times from TVmaze"). AniList's `airingAt`
+is the JAPANESE TV broadcast, not the streaming release a viewer outside Japan watches (23 Oct,
+checked: Black Clover S2 airs 23:00 JST, Crunchyroll streams it an hour later). AnimeSchedule.net
+has sub/stream times; the app is free, so its API only needs the owner's app token
+(`ANIMESCHEDULE_TOKEN`, not wired yet) and a visible credit. `TMDB_ACCESS_TOKEN` unset = TV disabled
 (anime-only mode; everything still works). Sync jobs must stay source-filtered — never feed
 offset ids to AniList (`refreshAiring`/`attachNewSeasons` filter on `source='anilist'`).
 
@@ -171,6 +185,16 @@ to `news:` with every social row, in one transaction, when research adopts the p
   else null; null on Following, the post page, Saved and Reminders). The viewer's part is cached
   per user for the snapshot's 10 minutes; a failure there serves the trending feed. An empty
   library gets the old time order.
+- **Recommendations rotate by what was SEEN (23 Oct: "Recommendations are completely static. If the
+  user has seen a recommendation, they should be rotated", owner — the daily jitter kept 13–16 of
+  the same 16 titles all week).** A tile at least half on screen for a second is noted
+  (`RecommendationImpression`, ForYouShelves.swift); the app holds a visit's notes and reports
+  them when the app leaves the screen (`POST /me/recommendations/impressions`, owed on the device
+  until they land), then refetches on a return after 30 min. The server counts a title's VISITS
+  (`recommendation_impressions`, migration 0016; one per 30-min sitting) and the rotating ranker
+  keeps ×0.6 of a title per visit (`exposureFatigue`, floor 0.15, the visits halving every 10
+  days unseen); the reference list (`rotation: false`, the feed's For you) never reads them. Until
+  0016 is applied the route records nothing and the list rotates daily only.
 - **"Episode N is out" posts (4 Oct), Following only and OPT-IN: `GET /me/feed?tab=following&
   episodes=1`.** One per main-story part for a week after its newest episode aired (statuses
   watching / completed / paused), kind `episode`, `episode: n`, id = the episode's room

@@ -1,5 +1,6 @@
 import Foundation
 import SwiftUI
+import UIKit
 
 // "Recommended for you" — the model half. The server ranks (docs/api-contract.md,
 // `GET /me/recommendations`); this file fetches, keeps an offline copy, and carries the three
@@ -68,7 +69,8 @@ extension AppModel {
     }
 
     /// The list is re-ranked against the library it was fetched for: a change of membership or
-    /// status (an add, a finish) or six hours refetches it; anything else keeps the one on screen.
+    /// status (an add, a finish) or six hours refetches it, and so does a new visit (`force`, from
+    /// `sceneBecameActive` — what was seen gives way); anything else keeps the one on screen.
     /// Debounced, so a burst of writes asks once.
     func refreshRecommendationsIfNeeded(force: Bool = false) {
         guard !isIsolated else { return }
@@ -104,11 +106,17 @@ extension AppModel {
             return
         }
         #endif
+        // What the last visits showed reaches the server first, so this list already lets it go.
+        await flushImpressions()
         do {
             // Sixteen for a shelf of twelve: hides and adds REFILL it from the rest instead of
             // shrinking it until the next list (review i5, F13).
             let res = try await api.recommendations(limit: 16)
             guard epoch == accountEpoch, !erasing else { return }
+            // A title glimpsed on the offline copy (the last visit's list, already reported) counts
+            // for this visit only if the fresh list keeps it on screen.
+            if recommendationsFromCache { shownRecommendationKeys.formIntersection(res.items.map(\.key)) }
+            recommendationsFromCache = false
             recommendations = res.items
             recommendationsState = .loaded
             AccountLocalStore.shared.remove("recommendations-unavailable.json", owner: accountStorage)
@@ -205,6 +213,70 @@ extension AppModel {
             withAnimation(ThemeMotion.uiGentle) { _ = self.hiddenRecommendationKeys.remove(key) }
             self.queueFeedback(key: key, kind: "undo")
         })
+    }
+
+    // MARK: What was seen
+
+    /// A tile of this title stayed on screen (`RecommendationImpression`): held for the visit.
+    func noteRecommendationShown(_ key: String) {
+        guard !isIsolated, !erasing, !hiddenRecommendationKeys.contains(key) else { return }
+        shownRecommendationKeys.insert(key)
+    }
+
+    /// The visit is over (the app left the screen): what it showed joins what the server is owed —
+    /// kept on the device, since a request begun on the way out may never finish — and is sent.
+    func endRecommendationVisit() {
+        guard !shownRecommendationKeys.isEmpty, !isIsolated, !erasing else { return }
+        var owed = loadOwedImpressions()
+        owed.append(contentsOf: shownRecommendationKeys.subtracting(owed).sorted())
+        shownRecommendationKeys = []
+        saveOwedImpressions(Array(owed.suffix(Self.owedImpressionsLimit)))
+        let grace = BackgroundGrace("recommendation-impressions")
+        Task { [weak self] in
+            await self?.flushImpressions()
+            grace.end()
+        }
+    }
+
+    /// Sends the owed impressions, a server batch at a time; each leaves the queue once it lands.
+    /// A refusal (an older server's 404, a key it will not take) drops them: they are a hint, and
+    /// retrying them forever would only hold the queue.
+    func flushImpressions() async {
+        guard !isIsolated, !erasing, let owner = accountStorage else { return }
+        let epoch = accountEpoch
+        let owed = loadOwedImpressions()
+        for start in stride(from: 0, to: owed.count, by: Self.impressionBatch) {
+            let batch = Array(owed[start..<min(start + Self.impressionBatch, owed.count)])
+            do {
+                try await api.recommendationImpressions(keys: batch)
+            } catch APIError.http(let code, _) where (400..<500).contains(code) {
+                // Dropped below, like a landed batch.
+            } catch {
+                return  // Kept for the next list or the next visit's end.
+            }
+            guard epoch == accountEpoch, !erasing, AccountLocalStore.shared.matches(owner) else { return }
+            saveOwedImpressions(loadOwedImpressions().filter { !batch.contains($0) })
+        }
+    }
+
+    /// The server's batch limit (`POST /me/recommendations/impressions`, 60 keys).
+    private static let impressionBatch = 60
+    /// An offline week of visits is still only a hint: the newest this many are kept.
+    private static let owedImpressionsLimit = 240
+
+    private func loadOwedImpressions() -> [String] {
+        guard let data = AccountLocalStore.shared.read("recommendations-impressions.json", owner: accountStorage),
+              let keys = try? JSONDecoder().decode([String].self, from: data) else { return [] }
+        return keys
+    }
+
+    private func saveOwedImpressions(_ keys: [String]) {
+        guard !isIsolated, !erasing else { return }
+        if keys.isEmpty {
+            AccountLocalStore.shared.remove("recommendations-impressions.json", owner: accountStorage)
+        } else if let data = try? JSONEncoder().encode(keys) {
+            try? AccountLocalStore.shared.write(data, name: "recommendations-impressions.json", owner: accountStorage)
+        }
     }
 
     // MARK: Feedback that survives
@@ -305,6 +377,7 @@ extension AppModel {
             guard let self, let cached, self.recommendations.isEmpty, epoch == self.accountEpoch,
                   !self.erasing, AccountLocalStore.shared.matches(owner) else { return }
             self.recommendations = cached.items
+            self.recommendationsFromCache = true
             if self.recommendationsState == .idle { self.recommendationsState = .loaded }
         }
     }
@@ -322,6 +395,8 @@ extension AppModel {
         recommendationsFetchedAt = 0
         recommendationsLibraryKey = 0
         hiddenRecommendationKeys = []
+        shownRecommendationKeys = []
+        recommendationsFromCache = false
         sessionStage = nil
         addedRecommendationKeys = []
         addedRecommendationIds = []
@@ -329,11 +404,31 @@ extension AppModel {
         resolvingRecommendations = []
         AccountLocalStore.shared.remove("recommendations-cache.json", owner: accountStorage)
         AccountLocalStore.shared.remove("recommendations-feedback.json", owner: accountStorage)
+        AccountLocalStore.shared.remove("recommendations-impressions.json", owner: accountStorage)
         AccountLocalStore.shared.remove("recommendations-stage.json", owner: accountStorage)
         AccountLocalStore.shared.remove("recommendations-unavailable.json", owner: accountStorage)
         UserDefaults.standard.removeObject(forKey: Self.stageDayKey)
         UserDefaults.standard.removeObject(forKey: Self.stageKey)
         UserDefaults.standard.removeObject(forKey: Self.unavailableKey)
+    }
+}
+
+/// The few seconds of background time a request begun on the way out needs (on the simulator the
+/// app was suspended mid-request); what does not make it in time stays owed for the next list.
+@MainActor
+private final class BackgroundGrace {
+    private var id: UIBackgroundTaskIdentifier = .invalid
+
+    init(_ name: String) {
+        id = UIApplication.shared.beginBackgroundTask(withName: name) { [weak self] in
+            MainActor.assumeIsolated { self?.end() }
+        }
+    }
+
+    func end() {
+        guard id != .invalid else { return }
+        UIApplication.shared.endBackgroundTask(id)
+        id = .invalid
     }
 }
 

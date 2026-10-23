@@ -12,6 +12,7 @@ import {
   notifications,
   progress,
   recommendationFeedback,
+  recommendationImpressions,
   reminders,
   reports,
   saves,
@@ -96,6 +97,7 @@ export const accountErasurePlan: readonly ErasureStep[] = [
   { table: userPreferences, column: userPreferences.userId },
   { table: userAudience, column: userAudience.userId, optional: true }, //         migration 0012
   { table: recommendationFeedback, column: recommendationFeedback.userId },
+  { table: recommendationImpressions, column: recommendationImpressions.userId, optional: true }, // migration 0016
 ]
 
 /**

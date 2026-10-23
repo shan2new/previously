@@ -1085,21 +1085,21 @@ struct EpisodeList: View {
             // aired BY NOW: the catalogue's count trails a drop by a sync, and the row after the
             // newest episode printed no date at all for that hour (20 Oct, Bleach's Episode 10).
             // It is the page's one statement of the next airing since the calm stage left it out.
-            let anchor = f.source.timeAnchor
+            let anchor = f.timeAnchor
             if n == max(part.airedByNow(now: now, anchor: anchor), part.airedEpisodes) + 1,
                let at = part.airings.first(where: { $0.episode == n && $0.at > now })?.at
                     ?? part.upcomingAiring(now: now, anchor: anchor) {
-                return (TemporalCopy.airsSentence(at: at, now: now, source: f.source), false)
+                return (TemporalCopy.airsSentence(at: at, now: now, anchor: f.timeAnchor), false)
             }
             // Nothing: "Upcoming" says only what the row's position below the dated ones says.
             return nil
         }
-        if let d = episode?.airDate { return (TemporalCopy.aired(at: d, now: now, source: .tmdb), false) }
+        if let d = episode?.airDate { return (TemporalCopy.aired(at: d, now: now, anchor: Episode.airDateAnchor), false) }
         // DERIVED, because the app demonstrably knows: the part's own air window plus the weekly
         // cadence. Where neither anchor exists the row prints nothing — an invented date is worse
         // than a blank.
         if let at = derivedAirDate(part, n: n) {
-            return (TemporalCopy.aired(at: at, now: now, source: f.source), false)
+            return (TemporalCopy.aired(at: at, now: now, anchor: f.timeAnchor), false)
         }
         return nil
     }

@@ -115,9 +115,9 @@ struct ReturnFact {
 
         /// The verb over an instant, on the day ladder `TemporalCopy.returns` uses: "Returns
         /// tomorrow" · "Premieres Friday" · "Premieres 9 Oct".
-        func at(_ ts: Int64, now: Int64, source: MediaSource) -> String {
-            guard self == .premieres else { return TemporalCopy.returns(at: ts, now: now, source: source) }
-            let day = TemporalCopy.airsCompact(at: ts, now: now, source: source)
+        func at(_ ts: Int64, now: Int64, anchor: Formatting.TimeAnchor) -> String {
+            guard self == .premieres else { return TemporalCopy.returns(at: ts, now: now, anchor: anchor) }
+            let day = TemporalCopy.airsCompact(at: ts, now: now, anchor: anchor)
             // "today" and "tomorrow" are common nouns mid-sentence; a weekday and a date are not.
             return TemporalCopy.premieres(day == "Today" || day == "Tomorrow" ? day.lowercased() : day)
         }
@@ -235,11 +235,11 @@ struct ReturnFact {
     static func of(_ f: Franchise, appModel: AppModel, verb: Verb = .returns) -> ReturnFact {
         let now = appModel.nowMinute
         func unknown() -> ReturnFact {
-            ReturnFact(text: TemporalCopy.returns(at: nil, now: now, source: f.source),
+            ReturnFact(text: TemporalCopy.returns(at: nil, now: now, anchor: f.timeAnchor),
                        dated: false, soon: false)
         }
         if let at = appModel.nextPremiere(of: f) {
-            return known(verb.at(at, now: now, source: f.source), at: at, now: now)
+            return known(verb.at(at, now: now, anchor: f.timeAnchor), at: at, now: now)
         }
         // An unconfirmed report is not a schedule (docs/api-contract.md): the server resolves its
         // window to `unknown`, and the caption says what it is — "Season 3 rumored" — rather than
@@ -254,7 +254,7 @@ struct ReturnFact {
         if window.precision == .day, parts.year == Formatting.localParts(now, anchor: .utcDate).y,
            let date = utcDay(y: parts.year, month: parts.month, day: parts.day) {
             let at = ms(date)
-            return known(verb.at(at, now: now, source: .tmdb), at: at, now: now)
+            return known(verb.at(at, now: now, anchor: .utcDate), at: at, now: now)
         }
         // Every other announced DATE settles at month-and-year: "Returns Oct 2026" fits, "Oct 2,
         // 2027" does not, and a day nine months out is not a fact anybody acts on. A curated
@@ -366,7 +366,7 @@ struct LibraryRowFacts {
             // Search's words for the same fact). A future air time is what amber MEANS; it is not
             // a count of what you owe.
             if let at = f.nextAiring(now: now) {
-                let day = TemporalCopy.airsCompact(at: at, now: now, source: f.source)
+                let day = TemporalCopy.airsCompact(at: at, now: now, anchor: f.timeAnchor)
                 return LibraryRowFacts(lead: Copy.Progress.episodeAirs(nil, when: day), meta: nil)
             }
             // The return date only replaces "Caught up" when there is genuinely nothing airing:

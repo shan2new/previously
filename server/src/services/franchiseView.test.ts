@@ -129,6 +129,7 @@ describe('airingsWindow', () => {
 function part(overrides: Partial<FranchisePart> = {}): FranchisePart {
   return {
     mediaId: 1,
+    timesExact: false,
     kind: 'season',
     sequence: 1,
     watchOrder: 1,

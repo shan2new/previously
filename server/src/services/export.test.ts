@@ -103,6 +103,7 @@ describe('buildAccountExport', () => {
       [], // preferences
       [], // audience (its own table, read in a savepoint)
       [], // recommendation feedback
+      [], // recommendation impressions (its own table, read in a savepoint)
       // watch sessions — a stopped rewatch, deleted later (a tombstone is still the caller's data)
       [
         {

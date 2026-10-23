@@ -39,6 +39,7 @@ import {
   clearRecommendationFeedback,
   getRecommendations,
   recordRecommendationFeedback,
+  recordRecommendationImpressions,
 } from '../services/recommendations.js'
 import { deleteWatchSession, listWatchSessions, putWatchSession } from '../services/watchSessions.js'
 import { ClientMutationError, clientMutationContext } from '../services/clientMutations.js'
@@ -191,6 +192,15 @@ export const meRoutes: FastifyPluginAsync = async (app) => {
     const body = z.object({ key: recommendationKey }).strict().safeParse(req.body)
     if (!body.success) return reply.code(400).send({ error: 'invalid request' })
     await clearRecommendationFeedback(req.user!.id, body.data.key)
+    return reply.code(204).send()
+  })
+
+  // The titles that stayed on the viewer's screen: the next list lets them give way (rotation by
+  // what was seen, not only by the day).
+  app.post('/me/recommendations/impressions', async (req, reply) => {
+    const body = z.object({ keys: z.array(recommendationKey).min(1).max(60) }).strict().safeParse(req.body)
+    if (!body.success) return reply.code(400).send({ error: 'invalid request' })
+    await recordRecommendationImpressions(req.user!.id, body.data.keys)
     return reply.code(204).send()
   })
 

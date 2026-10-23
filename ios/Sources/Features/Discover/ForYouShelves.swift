@@ -229,6 +229,7 @@ struct ForYouTopPick: View {
         .overlay { if !fullBleed { shape.strokeBorder(ThemeColor.posterEdge, lineWidth: 1) } }
         .cardShadow(fullBleed ? .none : .art, shape: shape)
         .contextMenu { ForYouMenu(item: item, reason: reason, onOpen: onOpen) }
+        .modifier(RecommendationImpression(key: item.key))
         .padding(.horizontal, fullBleed ? 0 : ThemeMetrics.gutter)
     }
 
@@ -340,6 +341,48 @@ struct ForYouShelfTile: View {
                     .allowsHitTesting(false)
             }
         }
+        .modifier(RecommendationImpression(key: item.key))
+    }
+}
+
+/// A recommendation whose tile stays at least half on screen for a second has been SHOWN (23 Oct:
+/// "If the user has seen a recommendation, they should be rotated to make the app feel lively",
+/// owner). The model holds it for the visit and tells the server when the visit ends, so the next
+/// visit's list lets it give way to titles not seen yet (`AppModel.noteRecommendationShown`). A
+/// Bool geometry flip — a scroll frame writes nothing — and a tile off the window (a pager's other
+/// page, a tab not in front) is never counted.
+struct RecommendationImpression: ViewModifier {
+    let key: String
+
+    @Environment(AppModel.self) private var appModel
+    @State private var inView = false
+    @State private var mounted = false
+
+    private static let dwell: Duration = .seconds(1)
+
+    func body(content: Content) -> some View {
+        content
+            .onGeometryChange(for: Bool.self) { proxy in
+                let frame = proxy.frame(in: .global)
+                guard frame.width > 0, frame.height > 0 else { return false }
+                let window = CGRect(x: 0, y: 0, width: ThemeMetrics.windowWidth, height: ThemeMetrics.windowHeight)
+                let shown = frame.intersection(window)
+                return !shown.isNull && shown.width * shown.height >= 0.5 * frame.width * frame.height
+            } action: { inView = $0 }
+            .onAppear { mounted = true }
+            .onDisappear { mounted = false }
+            // Keyed on the title too: the top pick is one view whose title changes when the fresh
+            // list replaces the offline copy, and its new title must earn its own second.
+            .task(id: Dwell(key: key, on: inView && mounted)) {
+                guard inView, mounted else { return }
+                try? await Task.sleep(for: Self.dwell)
+                if !Task.isCancelled { appModel.noteRecommendationShown(key) }
+            }
+    }
+
+    private struct Dwell: Hashable {
+        let key: String
+        let on: Bool
     }
 }
 

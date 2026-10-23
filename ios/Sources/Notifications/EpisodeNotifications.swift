@@ -84,10 +84,10 @@ final class EpisodeNotifications {
             let airsAt: Int64
         }
 
-        // TMDB air times are date-precision only (synthesized 17:00 UTC), so time-of-day alerts
-        // would fire at a meaningless instant — anime (AniList) only for now.
+        // Real instants only: a TV show on TMDB's dates alone (synthesized 17:00 UTC) would alert at
+        // a meaningless instant; one at TVmaze broadcast times (`timesExact`) alerts like anime.
         let perShow: [[UpcomingAiring]] = library
-            .filter { $0.effectiveStatus == .watching && $0.source == .anilist }
+            .filter { $0.effectiveStatus == .watching && !$0.timeAnchor.isDateOnly }
             .compactMap { f -> [UpcomingAiring]? in
                 guard let part = f.releasingPart else { return nil }
                 var slots = part.airings
@@ -121,7 +121,7 @@ final class EpisodeNotifications {
                 guard let part = f.parts.filter({ $0.premiereAt.map { $0 > now && $0 <= horizon } ?? false })
                     .min(by: { ($0.premiereAt ?? .max) < ($1.premiereAt ?? .max) }),
                       var at = part.premiereAt else { return nil }
-                if f.source.timeAnchor.isDateOnly {
+                if f.timeAnchor.isDateOnly {
                     // The DAY is the UTC calendar day of the synthesized 17:00 UTC instant (the
                     // contract); read in the device's calendar it is the next day east of UTC+7,
                     // and the alert fired a day late (review i3). That day, at 9 AM local.

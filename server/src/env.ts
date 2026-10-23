@@ -76,6 +76,9 @@ const schema = z.object({
   // search/sync is silently disabled and the app is anime-only (same spirit as
   // GROUPING_LLM_DISABLED: absence degrades, never crashes).
   TMDB_ACCESS_TOKEN: z.string().optional(),
+  // TVmaze broadcast times for TMDB shows (tvmaze/service.ts): free, no key, CC BY-SA (the app
+  // credits it). Needs TMDB (the shows' TheTVDB/IMDb ids). 1 = TV schedules stay date-only.
+  TVMAZE_DISABLED: envBool(false),
 
   // Social layer (the Today feed). Comments/replies can be switched off while legal/Clerk launch
   // blockers are open; likes, saves, reminders, ratings keep working. GET /me/feed reports it as

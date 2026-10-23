@@ -2,6 +2,7 @@ import { readFileSync } from 'node:fs'
 import { describe, expect, it } from 'vitest'
 import type { ArtworkSet } from '../types/api.js'
 import {
+  exposureFatigue,
   normTitle,
   rankRecommendations,
   seedEngagement,
@@ -286,6 +287,39 @@ describe("rankRecommendations — the owner's library", () => {
     expect(keys(rank(FIXTURE, 12, 'someone-else').items)).not.toEqual(keys(today.items))
   })
 
+  it('lets the titles the viewer was shown give way, and brings them back as the visits age', () => {
+    const before = rank(FIXTURE)
+    const shown = keys(before.items).slice(0, 6)
+    const impressions = shown.map((key) => ({ key, visits: 1, lastShownAt: FIXTURE.now - 3_600_000 }))
+    const after = rank({ ...FIXTURE, impressions })
+    // The next visit's shelf leads with titles that were not on screen (a title far stronger than
+    // the rest — Naruto here — may hold one front tile for a visit), and new ones join it.
+    expect(after.items.slice(0, 4).filter((item) => shown.includes(item.key)).length).toBeLessThanOrEqual(1)
+    expect(keys(after.items).filter((key) => !keys(before.items).includes(key)).length).toBeGreaterThanOrEqual(3)
+    for (const item of after.items) expect(item.breakdown.fatigue).toBeCloseTo(shown.includes(item.key) ? 0.6 : 1, 2)
+    // Still the shelf's own rules: 12 distinct titles, the TV quota with TV in the first four.
+    expect(new Set(keys(after.items)).size).toBe(12)
+    expect(after.items.filter((item) => item.source === 'tmdb')).toHaveLength(after.stats.tvQuota)
+    expect(after.items.slice(0, 4).some((item) => item.source === 'tmdb')).toBe(true)
+    // Shown on many visits, a title sinks further; unseen for two months, it is back.
+    const tired = rank({ ...FIXTURE, impressions: impressions.map((i) => ({ ...i, visits: 4 })) })
+    expect(keys(tired.items).filter((key) => shown.includes(key)).length)
+      .toBeLessThanOrEqual(keys(after.items).filter((key) => shown.includes(key)).length)
+    const rested = rank({ ...FIXTURE, impressions: impressions.map((i) => ({ ...i, lastShownAt: FIXTURE.now - 60 * DAY })) })
+    expect(keys(rested.items).filter((key) => shown.includes(key))).toHaveLength(shown.length)
+    // The reference list (the feed's ranking, the spike's order) never reads impressions.
+    expect(rankRecommendations({ ...FIXTURE, impressions }, { userId: USER, limit: 20, rotation: false }).items.map((i) => i.key))
+      .toEqual(APPROVED.map(([key]) => key))
+  })
+
+  it('matches an impression by any id of the series, like feedback', () => {
+    const top = rankRecommendations(FIXTURE, { userId: USER, limit: 20, rotation: false }).items
+    const naruto = top.find((item) => item.key === 'anilist:20')!
+    const sibling = FIXTURE.targets.find((t) => t.externalId === 20)!.memberIds.find((id) => id !== 20)!
+    const shown = rank({ ...FIXTURE, impressions: [{ key: `anilist:${sibling}`, visits: 1, lastShownAt: FIXTURE.now }] }, 30)
+    expect(shown.items.find((item) => item.key === naruto.key)!.breakdown.fatigue).toBeCloseTo(0.6, 6)
+  })
+
   it('drops dismissed and seen titles — by key, or by any id of the series', () => {
     const top = rankRecommendations(FIXTURE, { userId: USER, limit: 20, rotation: false }).items
     const hxh = top[0]!
@@ -374,6 +408,22 @@ const edge = (seedId: string, externalId: number, rank = 0, votes: number | null
   ({ seedId, source, externalId, rank, votes })
 const hit = (input: RankInput, key: string) =>
   rankRecommendations(input, { userId: USER, limit: 30, rotation: false }).items.find((item) => item.key === key)
+
+describe('exposureFatigue', () => {
+  it('keeps 0.6 of a title per visit it was passed over on, never less than 0.15', () => {
+    expect(exposureFatigue(0, 0, 0)).toBe(1)
+    expect(exposureFatigue(1, DAY, DAY)).toBeCloseTo(0.6, 6)
+    expect(exposureFatigue(2, DAY, DAY)).toBeCloseTo(0.36, 6)
+    expect(exposureFatigue(20, DAY, DAY)).toBe(0.15)
+  })
+
+  it('recovers as the visits age: they halve every ten days unseen', () => {
+    expect(exposureFatigue(2, 0, 10 * DAY)).toBeCloseTo(0.6, 6)
+    expect(exposureFatigue(1, 0, 60 * DAY)).toBeGreaterThan(0.99)
+    // A clock that reads a visit in the future never makes it heavier than a visit now.
+    expect(exposureFatigue(1, 5 * DAY, 0)).toBeCloseTo(0.6, 6)
+  })
+})
 
 describe('rankRecommendations — rules', () => {
   it('ranks a title several shows agree on above one only a single show points at', () => {

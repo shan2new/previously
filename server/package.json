@@ -18,6 +18,7 @@
     "group": "tsx src/scripts/group-one.ts",
     "news": "tsx src/scripts/news-once.ts",
     "tv": "tsx src/scripts/tv-one.ts",
+    "broadcast": "tsx src/scripts/broadcast-sync.ts",
     "backfill": "tsx src/scripts/backfill-episodes.ts",
     "anime-videos": "tsx src/scripts/backfill-anime-videos.ts",
     "reco": "tsx src/scripts/reco-one.ts",

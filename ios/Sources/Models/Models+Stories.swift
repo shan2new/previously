@@ -46,7 +46,8 @@ struct StoryReel: Identifiable, Hashable, Sendable {
 
     var seen: Bool { unwatched == 0 }
     var id: String { franchiseId }
-    var anchor: Formatting.TimeAnchor { source.timeAnchor }
+    /// The show's calendar (`Franchise.timeAnchor`): real instants for anime and TV at broadcast times.
+    let anchor: Formatting.TimeAnchor
 
     /// How long a drop stays in the tray: a week, plus the six hours that keep last week's
     /// episode up until this week's airs on a slow sync.
@@ -109,7 +110,7 @@ struct StoryReel: Identifiable, Hashable, Sendable {
             reels.append(StoryReel(franchiseId: f.id, mediaId: part.mediaId, source: f.source,
                                    showTitle: f.displayTitle, partLabel: part.label,
                                    avatarCandidates: FeedAvatar.candidates(f), frames: frames,
-                                   unwatched: unwatched, latestAired: last))
+                                   unwatched: unwatched, latestAired: last, anchor: anchor))
         }
         // Unseen first, newest drop first — Instagram's order; the id breaks a tie.
         return reels.sorted { a, b in

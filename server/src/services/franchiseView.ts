@@ -31,6 +31,7 @@ import { withReleaseWindow } from './releaseWindow.js'
 import { resolveRelatedFranchiseIds } from './catalogEnrichment.js'
 import { stripHtml } from '../util/text.js'
 import { catalogLinkViews } from './catalogLinks.js'
+import { exactSchedule, loadBroadcastTimes, type BroadcastTimes } from './broadcast.js'
 import { limitArtwork, rankLogos } from '../util/artwork.js'
 import { consumerFranchiseConditions } from './consumerContent.js'
 
@@ -224,28 +225,36 @@ type FranchiseRow = typeof franchise.$inferSelect
  * `source`. AniList publishes a real broadcast instant; TMDB publishes a calendar date that the TV
  * sync synthesizes to 17:00 UTC, so its clock half is not a fact and must never be rendered.
  */
-function releasePrecision(nextAiringAt: number | null, source: MediaSource): ReleasePrecision {
+function releasePrecision(nextAiringAt: number | null, source: MediaSource, broadcastExact = false): ReleasePrecision {
   if (nextAiringAt == null) return { precision: 'unknown', at: null, date: null }
-  if (source === 'tmdb') {
+  // A TMDB season the TVmaze sync covers carries the network's real slot (services/broadcast.ts).
+  if (source === 'tmdb' && !broadcastExact) {
     return { precision: 'date_only', at: nextAiringAt, date: new Date(nextAiringAt).toISOString().slice(0, 10) }
   }
   return { precision: 'exact', at: nextAiringAt, date: null }
 }
 
 /** Derive a FranchisePart's airing fields from a media row + the user's progress. Mirrors legacy `toShow`.
- *  `opts.episodes` includes the full per-episode list (detail only; omitted from lean list payloads). */
+ *  `opts.episodes` includes the full per-episode list (detail only; omitted from lean list payloads).
+ *  `broadcast`: the season's TVmaze broadcast times, which make its schedule exact (`exactSchedule`). */
 function toPart(
   m: MediaRow,
   member: MemberRow,
   watched: number,
   source: MediaSource,
   opts?: { episodes?: boolean },
+  broadcast?: BroadcastTimes | null,
 ): FranchisePart {
   const title = m.titleEnglish || m.titleRomaji || `Anime #${m.id}`
   const isReleasing = m.status === 'RELEASING'
   const total = m.episodes ?? 0
-  const next = m.nextAiringEpisode && m.nextAiringEpisode.airingAt > 0 ? m.nextAiringEpisode : null
-  const eps = m.episodesList ?? []
+  const listed = m.episodesList ?? []
+  const catalogNext = m.nextAiringEpisode && m.nextAiringEpisode.airingAt > 0 ? m.nextAiringEpisode : null
+  // The schedule (next slot, airings, last aired) at real broadcast instants when the season has
+  // them; the episode LIST keeps TMDB's dates, which the clients read as calendar days.
+  const exact = exactSchedule({ source, episodes: listed, next: catalogNext, broadcast })
+  const eps = exact?.episodes ?? listed
+  const next = exact ? exact.next : catalogNext
   const airedEpisodes = deriveAiredEpisodes({
     status: m.status,
     totalEpisodes: total,
@@ -254,13 +263,12 @@ function toPart(
     nowMs: Date.now(),
   })
   const nextAiringAt = next ? next.airingAt * 1000 : null
-  const release = releasePrecision(nextAiringAt, source)
-  const lastAiredAt =
-    m.lastAiredAt != null && m.lastAiredAt > 0
-      ? m.lastAiredAt
-      : eps.reduce<number | null>((latest, episode) =>
-          episode.airDate != null && episode.airDate <= Date.now()
-            ? Math.max(latest ?? 0, episode.airDate) : latest, null)
+  const release = releasePrecision(nextAiringAt, source, exact != null)
+  const latestDated = eps.reduce<number | null>((latest, episode) =>
+    episode.airDate != null && episode.airDate <= Date.now()
+      ? Math.max(latest ?? 0, episode.airDate) : latest, null)
+  // The stored `last_aired_at` of a TMDB season is the synthesized date: an exact one recounts.
+  const lastAiredAt = !exact && m.lastAiredAt != null && m.lastAiredAt > 0 ? m.lastAiredAt : latestDated
 
   // Episodes sharing the exact next airing instant ⇒ a same-day multi-episode / full-season drop.
   const nextAiringCount = nextAiringAt != null ? eps.filter((e) => e.airDate === nextAiringAt).length : 0
@@ -298,8 +306,9 @@ function toPart(
     year: m.seasonYear ?? null,
     studios: m.studios ?? [],
     nextAiringCount,
-    episodes: opts?.episodes ? eps : [],
+    episodes: opts?.episodes ? listed : [],
     airings,
+    timesExact: source !== 'tmdb' || exact != null,
     videos: scopedPartVideos(m, member),
   }
 }
@@ -358,6 +367,19 @@ function catalogUpcomingParts(mems: MemberRow[], mediaById: Map<number, MediaRow
   })
 }
 
+/** A part with its schedule removed: no next slot, no last airing, no airings (counts kept). */
+function unscheduled(p: FranchisePart): FranchisePart {
+  return {
+    ...p,
+    nextEpisodeNumber: null,
+    nextAiringAt: null,
+    nextAiringCount: 0,
+    lastAiredAt: null,
+    release: { precision: 'unknown', at: null, date: null },
+    airings: [],
+  }
+}
+
 /** Assemble a Franchise from already-loaded rows (no DB access). Shared by detail + library. */
 function buildFranchise(
   f: FranchiseRow,
@@ -366,16 +388,29 @@ function buildFranchise(
   watchedById: Map<number, number>,
   sub: { status: WatchStatus; addedAt: number } | null,
   opts?: { episodes?: boolean },
+  broadcastById?: Map<number, BroadcastTimes>,
 ): Franchise {
   const source: MediaSource = (f.source as MediaSource) ?? 'anilist'
-  const parts = sortParts(
+  const partsWith = (broadcast: Map<number, BroadcastTimes> | undefined) => sortParts(
     mems
       .map((mem) => {
         const m = mediaById.get(mem.mediaId)
-        return m ? toPart(m, mem, watchedById.get(mem.mediaId) ?? 0, source, opts) : null
+        return m ? toPart(m, mem, watchedById.get(mem.mediaId) ?? 0, source, opts, broadcast?.get(mem.mediaId)) : null
       })
       .filter((p): p is FranchisePart => p !== null),
   )
+  // A TV show is read at real instants only when EVERY part that carries a schedule fact is exact:
+  // the clients keep ONE calendar per show, so a show TVmaze covers only in part (a returning
+  // season TMDB alone dates, an old season it does not list) is dates throughout.
+  // Specials (TMDB's season 0) never count: TVmaze numbers them its own way, so they never carry
+  // broadcast times — and in a show read at real instants they keep no schedule of their own,
+  // since a date read as an instant would print a clock nobody published.
+  let parts = partsWith(broadcastById)
+  const scheduled = parts.filter((p) =>
+    (p.nextAiringAt != null || p.lastAiredAt != null || p.airings.length > 0) && !(source === 'tmdb' && p.kind === 'special'))
+  const timesExact = scheduled.every((p) => p.timesExact) && (source !== 'tmdb' || scheduled.length > 0)
+  if (source === 'tmdb' && !timesExact && parts.some((p) => p.timesExact)) parts = partsWith(undefined)
+  if (source === 'tmdb' && timesExact) parts = parts.map((p) => (p.timesExact ? p : unscheduled(p)))
 
   const partCounts: Partial<Record<PartKind, number>> = {}
   for (const p of parts) partCounts[p.kind] = (partCounts[p.kind] ?? 0) + 1
@@ -413,6 +448,7 @@ function buildFranchise(
   return {
     id: f.id,
     source,
+    timesExact,
     title: f.title,
     cover: f.cover ?? '',
     banner: f.banner ?? '',
@@ -457,7 +493,7 @@ export async function getFranchise(franchiseId: string, userId?: string, country
   const mediaIds = members.map((m) => m.mediaId)
   const mediaRows = mediaIds.length ? await db.select().from(media).where(inArray(media.id, mediaIds)) : []
   const mediaById = new Map(mediaRows.map((m) => [m.id, m]))
-  const watchedById = await loadProgressMap(userId, mediaIds)
+  const [watchedById, broadcastById] = await Promise.all([loadProgressMap(userId, mediaIds), loadBroadcastTimes(mediaIds)])
 
   let sub: { status: WatchStatus; addedAt: number } | null = null
   if (userId) {
@@ -470,7 +506,7 @@ export async function getFranchise(franchiseId: string, userId?: string, country
   }
 
   // Detail is the only response that ships the full per-episode list.
-  const built = buildFranchise(f, members, mediaById, watchedById, sub, { episodes: true })
+  const built = buildFranchise(f, members, mediaById, watchedById, sub, { episodes: true }, broadcastById)
   built.metadata.sources = (await catalogLinkViews([franchiseId])).get(franchiseId) ?? []
   built.related = await resolveRelatedFranchiseIds(built.related)
   const normalizedCountry = country?.toUpperCase()
@@ -646,9 +682,10 @@ export async function getFeedFranchises(franchiseIds: string[], userId: string |
       : Promise.resolve([]),
   ])
   const mediaIds = members.map((m) => m.mediaId)
-  const [mediaRows, watchedById] = await Promise.all([
+  const [mediaRows, watchedById, broadcastById] = await Promise.all([
     mediaIds.length ? db.select().from(media).where(inArray(media.id, mediaIds)) : Promise.resolve([]),
     loadProgressMap(userId ?? undefined, mediaIds),
+    loadBroadcastTimes(mediaIds),
   ])
 
   const frById = new Map(frRows.map((f) => [f.id, f]))
@@ -672,7 +709,7 @@ export async function getFeedFranchises(franchiseIds: string[], userId: string |
     const f = frById.get(id)
     if (!f) continue
     externalIdById.set(f.id, f.externalId ?? null)
-    franchises.push(buildFranchise(f, membersByFranchise.get(id) ?? [], mediaById, watchedById, subById.get(id) ?? null))
+    franchises.push(buildFranchise(f, membersByFranchise.get(id) ?? [], mediaById, watchedById, subById.get(id) ?? null, undefined, broadcastById))
   }
   const related = await resolveRelatedFranchiseIds(franchises.flatMap((item) => item.related))
   const relatedByKey = new Map(related.map((item) => [`${item.source}:${item.externalId}`, item]))
@@ -696,7 +733,7 @@ export async function getLibrary(userId: string, lastOpenedAt: number): Promise<
   const members = await db.select().from(franchiseMember).where(inArray(franchiseMember.franchiseId, franchiseIds))
   const mediaIds = members.map((m) => m.mediaId)
   const mediaRows = mediaIds.length ? await db.select().from(media).where(inArray(media.id, mediaIds)) : []
-  const watchedById = await loadProgressMap(userId, mediaIds)
+  const [watchedById, broadcastById] = await Promise.all([loadProgressMap(userId, mediaIds), loadBroadcastTimes(mediaIds)])
 
   const frById = new Map(frRows.map((f) => [f.id, f]))
   const mediaById = new Map(mediaRows.map((m) => [m.id, m]))
@@ -714,7 +751,7 @@ export async function getLibrary(userId: string, lastOpenedAt: number): Promise<
     if (!f) continue
     const mems = membersByFranchise.get(s.franchiseId) ?? []
     const status = statusById.get(s.franchiseId) ?? 'planned'
-    const fr = buildFranchise(f, mems, mediaById, watchedById, { status, addedAt: s.createdAt.getTime() })
+    const fr = buildFranchise(f, mems, mediaById, watchedById, { status, addedAt: s.createdAt.getTime() }, undefined, broadcastById)
     const behind = fr.parts.reduce((acc, p) => acc + episodesBehind(p), 0)
     // newParts: members added since the user last opened the app.
     const newParts = mems.filter((m) => m.addedAt.getTime() > lastOpenedAt).length

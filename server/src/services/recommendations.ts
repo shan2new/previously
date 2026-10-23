@@ -1,4 +1,4 @@
-import { and, asc, eq, inArray, isNotNull, or } from 'drizzle-orm'
+import { and, asc, eq, inArray, isNotNull, or, sql } from 'drizzle-orm'
 import { db } from '../db/index.js'
 import {
   catalogLinks,
@@ -8,6 +8,7 @@ import {
   progress,
   recommendationEdges,
   recommendationFeedback,
+  recommendationImpressions,
   recommendationTargets,
   subscriptions,
 } from '../db/schema.js'
@@ -25,11 +26,12 @@ import type {
 import { createPacer } from '../util/pacer.js'
 import { BoundedTaskQueue } from '../util/taskQueue.js'
 import { enqueueAnimeVideoFallback } from './animeVideoFallback.js'
-import { audienceSource } from './audience.js'
+import { audienceSource, isMissingTable } from './audience.js'
 import { deriveAiredEpisodes, getSummaries } from './franchiseView.js'
 import {
   rankRecommendations,
   type RankedRecommendation,
+  type RankImpression,
   type RankInput,
   type RankSeed,
   type RankTarget,
@@ -76,10 +78,13 @@ export async function loadRankInput(userId: string, now = Date.now()): Promise<L
     .innerJoin(franchise, eq(franchise.id, subscriptions.franchiseId))
     .where(and(eq(subscriptions.userId, userId), ...consumerFranchiseConditions()))
     .orderBy(asc(subscriptions.createdAt), asc(subscriptions.franchiseId))
-  const feedback = await db
-    .select({ key: recommendationFeedback.key, kind: recommendationFeedback.kind })
-    .from(recommendationFeedback)
-    .where(eq(recommendationFeedback.userId, userId))
+  const [feedback, impressions] = await Promise.all([
+    db
+      .select({ key: recommendationFeedback.key, kind: recommendationFeedback.kind })
+      .from(recommendationFeedback)
+      .where(eq(recommendationFeedback.userId, userId)),
+    loadImpressions(userId),
+  ])
   const empty: LoadedRankInput = { input: { now, seeds: [], edges: [], targets: [], feedback: [] }, series: new Map() }
   if (library.length === 0) return empty
 
@@ -178,8 +183,70 @@ export async function loadRankInput(userId: string, now = Date.now()): Promise<L
         key: row.key,
         kind: row.kind === 'seen' ? 'seen' : 'dismissed',
       })),
+      impressions,
     },
     series,
+  }
+}
+
+/** A sitting: impressions this close to the last one are the same visit (one fatigue step). */
+export const IMPRESSION_VISIT_GAP_MS = 30 * 60_000
+
+let impressionsMissingWarned = false
+
+/** The table arrives with migration 0016; until it is applied, nothing has been shown. */
+function impressionsMissing(error: unknown): boolean {
+  if (!isMissingTable(error)) return false
+  if (!impressionsMissingWarned) {
+    impressionsMissingWarned = true
+    console.warn('[recommendations] table recommendation_impressions does not exist yet (migration not applied): the list rotates daily only')
+  }
+  return true
+}
+
+async function loadImpressions(userId: string): Promise<RankImpression[]> {
+  try {
+    const rows = await db
+      .select({
+        key: recommendationImpressions.key,
+        visits: recommendationImpressions.visits,
+        lastShownAt: recommendationImpressions.lastShownAt,
+      })
+      .from(recommendationImpressions)
+      .where(eq(recommendationImpressions.userId, userId))
+    return rows.map((row) => ({ key: row.key, visits: row.visits, lastShownAt: row.lastShownAt.getTime() }))
+  } catch (error) {
+    if (impressionsMissing(error)) return []
+    throw error
+  }
+}
+
+/**
+ * `POST /me/recommendations/impressions`: the titles a tile of which stayed on the viewer's screen.
+ * A title counts one more VISIT only when it was last shown more than `IMPRESSION_VISIT_GAP_MS`
+ * ago, so a sitting spent on one shelf is one step of fatigue however often it is reported.
+ */
+export async function recordRecommendationImpressions(userId: string, keys: string[], now = Date.now()): Promise<void> {
+  const unique = [...new Set(keys)]
+  if (unique.length === 0) return
+  const at = new Date(now)
+  // Raw fragments take strings, not Dates: ISO stamps, typed.
+  const atSql = sql`${at.toISOString()}::timestamptz`
+  const visitStartSql = sql`${new Date(now - IMPRESSION_VISIT_GAP_MS).toISOString()}::timestamptz`
+  try {
+    await db
+      .insert(recommendationImpressions)
+      .values(unique.map((key) => ({ userId, key, visits: 1, firstShownAt: at, lastShownAt: at })))
+      .onConflictDoUpdate({
+        target: [recommendationImpressions.userId, recommendationImpressions.key],
+        set: {
+          visits: sql`${recommendationImpressions.visits} + case when ${recommendationImpressions.lastShownAt} < ${visitStartSql} then 1 else 0 end`,
+          lastShownAt: sql`greatest(${recommendationImpressions.lastShownAt}, ${atSql})`,
+        },
+      })
+  } catch (error) {
+    if (impressionsMissing(error)) return
+    throw error
   }
 }
 
