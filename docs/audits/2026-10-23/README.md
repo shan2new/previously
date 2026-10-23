@@ -59,3 +59,8 @@ Airs today. Time is also not provided. Why is there no time man?", then, of a Tr
 - Verified: server typecheck, 1,365 unit tests (the Clerk-migration file timed out once under a load
   average of 237 and passed alone); scratch server + QA simulator (Home's lead card "Episode 7 ·
   Aired 9h ago"; the show page's rows "Aired today" and "Airs 30 Oct at 12:30 PM").
+- **Release.** Backend activated 16:04:57 UTC from `5a66b82` — see [the drop-times release
+  record](../../qa/2026-10-23/drops-release/README.md). iOS 1.0 (24) archived with the release
+  Xcode (`APIBaseURL` `https://anime.cognipin.com`, the live Clerk key) and uploaded from the CLI
+  ("Upload succeeded." / `** EXPORT SUCCEEDED **`, 16:18 UTC). Build 22 stays in App Review; build
+  24 was not attached to any submission.
